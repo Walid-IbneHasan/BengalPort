@@ -1,0 +1,261 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum EnquiryType {
+  GENERAL
+  BUSINESS
+  EDUCATION
+  HEALTHCARE
+}
+
+enum ApplicationType {
+  BUSINESS
+  EDUCATION
+  HEALTHCARE
+}
+
+enum RecordStatus {
+  DRAFT
+  SUBMITTED
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum OpportunityCategory {
+  BUSINESS
+  EDUCATION
+  HEALTHCARE
+  FACTORY_VISIT
+  BUSINESS_TOUR
+  SCHOLARSHIP
+  EVENT
+}
+
+enum PaymentStatus {
+  PAID
+  PARTIALLY_PAID
+  DUE
+  PENDING
+  FAILED
+  REFUNDED
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  phone        String?
+  passwordHash String
+  role         Role          @default(USER)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  enquiries    Enquiry[]
+  applications Application[]
+  payments     Payment[]
+}
+
+model Enquiry {
+  id        String       @id @default(cuid())
+  type      EnquiryType
+  name      String
+  email     String?
+  phone     String
+  message   String
+  details   Json?
+  status    RecordStatus @default(SUBMITTED)
+  userId    String?
+  user      User?        @relation(fields: [userId], references: [id])
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model Application {
+  id        String          @id @default(cuid())
+  reference String          @unique
+  type      ApplicationType
+  status    RecordStatus    @default(SUBMITTED)
+  fullName  String
+  email     String
+  phone     String
+  details   Json
+  userId    String?
+  user      User?           @relation(fields: [userId], references: [id])
+  payments  Payment[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model Opportunity {
+  id          String              @id @default(cuid())
+  slug        String              @unique
+  category    OpportunityCategory
+  title       String
+  description String
+  country     String
+  location    String
+  deadline    DateTime?
+  image       String
+  published   Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model Supplier {
+  id          String   @id @default(cuid())
+  name        String
+  country     String
+  industry    String
+  product     String
+  description String
+  image       String
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Factory {
+  id          String   @id @default(cuid())
+  name        String
+  country     String
+  industry    String
+  product     String
+  description String
+  image       String
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Institution {
+  id          String             @id @default(cuid())
+  name        String
+  country     String
+  description String
+  image       String
+  programs    EducationProgram[]
+}
+
+model EducationProgram {
+  id            String      @id @default(cuid())
+  title         String
+  level         String
+  discipline    String
+  deadline      DateTime?
+  institutionId String
+  institution   Institution @relation(fields: [institutionId], references: [id])
+}
+
+model Hospital {
+  id          String              @id @default(cuid())
+  name        String
+  country     String
+  city        String
+  description String
+  image       String
+  services    HealthcareService[]
+}
+
+model HealthcareService {
+  id          String    @id @default(cuid())
+  title       String
+  category    String
+  description String
+  hospitalId  String?
+  hospital    Hospital? @relation(fields: [hospitalId], references: [id])
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id])
+  applicationId String?
+  application   Application?  @relation(fields: [applicationId], references: [id])
+  service       String
+  amount        Decimal       @db.Decimal(12, 2)
+  totalDue      Decimal       @db.Decimal(12, 2)
+  method        String
+  transactionId String        @unique
+  status        PaymentStatus
+  provider      String        @default("mock")
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  receipt       Receipt?
+}
+
+model Receipt {
+  id            String   @id @default(cuid())
+  receiptNumber String   @unique
+  paymentId     String   @unique
+  payment       Payment  @relation(fields: [paymentId], references: [id])
+  previousDue   Decimal  @db.Decimal(12, 2)
+  remainingDue  Decimal  @db.Decimal(12, 2)
+  createdAt     DateTime @default(now())
+}
+
+model FinancialCategory {
+  id           String                 @id @default(cuid())
+  name         String                 @unique
+  type         TransactionType
+  transactions FinancialTransaction[]
+}
+
+model FinancialTransaction {
+  id            String            @id @default(cuid())
+  type          TransactionType
+  date          DateTime
+  description   String
+  notes         String?
+  customer      String?
+  quantity      Decimal?          @db.Decimal(10, 2)
+  unitPrice     Decimal?          @db.Decimal(12, 2)
+  total         Decimal           @db.Decimal(12, 2)
+  paymentStatus PaymentStatus?
+  categoryId    String
+  category      FinancialCategory @relation(fields: [categoryId], references: [id])
+  createdAt     DateTime          @default(now())
+}
+
+model PageContent {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  content   Json
+  published Boolean  @default(true)
+  revision  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MediaAsset {
+  id           String   @id @default(cuid())
+  originalName String
+  mimeType     String   @default("image/webp")
+  format       String   @default("webp")
+  data         Bytes
+  width        Int
+  height       Int
+  byteSize     Int
+  orientation  String
+  purpose      String?
+  altText      String?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+}
