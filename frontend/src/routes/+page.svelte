@@ -83,7 +83,9 @@
       up: ["0", "2rem", ".985", "inset(0 0 0 0)"],
       left: [`-${distance}`, "0", ".99", "inset(0 0 0 0)"],
       right: [distance, "0", ".99", "inset(0 0 0 0)"],
-      mask: ["0", "1.15rem", "1", "inset(0 0 100% 0)"],
+      // Do not fully clip the observed node: a zero-area clip prevents
+      // IntersectionObserver from ever reporting it as visible in Chromium.
+      mask: ["0", "1.15rem", "1", "inset(0 0 0 0)"],
       scale: ["0", "1rem", ".955", "inset(0 0 0 0)"],
     };
     const [x, y, scale, clip] = directions[preset];
@@ -1155,13 +1157,14 @@
       font-size: 0.75rem;
     }
     .stats {
-      overflow-x: auto;
-      justify-content: flex-start;
-      gap: 1.8rem;
-      scrollbar-width: none;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      overflow: visible;
+      gap: 0.5rem;
     }
     .stat {
-      min-width: 10rem;
+      min-width: 0;
+      justify-content: center;
     }
     .stats em {
       display: none;
@@ -1239,10 +1242,44 @@
       padding-top: 2.25rem;
     }
     .tag {
-      gap: 0.75rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+      gap: 0.65rem;
+      padding-inline: 0.75rem;
+    }
+    .tag h2 {
+      grid-row: 1;
+      max-width: 100%;
+      line-height: 1.25;
+      text-wrap: balance;
     }
     .tag i {
-      width: 2rem;
+      grid-row: 2;
+      width: 5rem;
+      height: 2px;
+      justify-self: center;
+    }
+    .tag i:first-child:before {
+      content: "";
+      position: absolute;
+      left: -0.55rem;
+      top: 50%;
+      width: 0.42rem;
+      height: 0.42rem;
+      border-radius: 50%;
+      background: var(--gold);
+      transform: translateY(-50%);
+    }
+    .tag i:first-child:after {
+      right: -0.55rem;
+      top: 50%;
+      width: 0.42rem;
+      height: 0.42rem;
+      transform: translateY(-50%);
+    }
+    .tag i:last-child {
+      display: none;
     }
     .title p {
       font-size: 0.875rem;
@@ -1264,12 +1301,23 @@
       height: 11.75rem;
     }
     .stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       border-radius: 2rem 2rem 0 0;
       margin-top: 2.75rem;
-      padding: 1.1rem;
+      padding: 1rem;
+      gap: 0.65rem;
     }
     .stat {
-      min-width: 9.5rem;
+      min-width: 0;
+      justify-content: flex-start;
+      padding: 0.65rem;
+      border-radius: 0.9rem;
+      background: rgba(247, 249, 250, 0.9);
+    }
+    .stat:last-of-type {
+      grid-column: 1 / -1;
+      width: min(100%, 11rem);
+      justify-self: center;
     }
     .stat-icon {
       width: 3.3rem;
@@ -1277,6 +1325,10 @@
     }
     .stat b {
       font-size: 1.4rem;
+    }
+    .stat span {
+      display: block;
+      line-height: 1.25;
     }
     .panel p {
       font-size: 0.8rem;
@@ -1292,9 +1344,7 @@
     .tag h2 {
       font-size: 1.15rem;
     }
-    .tag i {
-      width: 1.15rem;
-    }
+    .tag i { width: 4.5rem; }
     .photo {
       width: 78%;
     }

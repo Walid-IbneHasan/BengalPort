@@ -320,13 +320,14 @@ p {
   .business-page .shortcut-bar,.business-page .proof{width:calc(100vw - 1.25rem)!important;max-width:calc(100vw - 1.25rem)!important;min-width:0!important}
 }
 @media(max-width:37.5rem){
-  header .nav{width:100%!important;max-width:100vw!important;display:grid!important;grid-template-columns:auto 1fr 4.9rem 2.75rem;overflow:visible}
+  header .nav{width:100%!important;max-width:100vw!important;display:grid!important;grid-template-columns:3.25rem minmax(0,1fr) 4.25rem 2.75rem 2.75rem;gap:.25rem;overflow:visible}
   header .brand{grid-column:1}
   header .links{grid-column:1/-1}
-  header .apply{grid-column:3;min-width:0!important;width:4.9rem!important;max-width:4.9rem!important;padding:.3rem .65rem!important;justify-content:center}
+  header .apply{grid-column:3;min-width:0!important;width:4.25rem!important;max-width:4.25rem!important;padding:.3rem .4rem!important;justify-content:center}
   header .apply i{display:none!important}
   header .apply span:after{margin-left:0!important}
-  header .menu{grid-column:4;display:grid!important;min-width:2.75rem!important}
+  header .account{grid-column:4;min-width:2.75rem!important;min-height:2.75rem!important}
+  header .menu{grid-column:5;display:grid!important;min-width:2.75rem!important;min-height:2.75rem!important}
 }
 
 /* Momentum scrolling and stable containment for wide, data-rich controls. */
@@ -405,9 +406,9 @@ table { font-variant-numeric: tabular-nums; }
 
 @media (max-width: 39.99rem) {
   .hero .title h1 { font-size: clamp(2rem, 10vw, 2.35rem) !important; letter-spacing: 0 !important; }
-  .hero .tag { gap: .45rem !important; }
-  .hero .tag i { width: .75rem !important; flex: 0 0 .75rem; }
-  .hero .tag h2 { min-width: 0; font-size: clamp(1rem, 4.7vw, 1.15rem) !important; white-space: nowrap; }
+  .hero .tag { gap: .65rem !important; }
+  .hero .tag i { width: 4.5rem !important; flex: none; }
+  .hero .tag h2 { min-width: 0; font-size: clamp(1rem, 4.7vw, 1.15rem) !important; white-space: normal; }
   .page-hero h1 { overflow-wrap: anywhere; }
   .section-head { margin-bottom: 2.25rem; }
   .content-card { border-radius: 0.875rem; }

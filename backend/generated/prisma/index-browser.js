@@ -127,9 +127,25 @@ exports.Prisma.UserScalarFieldEnum = {
   email: 'email',
   phone: 'phone',
   passwordHash: 'passwordHash',
+  googleId: 'googleId',
+  avatarUrl: 'avatarUrl',
+  emailVerifiedAt: 'emailVerifiedAt',
+  twoFactorEnabled: 'twoFactorEnabled',
+  lastLoginAt: 'lastLoginAt',
   role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AuthCodeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  purpose: 'purpose',
+  codeHash: 'codeHash',
+  expiresAt: 'expiresAt',
+  consumedAt: 'consumedAt',
+  attempts: 'attempts',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.EnquiryScalarFieldEnum = {
@@ -338,6 +354,12 @@ exports.Role = exports.$Enums.Role = {
   ADMIN: 'ADMIN'
 };
 
+exports.AuthCodePurpose = exports.$Enums.AuthCodePurpose = {
+  VERIFY_EMAIL: 'VERIFY_EMAIL',
+  LOGIN_2FA: 'LOGIN_2FA',
+  RESET_PASSWORD: 'RESET_PASSWORD'
+};
+
 exports.EnquiryType = exports.$Enums.EnquiryType = {
   GENERAL: 'GENERAL',
   BUSINESS: 'BUSINESS',
@@ -386,6 +408,7 @@ exports.TransactionType = exports.$Enums.TransactionType = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  AuthCode: 'AuthCode',
   Enquiry: 'Enquiry',
   Application: 'Application',
   Opportunity: 'Opportunity',

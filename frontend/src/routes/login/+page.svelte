@@ -1,118 +1,46 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  let mode = "login",
-    name = "",
-    email = "",
-    password = "",
-    error = "",
-    loading = false;
-  async function submit() {
-    loading = true;
-    error = "";
-    try {
-      const data: any = await api(`/auth/${mode}`, {
-        method: "POST",
-        body: JSON.stringify({ name, email, password }),
-      });
-      localStorage.setItem("bp_token", data.token);
-      localStorage.setItem("bp_user", JSON.stringify(data.user));
-      location.href = data.user.role === "ADMIN" ? "/admin" : "/dashboard";
-    } catch (e) {
-      error = e instanceof Error ? e.message : "Unable to continue";
-    } finally {
-      loading = false;
-    }
-  }
+  import { onMount } from "svelte";
+  import { goto } from "$app/navigation";
+  import { page } from "$app/state";
+  import { api, ApiError } from "$lib/api";
+  import { PUBLIC_GOOGLE_CLIENT_ID } from "$env/static/public";
+  import { ArrowRight, Check, Eye, EyeOff, KeyRound, Mail, ShieldCheck } from "lucide-svelte";
+  type Mode="login"|"register"|"verify"|"twoFactor"|"forgot"|"reset";
+  let mode:Mode="login",name="",phone="",email="",password="",confirm="",code="",challengeId="",developmentCode="",error="",notice="",loading=false,showPassword=false;
+  const googleClientId=PUBLIC_GOOGLE_CLIENT_ID||"";
+  const heading=()=>({login:"Welcome back",register:"Create your account",verify:"Verify your email",twoFactor:"Confirm it’s you",forgot:"Reset your password",reset:"Choose a new password"}[mode]);
+  const save=(data:any)=>{localStorage.setItem("bp_token",data.token);localStorage.setItem("bp_user",JSON.stringify(data.user));goto(data.user.role==="ADMIN"?"/admin":page.url.searchParams.get("next")||"/profile")};
+  const setChallenge=(next:Mode,data:any)=>{mode=next;challengeId=data.challengeId;developmentCode=data.developmentCode||"";notice=data.delivered?`We sent a six-digit code to ${email}.`:"Email delivery is not configured yet. Use the development code shown below."};
+  async function submit(){loading=true;error="";notice="";try{
+    if(mode==="register"){if(password!==confirm)throw new Error("Passwords do not match.");const data:any=await api("/auth/register",{method:"POST",body:JSON.stringify({name,phone:phone||undefined,email,password})});setChallenge("verify",data)}
+    else if(mode==="login"){const data:any=await api("/auth/login",{method:"POST",body:JSON.stringify({email,password})});data.requiresTwoFactor?setChallenge("twoFactor",data):save(data)}
+    else if(mode==="verify"){save(await api("/auth/verify-email",{method:"POST",body:JSON.stringify({challengeId,code})}))}
+    else if(mode==="twoFactor"){save(await api("/auth/verify-2fa",{method:"POST",body:JSON.stringify({challengeId,code})}))}
+    else if(mode==="forgot"){const data:any=await api("/auth/forgot-password",{method:"POST",body:JSON.stringify({email})});if(data.challengeId)setChallenge("reset",data);else notice="If this email has a password account, a reset code has been sent."}
+    else {if(password!==confirm)throw new Error("Passwords do not match.");await api("/auth/reset-password",{method:"POST",body:JSON.stringify({challengeId,code,password})});mode="login";password=confirm=code="";notice="Password updated. You can now sign in."}
+  }catch(e){if(e instanceof ApiError&&e.code==="EMAIL_NOT_VERIFIED"&&e.details){email=e.details.email;setChallenge("verify",e.details)}else error=e instanceof Error?e.message:"Unable to continue"}finally{loading=false}}
+  async function googleLogin(credential:string){loading=true;error="";try{save(await api("/auth/google",{method:"POST",body:JSON.stringify({credential})}))}catch(e){error=e instanceof Error?e.message:"Google sign-in failed"}finally{loading=false}}
+  onMount(()=>{if(!googleClientId)return;const script=document.createElement("script");script.src="https://accounts.google.com/gsi/client";script.async=true;script.onload=()=>{const g=(window as any).google;g.accounts.id.initialize({client_id:googleClientId,callback:(r:any)=>googleLogin(r.credential)});g.accounts.id.renderButton(document.getElementById("google-button"),{theme:"outline",size:"large",width:360,text:"continue_with",shape:"pill"})};document.head.appendChild(script)});
 </script>
-
-<svelte:head><title>Account — Bengal Port</title></svelte:head>
-<section class="section auth">
-  <div class="authbox">
-    <img src="/images/logo.webp" alt="Bengal Port" />
-    <h1>{mode === "login" ? "Welcome back" : "Create your account"}</h1>
-    <p>Access applications, payments and receipts.</p>
-    {#if error}<p class="error">{error}</p>{/if}
-    <form
-      onsubmit={(e) => {
-        e.preventDefault();
-        submit();
-      }}
-    >
-      {#if mode === "register"}<div class="field">
-          <label for="name">Full name</label><input
-            id="name"
-            bind:value={name}
-            required
-          />
-        </div>{/if}
-      <div class="field">
-        <label for="email">Email</label><input
-          id="email"
-          type="email"
-          bind:value={email}
-          required
-        />
-      </div>
-      <div class="field">
-        <label for="password">Password</label><input
-          id="password"
-          type="password"
-          bind:value={password}
-          minlength="8"
-          required
-        />
-      </div>
-      <button class="btn"
-        >{loading
-          ? "PLEASE WAIT…"
-          : mode === "login"
-            ? "LOGIN"
-            : "REGISTER"}</button
-      >
+<svelte:head><title>{heading()} — Bengal Port</title></svelte:head>
+<section class="auth-shell"><div class="story"><a href="/" class="brand"><img src="/images/logo.webp" alt="Bengal Port"/><span>BENGAL PORT</span></a><div><span class="eyebrow">OPTIONAL MEMBER ACCOUNT</span><h1>Your global journey,<br/>kept in one secure place.</h1><p>Track applications, enquiries, payments and receipts. You can still browse and enquire without creating an account.</p><ul><li><Check/> Email-verified access</li><li><Check/> Optional two-factor protection</li><li><Check/> One profile across all three divisions</li></ul></div></div>
+  <div class="form-side"><div class="authbox"><div class="icon"><svelte:component this={mode==="verify"||mode==="twoFactor"?ShieldCheck:mode==="forgot"||mode==="reset"?KeyRound:Mail}/></div><span class="step">{mode==="login"?"MEMBER SIGN IN":mode==="register"?"CREATE ACCOUNT":"SECURE VERIFICATION"}</span><h2>{heading()}</h2><p>{mode==="verify"||mode==="twoFactor"?"Enter the six-digit code. It expires in 10 minutes.":mode==="forgot"?"We’ll email you a secure six-digit reset code.":mode==="reset"?"Enter your code and a strong new password.":"Registration is optional and enquiries remain open to everyone."}</p>
+    {#if notice}<div class="notice success" role="status">{notice}</div>{/if}{#if developmentCode}<div class="dev-code">Development code: <b>{developmentCode}</b></div>{/if}{#if error}<div class="notice error" role="alert">{error}</div>{/if}
+    <form onsubmit={(e)=>{e.preventDefault();submit()}}>
+      {#if mode==="register"}<label><span>Full name</span><input bind:value={name} autocomplete="name" required/></label><label><span>Phone number <small>Optional</small></span><input bind:value={phone} autocomplete="tel" inputmode="tel"/></label>{/if}
+      {#if ["login","register","forgot"].includes(mode)}<label><span>Email address</span><input bind:value={email} type="email" autocomplete="email" required/></label>{/if}
+      {#if ["verify","twoFactor","reset"].includes(mode)}<label><span>Six-digit code</span><input class="otp" bind:value={code} inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required/></label>{/if}
+      {#if ["login","register","reset"].includes(mode)}<label><span>{mode==="reset"?"New password":"Password"}</span><div class="password"><input bind:value={password} type={showPassword?"text":"password"} autocomplete={mode==="login"?"current-password":"new-password"} minlength="8" required/><button type="button" aria-label={showPassword?"Hide password":"Show password"} onclick={()=>showPassword=!showPassword}>{#if showPassword}<EyeOff/>{:else}<Eye/>{/if}</button></div>{#if mode!=="login"}<small>8+ characters with uppercase, lowercase and a number.</small>{/if}</label>{/if}
+      {#if mode==="register"||mode==="reset"}<label><span>Confirm password</span><input bind:value={confirm} type="password" autocomplete="new-password" required/></label>{/if}
+      {#if mode==="login"}<button type="button" class="forgot" onclick={()=>{mode="forgot";error=notice=""}}>Forgot password?</button>{/if}
+      <button class="primary" disabled={loading}><span>{loading?"Please wait…":mode==="login"?"Sign in":mode==="register"?"Create account":mode==="forgot"?"Send reset code":mode==="reset"?"Update password":"Verify and continue"}</span><ArrowRight/></button>
     </form>
-    <button
-      class="switch"
-      onclick={() => (mode = mode === "login" ? "register" : "login")}
-      >{mode === "login"
-        ? "New to Bengal Port? Register"
-        : "Already registered? Login"}</button
-    >
-  </div>
+    {#if mode==="login"||mode==="register"}<div class="divider"><span>or</span></div>{#if googleClientId}<div id="google-button" class="google"></div>{:else}<button class="google-placeholder" disabled>Google sign-in available after configuration</button>{/if}{/if}
+    <div class="switches">{#if mode==="login"}<button onclick={()=>{mode="register";error=notice=""}}>New here? <b>Create an account</b></button>{:else}<button onclick={()=>{mode="login";error=notice=""}}>← Back to sign in</button>{/if}<a href="/apply">Continue without an account</a></div>
+  </div></div>
 </section>
-
 <style>
-  .auth {
-    min-height: 650px;
-    display: grid;
-    place-items: center;
-    background: #f1f4f6;
-  }
-  .authbox {
-    width: min(440px, 92vw);
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    text-align: center;
-  }
-  .authbox img {
-    width: 86px;
-    height: 86px;
-    border-radius: 50%;
-  }
-  .authbox form {
-    text-align: left;
-    display: grid;
-    gap: 16px;
-  }
-  .authbox .btn {
-    margin-top: 8px;
-  }
-  .switch {
-    border: 0;
-    background: none;
-    color: var(--gold);
-    font-weight: 800;
-    margin-top: 22px;
-  }
+  .auth-shell{min-height:calc(100svh - 9rem);display:grid;background:#f4f6f6}.story{display:none}.form-side{display:grid;place-items:center;padding:2rem 1rem}.authbox{width:min(100%,29rem);background:#fff;border:1px solid #e1e6e7;border-radius:1.35rem;padding:clamp(1.4rem,5vw,2.4rem);box-shadow:0 1.5rem 4rem rgba(17,42,67,.1)}.icon{width:3rem;height:3rem;display:grid;place-items:center;border-radius:.9rem;background:#f8efd9;color:#9b6d16;margin-bottom:1.3rem}.step{font-size:.7rem;letter-spacing:.14em;font-weight:800;color:#a77720}.authbox h2{font-size:clamp(1.9rem,8vw,2.6rem);letter-spacing:-.04em;color:#193652;margin:.5rem 0}.authbox>p{color:#68798a;line-height:1.6;margin:0 0 1.4rem}.notice,.dev-code{padding:.8rem 1rem;border-radius:.7rem;margin:.75rem 0;font-size:.86rem}.notice.error{background:#fff0f0;color:#942d35}.notice.success{background:#edf8f1;color:#286542}.dev-code{background:#fff7df;color:#74500d}.dev-code b{letter-spacing:.2em}form{display:grid;gap:1rem}label{display:grid;gap:.45rem;color:#263f58;font-weight:700;font-size:.86rem}label span{display:flex;justify-content:space-between}label small{font-weight:500;color:#84909c}input{width:100%;min-height:3rem;border:1px solid #d6dfe2;border-radius:.7rem;padding:.75rem .9rem;font:inherit;color:#17334e;outline:none;transition:border-color 160ms ease,box-shadow 160ms ease}input:focus{border-color:#bd8b29;box-shadow:0 0 0 .22rem rgba(198,150,54,.14)}.password{position:relative}.password input{padding-right:3.2rem}.password button{position:absolute;right:.2rem;top:.2rem;width:2.6rem;height:2.6rem;border:0;background:transparent;color:#6d7c89;border-radius:.55rem}.otp{text-align:center;font-size:1.4rem;letter-spacing:.45em;font-weight:800}.forgot{justify-self:end;border:0;background:none;color:#9b6d16;font-weight:700;padding:.2rem;cursor:pointer}.primary{min-height:3.2rem;border:0;border-radius:.8rem;background:#173652;color:#fff;padding:.7rem 1rem;display:flex;align-items:center;justify-content:space-between;font-weight:800;cursor:pointer;transition:transform 150ms cubic-bezier(.23,1,.32,1),background-color 180ms ease}.primary:active{transform:scale(.98)}.primary:disabled{opacity:.65;cursor:wait}.primary svg{width:1.15rem}.divider{display:flex;align-items:center;gap:.8rem;color:#9aa4ad;margin:1.25rem 0}.divider:before,.divider:after{content:"";height:1px;background:#e3e7e8;flex:1}.google{display:grid;place-items:center;min-height:2.75rem}.google-placeholder{width:100%;min-height:2.9rem;border:1px solid #dfe3e5;border-radius:1.5rem;background:#fafbfb;color:#84909c}.switches{display:grid;gap:.75rem;text-align:center;margin-top:1.35rem}.switches button{border:0;background:none;color:#556a7d;cursor:pointer}.switches b,.switches a{color:#9b6d16}.switches a{font-size:.85rem;text-decoration:none}
+  @media(min-width:64rem){.auth-shell{grid-template-columns:minmax(25rem,.9fr) minmax(32rem,1.1fr)}.story{display:flex;flex-direction:column;justify-content:space-between;padding:clamp(2.5rem,5vw,5rem);background:linear-gradient(145deg,#102d4b,#173f61);color:#fff;position:relative;overflow:hidden}.story:after{content:"";position:absolute;width:30rem;height:30rem;border:1px solid rgba(221,178,76,.2);border-radius:50%;right:-13rem;bottom:-15rem;box-shadow:0 0 0 5rem rgba(255,255,255,.025),0 0 0 10rem rgba(255,255,255,.018)}.brand{display:flex;align-items:center;gap:1rem;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.04em}.brand img{width:4rem;height:4rem;border-radius:50%}.story>div{position:relative;z-index:1;max-width:38rem}.eyebrow{color:#e0b558;font-size:.72rem;letter-spacing:.16em;font-weight:800}.story h1{font-size:clamp(2.8rem,4.5vw,4.8rem);line-height:1.05;letter-spacing:-.055em;margin:1rem 0 1.4rem}.story p{max-width:34rem;color:#cfdae3;line-height:1.75}.story ul{list-style:none;padding:0;display:grid;gap:.8rem;margin-top:2rem}.story li{display:flex;align-items:center;gap:.7rem;color:#edf2f5}.story li svg{width:1.1rem;color:#dfb24d}.form-side{padding:3rem}}
+  @media(hover:hover) and (pointer:fine){.primary:hover{background:#204663;transform:translateY(-.08rem)}.password button:hover{background:#f0f3f4}}@media(prefers-reduced-motion:reduce){.primary,input{transition-duration:.01ms}}
 </style>

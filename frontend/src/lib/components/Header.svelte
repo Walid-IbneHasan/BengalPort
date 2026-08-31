@@ -10,16 +10,29 @@
     Youtube,
     ChevronDown,
     ArrowRight,
+    UserRound,
+    BriefcaseBusiness,
+    GraduationCap,
+    HeartPulse,
   } from "lucide-svelte";
   import { page } from "$app/state";
+  import { onMount } from "svelte";
   import { cmsContent } from "$lib/cms";
   let open = false;
+  let servicesOpen = false;
+  let accountHref = "/login";
+  onMount(() => { accountHref = localStorage.getItem("bp_token") ? "/profile" : "/login"; });
   const links = [
     ["HOME", "/"],
     ["ABOUT US", "/about"],
     ["SERVICES", "/services"],
     ["OPPORTUNITIES", "/opportunities"],
     ["CONTACT US", "/contact"],
+  ];
+  const divisions = [
+    { title: "Global Business", text: "Trade, sourcing and business tours", href: "/business", icon: BriefcaseBusiness, tone: "business" },
+    { title: "Global Education", text: "Study abroad and admissions", href: "/education", icon: GraduationCap, tone: "education" },
+    { title: "Global Healthcare", text: "Treatment and patient support", href: "/healthcare", icon: HeartPulse, tone: "healthcare" },
   ];
   const active = (href: string) =>
     href === "/"
@@ -50,18 +63,21 @@
       ></a
     >
     <div class:show={open} class="links">
-      {#each links as link}<a
-          class:active={active(link[1])}
-          href={link[1]}
-          onclick={() => (open = false)}
-          >{link[0]}{#if link[0] === "SERVICES"}<ChevronDown
-              size={15}
-            />{/if}</a
-        >{/each}
+      {#each links as link}
+        {#if link[0] === "SERVICES"}
+          <div class:open={servicesOpen} class="services-nav">
+            <button class:active={active(link[1]) || ["/business","/education","/healthcare"].some(active)} aria-expanded={servicesOpen} aria-controls="services-menu" onclick={() => servicesOpen = !servicesOpen}>SERVICES <ChevronDown size={15}/></button>
+            <div id="services-menu" class="services-menu">
+              <div class="services-heading"><span>OUR GLOBAL DIVISIONS</span><a href="/services" onclick={() => { open=false; servicesOpen=false }}>View all services <ArrowRight size={14}/></a></div>
+              <div class="division-links">{#each divisions as division}<a class={division.tone} href={division.href} onclick={() => { open=false; servicesOpen=false }}><i><svelte:component this={division.icon} size={20}/></i><span><b>{division.title}</b><small>{division.text}</small></span><ArrowRight class="card-arrow" size={16}/></a>{/each}</div>
+            </div>
+          </div>
+        {:else}<a class:active={active(link[1])} href={link[1]} onclick={() => (open = false)}>{link[0]}</a>{/if}
+      {/each}
     </div>
     <a class="apply" href="/apply"
       ><span>APPLY / ENQUIRY</span><i><ArrowRight size={20} /></i></a
-    ><button
+    ><a class="account" href={accountHref} aria-label="Member account"><UserRound size={19}/></a><button
       class="menu"
       aria-label={open ? "Close navigation" : "Open navigation"}
       aria-expanded={open}
@@ -166,6 +182,18 @@
   .links a.active {
     color: var(--gold-deep);
   }
+  .services-nav{height:100%;display:flex;align-items:stretch;position:relative;flex:0 0 auto;min-width:max-content}
+  .services-nav>button{border:0;background:transparent;display:flex;align-items:center;gap:.4rem;padding:0 clamp(1rem,2.2vw,2.35rem);color:#3c5066;font:inherit;font-weight:640;font-size:.875rem;cursor:pointer;position:relative;white-space:nowrap;transition:color 160ms ease}
+  .services-nav>button:after{content:"";position:absolute;bottom:.9rem;left:35%;right:35%;height:2px;background:var(--gold);transform:scaleX(0);transition:transform 200ms var(--ease-out)}
+  .services-nav>button svg{transition:transform 180ms var(--ease-out)}
+  .services-nav>button.active,.services-nav>button:hover{color:var(--gold-deep)}
+  .services-nav>button.active:after,.services-nav>button:hover:after{transform:scaleX(1)}
+  .services-menu{position:absolute;z-index:30;top:calc(100% - .35rem);left:50%;width:min(48rem,82vw);padding:1rem;background:rgba(255,255,255,.99);border:1px solid rgba(24,54,80,.1);border-radius:1rem;box-shadow:0 1.4rem 3.5rem rgba(17,42,67,.16);opacity:0;pointer-events:none;transform:translate(-50%,-.45rem) scale(.985);transform-origin:50% 0;transition:opacity 140ms ease,transform 180ms var(--ease-out)}
+  .services-heading{display:flex;align-items:center;justify-content:space-between;padding:.15rem .25rem .75rem}.services-heading>span{font-size:.66rem;letter-spacing:.14em;font-weight:800;color:#8a6a2b}.services-heading>a{min-height:auto!important;padding:.25rem!important;font-size:.75rem!important;color:#51687d!important;gap:.35rem!important}
+  .division-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem}
+  .links .division-links>a{min-height:6.5rem;padding:1rem!important;border:1px solid #e3e8ea;border-radius:.8rem;align-items:flex-start;gap:.75rem;background:#fafbfb;color:#23405a!important;overflow:hidden;transition:transform 160ms var(--ease-out),border-color 160ms ease,background-color 160ms ease,box-shadow 160ms ease}
+  .links .division-links>a:after{display:none}.division-links i{width:2.3rem;height:2.3rem;flex:none;display:grid;place-items:center;border-radius:.65rem;background:#eaf0f5;color:#173f64}.division-links a.education i{background:#f1ecf6;color:#513374}.division-links a.healthcare i{background:#e7f3f1;color:#11665f}.division-links span{min-width:0}.division-links b,.division-links small{display:block}.division-links b{font-size:.86rem;line-height:1.25}.division-links small{font-size:.7rem;line-height:1.45;color:#71808c;margin-top:.35rem;white-space:normal}.card-arrow{margin-left:auto;margin-top:.15rem;opacity:.45;transition:transform 160ms var(--ease-out),opacity 160ms ease}
+  .services-nav.open .services-menu{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}.services-nav.open>button svg{transform:rotate(180deg)}
   .links a:after {
     content: "";
     position: absolute;
@@ -194,6 +222,7 @@
     border-radius: 1.75rem;
     font-weight: 760;
     font-size: 0.9rem;
+    box-sizing: border-box;
     box-shadow: 0 0.45rem 1rem rgba(166, 116, 21, 0.16);
     transition:
       transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
@@ -234,6 +263,8 @@
     border-radius: 50%;
     place-items: center;
   }
+  .account{width:2.75rem;height:2.75rem;flex:none;display:grid;place-items:center;border:1px solid #dce2e5;border-radius:50%;color:#29445e;text-decoration:none;transition:transform 150ms var(--ease-out),background-color 160ms ease}
+  .account:active{transform:scale(.96)}
   .menu:hover {
     background: #f1f3f4;
   }
@@ -271,6 +302,7 @@
     .links a:after {
       display: none;
     }
+    .services-nav{height:auto;display:block}.services-nav>button{width:100%;min-height:2.75rem;padding:.9rem;justify-content:space-between}.services-nav>button:after{display:none}.services-menu{position:static;width:100%;padding:.35rem 0 0;border:0;border-radius:0;box-shadow:none;background:transparent;display:none;opacity:1;pointer-events:auto;transform:none}.services-nav.open .services-menu{display:block;transform:none}.services-heading{padding:.4rem .9rem .65rem}.division-links{grid-template-columns:1fr;gap:.45rem}.links .division-links>a{min-height:4.7rem;padding:.75rem!important;background:#f6f8f8}.division-links small{font-size:.72rem}
     .menu {
       display: grid;
     }
@@ -282,11 +314,20 @@
     }
   }
   @media (max-width: 37.5rem) {
+    .utility {
+      height: auto;
+      min-height: 3.25rem;
+    }
     .utility-inner > span {
-      font-size: 0.7rem;
+      width: 100%;
+      justify-content: center;
+      padding-block: 0.55rem;
+      font-size: clamp(0.68rem, 3vw, 0.76rem);
+      line-height: 1.35;
+      text-align: center;
     }
     .contact {
-      gap: 0.7rem;
+      display: none;
     }
     .nav {
       height: 4.75rem;
@@ -478,6 +519,7 @@
     .menu:hover {
       background: #f1f3f4;
     }
+    .services-nav:hover .services-menu,.services-nav:focus-within .services-menu{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}.services-nav:hover>button svg,.services-nav:focus-within>button svg{transform:rotate(180deg)}.links .division-links>a:hover{transform:translateY(-.12rem);border-color:#cbd6da;background:#fff;box-shadow:0 .65rem 1.3rem rgba(24,54,80,.08)}.division-links>a:hover .card-arrow{opacity:1;transform:translateX(.18rem)}
   }
   @media (prefers-reduced-motion: reduce) {
     .brand img,
@@ -490,11 +532,14 @@
   }
   @media (max-width: 37.5rem) {
     .utility-inner {
-      gap: 0.5rem;
+      gap: 0;
     }
     .utility-inner > span {
       min-width: 0;
-      line-height: 1.25;
+      max-width: 28rem;
+    }
+    .utility-inner > span :global(svg) {
+      flex: 0 0 auto;
     }
     .contact a {
       min-width: 2.25rem;
@@ -505,7 +550,7 @@
       width: 100%;
       max-width: 100vw;
       display: grid;
-      grid-template-columns: 3.25rem minmax(0, 1fr) 4.25rem 2.75rem;
+      grid-template-columns: 3.25rem minmax(0, 1fr) 4.25rem 2.75rem 2.75rem;
       gap: 0.25rem;
       padding-inline: 0.75rem;
     }
@@ -521,10 +566,11 @@
       justify-content: center;
     }
     .menu {
-      grid-column: 4;
+      grid-column: 5;
       width: 2.75rem;
       min-width: 2.75rem;
     }
+    .account{grid-column:4}
     .links {
       grid-column: 1 / -1;
       width: auto;
@@ -532,14 +578,14 @@
   }
   @media (max-width: 22.5rem) {
     .utility-inner > span {
-      font-size: 0.65rem;
+      font-size: 0.66rem;
     }
     .contact a {
       min-width: 2rem;
       padding: 0;
     }
     .nav {
-      grid-template-columns: 3rem minmax(0, 1fr) 4rem 2.75rem;
+      grid-template-columns: 3rem minmax(0, 1fr) 4rem 2.5rem 2.5rem;
       padding-inline: 0.5rem;
     }
     .brand,

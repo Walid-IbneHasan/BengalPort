@@ -22,6 +22,14 @@ API: `http://localhost:4000/api`
 
 Seed admin: `admin@bengalport.com` / `Admin123!` (change immediately outside local development).
 
+## Optional member authentication
+
+Guest browsing and enquiries do not require an account. Member accounts support email verification, password recovery, password changes, optional email-code 2FA, profiles, and Google sign-in.
+
+For real OTP delivery, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, and `EMAIL_FROM` in `backend/.env`. Without SMTP, non-production responses include a development code for local testing.
+
+For Google sign-in, create a Google OAuth 2.0 Web Client and set the same client ID as `GOOGLE_CLIENT_ID` in `backend/.env` and `PUBLIC_GOOGLE_CLIENT_ID` in `frontend/.env`. Add the local and deployed frontend URLs to its Authorized JavaScript origins.
+
 ## Production
 
 Run `npm run build`, configure production environment variables, apply migrations with `npx prisma migrate deploy -w backend`, and start the backend with `npm start -w backend`. Deploy the SvelteKit build using the adapter appropriate to your hosting provider.

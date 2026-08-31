@@ -18,11 +18,12 @@ const at = (daysAgo: number, hour: number, minute = 0) => {
 async function main() {
   const admin = await prisma.user.upsert({
     where: { email: "admin@bengalport.com" },
-    update: {},
+    update: { emailVerifiedAt: new Date() },
     create: {
       name: "Bengal Port Admin",
       email: "admin@bengalport.com",
       passwordHash: await bcrypt.hash("Admin123!", 12),
+      emailVerifiedAt: new Date(),
       role: "ADMIN",
     },
   });
