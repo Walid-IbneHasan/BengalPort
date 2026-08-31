@@ -15,6 +15,7 @@
     ShieldCheck,
     Smile,
     Stethoscope,
+    TriangleAlert,
     Users,
   } from "lucide-svelte";
   import { cmsContent } from "$lib/cms";
@@ -161,6 +162,10 @@
             <strong>{division.cta}<ArrowRight size={18} /></strong>
           </div></a
         >{/each}
+    </div>
+    <div class="maintenance-alert" role="status" aria-live="polite">
+      <span class="maintenance-beacon" aria-hidden="true"><TriangleAlert size={19} /></span>
+      <p><strong>Site under maintenance</strong> — We’re sorry for the temporary inconvenience.</p>
     </div>
     <div class="stats" aria-label="Bengal Port at a glance">
       {#each stats as stat, index}<div class="stat">
@@ -415,6 +420,58 @@
     max-width: 76.875rem;
     margin: 0.125rem auto 0;
     width: 100%;
+  }
+  .maintenance-alert {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    width: min(48rem, calc(100% - 2rem));
+    margin: 1.25rem auto 0;
+    padding: 0.72rem 1.15rem;
+    overflow: visible;
+    border: 1px solid #d82f3d;
+    border-radius: 999px;
+    background: #b91525;
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 0.65rem 1.6rem rgba(155, 18, 33, 0.2);
+    animation: maintenance-pulse 1.15s cubic-bezier(0.77, 0, 0.175, 1) infinite alternate;
+  }
+  .maintenance-alert::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: -0.35rem;
+    border: 2px solid rgba(220, 33, 50, 0.42);
+    border-radius: inherit;
+    opacity: 0.2;
+    animation: maintenance-ring 1.15s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+  }
+  .maintenance-alert p {
+    margin: 0;
+    color: inherit;
+    font-size: clamp(0.76rem, 1.25vw, 0.9rem);
+    line-height: 1.35;
+    letter-spacing: 0.005em;
+  }
+  .maintenance-alert strong {
+    color: #fff;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.055em;
+  }
+  .maintenance-beacon {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #fff;
+    color: #b91525;
   }
   .division {
     display: block;
@@ -991,6 +1048,26 @@
       transform: none;
     }
   }
+  @keyframes maintenance-pulse {
+    from {
+      opacity: 0.88;
+      transform: scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1.025);
+    }
+  }
+  @keyframes maintenance-ring {
+    from {
+      opacity: 0.45;
+      transform: scale(0.99);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1.055);
+    }
+  }
   @media (min-width: 46.3125rem) {
     .hero {
       height: calc(100svh - 9.0625rem);
@@ -1294,6 +1371,13 @@
       gap: 2rem;
       margin-top: 1.5rem;
     }
+    .maintenance-alert {
+      width: calc(100% - 1rem);
+      margin-top: 1.35rem;
+      padding: 0.8rem 0.9rem;
+      border-radius: 1rem;
+      text-align: left;
+    }
     .photo {
       width: 82%;
     }
@@ -1381,6 +1465,10 @@
     .hero-arrival,
     .division,
     .stats {
+      animation: none;
+    }
+    .maintenance-alert,
+    .maintenance-alert::before {
       animation: none;
     }
     :global(.reveal-ready) {
