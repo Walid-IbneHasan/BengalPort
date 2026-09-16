@@ -126,7 +126,7 @@
 </script>
 
 <svelte:head>
-  <title>Bengal Port — Connecting Bengal to the World</title>
+  <title>Bengal Port | Connecting Bengal to the World</title>
   <meta
     name="description"
     content="Trusted international business, education and healthcare connections from Bengal to the world."
@@ -157,6 +157,7 @@
               <svelte:component this={division.icon} size={34} />
             </div>
             <h3>{division.title}</h3>
+            <span class="mobile-division-name">{division.title.replace("GLOBAL ", "")}</span>
             <span class="dash"></span>
             <p>{division.sub}</p>
             <strong>{division.cta}<ArrowRight size={18} /></strong>
@@ -165,7 +166,7 @@
     </div>
     <div class="maintenance-alert" role="status" aria-live="polite">
       <span class="maintenance-beacon" aria-hidden="true"><TriangleAlert size={19} /></span>
-      <p><strong>Site under maintenance</strong> — We’re sorry for the temporary inconvenience.</p>
+      <p><strong>Site under maintenance.</strong> We’re sorry for the temporary inconvenience.</p>
     </div>
     <div class="stats" aria-label="Bengal Port at a glance">
       {#each stats as stat, index}<div class="stat">
@@ -277,7 +278,7 @@
     <div class="featured-grid">
       <a class="feature feature-business" href="/opportunities" use:reveal
         ><span>Business tour</span>
-        <h3>Bangladesh–China Sourcing Delegation</h3>
+        <h3>Bangladesh-China Sourcing Delegation</h3>
         <p>
           Meet verified manufacturers and visit production facilities with
           end-to-end coordination.
@@ -550,6 +551,9 @@
     font-size: 1.55rem;
     margin: 0 0 0.25rem;
     font-weight: 720;
+  }
+  .mobile-division-name {
+    display: none;
   }
   .dash {
     display: block;
@@ -1785,6 +1789,294 @@
     .division:hover .photo img,
     .division:hover .division-icon {
       transform: none;
+    }
+  }
+
+  /* Tablet bridge: preserve the desktop composition while giving each card
+     enough room for complete labels and two-line supporting copy. */
+  @media (min-width: 46.3125rem) and (max-width: 56rem) {
+    .hero-wrap {
+      padding-inline: clamp(1rem, 2.5vw, 1.5rem);
+    }
+    .division-grid {
+      gap: clamp(0.7rem, 1.6vw, 1rem);
+    }
+    .photo {
+      width: min(82%, 13.5rem);
+    }
+    .panel {
+      padding-inline: 0.75rem;
+    }
+    .panel h3 {
+      min-height: 2.35em;
+      display: grid;
+      place-items: center;
+      margin-bottom: 0.2rem;
+      font-size: clamp(0.98rem, 2.25vw, 1.12rem);
+      line-height: 1.18;
+      text-wrap: balance;
+    }
+    .panel p {
+      min-height: 2.8em;
+      margin-bottom: 0.4rem;
+      font-size: clamp(0.62rem, 1.45vw, 0.72rem);
+      line-height: 1.4;
+      white-space: normal;
+      text-wrap: balance;
+    }
+    .panel strong {
+      width: 100%;
+      gap: 0.45rem;
+      padding-inline: 0.45rem;
+      font-size: clamp(0.64rem, 1.45vw, 0.72rem);
+    }
+    .stats {
+      padding-inline: 0.8rem;
+    }
+    .stat {
+      gap: 0.45rem;
+    }
+  }
+
+  /* Mobile hero concept: an asymmetric editorial bento gives the primary
+     business pathway more visual weight without hiding the other divisions. */
+  @media (max-width: 46.25rem) {
+    .hero {
+      padding-top: clamp(0.75rem, 3.5vw, 1.25rem);
+    }
+    .hero-wrap {
+      padding-inline: clamp(0.65rem, 3vw, 1rem);
+    }
+    .title h1 {
+      font-size: clamp(2rem, 10vw, 2.65rem);
+      line-height: 0.98;
+      margin-bottom: 0.2rem;
+    }
+    .tag {
+      gap: 0.45rem !important;
+      padding-inline: 0;
+    }
+    .tag h2 {
+      font-size: clamp(0.98rem, 4.7vw, 1.2rem) !important;
+    }
+    .tag i {
+      width: 3.75rem !important;
+    }
+    .title p {
+      max-width: 34rem;
+      margin: 0.5rem auto 0;
+      padding-inline: 0;
+      font-size: clamp(0.78rem, 3.5vw, 0.9rem);
+      line-height: 1.48;
+      text-wrap: balance;
+    }
+    .division-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(0.5rem, 2.4vw, 0.72rem);
+      width: 100%;
+      max-width: 36rem;
+      margin: clamp(0.9rem, 4vw, 1.35rem) auto 0;
+    }
+    .division {
+      position: relative;
+      min-width: 0;
+      min-height: 8.55rem;
+      padding-top: 0;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      border-radius: 1.15rem;
+      background: #183956;
+      box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.2),
+        0 0.75rem 1.75rem rgba(23, 48, 79, 0.15);
+      animation: card-in 0.52s var(--arrival-delay) cubic-bezier(0.23, 1, 0.32, 1) both;
+      transform-origin: 50% 70%;
+    }
+    .division.business {
+      grid-column: 1 / -1;
+      min-height: 7.2rem;
+    }
+    .division:active {
+      transform: scale(0.97);
+    }
+    .photo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      aspect-ratio: auto;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .photo img {
+      transform: scale(1.015);
+    }
+    .photo::before {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(6, 23, 43, 0.03) 8%, rgba(6, 23, 43, 0.84) 100%),
+        linear-gradient(90deg, color-mix(in srgb, var(--accent) 60%, transparent), transparent 76%);
+      pointer-events: none;
+    }
+    .photo:after {
+      display: none;
+    }
+    .panel {
+      z-index: 3;
+      display: flex;
+      min-height: inherit;
+      height: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding: 1rem 3.65rem 0.9rem 1rem;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    .education .panel,
+    .health .panel {
+      padding-right: 2.65rem;
+    }
+    .division-icon {
+      top: 0.75rem;
+      right: 0.75rem;
+      left: auto;
+      width: 2.45rem;
+      height: 2.45rem;
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      background: rgba(8, 30, 51, 0.48);
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(0.55rem);
+      -webkit-backdrop-filter: blur(0.55rem);
+      transform: none;
+    }
+    .division-icon :global(svg) {
+      width: 1.18rem;
+      height: 1.18rem;
+    }
+    .panel h3,
+    .panel p {
+      display: none;
+    }
+    .mobile-division-name {
+      display: block;
+      color: #fff;
+      font-size: clamp(0.92rem, 4.2vw, 1.08rem);
+      font-weight: 720;
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      text-shadow: 0 1px 0.5rem rgba(0, 0, 0, 0.4);
+    }
+    .business .mobile-division-name {
+      font-size: clamp(1.05rem, 4.8vw, 1.25rem);
+    }
+    .health .mobile-division-name {
+      font-size: clamp(0.78rem, 3.55vw, 0.94rem);
+      letter-spacing: -0.04em;
+    }
+    .dash {
+      width: 1.75rem;
+      height: 2px;
+      margin: 0.42rem 0 0;
+      background: #efc45c;
+    }
+    .panel strong {
+      position: absolute;
+      right: 0.75rem;
+      bottom: 0.75rem;
+      width: 2.45rem;
+      min-width: 0;
+      height: 2.45rem;
+      margin: 0;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 50%;
+      background: rgba(8, 30, 51, 0.38);
+      color: #fff;
+      backdrop-filter: blur(0.45rem);
+      -webkit-backdrop-filter: blur(0.45rem);
+      font-size: 0;
+    }
+    .education .panel strong,
+    .health .panel strong {
+      right: 0.65rem;
+      bottom: 0.65rem;
+      width: 2.15rem;
+      height: 2.15rem;
+    }
+    .panel strong::before {
+      content: none;
+    }
+    .panel strong :global(svg) {
+      width: 1rem;
+      height: 1rem;
+    }
+    .maintenance-alert {
+      width: calc(100% - 0.35rem);
+      margin-top: 1rem;
+      padding: 0.65rem 0.75rem;
+    }
+    .maintenance-alert p {
+      font-size: 0.72rem;
+    }
+    .maintenance-beacon {
+      width: 1.8rem;
+      height: 1.8rem;
+    }
+    .stats {
+      margin-top: 1.75rem;
+    }
+  }
+  @media (max-width: 22.5rem) {
+    .hero-wrap {
+      padding-inline: 0.5rem;
+    }
+    .division-grid {
+      gap: 0.45rem;
+    }
+    .panel {
+      padding-left: 0.8rem;
+    }
+    .mobile-division-name {
+      font-size: 0.88rem;
+    }
+    .maintenance-alert {
+      align-items: flex-start;
+      padding-inline: 0.65rem;
+    }
+    .maintenance-alert p {
+      font-size: 0.68rem;
+      line-height: 1.35;
+    }
+    .stats {
+      padding-inline: 0.55rem;
+      gap: 0.5rem;
+    }
+    .stat {
+      gap: 0.45rem;
+      padding: 0.55rem;
+    }
+    .stat-icon {
+      width: 2.85rem;
+      height: 2.85rem;
+      flex: 0 0 2.85rem;
+    }
+    .stat b {
+      font-size: 1.2rem;
+    }
+    .stat span {
+      font-size: 0.72rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .division {
+      animation: none;
     }
   }
 </style>
