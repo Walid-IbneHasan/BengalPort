@@ -126,7 +126,7 @@
 </script>
 
 <svelte:head>
-  <title>Bengal Port — Connecting Bengal to the World</title>
+  <title>Bengal Port | Connecting Bengal to the World</title>
   <meta
     name="description"
     content="Trusted international business, education and healthcare connections from Bengal to the world."
@@ -166,7 +166,7 @@
     </div>
     <div class="maintenance-alert" role="status" aria-live="polite">
       <span class="maintenance-beacon" aria-hidden="true"><TriangleAlert size={19} /></span>
-      <p><strong>Site under maintenance</strong> — We’re sorry for the temporary inconvenience.</p>
+      <p><strong>Site under maintenance.</strong> We’re sorry for the temporary inconvenience.</p>
     </div>
     <div class="stats" aria-label="Bengal Port at a glance">
       {#each stats as stat, index}<div class="stat">
@@ -278,7 +278,7 @@
     <div class="featured-grid">
       <a class="feature feature-business" href="/opportunities" use:reveal
         ><span>Business tour</span>
-        <h3>Bangladesh–China Sourcing Delegation</h3>
+        <h3>Bangladesh-China Sourcing Delegation</h3>
         <p>
           Meet verified manufacturers and visit production facilities with
           end-to-end coordination.
@@ -1792,6 +1792,52 @@
     }
   }
 
+  /* Tablet bridge: preserve the desktop composition while giving each card
+     enough room for complete labels and two-line supporting copy. */
+  @media (min-width: 46.3125rem) and (max-width: 56rem) {
+    .hero-wrap {
+      padding-inline: clamp(1rem, 2.5vw, 1.5rem);
+    }
+    .division-grid {
+      gap: clamp(0.7rem, 1.6vw, 1rem);
+    }
+    .photo {
+      width: min(82%, 13.5rem);
+    }
+    .panel {
+      padding-inline: 0.75rem;
+    }
+    .panel h3 {
+      min-height: 2.35em;
+      display: grid;
+      place-items: center;
+      margin-bottom: 0.2rem;
+      font-size: clamp(0.98rem, 2.25vw, 1.12rem);
+      line-height: 1.18;
+      text-wrap: balance;
+    }
+    .panel p {
+      min-height: 2.8em;
+      margin-bottom: 0.4rem;
+      font-size: clamp(0.62rem, 1.45vw, 0.72rem);
+      line-height: 1.4;
+      white-space: normal;
+      text-wrap: balance;
+    }
+    .panel strong {
+      width: 100%;
+      gap: 0.45rem;
+      padding-inline: 0.45rem;
+      font-size: clamp(0.64rem, 1.45vw, 0.72rem);
+    }
+    .stats {
+      padding-inline: 0.8rem;
+    }
+    .stat {
+      gap: 0.45rem;
+    }
+  }
+
   /* Mobile hero concept: an asymmetric editorial bento gives the primary
      business pathway more visual weight without hiding the other divisions. */
   @media (max-width: 46.25rem) {
@@ -1999,6 +2045,33 @@
     }
     .mobile-division-name {
       font-size: 0.88rem;
+    }
+    .maintenance-alert {
+      align-items: flex-start;
+      padding-inline: 0.65rem;
+    }
+    .maintenance-alert p {
+      font-size: 0.68rem;
+      line-height: 1.35;
+    }
+    .stats {
+      padding-inline: 0.55rem;
+      gap: 0.5rem;
+    }
+    .stat {
+      gap: 0.45rem;
+      padding: 0.55rem;
+    }
+    .stat-icon {
+      width: 2.85rem;
+      height: 2.85rem;
+      flex: 0 0 2.85rem;
+    }
+    .stat b {
+      font-size: 1.2rem;
+    }
+    .stat span {
+      font-size: 0.72rem;
     }
   }
   @media (prefers-reduced-motion: reduce) {

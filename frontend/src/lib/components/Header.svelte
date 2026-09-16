@@ -325,6 +325,7 @@
       font-size: clamp(0.68rem, 3vw, 0.76rem);
       line-height: 1.35;
       text-align: center;
+      overflow-wrap: anywhere;
     }
     .contact {
       display: none;
@@ -550,7 +551,7 @@
       width: 100%;
       max-width: 100vw;
       display: grid;
-      grid-template-columns: 3.25rem minmax(0, 1fr) 4.25rem 2.75rem 2.75rem;
+      grid-template-columns: 3.25rem minmax(0, 1fr) auto 2.75rem 2.75rem;
       gap: 0.25rem;
       padding-inline: 0.75rem;
     }
@@ -585,8 +586,9 @@
       padding: 0;
     }
     .nav {
-      grid-template-columns: 3rem minmax(0, 1fr) 4rem 2.5rem 2.5rem;
+      grid-template-columns: 3rem minmax(0, 1fr) 3.85rem 2.5rem 2.5rem;
       padding-inline: 0.5rem;
+      gap: 0.2rem;
     }
     .brand,
     .brand img {
@@ -594,8 +596,13 @@
       height: 3rem;
     }
     .apply {
-      width: 4rem;
-      min-width: 4rem;
+      width: 3.85rem;
+      min-width: 3.85rem;
+      padding-inline: 0.25rem;
+    }
+    .apply span:after {
+      margin-left: 0.35rem;
+      font-size: 0.68rem;
     }
   }
 </style>
