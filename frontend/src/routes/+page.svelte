@@ -1792,8 +1792,8 @@
     }
   }
 
-  /* Mobile hero concept: a compact three-pathway deck keeps every primary
-     destination visible on first paint without horizontal scrolling. */
+  /* Mobile hero concept: an asymmetric editorial bento gives the primary
+     business pathway more visual weight without hiding the other divisions. */
   @media (max-width: 46.25rem) {
     .hero {
       padding-top: clamp(0.75rem, 3.5vw, 1.25rem);
@@ -1825,60 +1825,90 @@
       text-wrap: balance;
     }
     .division-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: clamp(0.38rem, 2vw, 0.7rem);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(0.5rem, 2.4vw, 0.72rem);
       width: 100%;
-      max-width: 38rem;
+      max-width: 36rem;
       margin: clamp(0.9rem, 4vw, 1.35rem) auto 0;
     }
     .division {
+      position: relative;
       min-width: 0;
+      min-height: 8.55rem;
       padding-top: 0;
       overflow: hidden;
-      border: 1px solid color-mix(in srgb, var(--accent) 78%, white);
-      border-radius: 1rem;
-      background: var(--accent);
-      box-shadow: 0 0.6rem 1.35rem rgba(23, 48, 79, 0.13);
-      animation: card-in 0.48s var(--arrival-delay) cubic-bezier(0.23, 1, 0.32, 1) both;
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      border-radius: 1.15rem;
+      background: #183956;
+      box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.2),
+        0 0.75rem 1.75rem rgba(23, 48, 79, 0.15);
+      animation: card-in 0.52s var(--arrival-delay) cubic-bezier(0.23, 1, 0.32, 1) both;
+      transform-origin: 50% 70%;
+    }
+    .division.business {
+      grid-column: 1 / -1;
+      min-height: 7.2rem;
     }
     .division:active {
       transform: scale(0.97);
     }
     .photo {
+      position: absolute;
+      inset: 0;
       width: 100%;
-      aspect-ratio: 1.38 / 1;
+      height: 100%;
+      aspect-ratio: auto;
       margin: 0;
       border: 0;
       border-radius: 0;
       box-shadow: none;
     }
+    .photo img {
+      transform: scale(1.015);
+    }
     .photo::before {
       content: "";
       position: absolute;
-      z-index: 1;
+      z-index: 2;
       inset: 0;
-      background: linear-gradient(180deg, transparent 45%, rgba(7, 22, 45, 0.5));
+      background:
+        linear-gradient(180deg, rgba(6, 23, 43, 0.03) 8%, rgba(6, 23, 43, 0.84) 100%),
+        linear-gradient(90deg, color-mix(in srgb, var(--accent) 60%, transparent), transparent 76%);
       pointer-events: none;
     }
     .photo:after {
       display: none;
     }
     .panel {
+      z-index: 3;
       display: flex;
-      min-height: 6.85rem;
-      height: auto;
+      min-height: inherit;
+      height: 100%;
       flex-direction: column;
-      align-items: center;
-      padding: 1.75rem 0.35rem 0.45rem;
+      align-items: flex-start;
+      justify-content: flex-end;
+      padding: 1rem 3.65rem 0.9rem 1rem;
       border-radius: 0;
-      box-shadow: inset 0 1px rgba(255, 255, 255, 0.13);
+      background: transparent;
+      box-shadow: none;
+    }
+    .education .panel,
+    .health .panel {
+      padding-right: 2.65rem;
     }
     .division-icon {
-      top: -1.35rem;
-      width: 2.7rem;
-      height: 2.7rem;
-      border-width: 0.18rem;
-      box-shadow: 0 0.15rem 0 var(--light-gold);
+      top: 0.75rem;
+      right: 0.75rem;
+      left: auto;
+      width: 2.45rem;
+      height: 2.45rem;
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      background: rgba(8, 30, 51, 0.48);
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(0.55rem);
+      -webkit-backdrop-filter: blur(0.55rem);
+      transform: none;
     }
     .division-icon :global(svg) {
       width: 1.18rem;
@@ -1890,35 +1920,56 @@
     }
     .mobile-division-name {
       display: block;
-      min-height: 2.2em;
       color: #fff;
-      font-size: clamp(0.7rem, 3.15vw, 0.86rem);
-      font-weight: 760;
-      line-height: 1.1;
-      letter-spacing: -0.01em;
-      text-wrap: balance;
+      font-size: clamp(0.92rem, 4.2vw, 1.08rem);
+      font-weight: 720;
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      text-shadow: 0 1px 0.5rem rgba(0, 0, 0, 0.4);
+    }
+    .business .mobile-division-name {
+      font-size: clamp(1.05rem, 4.8vw, 1.25rem);
+    }
+    .health .mobile-division-name {
+      font-size: clamp(0.78rem, 3.55vw, 0.94rem);
+      letter-spacing: -0.04em;
     }
     .dash {
-      width: 1.25rem;
-      margin: 0.28rem auto 0.35rem;
+      width: 1.75rem;
+      height: 2px;
+      margin: 0.42rem 0 0;
+      background: #efc45c;
     }
     .panel strong {
-      width: calc(100% - 0.35rem);
+      position: absolute;
+      right: 0.75rem;
+      bottom: 0.75rem;
+      width: 2.45rem;
       min-width: 0;
-      height: 2rem;
-      margin-top: auto;
-      gap: 0.25rem;
-      border-width: 1px;
+      height: 2.45rem;
+      margin: 0;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 50%;
+      background: rgba(8, 30, 51, 0.38);
+      color: #fff;
+      backdrop-filter: blur(0.45rem);
+      -webkit-backdrop-filter: blur(0.45rem);
       font-size: 0;
     }
+    .education .panel strong,
+    .health .panel strong {
+      right: 0.65rem;
+      bottom: 0.65rem;
+      width: 2.15rem;
+      height: 2.15rem;
+    }
     .panel strong::before {
-      content: "OPEN";
-      font-size: 0.62rem;
-      letter-spacing: 0.08em;
+      content: none;
     }
     .panel strong :global(svg) {
-      width: 0.85rem;
-      height: 0.85rem;
+      width: 1rem;
+      height: 1rem;
     }
     .maintenance-alert {
       width: calc(100% - 0.35rem);
@@ -1941,17 +1992,13 @@
       padding-inline: 0.5rem;
     }
     .division-grid {
-      gap: 0.3rem;
-    }
-    .photo {
-      aspect-ratio: 1.5 / 1;
+      gap: 0.45rem;
     }
     .panel {
-      min-height: 6.45rem;
-      padding-inline: 0.2rem;
+      padding-left: 0.8rem;
     }
     .mobile-division-name {
-      font-size: 0.67rem;
+      font-size: 0.88rem;
     }
   }
   @media (prefers-reduced-motion: reduce) {
