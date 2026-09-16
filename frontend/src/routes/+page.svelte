@@ -157,6 +157,7 @@
               <svelte:component this={division.icon} size={34} />
             </div>
             <h3>{division.title}</h3>
+            <span class="mobile-division-name">{division.title.replace("GLOBAL ", "")}</span>
             <span class="dash"></span>
             <p>{division.sub}</p>
             <strong>{division.cta}<ArrowRight size={18} /></strong>
@@ -550,6 +551,9 @@
     font-size: 1.55rem;
     margin: 0 0 0.25rem;
     font-weight: 720;
+  }
+  .mobile-division-name {
+    display: none;
   }
   .dash {
     display: block;
@@ -1785,6 +1789,174 @@
     .division:hover .photo img,
     .division:hover .division-icon {
       transform: none;
+    }
+  }
+
+  /* Mobile hero concept: a compact three-pathway deck keeps every primary
+     destination visible on first paint without horizontal scrolling. */
+  @media (max-width: 46.25rem) {
+    .hero {
+      padding-top: clamp(0.75rem, 3.5vw, 1.25rem);
+    }
+    .hero-wrap {
+      padding-inline: clamp(0.65rem, 3vw, 1rem);
+    }
+    .title h1 {
+      font-size: clamp(2rem, 10vw, 2.65rem);
+      line-height: 0.98;
+      margin-bottom: 0.2rem;
+    }
+    .tag {
+      gap: 0.45rem !important;
+      padding-inline: 0;
+    }
+    .tag h2 {
+      font-size: clamp(0.98rem, 4.7vw, 1.2rem) !important;
+    }
+    .tag i {
+      width: 3.75rem !important;
+    }
+    .title p {
+      max-width: 34rem;
+      margin: 0.5rem auto 0;
+      padding-inline: 0;
+      font-size: clamp(0.78rem, 3.5vw, 0.9rem);
+      line-height: 1.48;
+      text-wrap: balance;
+    }
+    .division-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(0.38rem, 2vw, 0.7rem);
+      width: 100%;
+      max-width: 38rem;
+      margin: clamp(0.9rem, 4vw, 1.35rem) auto 0;
+    }
+    .division {
+      min-width: 0;
+      padding-top: 0;
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--accent) 78%, white);
+      border-radius: 1rem;
+      background: var(--accent);
+      box-shadow: 0 0.6rem 1.35rem rgba(23, 48, 79, 0.13);
+      animation: card-in 0.48s var(--arrival-delay) cubic-bezier(0.23, 1, 0.32, 1) both;
+    }
+    .division:active {
+      transform: scale(0.97);
+    }
+    .photo {
+      width: 100%;
+      aspect-ratio: 1.38 / 1;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .photo::before {
+      content: "";
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 45%, rgba(7, 22, 45, 0.5));
+      pointer-events: none;
+    }
+    .photo:after {
+      display: none;
+    }
+    .panel {
+      display: flex;
+      min-height: 6.85rem;
+      height: auto;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.75rem 0.35rem 0.45rem;
+      border-radius: 0;
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.13);
+    }
+    .division-icon {
+      top: -1.35rem;
+      width: 2.7rem;
+      height: 2.7rem;
+      border-width: 0.18rem;
+      box-shadow: 0 0.15rem 0 var(--light-gold);
+    }
+    .division-icon :global(svg) {
+      width: 1.18rem;
+      height: 1.18rem;
+    }
+    .panel h3,
+    .panel p {
+      display: none;
+    }
+    .mobile-division-name {
+      display: block;
+      min-height: 2.2em;
+      color: #fff;
+      font-size: clamp(0.7rem, 3.15vw, 0.86rem);
+      font-weight: 760;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      text-wrap: balance;
+    }
+    .dash {
+      width: 1.25rem;
+      margin: 0.28rem auto 0.35rem;
+    }
+    .panel strong {
+      width: calc(100% - 0.35rem);
+      min-width: 0;
+      height: 2rem;
+      margin-top: auto;
+      gap: 0.25rem;
+      border-width: 1px;
+      font-size: 0;
+    }
+    .panel strong::before {
+      content: "OPEN";
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+    }
+    .panel strong :global(svg) {
+      width: 0.85rem;
+      height: 0.85rem;
+    }
+    .maintenance-alert {
+      width: calc(100% - 0.35rem);
+      margin-top: 1rem;
+      padding: 0.65rem 0.75rem;
+    }
+    .maintenance-alert p {
+      font-size: 0.72rem;
+    }
+    .maintenance-beacon {
+      width: 1.8rem;
+      height: 1.8rem;
+    }
+    .stats {
+      margin-top: 1.75rem;
+    }
+  }
+  @media (max-width: 22.5rem) {
+    .hero-wrap {
+      padding-inline: 0.5rem;
+    }
+    .division-grid {
+      gap: 0.3rem;
+    }
+    .photo {
+      aspect-ratio: 1.5 / 1;
+    }
+    .panel {
+      min-height: 6.45rem;
+      padding-inline: 0.2rem;
+    }
+    .mobile-division-name {
+      font-size: 0.67rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .division {
+      animation: none;
     }
   }
 </style>
