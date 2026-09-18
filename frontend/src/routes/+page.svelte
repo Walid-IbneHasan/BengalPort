@@ -142,7 +142,7 @@
         <h2>{content.hero.tagline}</h2>
         <i></i>
       </div>
-      <p>{content.hero.description1}<br />{content.hero.description2}</p>
+      <p>{content.hero.description1} <br />{content.hero.description2}</p>
     </div>
     <div class="division-grid">
       {#each divisions as division, index}<a
@@ -160,7 +160,7 @@
             <span class="mobile-division-name">{division.title.replace("GLOBAL ", "")}</span>
             <span class="dash"></span>
             <p>{division.sub}</p>
-            <strong>{division.cta}<ArrowRight size={18} /></strong>
+            <strong><span class="cta-label">{division.cta}</span><ArrowRight size={18} /></strong>
           </div></a
         >{/each}
     </div>
@@ -584,6 +584,10 @@
     transition:
       background 0.25s,
       color 0.25s;
+  }
+  .cta-label {
+    display: inline-flex;
+    align-items: center;
   }
   .division:hover .panel strong {
     background: var(--light-gold);
@@ -1991,12 +1995,13 @@
       background: #efc45c;
     }
     .panel strong {
-      position: absolute;
-      right: 0.75rem;
-      bottom: 0.75rem;
+      position: static;
       width: 2.75rem;
-      min-width: 0;
+      min-width: 2.75rem;
+      max-width: 2.75rem;
       height: 2.75rem;
+      min-height: 2.75rem;
+      max-height: 2.75rem;
       margin: 0;
       padding: 0;
       border: 1px solid rgba(255, 255, 255, 0.72);
@@ -2005,27 +2010,40 @@
       color: #fff;
       backdrop-filter: blur(0.45rem);
       -webkit-backdrop-filter: blur(0.45rem);
-      font-size: 0;
       box-shadow: inset 0 1px rgba(255, 255, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      gap: 0;
+      box-sizing: border-box;
       transition:
         transform 160ms var(--ease-out),
         background-color 180ms ease,
         border-color 180ms ease,
         box-shadow 180ms ease;
     }
+    .panel strong .cta-label {
+      display: none !important;
+    }
     .education .panel strong,
     .health .panel strong {
-      right: 0.7rem;
-      bottom: 0.7rem;
       width: 2.75rem;
       height: 2.75rem;
+      min-width: 2.75rem;
+      min-height: 2.75rem;
     }
     .panel strong::before {
       content: none;
     }
     .panel strong :global(svg) {
-      width: 1rem;
-      height: 1rem;
+      width: 1.125rem;
+      height: 1.125rem;
+      display: block;
+      flex: 0 0 auto;
+      margin: 0;
+      padding: 0;
+      transform: none !important;
     }
     .maintenance-alert {
       width: calc(100% - 0.35rem);
@@ -2047,7 +2065,7 @@
       outline-offset: 3px;
     }
     .division:active .panel strong {
-      transform: scale(0.94);
+      transform: none;
       background: rgba(199, 152, 54, 0.92);
       border-color: #f5d98e;
       color: #102b4b;
@@ -2107,7 +2125,7 @@
         0 1rem 2.1rem rgba(23, 48, 79, 0.2);
     }
     .division:hover .panel strong {
-      transform: translateX(0.16rem);
+      transform: none;
       background: rgba(199, 152, 54, 0.92);
       border-color: #f5d98e;
       color: #102b4b;
@@ -2154,15 +2172,44 @@
       grid-column: 2;
       grid-row: 2 / 4;
       align-self: center;
-      display: grid;
-      place-items: center;
-      width: 2.75rem;
-      height: 2.75rem;
-      min-width: 2.75rem;
+      justify-self: end;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 2.75rem !important;
+      height: 2.75rem !important;
+      min-width: 2.75rem !important;
+      max-width: 2.75rem !important;
+      min-height: 2.75rem !important;
+      max-height: 2.75rem !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      gap: 0 !important;
+      border-radius: 50% !important;
+      box-sizing: border-box !important;
+      line-height: 1 !important;
+    }
+    .panel strong .cta-label {
+      display: none !important;
     }
     .panel strong :global(svg) {
-      display: block;
-      flex: none;
+      display: block !important;
+      flex: 0 0 auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 1.125rem !important;
+      height: 1.125rem !important;
+      transform: none !important;
+    }
+    .division:is(:hover, :focus-visible) .panel strong :global(svg),
+    .division:hover .panel strong :global(svg),
+    .division:active .panel strong :global(svg) {
+      transform: none !important;
+    }
+    .division:hover .panel strong,
+    .division:active .panel strong,
+    .division:is(:hover, :focus-visible) .panel strong {
+      transform: none !important;
     }
   }
   @media (prefers-reduced-motion: reduce) {
