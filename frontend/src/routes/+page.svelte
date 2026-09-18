@@ -1872,7 +1872,7 @@
     }
     .division-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: clamp(0.5rem, 2.4vw, 0.72rem);
+      gap: clamp(0.7rem, 3vw, 0.9rem);
       width: 100%;
       max-width: 36rem;
       margin: clamp(0.9rem, 4vw, 1.35rem) auto 0;
@@ -1891,6 +1891,10 @@
         0 0.75rem 1.75rem rgba(23, 48, 79, 0.15);
       animation: card-in 0.52s var(--arrival-delay) cubic-bezier(0.23, 1, 0.32, 1) both;
       transform-origin: 50% 70%;
+      transition:
+        transform 180ms var(--ease-out),
+        box-shadow 200ms ease,
+        border-color 180ms ease;
     }
     .division.business {
       grid-column: 1 / -1;
@@ -1990,9 +1994,9 @@
       position: absolute;
       right: 0.75rem;
       bottom: 0.75rem;
-      width: 2.45rem;
+      width: 2.75rem;
       min-width: 0;
-      height: 2.45rem;
+      height: 2.75rem;
       margin: 0;
       padding: 0;
       border: 1px solid rgba(255, 255, 255, 0.72);
@@ -2002,13 +2006,19 @@
       backdrop-filter: blur(0.45rem);
       -webkit-backdrop-filter: blur(0.45rem);
       font-size: 0;
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.18);
+      transition:
+        transform 160ms var(--ease-out),
+        background-color 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
     }
     .education .panel strong,
     .health .panel strong {
-      right: 0.65rem;
-      bottom: 0.65rem;
-      width: 2.15rem;
-      height: 2.15rem;
+      right: 0.7rem;
+      bottom: 0.7rem;
+      width: 2.75rem;
+      height: 2.75rem;
     }
     .panel strong::before {
       content: none;
@@ -2019,7 +2029,7 @@
     }
     .maintenance-alert {
       width: calc(100% - 0.35rem);
-      margin-top: 1rem;
+      margin-top: 1.25rem;
       padding: 0.65rem 0.75rem;
     }
     .maintenance-alert p {
@@ -2030,7 +2040,17 @@
       height: 1.8rem;
     }
     .stats {
-      margin-top: 1.75rem;
+      margin-top: 2rem;
+    }
+    .division:focus-visible {
+      outline: 3px solid rgba(199, 152, 54, 0.5);
+      outline-offset: 3px;
+    }
+    .division:active .panel strong {
+      transform: scale(0.94);
+      background: rgba(199, 152, 54, 0.92);
+      border-color: #f5d98e;
+      color: #102b4b;
     }
   }
   @media (max-width: 22.5rem) {
@@ -2038,10 +2058,14 @@
       padding-inline: 0.5rem;
     }
     .division-grid {
-      gap: 0.45rem;
+      gap: 0.6rem;
     }
     .panel {
       padding-left: 0.8rem;
+    }
+    .education .panel,
+    .health .panel {
+      padding-right: 3.15rem;
     }
     .mobile-division-name {
       font-size: 0.88rem;
@@ -2072,6 +2096,73 @@
     }
     .stat span {
       font-size: 0.72rem;
+    }
+  }
+  @media (max-width: 46.25rem) and (hover: hover) and (pointer: fine) {
+    .division:hover {
+      transform: translateY(-0.25rem);
+      border-color: color-mix(in srgb, var(--accent) 58%, white);
+      box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.24),
+        0 1rem 2.1rem rgba(23, 48, 79, 0.2);
+    }
+    .division:hover .panel strong {
+      transform: translateX(0.16rem);
+      background: rgba(199, 152, 54, 0.92);
+      border-color: #f5d98e;
+      color: #102b4b;
+      box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.3),
+        0 0.45rem 1rem rgba(7, 22, 45, 0.2);
+    }
+  }
+
+  /* Keep compact mobile card labels and their action affordances in separate,
+     predictable zones at every narrow viewport width. */
+  @media (max-width: 46.25rem) {
+    .panel,
+    .education .panel,
+    .health .panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-rows: 1fr auto auto;
+      column-gap: 0.45rem;
+      padding: 0.85rem 0.75rem 0.75rem;
+      text-align: left;
+    }
+    .mobile-division-name {
+      grid-column: 1;
+      grid-row: 2;
+      min-width: 0;
+      max-width: 100%;
+      overflow-wrap: normal;
+      white-space: nowrap;
+    }
+    .dash {
+      grid-column: 1;
+      grid-row: 3;
+    }
+    .education .mobile-division-name,
+    .health .mobile-division-name {
+      font-size: clamp(0.7rem, 3.2vw, 0.88rem);
+      letter-spacing: -0.045em;
+    }
+    .panel strong,
+    .education .panel strong,
+    .health .panel strong {
+      position: static;
+      grid-column: 2;
+      grid-row: 2 / 4;
+      align-self: center;
+      display: grid;
+      place-items: center;
+      width: 2.75rem;
+      height: 2.75rem;
+      min-width: 2.75rem;
+    }
+    .panel strong :global(svg) {
+      display: block;
+      flex: none;
     }
   }
   @media (prefers-reduced-motion: reduce) {

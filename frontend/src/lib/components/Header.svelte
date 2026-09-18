@@ -302,7 +302,7 @@
     .links a:after {
       display: none;
     }
-    .services-nav{height:auto;display:block}.services-nav>button{width:100%;min-height:2.75rem;padding:.9rem;justify-content:space-between}.services-nav>button:after{display:none}.services-menu{position:static;width:100%;padding:.35rem 0 0;border:0;border-radius:0;box-shadow:none;background:transparent;display:none;opacity:1;pointer-events:auto;transform:none}.services-nav.open .services-menu{display:block;transform:none}.services-heading{padding:.4rem .9rem .65rem}.division-links{grid-template-columns:1fr;gap:.45rem}.links .division-links>a{min-height:4.7rem;padding:.75rem!important;background:#f6f8f8}.division-links small{font-size:.72rem}
+    .services-nav{height:auto;display:block}.services-nav>button{width:100%;min-height:3rem;padding:.85rem 1rem;justify-content:space-between;border-radius:.75rem}.services-nav>button:after{display:none}.services-nav>button :global(svg){margin-left:.75rem;flex:none;transition:transform 180ms var(--ease-out)}.services-menu{position:static;width:100%;padding:.65rem 0 .15rem;border:0;border-radius:0;box-shadow:none;background:transparent;display:none;opacity:1;pointer-events:auto;transform:none}.services-nav.open .services-menu{display:block;transform:none}.services-nav.open>button :global(svg){transform:rotate(180deg)}.services-heading{padding:.45rem 1rem .8rem}.division-links{grid-template-columns:1fr;gap:.65rem}.links .division-links>a{min-height:5rem;padding:.8rem .75rem .8rem .85rem!important;background:#f6f8f8;gap:.8rem}.division-links small{font-size:.72rem}.card-arrow{width:2.25rem;height:2.25rem;margin:auto 0 auto auto;padding:.6rem;border:1px solid #d6dfe4;border-radius:50%;background:#fff;opacity:.72;flex:none;transition:transform 160ms var(--ease-out),opacity 160ms ease,background-color 160ms ease}
     .menu {
       display: grid;
     }
@@ -383,7 +383,7 @@
   @media (max-width: 37.5rem) {
     .nav {
       padding-inline: 0.75rem;
-      gap: 0.35rem;
+      gap: 0.5rem;
     }
     .brand img {
       margin-right: 0;
@@ -398,6 +398,8 @@
     .links {
       left: 0.75rem;
       right: 0.75rem;
+      padding: 0.75rem;
+      row-gap: 0.2rem;
     }
   }
   .utility-inner {
@@ -520,7 +522,7 @@
     .menu:hover {
       background: #f1f3f4;
     }
-    .services-nav:hover .services-menu,.services-nav:focus-within .services-menu{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}.services-nav:hover>button svg,.services-nav:focus-within>button svg{transform:rotate(180deg)}.links .division-links>a:hover{transform:translateY(-.12rem);border-color:#cbd6da;background:#fff;box-shadow:0 .65rem 1.3rem rgba(24,54,80,.08)}.division-links>a:hover .card-arrow{opacity:1;transform:translateX(.18rem)}
+    .services-nav:hover .services-menu,.services-nav:focus-within .services-menu{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}.services-nav:hover>button :global(svg),.services-nav:focus-within>button :global(svg){transform:rotate(180deg)}.links .division-links>a:hover{transform:translateY(-.12rem);border-color:#cbd6da;background:#fff;box-shadow:0 .65rem 1.3rem rgba(24,54,80,.08)}.division-links>a:hover :global(.card-arrow){opacity:1;transform:translateX(.18rem);background:#fbf4e4}
   }
   @media (prefers-reduced-motion: reduce) {
     .brand img,
@@ -552,7 +554,7 @@
       max-width: 100vw;
       display: grid;
       grid-template-columns: 3.25rem minmax(0, 1fr) auto 2.75rem 2.75rem;
-      gap: 0.25rem;
+      gap: 0.5rem;
       padding-inline: 0.75rem;
     }
     .brand {
@@ -565,6 +567,9 @@
       min-width: 4.25rem;
       padding-inline: 0.4rem;
       justify-content: center;
+    }
+    .apply i {
+      display: none;
     }
     .menu {
       grid-column: 5;
@@ -588,7 +593,7 @@
     .nav {
       grid-template-columns: 3rem minmax(0, 1fr) 3.85rem 2.5rem 2.5rem;
       padding-inline: 0.5rem;
-      gap: 0.2rem;
+      gap: 0.35rem;
     }
     .brand,
     .brand img {
@@ -603,6 +608,29 @@
     .apply span:after {
       margin-left: 0.35rem;
       font-size: 0.68rem;
+    }
+  }
+
+  /* Explicit mobile columns keep Apply, profile and menu touch targets apart. */
+  @media (max-width: 37.5rem) {
+    .nav {
+      grid-template-columns: 3.25rem minmax(0, 1fr) 4.25rem 2.75rem 2.75rem;
+      column-gap: 0.75rem;
+    }
+    .apply {
+      width: 4rem;
+      min-width: 4rem;
+      margin: 0;
+    }
+  }
+  @media (max-width: 22.5rem) {
+    .nav {
+      grid-template-columns: 3rem minmax(0, 1fr) 4rem 2.5rem 2.5rem;
+      column-gap: 0.625rem;
+    }
+    .apply {
+      width: 3.75rem;
+      min-width: 3.75rem;
     }
   }
 </style>
