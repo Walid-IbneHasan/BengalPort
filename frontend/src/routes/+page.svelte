@@ -2755,97 +2755,126 @@
   }
   @media (max-width: 37.5rem) {
     .hero {
-      min-height: calc(100vh - 4.55rem);
-      min-height: calc(100svh - 4.55rem);
+      height: calc(100vh - 4.55rem);
+      height: calc(100svh - 4.55rem);
+      min-height: 0;
     }
     .hero-wrap {
       display: flex;
       flex-direction: column;
-      min-height: calc(100vh - 4.55rem);
-      min-height: calc(100svh - 4.55rem);
+      height: 100%;
+      min-height: 0;
+      box-sizing: border-box;
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
     }
     .mobile-journey {
-      flex: 0 0 auto;
-      aspect-ratio: 1.98;
+      flex: 1 1 20%;
+      min-height: 0;
+      aspect-ratio: auto;
     }
-    .mobile-services-heading { flex: 0 0 auto; margin: 1.05rem 0 0.72rem; }
+    .mobile-journey img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .mobile-services-heading {
+      flex: 0 0 auto;
+      margin: min(3%, 1.05rem) 0 min(2%, 0.72rem);
+    }
     .division-grid {
-      flex: 1 1 auto;
-      grid-template-rows: repeat(2, minmax(9.75rem, 1fr));
-      gap: 0.62rem;
+      flex: 3 1 auto;
+      min-height: 0;
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem;
+      padding: 0.5rem 0.2rem;
     }
     .division,
-    .division.business { height: 100%; padding: 0.58rem 0.4rem 0.5rem; }
-    .photo { width: min(100%, 6.85rem); }
+    .division.business {
+      height: 100%;
+      min-height: 0;
+      padding: 0.6rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .photo {
+      flex: 0 1 auto;
+      min-height: 0;
+      width: 100%;
+      max-width: 7.25rem;
+      height: auto;
+      aspect-ratio: 1;
+      margin: 0 auto;
+    }
+    .photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
     .panel,
     .education .panel,
     .health .panel,
     .umrah .panel {
-      min-height: 2.55rem;
-      padding-top: 0.68rem;
+      flex: 0 0 auto;
+      min-height: 2rem;
+      padding-top: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .division-icon {
-      top: -2.05rem;
-      width: 2.5rem;
-      height: 2.5rem;
-    }
-    .stats {
-      flex: 0 0 auto;
-      min-height: 4.25rem;
-      margin: 0.62rem 0 0.52rem;
-      padding-block: 0.68rem;
-    }
-    .stat { gap: 0.42rem; padding-inline: 0.3rem; }
-    .stat-icon { width: 2.2rem; height: 2.2rem; }
-    .stat-icon :global(svg) { width: 1.55rem; height: 1.55rem; }
-    .stat b { font-size: clamp(0.78rem, 3.55vw, 0.92rem); }
-    .stat span { font-size: clamp(0.56rem, 2.45vw, 0.66rem); line-height: 1.12; }
-    .mobile-hero-actions {
-      flex: 0 0 auto;
-      margin-top: 0;
-      padding-bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px));
-    }
-  }
-  @media (max-width: 37.5rem) and (max-height: 53.125rem) {
-    .mobile-journey { aspect-ratio: 2.18; }
-    .mobile-services-heading { margin: 0.72rem 0 0.48rem; }
-    .mobile-services-heading h2 { font-size: clamp(1.05rem, 5vw, 1.3rem); }
-    .division-grid {
-      grid-template-rows: repeat(2, minmax(8.55rem, 1fr));
-      gap: 0.45rem;
-    }
-    .division,
-    .division.business { padding: 0.38rem 0.35rem 0.34rem; }
-    .photo { width: min(100%, 6.05rem); }
-    .panel,
-    .education .panel,
-    .health .panel,
-    .umrah .panel {
-      min-height: 2.25rem;
-      padding-top: 0.56rem;
-    }
-    .division-icon {
-      top: -1.9rem;
-      width: 2.3rem;
-      height: 2.3rem;
+      top: clamp(-2.2rem, -20%, -1.6rem);
+      width: clamp(2rem, 15vw, 2.5rem);
+      height: clamp(2rem, 15vw, 2.5rem);
     }
     .mobile-division-name,
     .business .mobile-division-name,
     .education .mobile-division-name,
     .health .mobile-division-name,
-    .umrah .mobile-division-name { font-size: clamp(0.86rem, 4vw, 1rem); }
-    .stats {
-      min-height: 3.65rem;
-      margin: 0.42rem 0 0.38rem;
-      padding-block: 0.45rem;
+    .umrah .mobile-division-name {
+      font-size: clamp(0.75rem, 3.5vw, 1rem);
     }
-    .stat-icon { width: 1.9rem; height: 1.9rem; }
-    .stat-icon :global(svg) { width: 1.35rem; height: 1.35rem; }
-    .stat b { font-size: clamp(0.74rem, 3.4vw, 0.86rem); }
-    .stat span { font-size: clamp(0.53rem, 2.35vw, 0.62rem); }
+    .stats {
+      flex: 0 1 auto;
+      min-height: 0;
+      margin: min(2%, 0.62rem) 0 min(2%, 0.52rem);
+      padding-block: min(3%, 0.68rem);
+    }
+    .stat {
+      gap: 0.42rem;
+      padding-inline: 0.3rem;
+    }
+    .stat-icon {
+      width: clamp(1.8rem, 6vw, 2.2rem);
+      height: clamp(1.8rem, 6vw, 2.2rem);
+    }
+    .stat-icon :global(svg) {
+      width: clamp(1.2rem, 4vw, 1.55rem);
+      height: clamp(1.2rem, 4vw, 1.55rem);
+    }
+    .stat b {
+      font-size: clamp(0.72rem, 3vw, 0.92rem);
+    }
+    .stat span {
+      font-size: clamp(0.52rem, 2.2vw, 0.66rem);
+      line-height: 1.12;
+    }
     .mobile-hero-actions {
-      padding-top: 0.55rem;
-      padding-inline: 0.7rem;
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 90;
+      flex: 0 0 auto;
+      width: 100%;
+      margin: 0;
+      border-radius: 1rem 1rem 0 0;
+      padding-bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px));
+      box-shadow: 0 -0.65rem 1.8rem rgba(7, 32, 57, 0.18);
+    }
+    :global(body) {
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
     }
   }
 </style>

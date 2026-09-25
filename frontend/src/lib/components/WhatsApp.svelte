@@ -27,6 +27,7 @@
 
 <a
   class:hero-hidden={page.url.pathname === "/" && heroVisible}
+  class:home-page={page.url.pathname === "/"}
   class="wa"
   href={`https://wa.me/${number}`}
   target="_blank"
@@ -42,5 +43,6 @@
   .wa.hero-hidden { opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(.6rem) scale(.92); }
   .wa span { position: absolute; right: 70px; background: #17304f; color: white; padding: 8px 12px; border-radius: 7px; white-space: nowrap; font-size: 12px; opacity: 0; transform: translateX(5px) scale(.97); transform-origin: right center; transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out); pointer-events: none; }
   @media (hover: hover) and (pointer: fine) { .wa:hover { transform: translateY(-3px); background: #22aa5c; box-shadow: 0 14px 32px #14763d4d, inset 0 1px #ffffff59; } .wa:hover span { opacity: 1; transform: none; } }
+  @media (max-width: 37.5rem) { .wa.home-page { display: none; } }
   @media (prefers-reduced-motion: reduce) { .wa, .wa span { transition-duration: .01ms; } }
 </style>
