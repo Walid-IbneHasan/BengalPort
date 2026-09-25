@@ -115,7 +115,8 @@ export const EnquiryType: {
   GENERAL: 'GENERAL',
   BUSINESS: 'BUSINESS',
   EDUCATION: 'EDUCATION',
-  HEALTHCARE: 'HEALTHCARE'
+  HEALTHCARE: 'HEALTHCARE',
+  UMRAH: 'UMRAH'
 };
 
 export type EnquiryType = (typeof EnquiryType)[keyof typeof EnquiryType]
@@ -146,6 +147,7 @@ export const OpportunityCategory: {
   BUSINESS: 'BUSINESS',
   EDUCATION: 'EDUCATION',
   HEALTHCARE: 'HEALTHCARE',
+  UMRAH: 'UMRAH',
   FACTORY_VISIT: 'FACTORY_VISIT',
   BUSINESS_TOUR: 'BUSINESS_TOUR',
   SCHOLARSHIP: 'SCHOLARSHIP',

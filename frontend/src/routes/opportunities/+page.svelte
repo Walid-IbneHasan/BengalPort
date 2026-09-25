@@ -51,7 +51,7 @@
         /></label
       ><select bind:value={category} aria-label="Category"
         ><option value="">All categories</option><option>BUSINESS</option
-        ><option>EDUCATION</option><option>HEALTHCARE</option><option
+        ><option>EDUCATION</option><option>HEALTHCARE</option><option>UMRAH</option><option
           >FACTORY_VISIT</option
         ><option>BUSINESS_TOUR</option><option>SCHOLARSHIP</option><option
           >EVENT</option

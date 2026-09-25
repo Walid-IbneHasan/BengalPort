@@ -14,6 +14,7 @@
     BriefcaseBusiness,
     GraduationCap,
     HeartPulse,
+    MoonStar,
   } from "lucide-svelte";
   import { page } from "$app/state";
   import { onMount } from "svelte";
@@ -33,6 +34,7 @@
     { title: "Global Business", text: "Trade, sourcing and business tours", href: "/business", icon: BriefcaseBusiness, tone: "business" },
     { title: "Global Education", text: "Study abroad and admissions", href: "/education", icon: GraduationCap, tone: "education" },
     { title: "Global Healthcare", text: "Treatment and patient support", href: "/healthcare", icon: HeartPulse, tone: "healthcare" },
+    { title: "Global Umrah", text: "Pilgrimage travel and on-ground support", href: "/umrah", icon: MoonStar, tone: "umrah" },
   ];
   const active = (href: string) =>
     href === "/"
@@ -66,7 +68,7 @@
       {#each links as link}
         {#if link[0] === "SERVICES"}
           <div class:open={servicesOpen} class="services-nav">
-            <button class:active={active(link[1]) || ["/business","/education","/healthcare"].some(active)} aria-expanded={servicesOpen} aria-controls="services-menu" onclick={() => servicesOpen = !servicesOpen}>SERVICES <ChevronDown size={15}/></button>
+            <button class:active={active(link[1]) || ["/business","/education","/healthcare","/umrah"].some(active)} aria-expanded={servicesOpen} aria-controls="services-menu" onclick={() => servicesOpen = !servicesOpen}>SERVICES <ChevronDown size={15}/></button>
             <div id="services-menu" class="services-menu">
               <div class="services-heading"><span>OUR GLOBAL DIVISIONS</span><a href="/services" onclick={() => { open=false; servicesOpen=false }}>View all services <ArrowRight size={14}/></a></div>
               <div class="division-links">{#each divisions as division}<a class={division.tone} href={division.href} onclick={() => { open=false; servicesOpen=false }}><i><svelte:component this={division.icon} size={20}/></i><span><b>{division.title}</b><small>{division.text}</small></span><ArrowRight class="card-arrow" size={16}/></a>{/each}</div>
@@ -74,6 +76,9 @@
           </div>
         {:else}<a class:active={active(link[1])} href={link[1]} onclick={() => (open = false)}>{link[0]}</a>{/if}
       {/each}
+      <a class="mobile-menu-apply" href="/apply" onclick={() => (open = false)}
+        ><span>APPLY / ENQUIRY</span><ArrowRight size={18} /></a
+      >
     </div>
     <a class="apply" href="/apply"
       ><span>APPLY / ENQUIRY</span><i><ArrowRight size={20} /></i></a
@@ -190,7 +195,7 @@
   .services-nav>button.active:after,.services-nav>button:hover:after{transform:scaleX(1)}
   .services-menu{position:absolute;z-index:30;top:calc(100% - .35rem);left:50%;width:min(48rem,82vw);padding:1rem;background:rgba(255,255,255,.99);border:1px solid rgba(24,54,80,.1);border-radius:1rem;box-shadow:0 1.4rem 3.5rem rgba(17,42,67,.16);opacity:0;pointer-events:none;transform:translate(-50%,-.45rem) scale(.985);transform-origin:50% 0;transition:opacity 140ms ease,transform 180ms var(--ease-out)}
   .services-heading{display:flex;align-items:center;justify-content:space-between;padding:.15rem .25rem .75rem}.services-heading>span{font-size:.66rem;letter-spacing:.14em;font-weight:800;color:#8a6a2b}.services-heading>a{min-height:auto!important;padding:.25rem!important;font-size:.75rem!important;color:#51687d!important;gap:.35rem!important}
-  .division-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem}
+  .division-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem}
   .links .division-links>a{min-height:6.5rem;padding:1rem!important;border:1px solid #e3e8ea;border-radius:.8rem;align-items:flex-start;gap:.75rem;background:#fafbfb;color:#23405a!important;overflow:hidden;transition:transform 160ms var(--ease-out),border-color 160ms ease,background-color 160ms ease,box-shadow 160ms ease}
   .links .division-links>a:after{display:none}.division-links i{width:2.3rem;height:2.3rem;flex:none;display:grid;place-items:center;border-radius:.65rem;background:#eaf0f5;color:#173f64}.division-links a.education i{background:#f1ecf6;color:#513374}.division-links a.healthcare i{background:#e7f3f1;color:#11665f}.division-links span{min-width:0}.division-links b,.division-links small{display:block}.division-links b{font-size:.86rem;line-height:1.25}.division-links small{font-size:.7rem;line-height:1.45;color:#71808c;margin-top:.35rem;white-space:normal}.card-arrow{margin-left:auto;margin-top:.15rem;opacity:.45;transition:transform 160ms var(--ease-out),opacity 160ms ease}
   .services-nav.open .services-menu{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}.services-nav.open>button svg{transform:rotate(180deg)}
@@ -632,5 +637,66 @@
       width: 3.75rem;
       min-width: 3.75rem;
     }
+  }
+  .division-links a.umrah i{background:#fbf2df;color:#9a6811}
+
+  /* Final small-screen navigation hierarchy. */
+  .mobile-menu-apply { display: none !important; }
+  @media (max-width: 37.5rem) {
+    .utility { display: none; }
+    .nav {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 2.75rem 2.75rem;
+      column-gap: 0.55rem;
+      height: 4.55rem;
+      padding-inline: 0.75rem;
+    }
+    .brand {
+      grid-column: 1;
+      width: auto;
+      min-width: 0;
+    }
+    .brand img {
+      width: 3rem;
+      height: 3rem;
+      margin-right: 0.62rem;
+    }
+    .brand span { display: block; min-width: 0; }
+    .brand b {
+      display: block;
+      font-size: clamp(1.02rem, 5.2vw, 1.3rem);
+      line-height: 1;
+      letter-spacing: -0.025em;
+      white-space: nowrap;
+    }
+    .brand small { display: none; }
+    .apply { display: none; }
+    .account { grid-column: 2; margin: 0; }
+    .menu { grid-column: 3; }
+    .links {
+      grid-column: 1 / -1;
+      top: 4.25rem;
+    }
+    .links .mobile-menu-apply {
+      display: flex !important;
+      justify-content: space-between;
+      margin-top: 0.35rem;
+      min-height: 3rem;
+      border-radius: 0.75rem;
+      background: #d3a84f;
+      color: #17304f;
+      font-weight: 800;
+    }
+  }
+  @media (max-width: 22.5rem) {
+    .nav {
+      grid-template-columns: minmax(0, 1fr) 2.5rem 2.5rem;
+      column-gap: 0.4rem;
+      padding-inline: 0.55rem;
+    }
+    .brand,
+    .brand img { width: auto; }
+    .brand img { width: 2.8rem; height: 2.8rem; margin-right: 0.48rem; }
+    .brand b { font-size: 1rem; }
   }
 </style>

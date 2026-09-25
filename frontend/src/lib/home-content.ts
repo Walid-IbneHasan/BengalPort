@@ -8,7 +8,7 @@ export type HomeContent = {
     backgroundImage: string;
   };
   divisions: Array<{
-    key: "business" | "education" | "health";
+    key: "business" | "education" | "health" | "umrah";
     title: string;
     subtitle: string;
     cta: string;
@@ -78,7 +78,7 @@ export type HomeContent = {
 };
 export const defaultHomeContent: HomeContent = {
   utility: {
-    message: "Your Global Partner for Business • Education • Healthcare",
+    message: "Your Global Partner for Business • Education • Healthcare • Umrah",
     email: "info@bengalport.com",
     phone: "+8801711-991035",
   },
@@ -86,7 +86,7 @@ export const defaultHomeContent: HomeContent = {
     title: "BENGAL PORT",
     tagline: "Connecting Bengal to the World",
     description1:
-      "Your trusted partner in international trade, global education and healthcare services.",
+      "Your trusted partner in international trade, global education, healthcare and Umrah services.",
     description2: "We connect people, opportunities and solutions worldwide.",
     backgroundImage: "/images/hero-global-background.svg",
   },
@@ -114,6 +114,14 @@ export const defaultHomeContent: HomeContent = {
       cta: "EXPLORE HEALTHCARE",
       href: "/healthcare",
       image: "/images/global-healthcare.webp",
+    },
+    {
+      key: "umrah",
+      title: "GLOBAL UMRAH",
+      subtitle: "Visa. Travel. Stay. Ziyarat",
+      cta: "EXPLORE UMRAH",
+      href: "/umrah",
+      image: "/images/global-umrah.webp",
     },
   ],
   stats: [
@@ -218,7 +226,7 @@ export const defaultHomeContent: HomeContent = {
     eyebrow: "FEATURED OPPORTUNITIES",
     title: "Your next global move starts here",
     description:
-      "Explore curated connections, visits, programs and services across our three divisions.",
+      "Explore curated connections, visits, programs and services across our four service pathways.",
     items: [
       {
         theme: "business",

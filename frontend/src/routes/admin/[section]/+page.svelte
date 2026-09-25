@@ -524,7 +524,7 @@
           <div class="form-grid">
             <label
               ><span>Category *</span><select bind:value={form.category}
-                >{#each ["BUSINESS", "EDUCATION", "HEALTHCARE", "FACTORY_VISIT", "BUSINESS_TOUR", "SCHOLARSHIP", "EVENT"] as c}<option
+                >{#each ["BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH", "FACTORY_VISIT", "BUSINESS_TOUR", "SCHOLARSHIP", "EVENT"] as c}<option
                     >{c}</option
                   >{/each}</select
               ></label

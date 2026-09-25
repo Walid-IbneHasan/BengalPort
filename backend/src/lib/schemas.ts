@@ -1,6 +1,6 @@
 import { z } from "zod";
 export const enquirySchema = z.object({
-  type: z.enum(["GENERAL", "BUSINESS", "EDUCATION", "HEALTHCARE"]),
+  type: z.enum(["GENERAL", "BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH"]),
   name: z.string().min(2),
   phone: z.string().min(7),
   email: z.string().email().optional().or(z.literal("")),
@@ -196,6 +196,7 @@ export const opportunitySchema = z.object({
     "BUSINESS",
     "EDUCATION",
     "HEALTHCARE",
+    "UMRAH",
     "FACTORY_VISIT",
     "BUSINESS_TOUR",
     "SCHOLARSHIP",
@@ -253,7 +254,7 @@ export const homeContentSchema = z.object({
   divisions: z
     .array(
       z.object({
-        key: z.enum(["business", "education", "health"]),
+        key: z.enum(["business", "education", "health", "umrah"]),
         title: text,
         subtitle: text,
         cta: text,
@@ -261,7 +262,7 @@ export const homeContentSchema = z.object({
         image: link,
       }),
     )
-    .length(3),
+    .length(4),
   stats: z
     .array(
       z.object({

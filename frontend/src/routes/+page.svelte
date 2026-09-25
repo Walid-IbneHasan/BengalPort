@@ -10,12 +10,13 @@
     Handshake,
     HeartPulse,
     MapPinned,
+    MessageCircle,
+    MoonStar,
     Package,
     Route,
     ShieldCheck,
     Smile,
     Stethoscope,
-    TriangleAlert,
     Users,
   } from "lucide-svelte";
   import { cmsContent } from "$lib/cms";
@@ -24,6 +25,7 @@
     business: BriefcaseBusiness,
     education: GraduationCap,
     health: HeartPulse,
+    umrah: MoonStar,
   };
   const statIcons = {
     globe: Globe2,
@@ -135,6 +137,18 @@
 
 <section class="hero" style={`--hero-background:url('${content.hero.backgroundImage}')`}>
   <div class="wrap hero-wrap">
+    <div class="mobile-journey" aria-label="Bengal Port global services">
+      <picture>
+        <source srcset="/images/mobile-global-journey-v1.webp" type="image/webp" />
+        <img src="/images/mobile-global-journey-v1.webp" alt="A graduate overlooking an interconnected world of international destinations" />
+      </picture>
+      <div class="mobile-journey-shade"></div>
+      <div class="mobile-journey-copy">
+        <span>Your global journey</span>
+        <strong>Starts <em>Here</em></strong>
+        <i></i>
+      </div>
+    </div>
     <div class="title hero-arrival">
       <h1>{content.hero.title}</h1>
       <div class="tag">
@@ -144,6 +158,7 @@
       </div>
       <p>{content.hero.description1} <br />{content.hero.description2}</p>
     </div>
+    <div class="mobile-services-heading"><i></i><h2>Our Global Services</h2><i></i></div>
     <div class="division-grid">
       {#each divisions as division, index}<a
           class="division {division.class}"
@@ -164,18 +179,21 @@
           </div></a
         >{/each}
     </div>
-    <div class="maintenance-alert" role="status" aria-live="polite">
-      <span class="maintenance-beacon" aria-hidden="true"><TriangleAlert size={19} /></span>
-      <p><strong>Site under maintenance.</strong> We’re sorry for the temporary inconvenience.</p>
-    </div>
     <div class="stats" aria-label="Bengal Port at a glance">
-      {#each stats as stat, index}<div class="stat">
+      {#each stats as stat, index}<div
+          class:mobile-hidden-stat={stat[1] === "Products" || stat[1] === "Business Tours"}
+          class="stat"
+        >
           <div class="stat-icon">
             <svelte:component this={stat[2]} size={27} />
           </div>
           <div><b>{stat[0]}</b><span>{stat[1]}</span></div>
         </div>
         {#if index < stats.length - 1}<em></em>{/if}{/each}
+    </div>
+    <div class="mobile-hero-actions">
+      <a class="mobile-whatsapp" href="https://wa.me/8801711991035" target="_blank" rel="noreferrer"><MessageCircle size={21}/><span><b>+8801711991035</b><small>Chat with us on WhatsApp</small></span></a>
+      <a class="mobile-apply" href="/apply"><span>APPLY / ENQUIRY</span><ArrowRight size={18}/></a>
     </div>
   </div>
 </section>
@@ -272,7 +290,7 @@
       <h2>Your next global move starts here</h2>
       <p>
         Explore curated connections, visits, programs and services across our
-        three divisions.
+        four service pathways.
       </p>
     </div>
     <div class="featured-grid">
@@ -1469,6 +1487,310 @@
       padding: 2rem 1.4rem;
     }
   }
+  /* Mobile journey composition: dedicated hierarchy, local imagery and four equal services. */
+  .mobile-journey,
+  .mobile-services-heading,
+  .mobile-hero-actions {
+    display: none;
+  }
+  .umrah {
+    --accent: #a97616;
+  }
+  @media (min-width: 64rem) {
+    .division-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      max-width: 86rem;
+      gap: clamp(1rem, 2vw, 2rem);
+    }
+  }
+  @media (min-width: 46.251rem) and (max-width: 63.999rem) {
+    .division-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: 46rem;
+    }
+  }
+  @media (max-width: 46.25rem) {
+    .hero {
+      padding-top: 0;
+      background-color: #f7f9fa;
+    }
+    .hero-wrap {
+      width: 100%;
+      max-width: 32rem;
+      padding: 0 0.85rem 1rem;
+    }
+    .title {
+      display: none;
+    }
+    .mobile-journey {
+      position: relative;
+      display: block;
+      width: calc(100% + 1.7rem);
+      margin-left: -0.85rem;
+      aspect-ratio: 1.72;
+      overflow: hidden;
+      border-radius: 0 0 1.5rem 1.5rem;
+      background: #0c2a49;
+      box-shadow: 0 1rem 2.5rem rgba(15, 48, 78, 0.16);
+    }
+    .mobile-journey img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 44%;
+      transform: scale(1.025);
+    }
+    .mobile-journey-shade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(5, 28, 51, 0.9) 0%, rgba(5, 28, 51, 0.54) 46%, rgba(5, 28, 51, 0.08) 78%),
+        linear-gradient(0deg, rgba(7, 31, 54, 0.35), transparent 50%);
+    }
+    .mobile-journey-copy {
+      position: absolute;
+      z-index: 2;
+      left: clamp(1.1rem, 6vw, 1.65rem);
+      bottom: clamp(1.2rem, 7vw, 2rem);
+      display: grid;
+      color: #fff;
+      text-align: left;
+    }
+    .mobile-journey-copy span {
+      margin-bottom: 0.1rem;
+      font-size: clamp(0.8rem, 3.4vw, 1rem);
+      font-weight: 650;
+      letter-spacing: 0.01em;
+    }
+    .mobile-journey-copy strong {
+      font-size: clamp(2rem, 10vw, 3rem);
+      line-height: 0.96;
+      letter-spacing: -0.055em;
+    }
+    .mobile-journey-copy em {
+      color: #f0bd43;
+      font-style: normal;
+    }
+    .mobile-journey-copy i {
+      width: 5.5rem;
+      height: 0.16rem;
+      margin-top: 0.7rem;
+      border-radius: 999px;
+      background: #e7b13b;
+    }
+    .mobile-services-heading {
+      display: grid;
+      grid-template-columns: minmax(1.5rem, 1fr) auto minmax(1.5rem, 1fr);
+      align-items: center;
+      gap: 0.8rem;
+      margin: 1.35rem 0 0.8rem;
+    }
+    .mobile-services-heading h2 {
+      margin: 0;
+      color: #102f50;
+      font-size: clamp(1.15rem, 5.5vw, 1.45rem);
+      letter-spacing: -0.035em;
+    }
+    .mobile-services-heading i {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #d4a33a);
+    }
+    .mobile-services-heading i:last-child {
+      background: linear-gradient(90deg, #d4a33a, transparent);
+    }
+    .division-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin: 0;
+      max-width: none;
+    }
+    .division,
+    .division.business {
+      min-height: auto;
+      padding: 0.7rem 0.55rem 0.75rem;
+      overflow: hidden;
+      border: 1px solid rgba(18, 56, 88, 0.12);
+      border-radius: 1.15rem;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 0.65rem 1.5rem rgba(18, 52, 80, 0.08);
+      color: #102f50;
+      transform: none;
+    }
+    .photo {
+      position: relative;
+      inset: auto;
+      width: min(100%, 9rem);
+      height: auto;
+      aspect-ratio: 1;
+      margin: 0 auto;
+      border: 0.22rem solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0.14rem color-mix(in srgb, var(--accent) 72%, white);
+    }
+    .photo::before,
+    .photo::after {
+      display: none;
+    }
+    .photo img {
+      transform: none;
+    }
+    .panel,
+    .education .panel,
+    .health .panel,
+    .umrah .panel {
+      position: relative;
+      display: block;
+      min-height: 3.35rem;
+      height: auto;
+      padding: 0.72rem 0.15rem 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      color: #102f50;
+      text-align: center;
+    }
+    .division-icon {
+      top: -2.25rem;
+      right: 50%;
+      left: auto;
+      width: 2.7rem;
+      height: 2.7rem;
+      border: 0.18rem solid #fff;
+      background: var(--accent);
+      color: #fff;
+      transform: translateX(50%);
+      box-shadow: 0 0.35rem 0.85rem rgba(7, 28, 49, 0.2);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    .panel h3,
+    .panel p,
+    .panel strong,
+    .dash {
+      display: none !important;
+    }
+    .mobile-division-name,
+    .business .mobile-division-name,
+    .education .mobile-division-name,
+    .health .mobile-division-name,
+    .umrah .mobile-division-name {
+      display: block;
+      max-width: 100%;
+      color: #102f50;
+      font-size: clamp(0.92rem, 4.2vw, 1.1rem);
+      font-weight: 780;
+      line-height: 1.15;
+      letter-spacing: -0.035em;
+      text-shadow: none;
+      white-space: normal;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.55rem;
+      width: 100%;
+      min-height: auto;
+      margin: 1rem 0 0;
+      padding: 0.7rem;
+      border-radius: 1.35rem;
+      background: #fff;
+      box-shadow: 0 0.8rem 2rem rgba(18, 52, 80, 0.09);
+    }
+    .stats em {
+      display: none;
+    }
+    .stat {
+      min-width: 0;
+      padding: 0.55rem;
+      border-radius: 0.9rem;
+      background: #f7f9fa;
+    }
+    .stat:last-of-type {
+      grid-column: 1 / -1;
+      width: calc(50% - 0.275rem);
+      justify-self: center;
+    }
+    .mobile-hero-actions {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 0.6rem;
+      margin-top: 0.8rem;
+      padding: 0.65rem;
+      border-radius: 1.15rem;
+      background: #0d3156;
+      box-shadow: 0 0.8rem 2rem rgba(7, 32, 57, 0.16);
+    }
+    .mobile-hero-actions a {
+      min-width: 0;
+      min-height: 3.15rem;
+      border-radius: 0.85rem;
+      text-decoration: none;
+      transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1), background-color 180ms ease;
+    }
+    .mobile-hero-actions a:active {
+      transform: scale(0.97);
+    }
+    .mobile-whatsapp {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid rgba(226, 180, 72, 0.68);
+      color: #fff;
+    }
+    .mobile-whatsapp > :global(svg) {
+      flex: 0 0 auto;
+      color: #54d579;
+    }
+    .mobile-whatsapp span,
+    .mobile-whatsapp b,
+    .mobile-whatsapp small {
+      display: block;
+      min-width: 0;
+    }
+    .mobile-whatsapp b {
+      overflow: hidden;
+      font-size: clamp(0.69rem, 3vw, 0.83rem);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .mobile-whatsapp small {
+      margin-top: 0.1rem;
+      color: #c9d6e1;
+      font-size: 0.61rem;
+    }
+    .mobile-apply {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.55rem;
+      background: #e0ad3e;
+      color: #102f50;
+      font-size: clamp(0.67rem, 2.9vw, 0.8rem);
+      font-weight: 850;
+      white-space: nowrap;
+    }
+  }
+  @media (max-width: 22.5rem) {
+    .hero-wrap {
+      padding-inline: 0.65rem;
+    }
+    .mobile-journey {
+      width: calc(100% + 1.3rem);
+      margin-left: -0.65rem;
+    }
+    .division-grid {
+      gap: 0.55rem;
+    }
+    .division,
+    .division.business {
+      padding-inline: 0.42rem;
+    }
+    .mobile-hero-actions {
+      grid-template-columns: 1fr;
+    }
+  }
   @media (prefers-reduced-motion: reduce) {
     .hero-arrival,
     .division,
@@ -2216,5 +2538,268 @@
     .division {
       animation: none;
     }
+  }
+
+  /* Final mobile cascade: overrides the legacy three-card bento rules above. */
+  @media (max-width: 46.25rem) {
+    .hero { padding-top: 0; background-color: #f7f9fa; }
+    .hero-wrap { width: 100%; max-width: 32rem; padding: 0 0.85rem 1rem; }
+    .title { display: none; }
+    .mobile-journey {
+      display: block;
+      aspect-ratio: 2.05;
+      border-radius: 0 0 1.1rem 1.1rem;
+    }
+    .mobile-journey picture { display: contents; }
+    .mobile-journey img {
+      object-position: 54% center;
+      transform: none;
+    }
+    .mobile-journey-shade {
+      background:
+        linear-gradient(90deg, rgba(5, 28, 51, .82) 0%, rgba(5, 28, 51, .38) 42%, rgba(5, 28, 51, .03) 69%),
+        linear-gradient(0deg, rgba(7, 31, 54, .25), transparent 48%);
+    }
+    .mobile-services-heading { display: grid; }
+    .division-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      width: 100%;
+      max-width: none;
+      margin: 0;
+    }
+    .division,
+    .division.business {
+      display: grid;
+      grid-template-rows: auto auto;
+      align-content: center;
+      grid-column: auto;
+      min-width: 0;
+      min-height: auto;
+      padding: 0.62rem 0.5rem 0.52rem;
+      overflow: hidden;
+      border: 1px solid rgba(18, 56, 88, 0.12);
+      border-radius: 1.15rem;
+      background: rgba(255, 255, 255, 0.96);
+      color: #102f50;
+      box-shadow: 0 0.65rem 1.5rem rgba(18, 52, 80, 0.08);
+      transform: none;
+    }
+    .photo {
+      position: relative;
+      inset: auto;
+      width: min(100%, 7.35rem);
+      height: auto;
+      aspect-ratio: 1;
+      margin: 0 auto;
+      border: 0.22rem solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0.14rem color-mix(in srgb, var(--accent) 72%, white);
+    }
+    .photo::before,
+    .photo::after { display: none; }
+    .photo img { transform: none; }
+    .panel,
+    .education .panel,
+    .health .panel,
+    .umrah .panel {
+      position: relative;
+      display: grid;
+      min-height: 2.72rem;
+      height: auto;
+      padding: 0.68rem 0.15rem 0;
+      place-items: center;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      color: #102f50;
+      text-align: center;
+    }
+    .division-icon {
+      top: -2.25rem;
+      right: 50%;
+      left: auto;
+      width: 2.7rem;
+      height: 2.7rem;
+      border: 0.18rem solid #fff;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 0.35rem 0.85rem rgba(7, 28, 49, 0.2);
+      transform: translateX(50%);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    .panel h3,
+    .panel p,
+    .panel strong,
+    .dash { display: none !important; }
+    .division.business .panel strong,
+    .division.education .panel strong,
+    .division.health .panel strong,
+    .division.umrah .panel strong { display: none !important; }
+    .mobile-division-name,
+    .business .mobile-division-name,
+    .education .mobile-division-name,
+    .health .mobile-division-name,
+    .umrah .mobile-division-name {
+      display: block;
+      grid-column: auto;
+      grid-row: auto;
+      max-width: 100%;
+      color: #102f50;
+      font-size: clamp(0.92rem, 4.2vw, 1.1rem);
+      font-weight: 780;
+      line-height: 1.15;
+      letter-spacing: -0.035em;
+      text-align: center;
+      text-shadow: none;
+      white-space: normal;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+      width: 100%;
+      min-height: auto;
+      margin: 0.8rem 0 0;
+      padding: 0.58rem 0.28rem;
+      border: 1px solid rgba(18, 56, 88, .09);
+      border-radius: 1rem;
+      background: #fff;
+      box-shadow: 0 0.8rem 2rem rgba(18, 52, 80, 0.09);
+    }
+    .stats em { display: none; }
+    .mobile-hidden-stat { display: none !important; }
+    .stat {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(.14rem, .8vw, .3rem);
+      min-width: 0;
+      padding: 0.2rem clamp(.08rem, .45vw, .22rem);
+      border-radius: 0;
+      background: transparent;
+      text-align: left;
+    }
+    .stats em + .stat {
+      border-left: 1px solid rgba(18, 56, 88, .13);
+    }
+    .stat-icon {
+      flex: 0 0 auto;
+      width: clamp(1.55rem, 7vw, 2rem);
+      height: clamp(1.55rem, 7vw, 2rem);
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+    .stat-icon :global(svg) {
+      width: clamp(1.1rem, 5.2vw, 1.55rem);
+      height: clamp(1.1rem, 5.2vw, 1.55rem);
+    }
+    .stat > div:last-child {
+      min-width: 0;
+    }
+    .stat b {
+      font-size: clamp(.62rem, 2.7vw, .8rem);
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .stat span {
+      margin-top: .15rem;
+      font-size: clamp(.43rem, 1.7vw, .54rem);
+      line-height: 1.05;
+      overflow-wrap: anywhere;
+    }
+    .stat:last-of-type {
+      grid-column: auto;
+      width: auto;
+      justify-self: stretch;
+    }
+    .mobile-hero-actions {
+      position: relative;
+      display: grid;
+      width: calc(100% + 1.7rem);
+      margin: .72rem 0 -1rem -.85rem;
+      padding: .7rem .85rem 1rem;
+      overflow: hidden;
+      border-radius: 1rem 1rem 0 0;
+      background: linear-gradient(135deg, #08294b, #0b3d70);
+    }
+    .mobile-hero-actions::after {
+      position: absolute;
+      right: -15%;
+      bottom: -.72rem;
+      left: 36%;
+      height: 1.1rem;
+      border-top: 2px solid rgba(226, 180, 72, .65);
+      border-radius: 50%;
+      content: "";
+      pointer-events: none;
+    }
+    .mobile-hero-actions a { position: relative; z-index: 1; }
+  }
+  @media (max-width: 22.5rem) {
+    .hero-wrap { padding-inline: 0.65rem; }
+    .mobile-journey { width: calc(100% + 1.3rem); margin-left: -0.65rem; }
+    .division-grid { gap: 0.55rem; }
+    .mobile-hero-actions {
+      width: calc(100% + 1.3rem);
+      margin-left: -.65rem;
+      grid-template-columns: 1.08fr .92fr;
+      gap: .38rem;
+      padding-inline: .55rem;
+    }
+    .mobile-whatsapp { gap: .3rem; padding-inline: .42rem; }
+    .mobile-whatsapp small { display: none; }
+    .mobile-apply { padding-inline: .35rem; }
+  }
+  @media (max-width: 37.5rem) {
+    .hero {
+      min-height: calc(100svh - 4.55rem);
+      min-height: calc(100dvh - 4.55rem);
+    }
+    .hero-wrap {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100svh - 4.55rem);
+      min-height: calc(100dvh - 4.55rem);
+    }
+    .mobile-journey {
+      flex: 0 0 auto;
+      aspect-ratio: 1.98;
+    }
+    .mobile-services-heading { flex: 0 0 auto; margin: 1.05rem 0 0.72rem; }
+    .division-grid {
+      flex: 1 1 auto;
+      grid-template-rows: repeat(2, minmax(9.75rem, 1fr));
+      gap: 0.62rem;
+    }
+    .division,
+    .division.business { height: 100%; padding: 0.58rem 0.4rem 0.5rem; }
+    .photo { width: min(100%, 6.85rem); }
+    .panel,
+    .education .panel,
+    .health .panel,
+    .umrah .panel {
+      min-height: 2.55rem;
+      padding-top: 0.68rem;
+    }
+    .division-icon {
+      top: -2.05rem;
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+    .stats {
+      flex: 0 0 auto;
+      min-height: 4.25rem;
+      margin: 0.62rem 0 0.52rem;
+      padding-block: 0.68rem;
+    }
+    .stat { gap: 0.42rem; padding-inline: 0.3rem; }
+    .stat-icon { width: 2.2rem; height: 2.2rem; }
+    .stat-icon :global(svg) { width: 1.55rem; height: 1.55rem; }
+    .stat b { font-size: clamp(0.78rem, 3.55vw, 0.92rem); }
+    .stat span { font-size: clamp(0.56rem, 2.45vw, 0.66rem); line-height: 1.12; }
+    .mobile-hero-actions { flex: 0 0 auto; margin-top: 0; }
   }
 </style>

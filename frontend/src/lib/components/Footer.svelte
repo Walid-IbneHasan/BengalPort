@@ -21,7 +21,7 @@
       <h3>Our Divisions</h3>
       <a href="/business">Global Business</a><a href="/education"
         >Global Education</a
-      ><a href="/healthcare">Global Healthcare</a>
+      ><a href="/healthcare">Global Healthcare</a><a href="/umrah">Global Umrah</a>
     </div>
     <div>
       <h3>Contact</h3>

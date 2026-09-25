@@ -35,7 +35,7 @@
     {
       key: "divisions",
       label: "Division cards",
-      hint: "Business, education and healthcare",
+      hint: "Business, education, healthcare and Umrah",
     },
     { key: "stats", label: "Statistics", hint: "Numbers below the hero" },
     { key: "intro", label: "Introduction", hint: "Opening statement and link" },

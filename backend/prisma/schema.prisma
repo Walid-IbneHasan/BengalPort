@@ -15,6 +15,7 @@ enum EnquiryType {
   BUSINESS
   EDUCATION
   HEALTHCARE
+  UMRAH
 }
 enum ApplicationType {
   BUSINESS
@@ -33,6 +34,7 @@ enum OpportunityCategory {
   BUSINESS
   EDUCATION
   HEALTHCARE
+  UMRAH
   FACTORY_VISIT
   BUSINESS_TOUR
   SCHOLARSHIP
