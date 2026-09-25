@@ -2768,7 +2768,7 @@
       padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
     }
     .mobile-journey {
-      flex: 1 1 20%;
+      flex: 1 1 25%;
       min-height: 0;
       aspect-ratio: auto;
     }
@@ -2782,7 +2782,7 @@
       margin: min(3%, 1.05rem) 0 min(2%, 0.72rem);
     }
     .division-grid {
-      flex: 3 1 auto;
+      flex: 2.5 1 auto;
       min-height: 0;
       grid-template-rows: repeat(2, minmax(0, 1fr));
       gap: 0.85rem;
