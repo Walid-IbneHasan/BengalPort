@@ -2755,14 +2755,14 @@
   }
   @media (max-width: 37.5rem) {
     .hero {
+      min-height: calc(100vh - 4.55rem);
       min-height: calc(100svh - 4.55rem);
-      min-height: calc(100dvh - 4.55rem);
     }
     .hero-wrap {
       display: flex;
       flex-direction: column;
+      min-height: calc(100vh - 4.55rem);
       min-height: calc(100svh - 4.55rem);
-      min-height: calc(100dvh - 4.55rem);
     }
     .mobile-journey {
       flex: 0 0 auto;
@@ -2800,6 +2800,52 @@
     .stat-icon :global(svg) { width: 1.55rem; height: 1.55rem; }
     .stat b { font-size: clamp(0.78rem, 3.55vw, 0.92rem); }
     .stat span { font-size: clamp(0.56rem, 2.45vw, 0.66rem); line-height: 1.12; }
-    .mobile-hero-actions { flex: 0 0 auto; margin-top: 0; }
+    .mobile-hero-actions {
+      flex: 0 0 auto;
+      margin-top: 0;
+      padding-bottom: calc(0.8rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+  @media (max-width: 37.5rem) and (max-height: 53.125rem) {
+    .mobile-journey { aspect-ratio: 2.18; }
+    .mobile-services-heading { margin: 0.72rem 0 0.48rem; }
+    .mobile-services-heading h2 { font-size: clamp(1.05rem, 5vw, 1.3rem); }
+    .division-grid {
+      grid-template-rows: repeat(2, minmax(8.55rem, 1fr));
+      gap: 0.45rem;
+    }
+    .division,
+    .division.business { padding: 0.38rem 0.35rem 0.34rem; }
+    .photo { width: min(100%, 6.05rem); }
+    .panel,
+    .education .panel,
+    .health .panel,
+    .umrah .panel {
+      min-height: 2.25rem;
+      padding-top: 0.56rem;
+    }
+    .division-icon {
+      top: -1.9rem;
+      width: 2.3rem;
+      height: 2.3rem;
+    }
+    .mobile-division-name,
+    .business .mobile-division-name,
+    .education .mobile-division-name,
+    .health .mobile-division-name,
+    .umrah .mobile-division-name { font-size: clamp(0.86rem, 4vw, 1rem); }
+    .stats {
+      min-height: 3.65rem;
+      margin: 0.42rem 0 0.38rem;
+      padding-block: 0.45rem;
+    }
+    .stat-icon { width: 1.9rem; height: 1.9rem; }
+    .stat-icon :global(svg) { width: 1.35rem; height: 1.35rem; }
+    .stat b { font-size: clamp(0.74rem, 3.4vw, 0.86rem); }
+    .stat span { font-size: clamp(0.53rem, 2.35vw, 0.62rem); }
+    .mobile-hero-actions {
+      padding-top: 0.55rem;
+      padding-inline: 0.7rem;
+    }
   }
 </style>

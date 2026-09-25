@@ -91,8 +91,22 @@
     >
   </nav>
 </header>
+<div class="header-spacer" aria-hidden="true"></div>
 
 <style>
+  header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 100;
+    width: 100%;
+  }
+  .header-spacer {
+    width: 100%;
+    height: 9.0625rem;
+    pointer-events: none;
+  }
   .utility {
     background: #102b4b;
     color: #f7f9fb;
@@ -274,6 +288,7 @@
     background: #f1f3f4;
   }
   @media (max-width: 68.75rem) {
+    .header-spacer { height: 8.3125rem; }
     .brand {
       min-width: auto;
     }
@@ -618,6 +633,7 @@
 
   /* Explicit mobile columns keep Apply, profile and menu touch targets apart. */
   @media (max-width: 37.5rem) {
+    .header-spacer { height: 4.55rem; }
     .nav {
       grid-template-columns: 3.25rem minmax(0, 1fr) 4.25rem 2.75rem 2.75rem;
       column-gap: 0.75rem;
