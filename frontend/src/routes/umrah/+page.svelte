@@ -1,21 +1,26 @@
 <script lang="ts">
-  import { ArrowRight, BadgeCheck, Bus, CalendarDays, Hotel, MoonStar, Plane, ShieldCheck } from "lucide-svelte";
-  const services = [
-    { icon: BadgeCheck, title: "Visa assistance", text: "Clear document guidance and careful application coordination." },
-    { icon: Plane, title: "Flight planning", text: "Practical itinerary options shaped around your preferred dates." },
-    { icon: Hotel, title: "Trusted accommodation", text: "Makkah and Madinah stays selected for comfort and accessibility." },
-    { icon: Bus, title: "Ground support", text: "Airport transfers, intercity transport and guided Ziyarat coordination." },
-  ];
+  import { onMount } from 'svelte';
+  import { api } from '$lib/api';
+  import DivisionPortal from '$lib/components/DivisionPortal.svelte';
+  import { defaultUmrahContent, type DivisionContent } from '$lib/division-content';
+  
+  let content: DivisionContent = structuredClone(defaultUmrahContent),
+      records: any[] = [],
+      loading = true;
+      
+  onMount(async () => {
+    try {
+      const page = await api<{content:DivisionContent}>('/content/umrah');
+      content = page.content;
+    } catch {} finally {
+      loading = false;
+    }
+  });
 </script>
 
-<svelte:head><title>Global Umrah | Bengal Port</title><meta name="description" content="Bengal Port provides trusted Umrah visa, travel, accommodation and on-ground pilgrimage coordination." /></svelte:head>
+<svelte:head>
+  <title>Global Umrah — Bengal Port</title>
+  <meta name="description" content={content.hero.description}/>
+</svelte:head>
 
-<section class="umrah-hero"><div class="wrap hero-grid"><div class="hero-copy"><span>GLOBAL UMRAH</span><h1>A peaceful journey, carefully coordinated.</h1><p>Thoughtful visa, flight, accommodation and on-ground support for your sacred journey to Makkah and Madinah.</p><div class="actions"><a class="primary" href="/apply?tab=umrah">PLAN YOUR UMRAH <ArrowRight size={18}/></a><a class="secondary" href="/contact">SPEAK TO OUR TEAM</a></div><div class="assurance"><ShieldCheck size={18}/><span>Transparent guidance from enquiry to return</span></div></div><div class="hero-visual"><img src="/images/global-umrah.webp" alt="Pilgrims at the Holy Kaaba in Makkah"/><span><MoonStar size={22}/><b>Umrah with confidence</b></span></div></div></section>
-
-<section class="section support"><div class="wrap"><div class="section-head"><span class="eyebrow">END-TO-END SUPPORT</span><h2>Every essential, handled with care</h2><p>One accountable team coordinates the practical details so you can focus on the purpose of your journey.</p></div><div class="service-grid">{#each services as service}<article><i><svelte:component this={service.icon} size={24}/></i><h3>{service.title}</h3><p>{service.text}</p></article>{/each}</div></div></section>
-
-<section class="section journey"><div class="wrap journey-grid"><div><span class="eyebrow">YOUR JOURNEY</span><h2>Flexible planning for individuals, families and groups</h2><p>Tell us your preferred dates, number of travellers and accommodation priorities. Our team will prepare a clear, relevant plan without overwhelming you with unnecessary choices.</p><ul><li><CalendarDays size={19}/> Flexible departure planning</li><li><Hotel size={19}/> Room and proximity preferences</li><li><Bus size={19}/> Coordinated local movement</li></ul></div><aside><MoonStar size={34}/><h3>Begin with a simple enquiry</h3><p>No account is required. Share the essentials and an Umrah coordinator will contact you.</p><a href="/apply?tab=umrah">START UMRAH ENQUIRY <ArrowRight size={18}/></a></aside></div></section>
-
-<style>
-  .umrah-hero{padding:clamp(2rem,6vw,5rem) 0;background:linear-gradient(135deg,#f7f9fa 0%,#edf2f5 100%)}.hero-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(24rem,1.1fr);align-items:center;gap:clamp(2rem,6vw,6rem)}.hero-copy>span{color:#a87517;font-size:.72rem;font-weight:850;letter-spacing:.16em}.hero-copy h1{max-width:12ch;margin:.7rem 0 1rem;color:#102f50;font-size:clamp(2.7rem,6vw,5.7rem);line-height:.96;letter-spacing:-.06em}.hero-copy p{max-width:37rem;color:#597080;font-size:1rem;line-height:1.75}.actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.6rem}.actions a{display:flex;align-items:center;justify-content:center;gap:.5rem;min-height:3.2rem;padding:.75rem 1.15rem;border-radius:999px;text-decoration:none;font-size:.78rem;font-weight:850;transition:transform 150ms cubic-bezier(.23,1,.32,1),background-color 180ms ease}.actions a:active{transform:scale(.97)}.primary{background:#d7a33a;color:#102f50}.secondary{border:1px solid #cdd8de;color:#24455f}.assurance{display:flex;align-items:center;gap:.5rem;margin-top:1.2rem;color:#547080;font-size:.78rem}.assurance svg{color:#9d711d}.hero-visual{position:relative;aspect-ratio:1;overflow:hidden;border-radius:2rem;box-shadow:0 2rem 5rem rgba(15,48,78,.2)}.hero-visual:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(7,31,54,.55),transparent 45%)}.hero-visual img{width:100%;height:100%;object-fit:cover}.hero-visual span{position:absolute;z-index:1;left:1.25rem;bottom:1.25rem;display:flex;align-items:center;gap:.65rem;padding:.75rem 1rem;border:1px solid rgba(255,255,255,.28);border-radius:.85rem;background:rgba(8,35,59,.72);color:#fff;backdrop-filter:blur(.7rem)}.hero-visual b{font-size:.85rem}.service-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}.service-grid article{padding:1.5rem;border:1px solid #dfe6e9;border-radius:1rem;background:#fff}.service-grid i{display:grid;place-items:center;width:3rem;height:3rem;border-radius:.8rem;background:#edf2f4;color:#9b6b16}.service-grid h3{margin:1rem 0 .45rem;color:#173a58;font-size:1.05rem}.service-grid p{margin:0;color:#667987;font-size:.86rem;line-height:1.65}.journey{background:#f1f4f5}.journey-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:clamp(2rem,7vw,7rem);align-items:center}.journey h2{max-width:16ch;font-size:clamp(2rem,4vw,3.7rem);letter-spacing:-.045em}.journey p{color:#607583;line-height:1.75}.journey ul{display:grid;gap:.8rem;padding:0;list-style:none}.journey li{display:flex;align-items:center;gap:.65rem;color:#294a63;font-weight:700}.journey li svg{color:#a87517}.journey aside{padding:clamp(1.5rem,4vw,2.5rem);border-radius:1.5rem;background:#103555;color:#fff;box-shadow:0 1.4rem 3rem rgba(10,38,64,.18)}.journey aside>svg{color:#e1b34d}.journey aside h3{font-size:1.55rem}.journey aside p{color:#d4e0e7}.journey aside a{display:flex;align-items:center;gap:.55rem;margin-top:1.2rem;color:#efc45d;font-size:.78rem;font-weight:850;text-decoration:none}@media(hover:hover) and (pointer:fine){.primary:hover{background:#e2b651}.secondary:hover{background:#fff}}@media(max-width:64rem){.hero-grid,.journey-grid{grid-template-columns:1fr}.hero-copy h1{max-width:14ch}.hero-visual{max-width:42rem}.service-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:38rem){.umrah-hero{padding-top:1rem}.hero-grid{gap:1.5rem}.hero-copy h1{font-size:clamp(2.35rem,12vw,3.45rem)}.actions{display:grid}.actions a{width:100%}.hero-visual{border-radius:1.25rem}.service-grid{grid-template-columns:1fr}.service-grid article{padding:1.2rem}.journey aside{border-radius:1.15rem}}@media(prefers-reduced-motion:reduce){.actions a{transition-duration:.01ms}}
-</style>
+<DivisionPortal {content} {records} {loading} kind="umrah"/>

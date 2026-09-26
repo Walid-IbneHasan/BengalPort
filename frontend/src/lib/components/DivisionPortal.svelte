@@ -28,7 +28,7 @@
   }: {
     content: DivisionContent;
     records: any[];
-    kind: "education" | "healthcare";
+    kind: "education" | "healthcare" | "umrah";
     loading?: boolean;
   } = $props();
   const icons: Record<string, any> = {
@@ -86,7 +86,7 @@
   }
 </script>
 
-<main class:health={kind === "healthcare"} class="portal">
+<main class:health={kind === "healthcare"} class:umrah={kind === "umrah"} class="portal">
   <section class="portal-hero">
     <div class="hero-copy">
       <span>{content.hero.eyebrow}</span>
@@ -254,6 +254,11 @@
     --accent: #237b79;
     --accent-soft: #edf7f6;
     --accent-deep: #145e60;
+  }
+  .portal.umrah {
+    --accent: #b48528;
+    --accent-soft: #fcf6ea;
+    --accent-deep: #78520b;
   }
   .portal-hero,
   .shortcuts,

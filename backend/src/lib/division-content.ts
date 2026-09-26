@@ -333,3 +333,150 @@ export const defaultHealthcareContent = {
     secondary: "Contact patient support",
   },
 };
+export const defaultUmrahContent = {
+  hero: {
+    eyebrow: "GLOBAL UMRAH",
+    title: "A peaceful journey, carefully coordinated.",
+    tagline: "Transparent guidance. Human support.",
+    description:
+      "Thoughtful visa, flight, accommodation and on-ground support for your sacred journey to Makkah and Madinah.",
+      image: "/images/global-umrah.webp",
+    primary: "Plan your Umrah",
+    secondary: "Speak to our team",
+  },
+  shortcuts: [
+    {
+      icon: "file",
+      title: "Visa Assistance",
+      subtitle: "Application coordination",
+      href: "#services",
+    },
+    {
+      icon: "plane",
+      title: "Flight Planning",
+      subtitle: "Itinerary options",
+      href: "#services",
+    },
+    {
+      icon: "building",
+      title: "Accommodation",
+      subtitle: "Makkah and Madinah",
+      href: "#services",
+    },
+    {
+      icon: "bus",
+      title: "Ground Support",
+      subtitle: "Transfers and Ziyarat",
+      href: "#services",
+    },
+  ],
+  services: {
+    eyebrow: "END-TO-END SUPPORT",
+    title: "Every essential, handled with care",
+    description:
+      "One accountable team coordinates the practical details so you can focus on the purpose of your journey.",
+    items: [
+      {
+        icon: "file-check",
+        title: "Visa assistance",
+        description:
+          "Clear document guidance and careful application coordination.",
+        href: "/apply?tab=umrah",
+      },
+      {
+        icon: "plane",
+        title: "Flight planning",
+        description:
+          "Practical itinerary options shaped around your preferred dates.",
+        href: "/apply?tab=umrah",
+      },
+      {
+        icon: "hotel",
+        title: "Trusted accommodation",
+        description:
+          "Makkah and Madinah stays selected for comfort and accessibility.",
+        href: "#directory",
+      },
+      {
+        icon: "bus",
+        title: "Ground support",
+        description:
+          "Airport transfers, intercity transport and guided Ziyarat coordination.",
+        href: "#directory",
+      },
+    ],
+  },
+  stats: [
+    { value: "100%", label: "Guided assistance", icon: "shield" },
+    { value: "24/7", label: "On-ground support", icon: "headset" },
+    { value: "5+", label: "Trusted hotel partners", icon: "building" },
+    { value: "3+", label: "Transport options", icon: "bus" },
+  ],
+  feature: {
+    eyebrow: "FLEXIBLE PLANNING",
+    title: "For individuals, families and groups",
+    description:
+      "Tell us your preferred dates, number of travellers and accommodation priorities. Our team will prepare a clear, relevant plan without overwhelming you with unnecessary choices.",
+    points: [
+      {
+        title: "Flexible departure planning",
+        description:
+          "Travel on dates that work for you and your family.",
+      },
+      {
+        title: "Room and proximity preferences",
+        description:
+          "Accommodations selected based on your comfort and distance requirements.",
+      },
+      {
+        title: "Coordinated local movement",
+        description:
+          "Reliable transport for seamless travel between holy sites.",
+      },
+    ],
+  },
+  directory: {
+    eyebrow: "LIVE UMRAH NETWORK",
+    title: "Partner Hotels and Transport",
+    description:
+      "Browse trusted accommodation and transport services.",
+  },
+  process: {
+    eyebrow: "YOUR JOURNEY",
+    title: "Begin with a simple enquiry.",
+    description: "No account is required. Share the essentials and an Umrah coordinator will contact you.",
+    steps: [
+      {
+        number: "01",
+        title: "Share your preferences",
+        description:
+          "Provide travel dates, number of pilgrims, and basic requirements.",
+      },
+      {
+        number: "02",
+        title: "Review your plan",
+        description:
+          "Receive a coordinated itinerary covering flights, hotels, and transport.",
+      },
+      {
+        number: "03",
+        title: "Confirm and prepare",
+        description:
+          "Finalize details while we process your visa and bookings.",
+      },
+      {
+        number: "04",
+        title: "Travel with peace of mind",
+        description:
+          "Focus on your pilgrimage with our on-ground support ready.",
+      },
+    ],
+  },
+  closing: {
+    title: "Ready to plan your sacred journey?",
+    description:
+      "Start with a simple enquiry. Our coordinators will handle the rest.",
+    primary: "Start Umrah Enquiry",
+    secondary: "Speak to our team",
+  },
+};
