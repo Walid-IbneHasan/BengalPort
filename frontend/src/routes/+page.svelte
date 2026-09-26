@@ -1621,7 +1621,8 @@
     .photo {
       position: relative;
       inset: auto;
-      width: min(100%, 9rem);
+      width: 100%;
+      max-width: 9rem;
       height: auto;
       aspect-ratio: 1;
       margin: 0 auto;
@@ -1629,9 +1630,13 @@
       border-radius: 50%;
       box-shadow: 0 0 0 0.14rem color-mix(in srgb, var(--accent) 72%, white);
     }
-    .photo::before,
-    .photo::after {
+    .photo::before {
       display: none;
+    }
+    .photo::after {
+      content: "";
+      display: block;
+      padding-bottom: 100%;
     }
     .photo img {
       transform: none;
