@@ -1,11 +1,14 @@
 // Form state and request bodies for the records an administrator manages.
-export type RecordKind = "opportunity" | "partner" | "institution" | "hospital";
+export type RecordKind = "opportunity" | "partner" | "institution" | "hospital" | "payment";
+
+export const paymentMethods = ["Cash", "Bank transfer", "bKash", "Nagad", "Card", "Cheque", "Other"];
 
 const defaultImages: Record<RecordKind, string> = {
   opportunity: "/images/global-business.webp",
   partner: "/images/global-business.webp",
   institution: "/images/global-education.webp",
   hospital: "/images/global-healthcare.webp",
+  payment: "",
 };
 
 export const blankProgram = () => ({ title: "", level: "", discipline: "", deadline: "" });
@@ -30,6 +33,12 @@ export function blankRecord(kind: RecordKind = "partner"): Record<string, any> {
     published: true,
     programs: [],
     services: [],
+    applicationId: "",
+    service: "",
+    totalDue: "",
+    amount: "",
+    method: paymentMethods[0],
+    transactionId: "",
   };
 }
 
@@ -64,6 +73,15 @@ export function recordBody(kind: RecordKind, form: Record<string, any>): Record<
       published: form.published,
     };
   if (kind === "partner") return { name, country, industry, product, description, image, featured };
+  if (kind === "payment")
+    return {
+      ...(form.applicationId ? { applicationId: form.applicationId } : {}),
+      service: form.service,
+      totalDue: Number(form.totalDue),
+      amount: Number(form.amount),
+      method: form.method,
+      ...(String(form.transactionId).trim() ? { transactionId: String(form.transactionId).trim() } : {}),
+    };
   if (kind === "institution")
     return {
       name,

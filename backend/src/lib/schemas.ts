@@ -320,8 +320,23 @@ export const hospitalSchema = z.object({
     .max(100)
     .default([]),
 });
+// Optional: blank hides the icon. Content saved before these existed has none.
+const socialLink = z
+  .string()
+  .trim()
+  .max(300)
+  .regex(/^https?:\/\//, "Use a full web address starting with https://")
+  .or(z.literal(""))
+  .default("");
 export const homeContentSchema = z.object({
-  utility: z.object({ message: text, email: z.string().email(), phone: text }),
+  utility: z.object({
+    message: text,
+    email: z.string().email(),
+    phone: text,
+    facebook: socialLink,
+    linkedin: socialLink,
+    youtube: socialLink,
+  }),
   hero: z.object({
     title: text,
     tagline: text,

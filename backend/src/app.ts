@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import compress from "@fastify/compress";
 import sensible from "@fastify/sensible";
 import multipart from "@fastify/multipart";
 import rateLimit from "@fastify/rate-limit";
@@ -17,6 +18,7 @@ export async function buildApp(options:{mailer?:Mailer}={}) {
   // address and protocol when the API runs behind a reverse proxy.
   const app=Fastify({logger:{level:process.env.LOG_LEVEL||"info"},trustProxy:process.env.TRUST_PROXY==="true"});
   await app.register(cors,{origin:(process.env.FRONTEND_URL||"http://localhost:5173").split(","),maxAge:86400});
+  await app.register(compress);
   await app.register(sensible);
   await app.register(rateLimit,{global:false});
   await app.register(multipart,{limits:{files:1,fileSize:Number.MAX_SAFE_INTEGER,parts:20}});

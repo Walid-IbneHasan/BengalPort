@@ -126,7 +126,11 @@
       const page = await api<any>("/admin/content/home", {
         headers: { authorization: `Bearer ${token}` },
       });
-      draft = page.content;
+      // Content saved before the social links existed gets their blank fields.
+      draft = {
+        ...page.content,
+        utility: { ...defaultHomeContent.utility, ...page.content.utility },
+      };
       revision = page.revision;
       published = page.published;
     } catch (e) {

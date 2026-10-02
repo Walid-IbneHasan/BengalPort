@@ -53,3 +53,39 @@ describe("editing the Global Umrah page", () => {
     assert.equal(res.statusCode, 403);
   });
 });
+
+describe("social links in the site header", () => {
+  const base = async () => {
+    const { defaultHomeContent } = await import("../src/lib/home-content.js");
+    const { homeContentSchema } = await import("../src/lib/schemas.js");
+    return { content: structuredClone(defaultHomeContent) as any, schema: homeContentSchema };
+  };
+
+  test("a full web address is accepted", async () => {
+    const { content, schema } = await base();
+    content.utility.facebook = "https://facebook.com/bengalport";
+    const parsed = schema.safeParse(content);
+    assert.equal(parsed.success, true);
+    assert.equal(parsed.data!.utility.facebook, "https://facebook.com/bengalport");
+  });
+
+  test("links can be left blank", async () => {
+    const { content, schema } = await base();
+    Object.assign(content.utility, { facebook: "", linkedin: "", youtube: "" });
+    assert.equal(schema.safeParse(content).success, true);
+  });
+
+  test("homepage content saved before social links existed is still valid", async () => {
+    const { content, schema } = await base();
+    for (const key of ["facebook", "linkedin", "youtube"]) delete content.utility[key];
+    const parsed = schema.safeParse(content);
+    assert.equal(parsed.success, true);
+    assert.equal(parsed.data!.utility.linkedin, "");
+  });
+
+  test("anything that is not a web address is rejected", async () => {
+    const { content, schema } = await base();
+    content.utility.youtube = "javascript:alert(1)";
+    assert.equal(schema.safeParse(content).success, false);
+  });
+});

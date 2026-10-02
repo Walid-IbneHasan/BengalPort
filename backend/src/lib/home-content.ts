@@ -3,6 +3,9 @@ export const defaultHomeContent = {
     message: "Your Global Partner for Business • Education • Healthcare • Umrah",
     email: "info@bengalport.com",
     phone: "+8801711-991035",
+    facebook: "",
+    linkedin: "",
+    youtube: "",
   },
   hero: {
     title: "BENGAL PORT",

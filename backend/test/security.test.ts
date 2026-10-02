@@ -211,6 +211,47 @@ describe("cross-origin requests from the website", () => {
   });
 });
 
+describe("response size", () => {
+  test("page content is compressed for browsers that accept it", async () => {
+    const app = await buildApp();
+    try {
+      const res = await app.inject({
+        method: "GET",
+        url: "/api/content/home",
+        headers: { "accept-encoding": "gzip, br" },
+      });
+      assert.equal(res.statusCode, 200);
+      assert.match(String(res.headers["content-encoding"]), /^(br|gzip)$/);
+    } finally {
+      await app.close();
+    }
+  });
+});
+
+describe("stored images", () => {
+  test("an uploaded image is served intact, without recompression", async () => {
+    const bytes = Buffer.from(Array.from({ length: 4096 }, (_, i) => (i * 31) % 251));
+    const asset = await prisma.mediaAsset.create({
+      data: { originalName: "test.webp", data: bytes, width: 64, height: 64, byteSize: bytes.length, orientation: "square" },
+    });
+    const app = await buildApp();
+    try {
+      const res = await app.inject({
+        method: "GET",
+        url: `/api/media/${asset.id}.webp`,
+        headers: { "accept-encoding": "gzip, br" },
+      });
+      assert.equal(res.statusCode, 200);
+      assert.equal(res.headers["content-type"], "image/webp");
+      assert.equal(res.headers["content-encoding"], undefined);
+      assert.deepEqual(res.rawPayload, bytes);
+    } finally {
+      await app.close();
+      await prisma.mediaAsset.delete({ where: { id: asset.id } });
+    }
+  });
+});
+
 describe("verification codes when email delivery is not configured", () => {
   const withEnv = async (
     env: Record<string, string>,

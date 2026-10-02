@@ -44,6 +44,23 @@ describe("what the admin form sends when saving", () => {
   });
 });
 
+describe("what the admin form sends when recording a payment", () => {
+  test("amounts are sent as numbers and blank optional fields are left out", () => {
+    const body = recordBody("payment", { ...blankRecord("payment"), service: "Umrah package", totalDue: "60000", amount: "25000", method: "Bank transfer" });
+    assert.deepEqual(body, { service: "Umrah package", totalDue: 60000, amount: 25000, method: "Bank transfer" });
+  });
+
+  test("the chosen application and bank reference are included", () => {
+    const body = recordBody("payment", { ...blankRecord("payment"), applicationId: "app-1", service: "MBBS admission", totalDue: 1000, amount: 1000, method: "Cash", transactionId: " TXN-77 " });
+    assert.equal(body.applicationId, "app-1");
+    assert.equal(body.transactionId, "TXN-77");
+  });
+
+  test("a new payment form starts on cash", () => {
+    assert.equal(blankRecord("payment").method, "Cash");
+  });
+});
+
 describe("opening an existing record for editing", () => {
   test("an opportunity's deadline is shown as a date field value", () => {
     const form = recordFromRow("opportunity", { id: "o1", slug: "open-day", category: "EVENT", title: "Open day", description: "Visit us.", country: "Bangladesh", location: "Dhaka", deadline: "2026-12-31T00:00:00.000Z", image: "/images/x.webp", published: false });

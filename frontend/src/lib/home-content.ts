@@ -1,5 +1,13 @@
 export type HomeContent = {
-  utility: { message: string; email: string; phone: string };
+  // The social links are optional; a blank one hides its icon in the header.
+  utility: {
+    message: string;
+    email: string;
+    phone: string;
+    facebook?: string;
+    linkedin?: string;
+    youtube?: string;
+  };
   hero: {
     title: string;
     tagline: string;
@@ -81,6 +89,9 @@ export const defaultHomeContent: HomeContent = {
     message: "Your Global Partner for Business • Education • Healthcare • Umrah",
     email: "info@bengalport.com",
     phone: "+8801711-991035",
+    facebook: "",
+    linkedin: "",
+    youtube: "",
   },
   hero: {
     title: "BENGAL PORT",

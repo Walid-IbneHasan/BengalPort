@@ -52,10 +52,7 @@
           ><Mail size={17} /> {$cmsContent.utility.email}</a
         ><a href={`tel:${$cmsContent.utility.phone.replace(/\s/g, "")}`}
           ><Phone size={17} /> {$cmsContent.utility.phone}</a
-        ><a aria-label="Facebook" href="#social"><Facebook size={18} /></a><a
-          aria-label="LinkedIn"
-          href="#social"><Linkedin size={18} /></a
-        ><a aria-label="YouTube" href="#social"><Youtube size={19} /></a>
+        >{#if $cmsContent.utility.facebook}<a aria-label="Facebook" href={$cmsContent.utility.facebook} target="_blank" rel="noreferrer"><Facebook size={18} /></a>{/if}{#if $cmsContent.utility.linkedin}<a aria-label="LinkedIn" href={$cmsContent.utility.linkedin} target="_blank" rel="noreferrer"><Linkedin size={18} /></a>{/if}{#if $cmsContent.utility.youtube}<a aria-label="YouTube" href={$cmsContent.utility.youtube} target="_blank" rel="noreferrer"><Youtube size={19} /></a>{/if}
       </div>
     </div>
   </div>

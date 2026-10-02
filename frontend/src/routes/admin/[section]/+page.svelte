@@ -19,6 +19,7 @@
     blankProgram,
     blankRecord,
     blankService,
+    paymentMethods,
     recordBody,
     recordFromRow,
     type RecordKind,
@@ -143,6 +144,7 @@
         ["status", "Status"],
         ["createdAt", "Date"],
       ],
+      add: "payment",
     },
     receipts: {
       title: "Receipts",
@@ -199,7 +201,11 @@
     partner: "partner",
     institution: "institution",
     hospital: "hospital",
+    payment: "payment",
   };
+  // Payments are a record of money received, so they are added but never edited.
+  $: editable = Boolean(config?.add) && config.add !== "payment";
+  let applications: any[] = [];
   $: noun =
     section === "suppliers"
       ? "supplier"
@@ -211,6 +217,10 @@
   function startAdding() {
     form = blankRecord(config.add);
     drawer = true;
+    if (config.add === "payment")
+      api<any[]>("/admin/resources/applications", { headers: headers() })
+        .then((list) => (applications = list))
+        .catch(() => (applications = []));
   }
   function startEditing(row: any) {
     form = recordFromRow(config.add as RecordKind, row);
@@ -313,11 +323,17 @@
         await api(
           kind === "opportunity"
             ? "/admin/opportunities"
-            : `/admin/resources/${section}`,
+            : kind === "payment"
+              ? "/payments"
+              : `/admin/resources/${section}`,
           { method: "POST", headers: headers(), body },
         );
       drawer = false;
-      success = form.id ? "Changes saved" : "Record created";
+      success = form.id
+        ? "Changes saved"
+        : kind === "payment"
+          ? "Payment recorded"
+          : "Record created";
       setTimeout(() => (success = ""), 1800);
       await load();
     } catch (e) {
@@ -359,7 +375,8 @@
         <p>{config.description}</p>
       </div>
       {#if config.add}<button class="primary" onclick={startAdding}
-          ><Plus size={18} /> Add {noun}</button
+          ><Plus size={18} />
+          {config.add === "payment" ? "Record payment" : `Add ${noun}`}</button
         >{/if}
     </header>
     {#if error}<div class="notice error">
@@ -408,7 +425,7 @@
             <thead
               ><tr
                 >{#each config.columns as column}<th>{column[1]}</th
-                  >{/each}{#if config.add}<th class="actions">Actions</th>{/if}{#if viewable}<th class="actions">Details</th>{/if}</tr
+                  >{/each}{#if editable}<th class="actions">Actions</th>{/if}{#if viewable}<th class="actions">Details</th>{/if}</tr
               ></thead
             ><tbody
               >{#if loading}{#each Array(5) as _}<tr class="skeleton"
@@ -454,7 +471,7 @@
                               "receiptNumber",
                             ].includes(column[0])}>{value(row, column[0])}</span
                           >{/if}</td
-                      >{/each}{#if config.add}<td class="actions"
+                      >{/each}{#if editable}<td class="actions"
                         ><button class="view" onclick={() => startEditing(row)}
                           >Edit</button
                         ><button
@@ -498,7 +515,10 @@
       <header>
         <div>
           <span>{form.id ? "EDIT RECORD" : "NEW RECORD"}</span>
-          <h2 id="drawer-title">{form.id ? "Edit" : "Add"} {noun}</h2>
+          <h2 id="drawer-title">
+            {config.add === "payment" ? "Record" : form.id ? "Edit" : "Add"}
+            {noun}
+          </h2>
         </div>
         <button aria-label="Close" onclick={() => (drawer = false)}
           ><X /></button
@@ -510,7 +530,56 @@
           save();
         }}
       >
-        {#if config.add === "opportunity"}<label
+        {#if config.add === "payment"}<label
+            ><span>Application</span><select bind:value={form.applicationId}
+              ><option value="">No application (walk-in customer)</option
+              >{#each applications as item}<option value={item.id}
+                  >{item.reference} · {item.fullName}</option
+                >{/each}</select
+            ></label
+          ><label
+            ><span>Service *</span><input
+              bind:value={form.service}
+              required
+              maxlength="200"
+              placeholder="e.g. Umrah package, MBBS admission support"
+            /></label
+          >
+          <div class="form-grid">
+            <label
+              ><span>Total due (৳) *</span><input
+                type="number"
+                min="1"
+                step="any"
+                bind:value={form.totalDue}
+                required
+              /></label
+            ><label
+              ><span>Amount paid now (৳) *</span><input
+                type="number"
+                min="1"
+                step="any"
+                bind:value={form.amount}
+                required
+              /></label
+            ><label
+              ><span>Payment method *</span><select bind:value={form.method}
+                >{#each paymentMethods as method}<option>{method}</option
+                  >{/each}</select
+              ></label
+            ><label
+              ><span>Transaction reference</span><input
+                bind:value={form.transactionId}
+                maxlength="100"
+                placeholder="Optional"
+              /></label
+            >
+          </div>
+          <p class="hint">
+            A receipt is created automatically. If the application was submitted
+            by a signed-in member, the payment and receipt appear on their
+            dashboard.
+          </p>{:else if config.add === "opportunity"}<label
             ><span>Title *</span><input
               bind:value={form.title}
               required
@@ -584,7 +653,7 @@
           <label class="check"
             ><input type="checkbox" bind:checked={form.featured} /> Feature this partner</label
           >{/if}
-          <CmsImageField
+          {#if config.add !== "payment"}<CmsImageField
             label="Card image"
             value={form.image}
             purpose={`${section} card image`}
@@ -597,7 +666,7 @@
             bind:value={form.description}
             required
             minlength="10"></textarea></label
-        >
+        >{/if}
         {#if config.add === "institution"}<fieldset class="items">
             <legend>Programs</legend>
             {#each form.programs as program, i}<div class="item">
@@ -638,7 +707,13 @@
           <button type="button" class="cancel" onclick={() => (drawer = false)}
             >Cancel</button
           ><button class="primary" disabled={saving}
-            >{saving ? "Saving…" : form.id ? "Save changes" : "Create record"}</button
+            >{saving
+              ? "Saving…"
+              : form.id
+                ? "Save changes"
+                : config.add === "payment"
+                  ? "Record payment"
+                  : "Create record"}</button
           >
         </footer>
       </form>
@@ -1175,6 +1250,12 @@
     color: #23384f;
     overflow-wrap: anywhere;
     white-space: pre-wrap;
+  }
+  .hint {
+    margin: 0;
+    font-size: 0.74rem;
+    line-height: 1.5;
+    color: #6d7b89;
   }
   .items {
     margin: 0;
