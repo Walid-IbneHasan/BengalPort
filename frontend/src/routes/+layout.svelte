@@ -1,4 +1,6 @@
 <script lang="ts">
+  // Self-hosted, so the site's typeface is the same on every device.
+  import '@fontsource-variable/manrope';
   import '../styles.css';
   import { page } from '$app/state';
   import Header from '$lib/components/Header.svelte';
