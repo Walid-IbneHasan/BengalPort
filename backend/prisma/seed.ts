@@ -6,6 +6,7 @@ import {
   defaultEducationContent,
   defaultHealthcareContent,
 } from "../src/lib/division-content.js";
+import { seedPlan } from "./seed-config.js";
 
 const prisma = new PrismaClient();
 const at = (daysAgo: number, hour: number, minute = 0) => {
@@ -16,13 +17,14 @@ const at = (daysAgo: number, hour: number, minute = 0) => {
 };
 
 async function main() {
+  const plan = seedPlan(process.env);
   const admin = await prisma.user.upsert({
-    where: { email: "admin@bengalport.com" },
+    where: { email: plan.adminEmail },
     update: { emailVerifiedAt: new Date() },
     create: {
       name: "Bengal Port Admin",
-      email: "admin@bengalport.com",
-      passwordHash: await bcrypt.hash("Admin123!", 12),
+      email: plan.adminEmail,
+      passwordHash: await bcrypt.hash(plan.adminPassword, 12),
       emailVerifiedAt: new Date(),
       role: "ADMIN",
     },
@@ -68,6 +70,33 @@ async function main() {
     },
   });
 
+  const categories = await Promise.all(
+    [
+      ["Client Payment", "INCOME"],
+      ["Consultation Fee", "INCOME"],
+      ["Application Fee", "INCOME"],
+      ["Office Purchase", "EXPENSE"],
+      ["Travel & Transport", "EXPENSE"],
+      ["Marketing", "EXPENSE"],
+      ["Utilities", "EXPENSE"],
+    ].map(async ([name, type]) =>
+      prisma.financialCategory.upsert({
+        where: { name },
+        update: {},
+        create: { name, type: type as any },
+      }),
+    ),
+  );
+  const category = Object.fromEntries(categories.map((c) => [c.name, c.id]));
+
+  if (plan.demoData) await seedDemoData(admin.id, category);
+}
+
+// Sample partners, records and ledger entries for local development.
+async function seedDemoData(
+  adminId: string,
+  category: Record<string, string>,
+) {
   const opportunities = [
     [
       "china-sourcing-tour",
@@ -281,7 +310,7 @@ async function main() {
         message: "I would like to join the next sourcing and factory visit.",
         details: { company: "Hasan Trading", preferredCountry: "China" },
         status: "SUBMITTED",
-        userId: admin.id,
+        userId: adminId,
       },
     });
 
@@ -295,7 +324,7 @@ async function main() {
       fullName: "Arif Hasan",
       email: "arif.demo@example.com",
       phone: "+8801700000000",
-      userId: admin.id,
+      userId: adminId,
       details: {
         nationality: "Bangladeshi",
         passportNumber: "A00000000",
@@ -311,7 +340,7 @@ async function main() {
     where: { transactionId: "MOCK-DEMO-2026-001" },
     update: {},
     create: {
-      userId: admin.id,
+      userId: adminId,
       applicationId: demoApplication.id,
       service: "Business sourcing and factory visit",
       amount: 25000,
@@ -330,25 +359,6 @@ async function main() {
       },
     },
   });
-
-  const categories = await Promise.all(
-    [
-      ["Client Payment", "INCOME"],
-      ["Consultation Fee", "INCOME"],
-      ["Application Fee", "INCOME"],
-      ["Office Purchase", "EXPENSE"],
-      ["Travel & Transport", "EXPENSE"],
-      ["Marketing", "EXPENSE"],
-      ["Utilities", "EXPENSE"],
-    ].map(async ([name, type]) =>
-      prisma.financialCategory.upsert({
-        where: { name },
-        update: {},
-        create: { name, type: type as any },
-      }),
-    ),
-  );
-  const category = Object.fromEntries(categories.map((c) => [c.name, c.id]));
 
   if ((await prisma.financialTransaction.count()) === 0) {
     const entries = [

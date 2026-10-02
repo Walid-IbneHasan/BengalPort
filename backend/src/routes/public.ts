@@ -1,4 +1,7 @@
-import type { FastifyPluginAsync } from 'fastify'; import { prisma } from '../lib/prisma.js'; import { enquirySchema,applicationSchema } from '../lib/schemas.js'; import { defaultHomeContent } from '../lib/home-content.js'; import {defaultBusinessContent} from '../lib/business-content.js'; import {defaultEducationContent,defaultHealthcareContent,defaultUmrahContent} from '../lib/division-content.js';
+import type { FastifyPluginAsync } from 'fastify'; import crypto from 'node:crypto'; import { notifyNewEnquiry,notifyNewApplication } from '../lib/notifications.js'; import { prisma } from '../lib/prisma.js'; import { enquirySchema,applicationSchema } from '../lib/schemas.js'; import { defaultHomeContent } from '../lib/home-content.js'; import {defaultBusinessContent} from '../lib/business-content.js'; import {defaultEducationContent,defaultHealthcareContent,defaultUmrahContent} from '../lib/division-content.js';
+// Unambiguous characters only (no 0/O or 1/I), so a reference can be read out over the phone.
+const referenceAlphabet='23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+const newReference=()=>'BP-'+Array.from({length:8},()=>referenceAlphabet[crypto.randomInt(referenceAlphabet.length)]).join('');
 const routes:FastifyPluginAsync=async app=>{
  const optionalUser=async(req:any)=>{if(!req.headers.authorization)return undefined;try{await req.jwtVerify();return req.user?.sub as string}catch{return undefined}};
  app.get('/health',async()=>({data:{status:'ok'}}));
@@ -14,7 +17,8 @@ const routes:FastifyPluginAsync=async app=>{
  app.get('/factories',async()=>({data:await prisma.factory.findMany({orderBy:[{featured:'desc'},{createdAt:'desc'}]})}));
  app.get('/education',async()=>({data:await prisma.institution.findMany({include:{programs:true}})}));
  app.get('/healthcare',async()=>({data:await prisma.hospital.findMany({include:{services:true}})}));
- app.post('/enquiries',async(req,reply)=>{const parsed=enquirySchema.safeParse(req.body);if(!parsed.success)return reply.code(400).send({error:{code:'VALIDATION_ERROR',message:'Please check the enquiry fields',details:parsed.error.flatten()}});const userId=await optionalUser(req);const data=await prisma.enquiry.create({data:{...parsed.data,email:parsed.data.email||null,details:parsed.data.details as any,userId}});return reply.code(201).send({data})});
- app.post('/applications',async(req,reply)=>{const parsed=applicationSchema.safeParse(req.body);if(!parsed.success)return reply.code(400).send({error:{code:'VALIDATION_ERROR',message:'Please check the application fields',details:parsed.error.flatten()}});const reference=`BP-${Date.now().toString().slice(-8)}`;const userId=await optionalUser(req);const data=await prisma.application.create({data:{...parsed.data,details:parsed.data.details as any,reference,userId}});return reply.code(201).send({data})});
+ const formLimit={config:{rateLimit:{max:10,timeWindow:'10 minutes'}}};
+ app.post('/enquiries',formLimit,async(req,reply)=>{const parsed=enquirySchema.safeParse(req.body);if(!parsed.success)return reply.code(400).send({error:{code:'VALIDATION_ERROR',message:'Please check the enquiry fields',details:parsed.error.flatten()}});const userId=await optionalUser(req);const data=await prisma.enquiry.create({data:{...parsed.data,email:parsed.data.email||null,details:parsed.data.details as any,userId}});notifyNewEnquiry(app,data);return reply.code(201).send({data})});
+ app.post('/applications',formLimit,async(req,reply)=>{const parsed=applicationSchema.safeParse(req.body);if(!parsed.success)return reply.code(400).send({error:{code:'VALIDATION_ERROR',message:'Please check the application fields',details:parsed.error.flatten()}});const reference=newReference();const userId=await optionalUser(req);const data=await prisma.application.create({data:{...parsed.data,details:parsed.data.details as any,reference,userId}});notifyNewApplication(app,data);return reply.code(201).send({data})});
 }; export default routes;
 
