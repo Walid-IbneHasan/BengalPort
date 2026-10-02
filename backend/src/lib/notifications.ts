@@ -6,7 +6,8 @@ type ApplicationRecord = { type: string; reference: string; fullName: string; ph
 
 // ADMIN_NOTIFY_EMAIL holds one or more comma-separated team addresses.
 const teamAddresses = () => (process.env.ADMIN_NOTIFY_EMAIL || "").split(",").map((x) => x.trim()).filter(Boolean);
-const adminUrl = (section: string) => `${(process.env.FRONTEND_URL || "http://localhost:5173").split(",")[0].trim()}/admin/${section}`;
+const siteUrl = () => (process.env.FRONTEND_URL || "http://localhost:5173").split(",")[0].trim();
+const adminUrl = (section: string) => `${siteUrl()}/admin/${section}`;
 const oneLine = (value: string) => value.replace(/\s+/g, " ").trim().slice(0, 120);
 
 function mail(to: string, subject: string, paragraphs: string[]): Mail {
@@ -76,6 +77,42 @@ export function notifyPayment(app: FastifyInstance, notice: PaymentNotice) {
     notYou("make this payment"),
   ]));
   deliver(app, mails);
+}
+
+// What an applicant is told when staff move their application on. Moving it
+// back to "received" or to a draft is housekeeping and is not announced.
+const statusNotices: Record<string, { subject: string; lines: string[] }> = {
+  IN_REVIEW: { subject: "Your application is being reviewed", lines: ["Our team has started reviewing your application. We will contact you if we need anything else from you."] },
+  APPROVED: { subject: "Your application has been approved", lines: ["Good news: your application has been approved. Our team will contact you about the next steps."] },
+  REJECTED: { subject: "An update on your application", lines: ["Thank you for applying through Bengal Port. After reviewing your application, we are unable to proceed with it at this time.", "If you would like to know more or discuss other options, please contact us and quote your reference number."] },
+  CANCELLED: { subject: "Your application has been cancelled", lines: ["Your application has been cancelled. If you did not expect this, please contact us and quote your reference number."] },
+};
+
+type ApplicantRecord = { reference: string; email: string; userId: string | null };
+
+export function notifyApplicationStatus(app: FastifyInstance, application: ApplicantRecord, status: string) {
+  const notice = statusNotices[status];
+  if (!notice) return;
+  deliver(app, [mail(application.email, `${notice.subject} | Bengal Port ${application.reference}`, [
+    "Hello,",
+    `This is an update on your Bengal Port application ${application.reference}.`,
+    ...notice.lines,
+    ...(application.userId ? [`You can follow your application from your account: ${siteUrl()}/dashboard`] : []),
+  ])]);
+}
+
+// Staff have set what an application costs. The link is offered only while
+// the site can actually take a payment.
+export function notifyAmountDue(app: FastifyInstance, application: ApplicantRecord, amounts: { amountDue: number; remaining: number }) {
+  const { amountDue, remaining } = amounts;
+  deliver(app, [mail(application.email, `Amount due for your application | Bengal Port ${application.reference}`, [
+    "Hello,",
+    `The amount due for your Bengal Port application ${application.reference} is ${money(amountDue)}.${remaining < amountDue ? ` After the payments we have received, ${money(remaining)} is still due.` : ""}`,
+    app.gateway.configured
+      ? `You can pay online with bKash, in full or in part: ${siteUrl()}/pay?ref=${application.reference}`
+      : "Our team will contact you about how to pay.",
+    "If you have a question about this amount, please contact us and quote your reference number.",
+  ])]);
 }
 
 export function notifyNewApplication(app: FastifyInstance, application: ApplicationRecord) {

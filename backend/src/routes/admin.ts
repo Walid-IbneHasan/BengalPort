@@ -21,6 +21,11 @@ import {
 } from "../lib/division-content.js";
 import sharp from "sharp";
 import { documentSummary } from "../lib/documents.js";
+import { balance } from "../lib/payment-rules.js";
+import {
+  notifyAmountDue,
+  notifyApplicationStatus,
+} from "../lib/notifications.js";
 
 function rangeStart(period: string) {
   const now = new Date();
@@ -373,10 +378,21 @@ const admin: FastifyPluginAsync = async (app) => {
       const amountDue = amountDueSchema.safeParse(body.amountDue);
       if (!amountDue.success)
         return reply.badRequest("Enter the amount due as a positive number");
-      await prisma.application.update({
+      const before = await prisma.application.findUnique({
+        where: { id },
+        select: { amountDue: true },
+      });
+      if (!before) return reply.notFound("Application not found");
+      const updated = await prisma.application.update({
         where: { id },
         data: { amountDue: amountDue.data },
+        include: { payments: { select: { amount: true, status: true } } },
       });
+      // The applicant hears about a new amount, not about one saved again.
+      const previous = before.amountDue === null ? null : Number(before.amountDue);
+      const { remaining } = balance(amountDue.data, updated.payments);
+      if (amountDue.data !== null && amountDue.data !== previous && remaining)
+        notifyAmountDue(app, updated, { amountDue: amountDue.data, remaining });
       if (body.status === undefined)
         return { data: await prisma.application.findUnique({ where: { id } }) };
     }
@@ -390,18 +406,25 @@ const admin: FastifyPluginAsync = async (app) => {
         "CANCELLED",
       ].includes(String(body.status));
       if (!parsed) return reply.badRequest("Invalid record status");
-      return {
-        data:
-          resource === "enquiries"
-            ? await prisma.enquiry.update({
-                where: { id },
-                data: { status: body.status as any },
-              })
-            : await prisma.application.update({
-                where: { id },
-                data: { status: body.status as any },
-              }),
-      };
+      if (resource === "enquiries")
+        return {
+          data: await prisma.enquiry.update({
+            where: { id },
+            data: { status: body.status as any },
+          }),
+        };
+      const before = await prisma.application.findUnique({
+        where: { id },
+        select: { status: true },
+      });
+      if (!before) return reply.notFound("Application not found");
+      const updated = await prisma.application.update({
+        where: { id },
+        data: { status: body.status as any },
+      });
+      if (updated.status !== before.status)
+        notifyApplicationStatus(app, updated, updated.status);
+      return { data: updated };
     }
     if (resource === "opportunities")
       return {
