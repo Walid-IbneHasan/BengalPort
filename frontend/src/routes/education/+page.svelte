@@ -1,2 +1,7 @@
-<script lang="ts">import {onMount} from 'svelte';import {api} from '$lib/api';import DivisionPortal from '$lib/components/DivisionPortal.svelte';import {defaultEducationContent,type DivisionContent} from '$lib/division-content';let content:DivisionContent=structuredClone(defaultEducationContent),records:any[]=[],loading=true;onMount(async()=>{try{const [page,data]=await Promise.all([api<{content:DivisionContent}>('/content/education'),api<any[]>('/education')]);content=page.content;records=data}catch{}finally{loading=false}})</script>
-<svelte:head><title>Global Education — Bengal Port</title><meta name="description" content={content.hero.description}/></svelte:head><DivisionPortal {content} {records} {loading} kind="education"/>
+<script lang="ts">
+  import DivisionPortal from '$lib/components/DivisionPortal.svelte';
+  let { data } = $props();
+</script>
+
+<svelte:head><title>Global Education — Bengal Port</title><meta name="description" content={data.content.hero.description}/></svelte:head>
+<DivisionPortal content={data.content} records={data.records} kind="education"/>

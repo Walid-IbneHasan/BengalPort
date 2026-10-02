@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { api } from "$lib/api";
-  import { cmsContent, loadCmsContent } from "$lib/cms";
+  import { invalidateAll } from "$app/navigation";
   import { defaultHomeContent, type HomeContent } from "$lib/home-content";
   import {
     ArrowLeft,
@@ -147,8 +147,8 @@
         body: JSON.stringify({ content: draft, published, revision }),
       });
       revision = page.revision;
-      cmsContent.set(draft);
-      await loadCmsContent(true);
+      // Reloads the site-wide content used by the header and footer.
+      await invalidateAll();
       success = `Homepage saved as revision ${revision}.`;
     } catch (e) {
       error = e instanceof Error ? e.message : "Unable to save content";
@@ -164,7 +164,7 @@
   <aside>
     <a class="back" href="/admin"><ArrowLeft size={18} /> Dashboard</a>
     <div class="brand">
-      <img src="/images/logo.webp" alt="" />
+      <img src="/images/logo-192.webp" alt="" />
       <div><b>CONTENT STUDIO</b><span>Homepage CMS</span></div>
     </div>
     <nav>

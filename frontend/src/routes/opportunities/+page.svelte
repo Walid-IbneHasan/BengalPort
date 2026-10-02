@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { api } from "$lib/api";
   import { Search, MapPin, Calendar } from "lucide-svelte";
-  let items: any[] = [];
-  let loading = true,
-    error = "",
+  // The first list is loaded on the server by +page.ts; searches run here.
+  export let data: { items: any[] | null };
+  let items: any[] = data.items ?? [];
+  let loading = false,
+    error = data.items ? "" : "Opportunities could not be loaded.",
     search = "",
     category = "";
   async function load() {
@@ -20,7 +21,6 @@
       loading = false;
     }
   }
-  onMount(load);
 </script>
 
 <svelte:head><title>Opportunities — Bengal Port</title></svelte:head>

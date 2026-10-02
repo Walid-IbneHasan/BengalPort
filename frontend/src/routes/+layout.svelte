@@ -4,10 +4,7 @@
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import WhatsApp from '$lib/components/WhatsApp.svelte';
-  import { onMount } from 'svelte';
-  import { loadCmsContent } from '$lib/cms';
   let { children } = $props();
-  onMount(()=>{ loadCmsContent(); });
 </script>
 
 {#if page.url.pathname.startsWith('/admin')}

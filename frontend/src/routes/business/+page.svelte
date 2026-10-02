@@ -1,11 +1,6 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { api } from "$lib/api";
   import { applyHref } from "$lib/apply-route";
-  import {
-    defaultBusinessContent,
-    type BusinessContent,
-  } from "$lib/business-content";
+  import type { BusinessContent } from "$lib/business-content";
   import {
     ArrowRight,
     BriefcaseBusiness,
@@ -36,10 +31,18 @@
     headset: Headphones,
     shield: ShieldCheck,
   };
-  let content: BusinessContent = structuredClone(defaultBusinessContent),
-    partners: any[] = [],
-    loading = true,
-    error = "";
+  // Loaded on the server by +page.ts, so the page arrives with its content.
+  export let data: {
+    content: BusinessContent;
+    partners: any[];
+    partnersUnavailable: boolean;
+  };
+  const loading = false;
+  $: content = data.content;
+  $: partners = data.partners;
+  $: error = data.partnersUnavailable
+    ? "Live partner data is temporarily unavailable."
+    : "";
   let productCost = 100000,
     shipping = 18000,
     duty = 15;
@@ -68,26 +71,6 @@
     observer.observe(node);
     return { destroy: () => observer.disconnect() };
   }
-  onMount(async () => {
-    try {
-      const [page, suppliers, factories] = await Promise.all([
-        api<{ content: BusinessContent }>("/content/business"),
-        api<any[]>("/suppliers"),
-        api<any[]>("/factories"),
-      ]);
-      content = page.content;
-      partners = [
-        ...suppliers.map((item) => ({ ...item, kind: "Supplier" })),
-        ...factories.map((item) => ({ ...item, kind: "Factory" })),
-      ]
-        .sort((a, b) => Number(b.featured) - Number(a.featured))
-        .slice(0, 6);
-    } catch {
-      error = "Live partner data is temporarily unavailable.";
-    } finally {
-      loading = false;
-    }
-  });
 </script>
 
 <svelte:head

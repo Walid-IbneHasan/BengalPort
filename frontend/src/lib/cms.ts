@@ -1,11 +1,10 @@
-import { writable } from 'svelte/store';
-import { api } from './api';
+import { derived } from 'svelte/store';
+import { page } from '$app/stores';
 import { defaultHomeContent, type HomeContent } from './home-content';
 
-export const cmsContent = writable<HomeContent>(structuredClone(defaultHomeContent));
-let request:Promise<void>|null=null;
-export function loadCmsContent(force=false){
-  if(request&&!force)return request;
-  request=api<{content:HomeContent}>('/content/home').then(result=>cmsContent.set(result.content)).catch(()=>undefined);
-  return request;
-}
+// Homepage, header and footer content. The root layout loads it for every
+// page; the built-in content is used when the API cannot be reached.
+export const cmsContent = derived(
+  page,
+  ($page) => ($page.data.home as HomeContent | undefined) ?? defaultHomeContent,
+);
