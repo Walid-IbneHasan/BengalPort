@@ -11,3 +11,6 @@ backend/prisma/dev.db
 
 # Browser profiles created by local QA runs
 .edge-business-qa*/
+
+# cPanel upload bundles (npm run package:cpanel)
+deploy
