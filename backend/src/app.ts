@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import compress from "@fastify/compress";
+import helmet from "@fastify/helmet";
 import sensible from "@fastify/sensible";
 import multipart from "@fastify/multipart";
 import rateLimit from "@fastify/rate-limit";
@@ -21,6 +22,16 @@ export async function buildApp(options:{mailer?:Mailer;gateway?:Gateway}={}) {
   // address and protocol when the API runs behind a reverse proxy.
   const app=Fastify({logger:{level:process.env.LOG_LEVEL||"info"},trustProxy:process.env.TRUST_PROXY==="true"});
   await app.register(cors,{origin:(process.env.FRONTEND_URL||"http://localhost:5173").split(","),maxAge:86400});
+  // The API only ever answers with data, images and downloads, so nothing may
+  // be loaded by, or frame, one of its responses. The website is on another
+  // address and shows the API's images, hence the cross-origin resource policy.
+  await app.register(helmet,{
+    contentSecurityPolicy:{useDefaults:false,directives:{defaultSrc:["'none'"],frameAncestors:["'none'"]}},
+    crossOriginResourcePolicy:{policy:"cross-origin"},
+    frameguard:{action:"deny"},
+    strictTransportSecurity:{maxAge:31536000,includeSubDomains:false},
+    referrerPolicy:{policy:"no-referrer"},
+  });
   await app.register(compress);
   await app.register(sensible);
   await app.register(rateLimit,{global:false});

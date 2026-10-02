@@ -34,7 +34,7 @@ For Google sign-in, create a Google OAuth 2.0 Web Client and set the same client
 
 ## Email
 
-Email is used for sign-in codes and notifications. With it configured, each new enquiry and application is emailed to the addresses in `ADMIN_NOTIFY_EMAIL` (comma-separated), and the person who submitted it receives a confirmation; applicants are sent their reference number. A mail failure is logged and never blocks the submission.
+Email is used for sign-in codes and notifications. With it configured, each new enquiry and application is emailed to the addresses in `ADMIN_NOTIFY_EMAIL` (comma-separated), and the person who submitted it receives a confirmation; applicants are sent their reference number. Applicants are also emailed when staff start reviewing, approve, decline or cancel their application, and when staff set a new amount due. A mail failure is logged and never blocks the submission.
 
 Settings (backend): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `EMAIL_FROM`, and one way of signing in:
 
@@ -71,6 +71,8 @@ Production settings for the API:
 - `TRUST_PROXY="true"` when the API sits behind a reverse proxy, as it does on cPanel, so rate limits apply per visitor rather than to the proxy.
 
 Settings for the website: `ORIGIN` (its public address), `PUBLIC_API_URL` (the API address ending in `/api`), `PUBLIC_WHATSAPP_NUMBER` and `PUBLIC_GOOGLE_CLIENT_ID`. They are read when the website starts, so they can be changed without rebuilding.
+
+**Security headers.** Both apps send them without any setting. The website's content security policy (in `frontend/svelte.config.js`) lets pages load scripts only from the site itself, Google sign-in and the Cloudflare check on the public forms; the API's address from `PUBLIC_API_URL` is added when the site starts. If you embed something from another service (a map, a video, an analytics script), add its address there and rebuild, or the browser will block it. Over HTTPS both apps also tell browsers to keep using HTTPS for their own address for a year, so serve them over HTTPS from the first day.
 
 Seeding a production database requires `SEED_ADMIN_PASSWORD` (12+ characters; the local default is rejected) and optionally `SEED_ADMIN_EMAIL`. It creates the admin account, page content and accounting categories only. Demo partners, enquiries, payments and ledger entries are added only with `SEED_DEMO_DATA="true"`.
 
