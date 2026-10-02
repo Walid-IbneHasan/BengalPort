@@ -62,7 +62,7 @@ write(
       // own client and applies migrations.
       dependencies: { ...backendPackage.dependencies, prisma: backendPackage.devDependencies.prisma },
       // Same patched transitive dependency as the workspace root.
-      overrides: rootPackage.overrides,
+      overrides: { "deepmerge-ts": rootPackage.overrides["deepmerge-ts"] },
     },
     null,
     2,
