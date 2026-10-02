@@ -63,6 +63,22 @@ bKash allows two token requests per hour, so the API stores its token in the dat
 
 **Going live.** bKash normally asks you to complete a set of sandbox test cases with your own sandbox credentials before issuing live ones. Put the sandbox credentials in the API's `.env`, set a small fee, and run a payment through `/apply` and `/pay`; then switch the five `BKASH_*` values to the live ones and restart the API.
 
+## Backups
+
+Everything the site holds is in the PostgreSQL database: applications, attached documents, uploaded images, payments, refunds and page content. One database dump is therefore a complete backup. Backups use PostgreSQL's own `pg_dump`, which must be installed on the server (set `PG_DUMP_PATH` if it is not on the path; on cPanel it is usually `/usr/bin/pg_dump`, and it must not be older than the database server).
+
+- **Download from the admin.** Admin → Settings → *Download a backup* saves a fresh dump to your computer. Do this regularly, and before every update: a copy that is not on the server is the one that survives a server failure.
+- **Nightly on the server.** `npm run backup` (in the API folder) writes `backups/bengal-port-<date>-<time>.dump` and keeps the newest 14 (`BACKUP_DIR`, `BACKUP_KEEP`). On cPanel add a Cron Job, for example every night at 03:00, using the "enter the virtual environment" command that *Setup Node.js App* shows for the API app:
+
+  ```
+  0 3 * * * source /home/USER/nodevenv/bengal-port-api/20/bin/activate && cd /home/USER/bengal-port-api && npm run backup
+  ```
+
+  Admin → Settings shows when the last server backup was made. Server backups sit on the same disk as the site, so still download a copy from time to time.
+- **Restoring.** Into an empty database: `pg_restore --no-owner --dbname="postgresql://USER:PASSWORD@HOST:5432/DATABASE" bengal-port-<date>-<time>.dump`. To replace the contents of an existing database add `--clean --if-exists`. Restoring was tested on a development machine by restoring a dump into a scratch database and comparing it with the original.
+
+If your host has no `pg_dump`, use the hosting panel's own database backup (cPanel → Backup, or JetBackup) instead; the admin will say so when you ask for a download.
+
 ## Spam protection on the public forms
 
 The enquiry and application forms are rate-limited per visitor and carry a hidden field that only automated scripts fill in; such submissions are discarded. For a stronger check, create a free **Cloudflare Turnstile** widget for your website address and set `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` in the API's settings. The forms then show Cloudflare's check to visitors (signed-in members are not asked), and the API refuses a guest submission that has not passed it. If Cloudflare cannot be reached, submissions are let through rather than lost. Admin → Settings shows whether the check is on.

@@ -57,6 +57,7 @@ write(
         start: "node server.cjs",
         setup: "prisma generate && prisma migrate deploy",
         "db:seed": "node prisma/seed.js",
+        backup: "node dist/backup.js",
       },
       // The Prisma CLI is a runtime dependency here: the server generates its
       // own client and applies migrations.
@@ -106,6 +107,12 @@ BKASH_APP_SECRET=""
 # dash.cloudflare.com -> Turnstile.
 TURNSTILE_SITE_KEY=""
 TURNSTILE_SECRET_KEY=""
+
+# Database backups ("npm run backup", see "Backups" in the README). pg_dump is
+# usually /usr/bin/pg_dump on cPanel; leave PG_DUMP_PATH empty if it is on the path.
+BACKUP_DIR="backups"
+BACKUP_KEEP="14"
+PG_DUMP_PATH=""
 
 # Used once by "db:seed" to create the admin account.
 SEED_ADMIN_EMAIL=""

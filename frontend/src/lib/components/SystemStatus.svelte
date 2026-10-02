@@ -3,7 +3,9 @@
   import { api } from "$lib/api";
 
   // Admin settings: what is actually working on the server right now.
-  type Status = { database: boolean; email: boolean; onlinePayment: boolean; teamInbox: boolean; formProtection: boolean };
+  type Status = { database: boolean; email: boolean; onlinePayment: boolean; teamInbox: boolean; formProtection: boolean; lastBackup: { madeAt: string; bytes: number } | null };
+  const TWO_DAYS = 48 * 3600_000;
+  const day = (value: string) => new Date(value).toLocaleString("en-BD", { dateStyle: "medium", timeStyle: "short" });
   let status = $state<Status | null>(null);
   let failed = $state(false);
 
@@ -15,10 +17,19 @@
     }
   });
 
+  // A scheduled backup is recent when it ran within the last two days.
+  let backedUp = $derived(Boolean(status?.lastBackup && Date.now() - new Date(status.lastBackup.madeAt).getTime() < TWO_DAYS));
   let lines = $derived(
     status
       ? [
           { name: "Database", ok: status.database, on: "Connected", off: "Not reachable", note: status.database ? "" : "The API cannot reach PostgreSQL. Check DATABASE_URL on the server." },
+          {
+            name: "Scheduled backups",
+            ok: backedUp,
+            on: status.lastBackup ? `Last: ${day(status.lastBackup.madeAt)}` : "",
+            off: status.lastBackup ? `Last: ${day(status.lastBackup.madeAt)}` : "None yet",
+            note: backedUp ? "" : "No backup has been made on the server in the last two days. Schedule the nightly backup (see “Backups” in the README), or download a backup with the button above regularly.",
+          },
           { name: "Email", ok: status.email, on: "Sending", off: "Not set up", note: status.email ? "" : "Sign-up codes, password resets and notifications are not sent until the SMTP settings are added on the server." },
           { name: "Team inbox", ok: status.teamInbox, on: "Set", off: "Not set", note: status.teamInbox ? "" : "Nobody is emailed about new enquiries and applications until ADMIN_NOTIFY_EMAIL is set on the server." },
           { name: "bKash payments", ok: status.onlinePayment, on: "Connected", off: "Not connected", note: status.onlinePayment ? "" : "Customers cannot pay online until the bKash settings are added on the server." },

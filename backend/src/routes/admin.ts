@@ -30,6 +30,12 @@ import {
   defaultContactContent,
   defaultServicesContent,
 } from "../lib/site-pages.js";
+import {
+  MISSING_TOOL,
+  backupFolder,
+  dumpToolAvailable,
+  lastBackup,
+} from "../lib/backup.js";
 import { z } from "zod";
 import sharp from "sharp";
 import { documentSummary } from "../lib/documents.js";
@@ -1008,15 +1014,41 @@ const admin: FastifyPluginAsync = async (app) => {
       () => true,
       () => false,
     );
+    const backup = lastBackup(backupFolder(process.env));
     return {
       data: {
         database,
+        // Whether a backup can be downloaded here, and when the server's
+        // scheduled backup last ran.
+        backupTool: await dumpToolAvailable(),
+        lastBackup: backup && { madeAt: backup.madeAt, bytes: backup.bytes },
         email: app.mailer.configured,
         onlinePayment: app.gateway.configured,
         teamInbox: teamAddresses().length > 0,
         formProtection: app.spamCheck.siteKey !== null,
       },
     };
+  });
+
+  // A link, valid for two minutes, with which the admin's browser downloads
+  // a fresh backup of the database (see routes/backup.ts).
+  app.get("/backup-link", async (req, reply) => {
+    if (!(await dumpToolAvailable()))
+      return reply
+        .code(503)
+        .send({ error: { code: "PG_DUMP_MISSING", message: MISSING_TOOL } });
+    const id = (req.user as { sub: string }).sub;
+    const account = await prisma.user.findUniqueOrThrow({
+      where: { id },
+      select: { tokenVersion: true },
+    });
+    const key = app.jwt.sign(
+      { sub: id, purpose: "backup", v: account.tokenVersion },
+      { expiresIn: "2m" },
+    );
+    const api =
+      process.env.API_PUBLIC_URL || `${req.protocol}://${req.host}`;
+    return { data: { url: `${api}/api/backup/download?key=${key}` } };
   });
 
   // Ledger categories, each with the number of entries recorded under it.

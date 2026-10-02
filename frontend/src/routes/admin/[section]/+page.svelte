@@ -20,6 +20,7 @@
   import DocumentList from "$lib/components/DocumentList.svelte";
   import FeeSettings from "$lib/components/FeeSettings.svelte";
   import SystemStatus from "$lib/components/SystemStatus.svelte";
+  import BackupCard from "$lib/components/BackupCard.svelte";
   import StaffNotes from "$lib/components/StaffNotes.svelte";
   import ApplicationEditor from "$lib/components/ApplicationEditor.svelte";
   import RefundDialog from "$lib/components/RefundDialog.svelte";
@@ -523,6 +524,7 @@
           </div>
           <ArrowRight /></a
         >
+        <BackupCard />
         <SystemStatus />
       </section>{:else}<div class="toolbar">
         <label
