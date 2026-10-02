@@ -3,8 +3,9 @@
   import { page } from "$app/state";
   import { afterNavigate } from "$app/navigation";
   import { onDestroy } from "svelte";
+  import { whatsappNumber } from "$lib/config";
 
-  const number = import.meta.env.PUBLIC_WHATSAPP_NUMBER || "8801711991035";
+  const number = whatsappNumber();
   let heroVisible = false;
   let observer: IntersectionObserver | undefined;
 

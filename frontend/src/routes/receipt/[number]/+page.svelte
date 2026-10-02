@@ -1,14 +1,18 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { onMount } from "svelte";
-  import { api } from "$lib/api";
+  import { api, ApiError } from "$lib/api";
   let receipt: any,
-    error = "";
+    error = "",
+    signInRequired = false;
   onMount(async () => {
     try {
       receipt = await api(`/payments/receipt/${page.params.number}`);
     } catch (e) {
-      error = "Receipt not found";
+      signInRequired = e instanceof ApiError && e.status === 401;
+      error = signInRequired
+        ? "Sign in to view this receipt."
+        : "Receipt not found";
     }
   });
 </script>
@@ -23,7 +27,12 @@
         <p>Bengal Port · Connecting Bengal to the World</p>
       </div>
     </header>
-    {#if error}<p class="error">{error}</p>{:else if !receipt}<p>
+    {#if error}<p class="error">
+        {error}
+        {#if signInRequired}<a href={`/login?next=${page.url.pathname}`}
+            >Sign in</a
+          >{/if}
+      </p>{:else if !receipt}<p>
         Loading receipt…
       </p>{:else}<div class="meta">
         <p>Receipt Number <b>{receipt.receiptNumber}</b></p>
@@ -115,7 +124,8 @@
     text-align: right;
   }
   @media print {
-    body > *:not(main) {
+    /* Hide the site header, footer and chat button around the receipt. */
+    :global(body > div > :not(main)) {
       display: none;
     }
     .receipt {

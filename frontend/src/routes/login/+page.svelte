@@ -3,7 +3,7 @@
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import { api, ApiError } from "$lib/api";
-  import { PUBLIC_GOOGLE_CLIENT_ID } from "$env/static/public";
+  import { googleClientId as publicGoogleClientId } from "$lib/config";
   import {
     ArrowRight,
     Check,
@@ -28,7 +28,7 @@
     notice = "",
     loading = false,
     showPassword = false;
-  const googleClientId = PUBLIC_GOOGLE_CLIENT_ID || "";
+  const googleClientId = publicGoogleClientId();
   const heading = () =>
     ({
       login: "Welcome back",

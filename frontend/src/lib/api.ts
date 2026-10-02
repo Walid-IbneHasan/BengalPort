@@ -1,16 +1,22 @@
-const API = import.meta.env.PUBLIC_API_URL || 'http://localhost:4000/api';
+import { apiUrl } from './config';
+import { requestHeaders } from './request-headers';
 
 export class ApiError extends Error {
   constructor(message: string, public code?: string, public details?: any, public status?: number) { super(message); }
 }
 
+function sessionToken(): string | null {
+  try {
+    return typeof localStorage === 'undefined' ? null : localStorage.getItem('bp_token');
+  } catch {
+    return null;
+  }
+}
+
 export async function api<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API}${path}`, {
+  const response = await fetch(`${apiUrl()}${path}`, {
     ...options,
-    headers: {
-      'content-type': 'application/json',
-      ...(options?.headers || {})
-    }
+    headers: requestHeaders(options, sessionToken())
   });
 
   const text = await response.text();

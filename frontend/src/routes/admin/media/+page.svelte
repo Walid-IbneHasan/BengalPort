@@ -2,11 +2,12 @@
   import { onMount } from 'svelte';
   import { Check, Copy, Image as ImageIcon, LoaderCircle, RefreshCw, Trash2 } from 'lucide-svelte';
   import { api } from '$lib/api';
+  import { apiUrl } from '$lib/config';
   import CmsImageField from '$lib/components/CmsImageField.svelte';
   type Asset={id:string;originalName:string;width:number;height:number;byteSize:number;orientation:string;purpose?:string;createdAt:string;format:string};
   let items:Asset[]=$state([]),loading=$state(true),error=$state(''),notice=$state(''),uploaded=$state('');
   const headers=()=>({authorization:`Bearer ${localStorage.getItem('bp_token')}`});
-  const url=(item:Asset)=>`${import.meta.env.PUBLIC_API_URL||'http://localhost:4000/api'}/media/${item.id}.${item.format}`;
+  const url=(item:Asset)=>`${apiUrl()}/media/${item.id}.${item.format}`;
   async function load(){loading=true;error='';try{items=await api<Asset[]>('/admin/media',{headers:headers()})}catch(e){error=e instanceof Error?e.message:'Unable to load media'}finally{loading=false}}
   async function remove(item:Asset){if(!confirm(`Delete ${item.originalName}? Images in use cannot be deleted.`))return;try{await api(`/admin/media/${item.id}`,{method:'DELETE',headers:headers()});items=items.filter(value=>value.id!==item.id);notice='Unused image deleted.'}catch(e){error=e instanceof Error?e.message:'Unable to delete image'}}
   async function copy(item:Asset){await navigator.clipboard.writeText(url(item));notice='Image URL copied.'}

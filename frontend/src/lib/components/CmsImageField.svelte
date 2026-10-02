@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ImageUp, LoaderCircle, CheckCircle2 } from "lucide-svelte";
+  import { apiUrl } from "$lib/config";
 
   let {
     label,
@@ -31,10 +32,8 @@
       if (!token) throw new Error("Admin sign-in required");
       const body = new FormData();
       body.append("image", file, file.name);
-      const apiOrigin =
-        import.meta.env.PUBLIC_API_URL || "http://localhost:4000/api";
       const response = await fetch(
-        `${apiOrigin}/admin/media?purpose=${encodeURIComponent(purpose)}`,
+        `${apiUrl()}/admin/media?purpose=${encodeURIComponent(purpose)}`,
         {
           method: "POST",
           headers: { authorization: `Bearer ${token}` },
