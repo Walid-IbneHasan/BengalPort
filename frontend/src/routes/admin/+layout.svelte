@@ -80,6 +80,11 @@
       goto("/login?next=/admin");
     }
   });
+  function signOut() {
+    localStorage.removeItem("bp_token");
+    localStorage.removeItem("bp_user");
+    goto("/login");
+  }
 </script>
 
 {#if page.url.pathname === "/admin/content"}
@@ -111,7 +116,7 @@
       <div class="account">
         <span>Signed in as</span><b>Administrator</b><a href="/"
           >View public website</a
-        >
+        ><button onclick={signOut}>Sign out</button>
       </div>
     </aside>
     {#if menuOpen}<button
@@ -260,6 +265,17 @@
   .account a {
     color: #e1ba60;
     font-size: 0.75rem;
+  }
+  .account button {
+    display: block;
+    margin-top: 0.7rem;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid #ffffff24;
+    border-radius: 0.55rem;
+    background: none;
+    color: #dbe3ee;
+    font-size: 0.75rem;
+    cursor: pointer;
   }
   .workspace {
     min-width: 0;

@@ -14,6 +14,7 @@
     X,
   } from "lucide-svelte";
   import CmsImageField from "$lib/components/CmsImageField.svelte";
+  import { detailGroups } from "$lib/submission-details";
   type Config = {
     title: string;
     description: string;
@@ -172,6 +173,15 @@
     search = "",
     drawer = false,
     saving = false;
+  // The enquiry or application whose full details are open.
+  let viewing: any = null;
+  $: viewable = ["enquiries", "applications"].includes(section);
+  $: viewingGroups = viewing
+    ? detailGroups(
+        section === "applications" ? viewing.type : undefined,
+        viewing.details,
+      )
+    : [];
   let form: any = {
     name: "",
     country: "",
@@ -344,6 +354,7 @@
       search = "";
       rows = [];
       drawer = false;
+      viewing = null;
       load();
     }
   });
@@ -352,6 +363,7 @@
 <svelte:head
   ><title>{config?.title || "Admin"} — Bengal Port</title></svelte:head
 >
+<svelte:window onkeydown={(e) => e.key === "Escape" && (viewing = null)} />
 {#if !config}<div class="resource">
     <div class="empty">
       <FileText />
@@ -419,7 +431,7 @@
                 >{#each config.columns as column}<th>{column[1]}</th
                   >{/each}{#if ["opportunities", "suppliers", "factories"].includes(section)}<th
                     class="actions">Actions</th
-                  >{/if}</tr
+                  >{/if}{#if viewable}<th class="actions">Details</th>{/if}</tr
               ></thead
             ><tbody
               >{#if loading}{#each Array(5) as _}<tr class="skeleton"
@@ -472,6 +484,10 @@
                           aria-label="Delete record"
                           onclick={() => remove(row.id)}
                           ><Trash2 size={16} /></button
+                        ></td
+                      >{/if}{#if viewable}<td class="actions"
+                        ><button class="view" onclick={() => (viewing = row)}
+                          >View</button
                         ></td
                       >{/if}</tr
                   >{/each}{/if}</tbody
@@ -594,6 +610,84 @@
       </form>
     </aside>
   </div>{/if}
+{#if viewing}<div
+    class="backdrop"
+    role="presentation"
+    onclick={(e) => e.target === e.currentTarget && (viewing = null)}
+  >
+    <div
+      class="drawer details"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="details-title"
+    >
+      <header>
+        <div>
+          <span
+            >{viewing.type}
+            {section === "applications" ? "APPLICATION" : "ENQUIRY"}</span
+          >
+          <h2 id="details-title">{viewing.reference || viewing.name}</h2>
+        </div>
+        <button aria-label="Close" onclick={() => (viewing = null)}
+          ><X /></button
+        >
+      </header>
+      <div class="details-body">
+        <section>
+          <h3>Contact</h3>
+          <dl>
+            <div>
+              <dt>Name</dt>
+              <dd>{viewing.fullName || viewing.name}</dd>
+            </div>
+            <div>
+              <dt>Phone</dt>
+              <dd><a href={`tel:${viewing.phone}`}>{viewing.phone}</a></dd>
+            </div>
+            <div>
+              <dt>Email</dt>
+              <dd>
+                {#if viewing.email}<a href={`mailto:${viewing.email}`}
+                    >{viewing.email}</a
+                  >{:else}Not provided{/if}
+              </dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd>{viewing.status.replaceAll("_", " ")}</dd>
+            </div>
+            <div>
+              <dt>{section === "applications" ? "Submitted" : "Received"}</dt>
+              <dd>
+                {new Date(viewing.createdAt).toLocaleString("en-BD", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+              </dd>
+            </div>
+            {#if viewing.user}<div>
+                <dt>Member account</dt>
+                <dd>{viewing.user.email}</dd>
+              </div>{/if}
+          </dl>
+        </section>
+        {#if viewing.message}<section>
+            <h3>Message</h3>
+            <p class="message">{viewing.message}</p>
+          </section>{/if}
+        {#each viewingGroups as group}<section>
+            <h3>{group.title}</h3>
+            <dl>
+              {#each group.rows as item}<div>
+                  <dt>{item.label}</dt>
+                  <dd>{item.value}</dd>
+                </div>{/each}
+            </dl>
+          </section>{/each}
+      </div>
+    </div>
+  </div>{/if}
 
 <style>
   .resource {
@@ -647,6 +741,7 @@
   .primary:active,
   .toolbar button:active,
   .delete:active,
+  .view:active,
   .open:active {
     transform: scale(0.97);
   }
@@ -825,6 +920,17 @@
     color: var(--gold-deep);
     font-weight: 750;
   }
+  .view {
+    min-height: 2.2rem;
+    padding: 0 0.8rem;
+    border: 1px solid #d9dfe4;
+    border-radius: 0.55rem;
+    background: #fff;
+    color: var(--heading);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
   .skeleton i {
     display: block;
     height: 0.8rem;
@@ -967,6 +1073,69 @@
     border-top: 1px solid #e0e5e8;
     padding-top: 1rem;
   }
+  .drawer.details {
+    display: flex;
+    flex-direction: column;
+  }
+  .details-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+  .details-body section {
+    background: #fff;
+    border: 1px solid #e0e5e8;
+    border-radius: 0.8rem;
+    padding: 1rem 1.1rem;
+  }
+  .details-body h3 {
+    margin: 0 0 0.6rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+  }
+  .details-body dl {
+    margin: 0;
+  }
+  .details-body dl > div {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-top: 1px solid #edf0f2;
+  }
+  .details-body dl > div:first-child {
+    border-top: 0;
+  }
+  .details-body dt {
+    font-size: 0.74rem;
+    color: #6d7b89;
+    line-height: 1.45;
+  }
+  .details-body dd {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 650;
+    color: #23384f;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+  .details-body dd a {
+    color: var(--gold-deep);
+  }
+  .message {
+    margin: 0;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    color: #23384f;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
   .cancel {
     border: 1px solid #d7dde2;
     background: #fff;
@@ -986,6 +1155,9 @@
     }
     .delete:hover {
       background: #fff1f1;
+    }
+    .view:hover {
+      background: #f4f6f8;
     }
   }
   @keyframes drawer-in {
@@ -1020,6 +1192,10 @@
     }
     .form-grid {
       grid-template-columns: 1fr;
+    }
+    .details-body dl > div {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
     }
   }
   @media (prefers-reduced-motion: reduce) {
