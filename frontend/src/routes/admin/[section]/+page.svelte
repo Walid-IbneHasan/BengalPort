@@ -7,6 +7,7 @@
   import {
     ArrowRight,
     Check,
+    Download,
     ExternalLink,
     FileText,
     Plus,
@@ -18,6 +19,15 @@
   import { detailGroups } from "$lib/submission-details";
   import DocumentList from "$lib/components/DocumentList.svelte";
   import FeeSettings from "$lib/components/FeeSettings.svelte";
+  import SystemStatus from "$lib/components/SystemStatus.svelte";
+  import StaffNotes from "$lib/components/StaffNotes.svelte";
+  import ApplicationEditor from "$lib/components/ApplicationEditor.svelte";
+  import { xlsx } from "$lib/xlsx";
+  import {
+    applicationRows,
+    enquiryRows,
+    exportFileName,
+  } from "$lib/record-export";
   import { taka, type PaymentSummary } from "$lib/payment-rules";
   import {
     blankProgram,
@@ -198,8 +208,12 @@
   let owing: PaymentSummary | null = null;
   let amountDue: number | null = null;
   let savingAmount = false;
+  // Whether the open application's answers are being corrected.
+  let editing = false;
+  let exporting = false;
   async function openDetails(row: any) {
     viewing = row;
+    editing = false;
     owing = null;
     if (section !== "applications") return;
     try {
@@ -227,6 +241,44 @@
       error = e instanceof Error ? e.message : "The amount could not be saved";
     } finally {
       savingAmount = false;
+    }
+  }
+  function applicationSaved(updated: any) {
+    viewing = { ...viewing, ...updated };
+    rows = rows.map((row) => (row.id === updated.id ? { ...row, ...updated } : row));
+    editing = false;
+    success = "Changes saved";
+    setTimeout(() => (success = ""), 1800);
+  }
+  function notesChanged(count: number) {
+    const id = viewing.id;
+    rows = rows.map((row) =>
+      row.id === id ? { ...row, _count: { ...row._count, notes: count } } : row,
+    );
+  }
+  // Downloads every record matching the search, not just the page shown.
+  async function exportRecords() {
+    exporting = true;
+    error = "";
+    try {
+      const all = await api<any[]>(
+        `/admin/resources/${section}${search ? `?search=${encodeURIComponent(search)}` : ""}`,
+      );
+      const sheet =
+        section === "applications" ? applicationRows(all) : enquiryRows(all);
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(
+        new Blob([xlsx(config.title, sheet)], {
+          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }),
+      );
+      link.download = exportFileName(section);
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    } catch (e) {
+      error = e instanceof Error ? e.message : "The export could not be made";
+    } finally {
+      exporting = false;
     }
   }
   $: viewable = ["enquiries", "applications"].includes(section);
@@ -349,7 +401,11 @@
     }
   }
   async function remove(id: string) {
-    if (!confirm("Delete this record? This cannot be undone.")) return;
+    const question =
+      section === "applications"
+        ? "Delete this application with its documents and notes? This cannot be undone."
+        : "Delete this record? This cannot be undone.";
+    if (!confirm(question)) return;
     try {
       await api(`/admin/resources/${section}/${id}`, {
         method: "DELETE",
@@ -456,16 +512,7 @@
           </div>
           <ArrowRight /></a
         >
-        <div class="health">
-          <i></i>
-          <div>
-            <b>System status</b><span
-              >Frontend, Fastify API and PostgreSQL are configured for this
-              workspace.</span
-            >
-          </div>
-          <strong>Operational</strong>
-        </div>
+        <SystemStatus />
       </section>{:else}<div class="toolbar">
         <label
           ><Search size={17} /><input
@@ -473,7 +520,13 @@
             onkeydown={(e) => e.key === "Enter" && goToPage(1)}
             placeholder={`Search ${config.title.toLowerCase()}`}
           /></label
-        ><button onclick={() => goToPage(1)}>Search</button><span
+        ><button onclick={() => goToPage(1)}>Search</button>{#if viewable}<button
+            class="export"
+            disabled={exporting || !meta.total}
+            onclick={exportRecords}
+            ><Download size={16} />
+            {exporting ? "Preparing…" : "Export to Excel"}</button
+          >{/if}<span
           >{meta.total} {meta.total === 1 ? "record" : "records"}</span
         >
       </div>
@@ -540,13 +593,19 @@
                         ></td
                       >{/if}{#if viewable}<td class="actions"
                         ><button class="view" onclick={() => openDetails(row)}
-                          >View</button
-                        >{#if section === "enquiries"}<button
-                            class="delete"
-                            aria-label="Delete enquiry"
-                            onclick={() => remove(row.id)}
-                            ><Trash2 size={16} /></button
-                          >{/if}</td
+                          >View{#if row._count?.notes}<span
+                              class="note-count"
+                              title={`${row._count.notes} staff ${row._count.notes === 1 ? "note" : "notes"}`}
+                              >{row._count.notes}</span
+                            >{/if}</button
+                        ><button
+                          class="delete"
+                          aria-label={section === "enquiries"
+                            ? "Delete enquiry"
+                            : "Delete application"}
+                          onclick={() => remove(row.id)}
+                          ><Trash2 size={16} /></button
+                        ></td
                       >{/if}</tr
                   >{/each}{/if}</tbody
             >
@@ -802,11 +861,31 @@
           >
           <h2 id="details-title">{viewing.reference || viewing.name}</h2>
         </div>
-        <button aria-label="Close" onclick={() => (viewing = null)}
-          ><X /></button
-        >
+        <div class="header-actions">
+          {#if section === "applications" && !editing}<button
+              class="edit-answers"
+              onclick={() => (editing = true)}>Edit answers</button
+            >{/if}
+          <button aria-label="Close" onclick={() => (viewing = null)}
+            ><X /></button
+          >
+        </div>
       </header>
-      <div class="details-body">
+      {#if editing}<div class="details-body">
+          {#key viewing.id}<ApplicationEditor
+              application={viewing}
+              onsaved={applicationSaved}
+              oncancel={() => (editing = false)}
+            />{/key}
+        </div>{:else}<div class="details-body">
+        <section>
+          <h3>Staff notes</h3>
+          {#key viewing.id}<StaffNotes
+              resource={section === "applications" ? "applications" : "enquiries"}
+              id={viewing.id}
+              onchange={notesChanged}
+            />{/key}
+        </section>
         <section>
           <h3>Contact</h3>
           <dl>
@@ -900,7 +979,7 @@
                 </div>{/each}
             </dl>
           </section>{/each}
-      </div>
+      </div>{/if}
     </div>
   </div>{/if}
 
@@ -1014,6 +1093,36 @@
     font-weight: 700;
     color: var(--heading);
   }
+  .toolbar .export {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .toolbar .export:disabled {
+    opacity: 0.5;
+  }
+  .note-count {
+    display: inline-block;
+    min-width: 1.15rem;
+    margin-left: 0.4rem;
+    padding: 0.05rem 0.3rem;
+    border-radius: 1rem;
+    background: #faf0d5;
+    color: #72591e;
+    font-size: 0.66rem;
+    text-align: center;
+  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .drawer header .edit-answers {
+    width: auto;
+    padding: 0 0.9rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
   .toolbar > span {
     margin-left: auto;
     color: #798795;
@@ -1116,7 +1225,7 @@
   }
   .actions {
     text-align: right;
-    width: 5rem;
+    width: 8rem;
     white-space: nowrap;
   }
   .actions button + button {
@@ -1201,8 +1310,7 @@
     gap: 0.8rem;
     max-width: 55rem;
   }
-  .settings > a,
-  .settings > .health {
+  .settings > a {
     background: #fff;
     border: 1px solid #e0e5e8;
     border-radius: 0.9rem;
@@ -1224,18 +1332,6 @@
     font-size: 0.78rem;
     color: var(--muted);
     margin-top: 0.3rem;
-  }
-  .health > i {
-    width: 0.7rem;
-    height: 0.7rem;
-    border-radius: 50%;
-    background: #3b9963;
-    box-shadow: 0 0 0 0.3rem #3b99631c;
-  }
-  .health strong {
-    margin-left: auto;
-    color: #347854;
-    font-size: 0.75rem;
   }
   .backdrop {
     position: fixed;
