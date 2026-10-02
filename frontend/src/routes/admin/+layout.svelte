@@ -93,17 +93,18 @@
   }
 </script>
 
+<svelte:head><meta name="robots" content="noindex" /></svelte:head>
 {#if page.url.pathname === "/admin/content"}
   {@render children()}
 {:else if !ready}
   <div class="admin-loading">
-    <img src="/images/logo.webp" alt="" /><span>Opening admin workspace…</span>
+    <img src="/images/logo-192.webp" alt="" /><span>Opening admin workspace…</span>
   </div>
 {:else}
   <div class="admin-shell">
     <aside class:open={menuOpen}>
       <div class="brand">
-        <img src="/images/logo.webp" alt="Bengal Port" />
+        <img src="/images/logo-192.webp" alt="Bengal Port" />
         <div><b>BENGAL PORT</b><span>Administration</span></div>
         <button aria-label="Close navigation" onclick={() => (menuOpen = false)}
           ><X size={20} /></button

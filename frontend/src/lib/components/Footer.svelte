@@ -7,7 +7,7 @@
   <div class="wrap cols">
     <div>
       <div class="foot-brand">
-        <img src="/images/logo.webp" alt="Bengal Port" /><b>BENGAL PORT</b>
+        <img src="/images/logo-192.webp" alt="Bengal Port" /><b>BENGAL PORT</b>
       </div>
       <p>{$cmsContent.footer.description}</p>
     </div>
@@ -31,8 +31,8 @@
     </div>
   </div>
   <div class="bottom wrap">
-    © {new Date().getFullYear()}
-    {$cmsContent.footer.copyright}
+    <span>© {new Date().getFullYear()} {$cmsContent.footer.copyright}</span>
+    <nav aria-label="Legal"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Use</a></nav>
   </div>
 </footer>
 
@@ -91,6 +91,19 @@
     margin-top: 2.8rem;
     padding-top: 1.25rem;
     font-size: 0.8rem;
+    color: #aebdcb;
+    display: flex;
+    flex-wrap: wrap;
+    /* Kept to the left: the chat button floats over the bottom-right corner. */
+    gap: 0.6rem 2rem;
+  }
+  .bottom nav {
+    display: flex;
+    gap: 1.4rem;
+  }
+  .bottom a {
+    display: inline;
+    margin: 0;
     color: #aebdcb;
   }
   @media (max-width: 47.5rem) {

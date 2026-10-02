@@ -21,7 +21,7 @@
 <section class="section">
   <div class="receipt">
     <header>
-      <img src="/images/logo.webp" alt="Bengal Port" />
+      <img src="/images/logo-192.webp" alt="Bengal Port" />
       <div>
         <h1>PAYMENT RECEIPT</h1>
         <p>Bengal Port · Connecting Bengal to the World</p>

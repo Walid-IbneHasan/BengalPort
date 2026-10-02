@@ -61,7 +61,7 @@
   </div>
   <nav class="nav" aria-label="Main navigation">
     <a class="brand" href="/"
-      ><img src="/images/logo.webp" alt="Bengal Port official logo" /><span
+      ><img src="/images/logo-192.webp" alt="Bengal Port official logo" /><span
         ><b>BENGAL PORT</b><small>Connecting Bengal to the World</small></span
       ></a
     >

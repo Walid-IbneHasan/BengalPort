@@ -167,7 +167,7 @@
 <section class="auth-shell">
   <div class="story">
     <a href="/" class="brand"
-      ><img src="/images/logo.webp" alt="Bengal Port" /><span>BENGAL PORT</span
+      ><img src="/images/logo-192.webp" alt="Bengal Port" /><span>BENGAL PORT</span
       ></a
     >
     <div>
