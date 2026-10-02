@@ -4,12 +4,13 @@
   import { applicationForms, type ApplicationDivision } from "$lib/application-forms";
   import { fieldError } from "$lib/application-validation";
   import DocumentList from "./DocumentList.svelte";
+  import PaymentPanel from "./PaymentPanel.svelte";
   import { ArrowLeft, ArrowRight, Check, ShieldCheck } from "lucide-svelte";
 
   let { division }: { division: ApplicationDivision } = $props();
   let step = $state(0), form = $state<Record<string, any>>({}), sending = $state(false), error = $state(""), reference = $state("");
   // The submitted application and the link that lets its sender attach documents.
-  let submitted = $state<{ id: string; uploadToken: string } | null>(null);
+  let submitted = $state<{ id: string; uploadToken: string; payToken: string; amountDue: string | null } | null>(null);
   let config = $derived(applicationForms[division]);
   let current = $derived(config.steps[step]);
 
@@ -57,8 +58,8 @@
   async function submit() {
     sending = true; error = "";
     try {
-      const result = await api<{ id: string; reference: string; uploadToken: string }>("/applications", { method: "POST", body: JSON.stringify({ division, type: division, fullName: form.fullName, email: form.email, phone: form.phone, details: form }) });
-      submitted = { id: result.id, uploadToken: result.uploadToken };
+      const result = await api<{ id: string; reference: string; uploadToken: string; payToken: string; amountDue: string | null }>("/applications", { method: "POST", body: JSON.stringify({ division, type: division, fullName: form.fullName, email: form.email, phone: form.phone, details: form }) });
+      submitted = { id: result.id, uploadToken: result.uploadToken, payToken: result.payToken, amountDue: result.amountDue };
       reference = result.reference;
       clearDraft();
     } catch (e) { error = e instanceof Error ? e.message : "The application could not be submitted."; }
@@ -68,7 +69,7 @@
 
 <div class="application-shell">
   {#if reference}
-    <section class="complete" aria-live="polite"><i><Check size={30}/></i><span>APPLICATION RECEIVED</span><h2>Thank you, {form.fullName}.</h2><p>Your reference number is <strong>{reference}</strong>. Keep it for future communication with Bengal Port.</p>{#if submitted}<div class="attach"><h3>Attach your documents <small>(optional)</small></h3><p>Passport copy, photograph, certificates or medical reports help us process your application faster. You can also send them to our team later.</p><DocumentList applicationId={submitted.id} uploadToken={submitted.uploadToken} canAttach /></div>{/if}<a class="btn" href="/">RETURN HOME</a></section>
+    <section class="complete" aria-live="polite"><i><Check size={30}/></i><span>APPLICATION RECEIVED</span><h2>Thank you, {form.fullName}.</h2><p>Your reference number is <strong>{reference}</strong>. Keep it for future communication with Bengal Port.</p>{#if submitted?.amountDue}<div class="attach"><PaymentPanel applicationId={submitted.id} token={submitted.payToken} quiet title="Pay now with bKash (optional)" /></div>{/if}{#if submitted}<div class="attach"><h3>Attach your documents <small>(optional)</small></h3><p>Passport copy, photograph, certificates or medical reports help us process your application faster. You can also send them to our team later.</p><DocumentList applicationId={submitted.id} uploadToken={submitted.uploadToken} canAttach /></div>{/if}<a class="btn" href="/">RETURN HOME</a></section>
   {:else}
     <header class="form-header"><div><span>{division} APPLICATION</span><h2>{config.title}</h2><p>{config.intro}</p></div><ShieldCheck size={30}/></header>
     <nav class="progress" aria-label="Application progress">{#each config.steps as item, index}<button type="button" class:active={index===step} class:done={index<step} onclick={() => index < step && (step=index)} aria-current={index===step?"step":undefined}><i>{index<step?"✓":index+1}</i><span>{item.title}</span></button>{/each}</nav>

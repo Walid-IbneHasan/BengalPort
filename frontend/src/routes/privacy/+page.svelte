@@ -32,7 +32,11 @@
       current treatment.
     </li>
     <li><b>Account details</b> if you create a member account: your name, email address, phone number and a protected (hashed) copy of your password, or your Google account identifier and profile picture if you sign in with Google.</li>
-    <li><b>Payment records</b> for payments recorded against your application, and the receipts issued for them.</li>
+    <li>
+      <b>Payment records</b> for payments made or recorded against your application, and the receipts issued for
+      them. Online payments are approved on bKash's own page: we receive the bKash transaction ID and the wallet number
+      that paid, never your PIN.
+    </li>
     <li><b>Technical information</b> our servers record when you use the site, such as your IP address and the time of each request.</li>
   </ul>
   <p>

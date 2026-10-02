@@ -2,7 +2,7 @@ import { apiUrl } from '$lib/config';
 import { fetchData } from '$lib/fetch-data';
 import type { RequestHandler } from './$types';
 
-const pages = ['/', '/about', '/services', '/business', '/education', '/healthcare', '/umrah', '/opportunities', '/apply', '/contact', '/privacy', '/terms'];
+const pages = ['/', '/about', '/services', '/business', '/education', '/healthcare', '/umrah', '/opportunities', '/apply', '/pay', '/contact', '/privacy', '/terms'];
 const escape = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 export const GET: RequestHandler = async ({ url, fetch }) => {

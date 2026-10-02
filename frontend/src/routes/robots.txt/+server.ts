@@ -10,6 +10,7 @@ export const GET: RequestHandler = ({ url }) =>
       'Disallow: /profile',
       'Disallow: /login',
       'Disallow: /receipt',
+      'Disallow: /payment',
       '',
       `Sitemap: ${url.origin}/sitemap.xml`,
       '',

@@ -43,6 +43,24 @@ Settings (backend): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `EMAIL_FROM`, and one
 
 `EMAIL_FROM` should use the same Gmail address, for example `Bengal Port <you@gmail.com>`; Gmail replaces other sender addresses.
 
+## Online payment (bKash)
+
+Paying online is optional for the customer. An enquiry is always free; an application can be paid in full or in part, straight after applying, later from the member dashboard, or without an account on `/pay` using the reference number plus the phone number or email the application was submitted with.
+
+**What an application costs.** In Admin → Settings, each division has a service fee and a smallest part payment. A new application owes its division's fee; leave a fee at 0 if staff quote each application instead. The amount due can be set or changed per application in Admin → Applications → View. Payments recorded by staff (cash, bank transfer) count toward the same balance.
+
+**How a payment works.** The site uses bKash Tokenized Checkout (API v2). The customer is sent to bKash's own page to approve the payment with their wallet PIN and is then sent back. The money is counted only when bKash itself confirms the payment; if that confirmation goes unanswered the payment is checked with bKash again rather than assumed. Each payment gets a receipt, which is emailed to the payer and can be opened through its own link without an account. Refunds are made in the bKash merchant portal and are not recorded automatically.
+
+**Settings (backend).** Online payment stays switched off until all four keys are set:
+
+- `BKASH_USERNAME`, `BKASH_PASSWORD`, `BKASH_APP_KEY`, `BKASH_APP_SECRET`: issued by bKash for your merchant account.
+- `BKASH_BASE_URL`: `https://tokenized.sandbox.bka.sh` for testing (the default), and the live address bKash gives you, normally `https://tokenized.pay.bka.sh`, in production.
+- `API_PUBLIC_URL` must be the public address of the API: bKash sends customers back to `<API_PUBLIC_URL>/api/payments/bkash/callback`, and `FRONTEND_URL` decides which site they then land on.
+
+bKash allows two token requests per hour, so the API stores its token in the database and renews it only when needed. Do not run a second copy of the API with the same bKash credentials against a different database.
+
+**Going live.** bKash normally asks you to complete a set of sandbox test cases with your own sandbox credentials before issuing live ones. Put the sandbox credentials in the API's `.env`, set a small fee, and run a payment through `/apply` and `/pay`; then switch the five `BKASH_*` values to the live ones and restart the API.
+
 ## Production
 
 Production settings for the API:
@@ -72,7 +90,7 @@ To update later, run `npm run package:cpanel` again, upload and extract the new 
 
 `/api/auth`, `/api/enquiries`, `/api/applications`, `/api/opportunities`, `/api/suppliers`, `/api/factories`, `/api/education`, `/api/healthcare`, `/api/payments`, `/api/admin`, `/api/admin/accounts`.
 
-Payments are recorded by an administrator after the money is received (Admin → Payments → Record payment), and each one creates its receipt atomically. There is no online payment provider yet. A receipt can be opened only by an administrator or the customer it belongs to; payments recorded against a member's application appear on their dashboard.
+Payments are either made online through bKash (see [Online payment](#online-payment-bkash)) or recorded by an administrator after money is received another way (Admin → Payments → Record payment). Each one creates its receipt atomically. A receipt can be opened by an administrator, by the member it belongs to, or through the receipt link sent to the payer.
 
 The public enquiry and application endpoints accept 10 submissions per client every 10 minutes, and JSON request bodies are limited to 1 MB.
 

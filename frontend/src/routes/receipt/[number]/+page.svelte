@@ -7,7 +7,10 @@
     signInRequired = false;
   onMount(async () => {
     try {
-      receipt = await api(`/payments/receipt/${page.params.number}`);
+      const key = page.url.searchParams.get("key");
+      receipt = await api(
+        `/payments/receipt/${page.params.number}${key ? `?key=${encodeURIComponent(key)}` : ""}`,
+      );
     } catch (e) {
       signInRequired = e instanceof ApiError && e.status === 401;
       error = signInRequired
@@ -41,14 +44,19 @@
         </p>
         <p>
           Customer <b
-            >{receipt.payment.user?.name ||
-              receipt.payment.application?.fullName ||
+            >{receipt.payment.application?.fullName ||
+              receipt.payment.user?.name ||
               "Customer"}</b
           >
         </p>
         <p>Service <b>{receipt.payment.service}</b></p>
         <p>Payment Method <b>{receipt.payment.method}</b></p>
-        <p>Transaction ID <b>{receipt.payment.transactionId}</b></p>
+        <p>
+          Transaction ID <b
+            >{receipt.payment.gatewayTransactionId ||
+              receipt.payment.transactionId}</b
+          >
+        </p>
       </div>
       <table>
         <tbody

@@ -5,6 +5,7 @@
   import { detailGroups } from "$lib/submission-details";
   import { enquiryTitle, statusInfo } from "$lib/member-activity";
   import DocumentList from "$lib/components/DocumentList.svelte";
+  import PaymentPanel from "$lib/components/PaymentPanel.svelte";
   import { ArrowRight, ChevronDown, ClipboardList, MessageSquare, WalletCards } from "lucide-svelte";
 
   type Activity = { enquiries: any[]; applications: any[]; payments: any[] };
@@ -79,6 +80,7 @@
             </button>
             {#if open === item.id}
               <div class="detail">
+                <div class="money"><PaymentPanel applicationId={item.id} /></div>
                 {#each detailGroups(item.type, item.details) as group}
                   <h3>{group.title}</h3>
                   <dl>{#each group.rows as answer}<div><dt>{answer.label}</dt><dd>{answer.value}</dd></div>{/each}</dl>
@@ -144,7 +146,7 @@
   .row{border-top:1px solid #edf0f2}.summary{display:flex;align-items:center;gap:.9rem;width:100%;padding:.95rem .2rem;border:0;background:none;text-align:left;color:inherit}.main{display:grid;gap:.2rem;flex:1;min-width:0}.main b{color:#1c3b57;font-size:.95rem;overflow-wrap:anywhere}.main small,.amounts small{color:#748391;font-size:.76rem}
   i{flex:none;font-style:normal;font-size:.68rem;font-weight:800;letter-spacing:.04em;padding:.32rem .55rem;border-radius:.45rem;background:#edf0f1;color:#5d6b77}i.progress{background:#faf1da;color:#7a5a12}i.good{background:#e9f7ee;color:#267145}i.bad{background:#fff0f0;color:#91343e}
   .chevron{flex:none;display:grid;color:#7a8893;transition:transform 180ms cubic-bezier(.23,1,.32,1)}.chevron.turned{transform:rotate(180deg)}
-  .detail{padding:.2rem .2rem 1.2rem}.detail h3{margin:1rem 0 .4rem;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#a87618}.detail dl{margin:0}.detail dl>div{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:1rem;padding:.5rem 0;border-top:1px solid #f0f2f4}.detail dt{font-size:.76rem;color:#6d7b89;line-height:1.45}.detail dd{margin:0;font-size:.82rem;font-weight:650;color:#23384f;line-height:1.45;overflow-wrap:anywhere}.message{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.65;color:#33465a}
+  .detail{padding:.2rem .2rem 1.2rem}.money{margin:.4rem 0 .6rem;padding:1rem;border:1px solid #e1e7e9;border-radius:.8rem;background:#f8faf9}.money:empty{display:none}.detail h3{margin:1rem 0 .4rem;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#a87618}.detail dl{margin:0}.detail dl>div{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:1rem;padding:.5rem 0;border-top:1px solid #f0f2f4}.detail dt{font-size:.76rem;color:#6d7b89;line-height:1.45}.detail dd{margin:0;font-size:.82rem;font-weight:650;color:#23384f;line-height:1.45;overflow-wrap:anywhere}.message{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.65;color:#33465a}
   .row.payment{display:flex;flex-wrap:wrap;align-items:center;gap:.9rem;padding:.95rem .2rem}.amounts{display:grid;gap:.2rem;text-align:right}.amounts b{color:#1c3b57;font-size:.9rem}.receipt{display:inline-flex;align-items:center;gap:.35rem;color:#a87618;font-weight:750;font-size:.82rem;text-decoration:none}
   .empty{border-top:1px solid #edf0f2;padding:1.4rem .2rem .4rem;color:#748391;font-size:.86rem}.empty p{margin:0 0 .6rem}.empty a{display:inline-flex;align-items:center;gap:.35rem;color:#a87618;font-weight:750;text-decoration:none}
   @media(hover:hover) and (pointer:fine){.hero-actions .primary:hover{background:#dfb757}.hero-actions .ghost:hover{background:#ffffff14}.summary:hover .main b{color:#a87618}.tiles a:hover{border-color:#d4bd83}}

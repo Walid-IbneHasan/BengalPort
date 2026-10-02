@@ -93,6 +93,14 @@ ADMIN_NOTIFY_EMAIL="you@gmail.com"
 
 GOOGLE_CLIENT_ID=""
 
+# bKash online payment (stays off until all four keys are set). Use the live
+# address and credentials bKash issues for your merchant account.
+BKASH_BASE_URL="https://tokenized.pay.bka.sh"
+BKASH_USERNAME=""
+BKASH_PASSWORD=""
+BKASH_APP_KEY=""
+BKASH_APP_SECRET=""
+
 # Used once by "db:seed" to create the admin account.
 SEED_ADMIN_EMAIL=""
 SEED_ADMIN_PASSWORD=""

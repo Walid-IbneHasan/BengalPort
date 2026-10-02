@@ -17,6 +17,8 @@
   import CmsImageField from "$lib/components/CmsImageField.svelte";
   import { detailGroups } from "$lib/submission-details";
   import DocumentList from "$lib/components/DocumentList.svelte";
+  import FeeSettings from "$lib/components/FeeSettings.svelte";
+  import { taka, type PaymentSummary } from "$lib/payment-rules";
   import {
     blankProgram,
     blankRecord,
@@ -141,7 +143,8 @@
       columns: [
         ["customer", "Customer"],
         ["service", "Service"],
-        ["amount", "Paid"],
+        ["amount", "Amount"],
+        ["method", "Method"],
         ["due", "Remaining due"],
         ["status", "Status"],
         ["createdAt", "Date"],
@@ -191,6 +194,41 @@
   let meta: PageMeta = { total: 0, page: 1, pageSize: PAGE_SIZE };
   // The enquiry or application whose full details are open.
   let viewing: any = null;
+  // What the open application costs, and the amount staff are entering for it.
+  let owing: PaymentSummary | null = null;
+  let amountDue: number | null = null;
+  let savingAmount = false;
+  async function openDetails(row: any) {
+    viewing = row;
+    owing = null;
+    if (section !== "applications") return;
+    try {
+      owing = await api<PaymentSummary>(`/payments/application/${row.id}`, {
+        headers: headers(),
+      });
+      amountDue = owing.amountDue;
+    } catch {
+      // The rest of the application still shows.
+    }
+  }
+  async function saveAmountDue() {
+    savingAmount = true;
+    error = "";
+    try {
+      await api(`/admin/resources/applications/${viewing.id}`, {
+        method: "PATCH",
+        headers: headers(),
+        body: JSON.stringify({
+          amountDue: amountDue === null || amountDue === undefined ? null : Number(amountDue),
+        }),
+      });
+      await openDetails(viewing);
+    } catch (e) {
+      error = e instanceof Error ? e.message : "The amount could not be saved";
+    } finally {
+      savingAmount = false;
+    }
+  }
   $: viewable = ["enquiries", "applications"].includes(section);
   $: viewingGroups = viewing
     ? detailGroups(
@@ -284,10 +322,10 @@
       return `${row._count?.enquiries || 0} enquiries · ${row._count?.applications || 0} applications`;
     if (key === "customer")
       return (
-        row.user?.name ||
         row.application?.fullName ||
-        row.payment?.user?.name ||
+        row.user?.name ||
         row.payment?.application?.fullName ||
+        row.payment?.user?.name ||
         "Walk-in customer"
       );
     if (key === "amount") return money(row.amount || row.payment?.amount);
@@ -402,6 +440,7 @@
       </div>{/if}{#if success}<div class="notice success">
         <Check size={16} />{success}
       </div>{/if}{#if section === "settings"}<section class="settings">
+        <FeeSettings />
         <a href="/admin/content"
           ><div>
             <b>Website content</b><span
@@ -500,7 +539,7 @@
                           ><Trash2 size={16} /></button
                         ></td
                       >{/if}{#if viewable}<td class="actions"
-                        ><button class="view" onclick={() => (viewing = row)}
+                        ><button class="view" onclick={() => openDetails(row)}
                           >View</button
                         >{#if section === "enquiries"}<button
                             class="delete"
@@ -811,6 +850,40 @@
             <p class="message">{viewing.message}</p>
           </section>{/if}
         {#if section === "applications"}<section>
+            <h3>Payment</h3>
+            {#if owing}<dl>
+                <div><dt>Paid</dt><dd>{taka(owing.paid)}</dd></div>
+                <div>
+                  <dt>Remaining</dt>
+                  <dd>{owing.remaining === null ? "Not set" : taka(owing.remaining)}</dd>
+                </div>
+              </dl>
+              <form
+                class="amount-due"
+                onsubmit={(e) => {
+                  e.preventDefault();
+                  saveAmountDue();
+                }}
+              >
+                <label
+                  ><span>Amount due (৳)</span><input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    bind:value={amountDue}
+                    placeholder="Not set"
+                  /></label
+                ><button class="view" disabled={savingAmount}
+                  >{savingAmount ? "Saving…" : "Save amount"}</button
+                >
+              </form>
+              <p class="hint">
+                The total this application costs. The customer can pay it in
+                full or in part{owing.onlinePayment ? " with bKash" : ""} from
+                their dashboard or the Pay page.
+              </p>{:else}<p class="hint">Loading payment details…</p>{/if}
+          </section>
+          <section>
             <h3>Documents</h3>
             {#key viewing.id}<DocumentList
                 applicationId={viewing.id}
@@ -1248,6 +1321,16 @@
     gap: 0.6rem;
     border-top: 1px solid #e0e5e8;
     padding-top: 1rem;
+  }
+  .amount-due {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.6rem;
+    padding: 0.8rem 0 0.5rem;
+    border-top: 1px solid #edf0f2;
+  }
+  .amount-due label {
+    flex: 1;
   }
   .drawer.details {
     display: flex;
