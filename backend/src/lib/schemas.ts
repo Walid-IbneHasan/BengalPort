@@ -280,6 +280,26 @@ const link = z
 const label = z.string().trim().min(1).max(200);
 const image = (fallback: string) =>
   z.preprocess((v) => v || undefined, link.default(fallback));
+const money = z.coerce.number().min(0).max(99_999_999).multipleOf(0.01);
+// What each division charges and the smallest part payment it accepts.
+export const feeSettingsSchema = z.object({
+  fees: z
+    .array(
+      z
+        .object({
+          division: z.enum(["BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH"]),
+          label: z.string().trim().min(1).max(80),
+          amount: money,
+          minimumPayment: money,
+        })
+        .refine((fee) => fee.minimumPayment <= fee.amount, {
+          message: "The smallest part payment cannot be more than the fee",
+        }),
+    )
+    .min(1)
+    .max(4),
+});
+export const amountDueSchema = money.nullable();
 export const partnerSchema = z.object({
   name: label,
   country: label,

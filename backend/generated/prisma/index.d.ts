@@ -84,6 +84,16 @@ export type Payment = $Result.DefaultSelection<Prisma.$PaymentPayload>
  */
 export type Receipt = $Result.DefaultSelection<Prisma.$ReceiptPayload>
 /**
+ * Model ServiceFee
+ * 
+ */
+export type ServiceFee = $Result.DefaultSelection<Prisma.$ServiceFeePayload>
+/**
+ * Model GatewayToken
+ * 
+ */
+export type GatewayToken = $Result.DefaultSelection<Prisma.$GatewayTokenPayload>
+/**
  * Model FinancialCategory
  * 
  */
@@ -482,6 +492,26 @@ export class PrismaClient<
     * ```
     */
   get receipt(): Prisma.ReceiptDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.serviceFee`: Exposes CRUD operations for the **ServiceFee** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ServiceFees
+    * const serviceFees = await prisma.serviceFee.findMany()
+    * ```
+    */
+  get serviceFee(): Prisma.ServiceFeeDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.gatewayToken`: Exposes CRUD operations for the **GatewayToken** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more GatewayTokens
+    * const gatewayTokens = await prisma.gatewayToken.findMany()
+    * ```
+    */
+  get gatewayToken(): Prisma.GatewayTokenDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.financialCategory`: Exposes CRUD operations for the **FinancialCategory** model.
@@ -977,6 +1007,8 @@ export namespace Prisma {
     HealthcareService: 'HealthcareService',
     Payment: 'Payment',
     Receipt: 'Receipt',
+    ServiceFee: 'ServiceFee',
+    GatewayToken: 'GatewayToken',
     FinancialCategory: 'FinancialCategory',
     FinancialTransaction: 'FinancialTransaction',
     PageContent: 'PageContent',
@@ -999,7 +1031,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "authCode" | "enquiry" | "application" | "applicationDocument" | "opportunity" | "supplier" | "factory" | "institution" | "educationProgram" | "hospital" | "healthcareService" | "payment" | "receipt" | "financialCategory" | "financialTransaction" | "pageContent" | "mediaAsset"
+      modelProps: "user" | "authCode" | "enquiry" | "application" | "applicationDocument" | "opportunity" | "supplier" | "factory" | "institution" | "educationProgram" | "hospital" | "healthcareService" | "payment" | "receipt" | "serviceFee" | "gatewayToken" | "financialCategory" | "financialTransaction" | "pageContent" | "mediaAsset"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2039,6 +2071,154 @@ export namespace Prisma {
           }
         }
       }
+      ServiceFee: {
+        payload: Prisma.$ServiceFeePayload<ExtArgs>
+        fields: Prisma.ServiceFeeFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ServiceFeeFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceFeePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ServiceFeeFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceFeePayload>
+          }
+          findFirst: {
+            args: Prisma.ServiceFeeFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceFeePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ServiceFeeFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceFeePayload>
+          }
+          findMany: {
+            args: Prisma.ServiceFeeFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceFeePayload>[]
+          }
+          create: {
+            args: Prisma.ServiceFeeCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceFeePayload>
+          }
+          createMany: {
+            args: Prisma.ServiceFeeCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ServiceFeeCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceFeePayload>[]
+          }
+          delete: {
+            args: Prisma.ServiceFeeDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceFeePayload>
+          }
+          update: {
+            args: Prisma.ServiceFeeUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceFeePayload>
+          }
+          deleteMany: {
+            args: Prisma.ServiceFeeDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ServiceFeeUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ServiceFeeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceFeePayload>[]
+          }
+          upsert: {
+            args: Prisma.ServiceFeeUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ServiceFeePayload>
+          }
+          aggregate: {
+            args: Prisma.ServiceFeeAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateServiceFee>
+          }
+          groupBy: {
+            args: Prisma.ServiceFeeGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ServiceFeeGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ServiceFeeCountArgs<ExtArgs>
+            result: $Utils.Optional<ServiceFeeCountAggregateOutputType> | number
+          }
+        }
+      }
+      GatewayToken: {
+        payload: Prisma.$GatewayTokenPayload<ExtArgs>
+        fields: Prisma.GatewayTokenFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.GatewayTokenFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GatewayTokenPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.GatewayTokenFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GatewayTokenPayload>
+          }
+          findFirst: {
+            args: Prisma.GatewayTokenFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GatewayTokenPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.GatewayTokenFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GatewayTokenPayload>
+          }
+          findMany: {
+            args: Prisma.GatewayTokenFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GatewayTokenPayload>[]
+          }
+          create: {
+            args: Prisma.GatewayTokenCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GatewayTokenPayload>
+          }
+          createMany: {
+            args: Prisma.GatewayTokenCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.GatewayTokenCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GatewayTokenPayload>[]
+          }
+          delete: {
+            args: Prisma.GatewayTokenDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GatewayTokenPayload>
+          }
+          update: {
+            args: Prisma.GatewayTokenUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GatewayTokenPayload>
+          }
+          deleteMany: {
+            args: Prisma.GatewayTokenDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.GatewayTokenUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.GatewayTokenUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GatewayTokenPayload>[]
+          }
+          upsert: {
+            args: Prisma.GatewayTokenUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$GatewayTokenPayload>
+          }
+          aggregate: {
+            args: Prisma.GatewayTokenAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateGatewayToken>
+          }
+          groupBy: {
+            args: Prisma.GatewayTokenGroupByArgs<ExtArgs>
+            result: $Utils.Optional<GatewayTokenGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.GatewayTokenCountArgs<ExtArgs>
+            result: $Utils.Optional<GatewayTokenCountAggregateOutputType> | number
+          }
+        }
+      }
       FinancialCategory: {
         payload: Prisma.$FinancialCategoryPayload<ExtArgs>
         fields: Prisma.FinancialCategoryFieldRefs
@@ -2445,6 +2625,8 @@ export namespace Prisma {
     healthcareService?: HealthcareServiceOmit
     payment?: PaymentOmit
     receipt?: ReceiptOmit
+    serviceFee?: ServiceFeeOmit
+    gatewayToken?: GatewayTokenOmit
     financialCategory?: FinancialCategoryOmit
     financialTransaction?: FinancialTransactionOmit
     pageContent?: PageContentOmit
@@ -6312,8 +6494,18 @@ export namespace Prisma {
 
   export type AggregateApplication = {
     _count: ApplicationCountAggregateOutputType | null
+    _avg: ApplicationAvgAggregateOutputType | null
+    _sum: ApplicationSumAggregateOutputType | null
     _min: ApplicationMinAggregateOutputType | null
     _max: ApplicationMaxAggregateOutputType | null
+  }
+
+  export type ApplicationAvgAggregateOutputType = {
+    amountDue: Decimal | null
+  }
+
+  export type ApplicationSumAggregateOutputType = {
+    amountDue: Decimal | null
   }
 
   export type ApplicationMinAggregateOutputType = {
@@ -6324,6 +6516,7 @@ export namespace Prisma {
     fullName: string | null
     email: string | null
     phone: string | null
+    amountDue: Decimal | null
     userId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -6337,6 +6530,7 @@ export namespace Prisma {
     fullName: string | null
     email: string | null
     phone: string | null
+    amountDue: Decimal | null
     userId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -6351,12 +6545,21 @@ export namespace Prisma {
     email: number
     phone: number
     details: number
+    amountDue: number
     userId: number
     createdAt: number
     updatedAt: number
     _all: number
   }
 
+
+  export type ApplicationAvgAggregateInputType = {
+    amountDue?: true
+  }
+
+  export type ApplicationSumAggregateInputType = {
+    amountDue?: true
+  }
 
   export type ApplicationMinAggregateInputType = {
     id?: true
@@ -6366,6 +6569,7 @@ export namespace Prisma {
     fullName?: true
     email?: true
     phone?: true
+    amountDue?: true
     userId?: true
     createdAt?: true
     updatedAt?: true
@@ -6379,6 +6583,7 @@ export namespace Prisma {
     fullName?: true
     email?: true
     phone?: true
+    amountDue?: true
     userId?: true
     createdAt?: true
     updatedAt?: true
@@ -6393,6 +6598,7 @@ export namespace Prisma {
     email?: true
     phone?: true
     details?: true
+    amountDue?: true
     userId?: true
     createdAt?: true
     updatedAt?: true
@@ -6437,6 +6643,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: ApplicationAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ApplicationSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: ApplicationMinAggregateInputType
@@ -6467,6 +6685,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: ApplicationCountAggregateInputType | true
+    _avg?: ApplicationAvgAggregateInputType
+    _sum?: ApplicationSumAggregateInputType
     _min?: ApplicationMinAggregateInputType
     _max?: ApplicationMaxAggregateInputType
   }
@@ -6480,10 +6700,13 @@ export namespace Prisma {
     email: string
     phone: string
     details: JsonValue
+    amountDue: Decimal | null
     userId: string | null
     createdAt: Date
     updatedAt: Date
     _count: ApplicationCountAggregateOutputType | null
+    _avg: ApplicationAvgAggregateOutputType | null
+    _sum: ApplicationSumAggregateOutputType | null
     _min: ApplicationMinAggregateOutputType | null
     _max: ApplicationMaxAggregateOutputType | null
   }
@@ -6511,6 +6734,7 @@ export namespace Prisma {
     email?: boolean
     phone?: boolean
     details?: boolean
+    amountDue?: boolean
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -6529,6 +6753,7 @@ export namespace Prisma {
     email?: boolean
     phone?: boolean
     details?: boolean
+    amountDue?: boolean
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -6544,6 +6769,7 @@ export namespace Prisma {
     email?: boolean
     phone?: boolean
     details?: boolean
+    amountDue?: boolean
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -6559,12 +6785,13 @@ export namespace Prisma {
     email?: boolean
     phone?: boolean
     details?: boolean
+    amountDue?: boolean
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ApplicationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "reference" | "type" | "status" | "fullName" | "email" | "phone" | "details" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["application"]>
+  export type ApplicationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "reference" | "type" | "status" | "fullName" | "email" | "phone" | "details" | "amountDue" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["application"]>
   export type ApplicationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Application$userArgs<ExtArgs>
     payments?: boolean | Application$paymentsArgs<ExtArgs>
@@ -6594,6 +6821,7 @@ export namespace Prisma {
       email: string
       phone: string
       details: Prisma.JsonValue
+      amountDue: Prisma.Decimal | null
       userId: string | null
       createdAt: Date
       updatedAt: Date
@@ -7031,6 +7259,7 @@ export namespace Prisma {
     readonly email: FieldRef<"Application", 'String'>
     readonly phone: FieldRef<"Application", 'String'>
     readonly details: FieldRef<"Application", 'Json'>
+    readonly amountDue: FieldRef<"Application", 'Decimal'>
     readonly userId: FieldRef<"Application", 'String'>
     readonly createdAt: FieldRef<"Application", 'DateTime'>
     readonly updatedAt: FieldRef<"Application", 'DateTime'>
@@ -16147,6 +16376,11 @@ export namespace Prisma {
     transactionId: string | null
     status: $Enums.PaymentStatus | null
     provider: string | null
+    gatewayPaymentId: string | null
+    gatewayTransactionId: string | null
+    gatewayStatus: string | null
+    gatewaySignature: string | null
+    payerAccount: string | null
     paidAt: Date | null
     createdAt: Date | null
   }
@@ -16162,6 +16396,11 @@ export namespace Prisma {
     transactionId: string | null
     status: $Enums.PaymentStatus | null
     provider: string | null
+    gatewayPaymentId: string | null
+    gatewayTransactionId: string | null
+    gatewayStatus: string | null
+    gatewaySignature: string | null
+    payerAccount: string | null
     paidAt: Date | null
     createdAt: Date | null
   }
@@ -16177,6 +16416,11 @@ export namespace Prisma {
     transactionId: number
     status: number
     provider: number
+    gatewayPaymentId: number
+    gatewayTransactionId: number
+    gatewayStatus: number
+    gatewaySignature: number
+    payerAccount: number
     paidAt: number
     createdAt: number
     _all: number
@@ -16204,6 +16448,11 @@ export namespace Prisma {
     transactionId?: true
     status?: true
     provider?: true
+    gatewayPaymentId?: true
+    gatewayTransactionId?: true
+    gatewayStatus?: true
+    gatewaySignature?: true
+    payerAccount?: true
     paidAt?: true
     createdAt?: true
   }
@@ -16219,6 +16468,11 @@ export namespace Prisma {
     transactionId?: true
     status?: true
     provider?: true
+    gatewayPaymentId?: true
+    gatewayTransactionId?: true
+    gatewayStatus?: true
+    gatewaySignature?: true
+    payerAccount?: true
     paidAt?: true
     createdAt?: true
   }
@@ -16234,6 +16488,11 @@ export namespace Prisma {
     transactionId?: true
     status?: true
     provider?: true
+    gatewayPaymentId?: true
+    gatewayTransactionId?: true
+    gatewayStatus?: true
+    gatewaySignature?: true
+    payerAccount?: true
     paidAt?: true
     createdAt?: true
     _all?: true
@@ -16336,6 +16595,11 @@ export namespace Prisma {
     transactionId: string
     status: $Enums.PaymentStatus
     provider: string
+    gatewayPaymentId: string | null
+    gatewayTransactionId: string | null
+    gatewayStatus: string | null
+    gatewaySignature: string | null
+    payerAccount: string | null
     paidAt: Date | null
     createdAt: Date
     _count: PaymentCountAggregateOutputType | null
@@ -16370,6 +16634,11 @@ export namespace Prisma {
     transactionId?: boolean
     status?: boolean
     provider?: boolean
+    gatewayPaymentId?: boolean
+    gatewayTransactionId?: boolean
+    gatewayStatus?: boolean
+    gatewaySignature?: boolean
+    payerAccount?: boolean
     paidAt?: boolean
     createdAt?: boolean
     user?: boolean | Payment$userArgs<ExtArgs>
@@ -16388,6 +16657,11 @@ export namespace Prisma {
     transactionId?: boolean
     status?: boolean
     provider?: boolean
+    gatewayPaymentId?: boolean
+    gatewayTransactionId?: boolean
+    gatewayStatus?: boolean
+    gatewaySignature?: boolean
+    payerAccount?: boolean
     paidAt?: boolean
     createdAt?: boolean
     user?: boolean | Payment$userArgs<ExtArgs>
@@ -16405,6 +16679,11 @@ export namespace Prisma {
     transactionId?: boolean
     status?: boolean
     provider?: boolean
+    gatewayPaymentId?: boolean
+    gatewayTransactionId?: boolean
+    gatewayStatus?: boolean
+    gatewaySignature?: boolean
+    payerAccount?: boolean
     paidAt?: boolean
     createdAt?: boolean
     user?: boolean | Payment$userArgs<ExtArgs>
@@ -16422,11 +16701,16 @@ export namespace Prisma {
     transactionId?: boolean
     status?: boolean
     provider?: boolean
+    gatewayPaymentId?: boolean
+    gatewayTransactionId?: boolean
+    gatewayStatus?: boolean
+    gatewaySignature?: boolean
+    payerAccount?: boolean
     paidAt?: boolean
     createdAt?: boolean
   }
 
-  export type PaymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "applicationId" | "service" | "amount" | "totalDue" | "method" | "transactionId" | "status" | "provider" | "paidAt" | "createdAt", ExtArgs["result"]["payment"]>
+  export type PaymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "applicationId" | "service" | "amount" | "totalDue" | "method" | "transactionId" | "status" | "provider" | "gatewayPaymentId" | "gatewayTransactionId" | "gatewayStatus" | "gatewaySignature" | "payerAccount" | "paidAt" | "createdAt", ExtArgs["result"]["payment"]>
   export type PaymentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Payment$userArgs<ExtArgs>
     application?: boolean | Payment$applicationArgs<ExtArgs>
@@ -16459,6 +16743,11 @@ export namespace Prisma {
       transactionId: string
       status: $Enums.PaymentStatus
       provider: string
+      gatewayPaymentId: string | null
+      gatewayTransactionId: string | null
+      gatewayStatus: string | null
+      gatewaySignature: string | null
+      payerAccount: string | null
       paidAt: Date | null
       createdAt: Date
     }, ExtArgs["result"]["payment"]>
@@ -16897,6 +17186,11 @@ export namespace Prisma {
     readonly transactionId: FieldRef<"Payment", 'String'>
     readonly status: FieldRef<"Payment", 'PaymentStatus'>
     readonly provider: FieldRef<"Payment", 'String'>
+    readonly gatewayPaymentId: FieldRef<"Payment", 'String'>
+    readonly gatewayTransactionId: FieldRef<"Payment", 'String'>
+    readonly gatewayStatus: FieldRef<"Payment", 'String'>
+    readonly gatewaySignature: FieldRef<"Payment", 'String'>
+    readonly payerAccount: FieldRef<"Payment", 'String'>
     readonly paidAt: FieldRef<"Payment", 'DateTime'>
     readonly createdAt: FieldRef<"Payment", 'DateTime'>
   }
@@ -18476,6 +18770,2034 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ReceiptInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ServiceFee
+   */
+
+  export type AggregateServiceFee = {
+    _count: ServiceFeeCountAggregateOutputType | null
+    _avg: ServiceFeeAvgAggregateOutputType | null
+    _sum: ServiceFeeSumAggregateOutputType | null
+    _min: ServiceFeeMinAggregateOutputType | null
+    _max: ServiceFeeMaxAggregateOutputType | null
+  }
+
+  export type ServiceFeeAvgAggregateOutputType = {
+    amount: Decimal | null
+    minimumPayment: Decimal | null
+  }
+
+  export type ServiceFeeSumAggregateOutputType = {
+    amount: Decimal | null
+    minimumPayment: Decimal | null
+  }
+
+  export type ServiceFeeMinAggregateOutputType = {
+    division: $Enums.ApplicationType | null
+    label: string | null
+    amount: Decimal | null
+    minimumPayment: Decimal | null
+    updatedAt: Date | null
+  }
+
+  export type ServiceFeeMaxAggregateOutputType = {
+    division: $Enums.ApplicationType | null
+    label: string | null
+    amount: Decimal | null
+    minimumPayment: Decimal | null
+    updatedAt: Date | null
+  }
+
+  export type ServiceFeeCountAggregateOutputType = {
+    division: number
+    label: number
+    amount: number
+    minimumPayment: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ServiceFeeAvgAggregateInputType = {
+    amount?: true
+    minimumPayment?: true
+  }
+
+  export type ServiceFeeSumAggregateInputType = {
+    amount?: true
+    minimumPayment?: true
+  }
+
+  export type ServiceFeeMinAggregateInputType = {
+    division?: true
+    label?: true
+    amount?: true
+    minimumPayment?: true
+    updatedAt?: true
+  }
+
+  export type ServiceFeeMaxAggregateInputType = {
+    division?: true
+    label?: true
+    amount?: true
+    minimumPayment?: true
+    updatedAt?: true
+  }
+
+  export type ServiceFeeCountAggregateInputType = {
+    division?: true
+    label?: true
+    amount?: true
+    minimumPayment?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ServiceFeeAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ServiceFee to aggregate.
+     */
+    where?: ServiceFeeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ServiceFees to fetch.
+     */
+    orderBy?: ServiceFeeOrderByWithRelationInput | ServiceFeeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ServiceFeeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ServiceFees from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ServiceFees.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ServiceFees
+    **/
+    _count?: true | ServiceFeeCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ServiceFeeAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ServiceFeeSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ServiceFeeMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ServiceFeeMaxAggregateInputType
+  }
+
+  export type GetServiceFeeAggregateType<T extends ServiceFeeAggregateArgs> = {
+        [P in keyof T & keyof AggregateServiceFee]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateServiceFee[P]>
+      : GetScalarType<T[P], AggregateServiceFee[P]>
+  }
+
+
+
+
+  export type ServiceFeeGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ServiceFeeWhereInput
+    orderBy?: ServiceFeeOrderByWithAggregationInput | ServiceFeeOrderByWithAggregationInput[]
+    by: ServiceFeeScalarFieldEnum[] | ServiceFeeScalarFieldEnum
+    having?: ServiceFeeScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ServiceFeeCountAggregateInputType | true
+    _avg?: ServiceFeeAvgAggregateInputType
+    _sum?: ServiceFeeSumAggregateInputType
+    _min?: ServiceFeeMinAggregateInputType
+    _max?: ServiceFeeMaxAggregateInputType
+  }
+
+  export type ServiceFeeGroupByOutputType = {
+    division: $Enums.ApplicationType
+    label: string
+    amount: Decimal
+    minimumPayment: Decimal
+    updatedAt: Date
+    _count: ServiceFeeCountAggregateOutputType | null
+    _avg: ServiceFeeAvgAggregateOutputType | null
+    _sum: ServiceFeeSumAggregateOutputType | null
+    _min: ServiceFeeMinAggregateOutputType | null
+    _max: ServiceFeeMaxAggregateOutputType | null
+  }
+
+  type GetServiceFeeGroupByPayload<T extends ServiceFeeGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ServiceFeeGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ServiceFeeGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ServiceFeeGroupByOutputType[P]>
+            : GetScalarType<T[P], ServiceFeeGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ServiceFeeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    division?: boolean
+    label?: boolean
+    amount?: boolean
+    minimumPayment?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["serviceFee"]>
+
+  export type ServiceFeeSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    division?: boolean
+    label?: boolean
+    amount?: boolean
+    minimumPayment?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["serviceFee"]>
+
+  export type ServiceFeeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    division?: boolean
+    label?: boolean
+    amount?: boolean
+    minimumPayment?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["serviceFee"]>
+
+  export type ServiceFeeSelectScalar = {
+    division?: boolean
+    label?: boolean
+    amount?: boolean
+    minimumPayment?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ServiceFeeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"division" | "label" | "amount" | "minimumPayment" | "updatedAt", ExtArgs["result"]["serviceFee"]>
+
+  export type $ServiceFeePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ServiceFee"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      division: $Enums.ApplicationType
+      label: string
+      amount: Prisma.Decimal
+      minimumPayment: Prisma.Decimal
+      updatedAt: Date
+    }, ExtArgs["result"]["serviceFee"]>
+    composites: {}
+  }
+
+  type ServiceFeeGetPayload<S extends boolean | null | undefined | ServiceFeeDefaultArgs> = $Result.GetResult<Prisma.$ServiceFeePayload, S>
+
+  type ServiceFeeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ServiceFeeFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ServiceFeeCountAggregateInputType | true
+    }
+
+  export interface ServiceFeeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ServiceFee'], meta: { name: 'ServiceFee' } }
+    /**
+     * Find zero or one ServiceFee that matches the filter.
+     * @param {ServiceFeeFindUniqueArgs} args - Arguments to find a ServiceFee
+     * @example
+     * // Get one ServiceFee
+     * const serviceFee = await prisma.serviceFee.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ServiceFeeFindUniqueArgs>(args: SelectSubset<T, ServiceFeeFindUniqueArgs<ExtArgs>>): Prisma__ServiceFeeClient<$Result.GetResult<Prisma.$ServiceFeePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ServiceFee that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ServiceFeeFindUniqueOrThrowArgs} args - Arguments to find a ServiceFee
+     * @example
+     * // Get one ServiceFee
+     * const serviceFee = await prisma.serviceFee.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ServiceFeeFindUniqueOrThrowArgs>(args: SelectSubset<T, ServiceFeeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ServiceFeeClient<$Result.GetResult<Prisma.$ServiceFeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ServiceFee that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceFeeFindFirstArgs} args - Arguments to find a ServiceFee
+     * @example
+     * // Get one ServiceFee
+     * const serviceFee = await prisma.serviceFee.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ServiceFeeFindFirstArgs>(args?: SelectSubset<T, ServiceFeeFindFirstArgs<ExtArgs>>): Prisma__ServiceFeeClient<$Result.GetResult<Prisma.$ServiceFeePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ServiceFee that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceFeeFindFirstOrThrowArgs} args - Arguments to find a ServiceFee
+     * @example
+     * // Get one ServiceFee
+     * const serviceFee = await prisma.serviceFee.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ServiceFeeFindFirstOrThrowArgs>(args?: SelectSubset<T, ServiceFeeFindFirstOrThrowArgs<ExtArgs>>): Prisma__ServiceFeeClient<$Result.GetResult<Prisma.$ServiceFeePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ServiceFees that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceFeeFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ServiceFees
+     * const serviceFees = await prisma.serviceFee.findMany()
+     * 
+     * // Get first 10 ServiceFees
+     * const serviceFees = await prisma.serviceFee.findMany({ take: 10 })
+     * 
+     * // Only select the `label`
+     * const serviceFeeWithLabelOnly = await prisma.serviceFee.findMany({ select: { label: true } })
+     * 
+     */
+    findMany<T extends ServiceFeeFindManyArgs>(args?: SelectSubset<T, ServiceFeeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceFeePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ServiceFee.
+     * @param {ServiceFeeCreateArgs} args - Arguments to create a ServiceFee.
+     * @example
+     * // Create one ServiceFee
+     * const ServiceFee = await prisma.serviceFee.create({
+     *   data: {
+     *     // ... data to create a ServiceFee
+     *   }
+     * })
+     * 
+     */
+    create<T extends ServiceFeeCreateArgs>(args: SelectSubset<T, ServiceFeeCreateArgs<ExtArgs>>): Prisma__ServiceFeeClient<$Result.GetResult<Prisma.$ServiceFeePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ServiceFees.
+     * @param {ServiceFeeCreateManyArgs} args - Arguments to create many ServiceFees.
+     * @example
+     * // Create many ServiceFees
+     * const serviceFee = await prisma.serviceFee.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ServiceFeeCreateManyArgs>(args?: SelectSubset<T, ServiceFeeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ServiceFees and returns the data saved in the database.
+     * @param {ServiceFeeCreateManyAndReturnArgs} args - Arguments to create many ServiceFees.
+     * @example
+     * // Create many ServiceFees
+     * const serviceFee = await prisma.serviceFee.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ServiceFees and only return the `label`
+     * const serviceFeeWithLabelOnly = await prisma.serviceFee.createManyAndReturn({
+     *   select: { label: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ServiceFeeCreateManyAndReturnArgs>(args?: SelectSubset<T, ServiceFeeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceFeePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ServiceFee.
+     * @param {ServiceFeeDeleteArgs} args - Arguments to delete one ServiceFee.
+     * @example
+     * // Delete one ServiceFee
+     * const ServiceFee = await prisma.serviceFee.delete({
+     *   where: {
+     *     // ... filter to delete one ServiceFee
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ServiceFeeDeleteArgs>(args: SelectSubset<T, ServiceFeeDeleteArgs<ExtArgs>>): Prisma__ServiceFeeClient<$Result.GetResult<Prisma.$ServiceFeePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ServiceFee.
+     * @param {ServiceFeeUpdateArgs} args - Arguments to update one ServiceFee.
+     * @example
+     * // Update one ServiceFee
+     * const serviceFee = await prisma.serviceFee.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ServiceFeeUpdateArgs>(args: SelectSubset<T, ServiceFeeUpdateArgs<ExtArgs>>): Prisma__ServiceFeeClient<$Result.GetResult<Prisma.$ServiceFeePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ServiceFees.
+     * @param {ServiceFeeDeleteManyArgs} args - Arguments to filter ServiceFees to delete.
+     * @example
+     * // Delete a few ServiceFees
+     * const { count } = await prisma.serviceFee.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ServiceFeeDeleteManyArgs>(args?: SelectSubset<T, ServiceFeeDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ServiceFees.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceFeeUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ServiceFees
+     * const serviceFee = await prisma.serviceFee.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ServiceFeeUpdateManyArgs>(args: SelectSubset<T, ServiceFeeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ServiceFees and returns the data updated in the database.
+     * @param {ServiceFeeUpdateManyAndReturnArgs} args - Arguments to update many ServiceFees.
+     * @example
+     * // Update many ServiceFees
+     * const serviceFee = await prisma.serviceFee.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ServiceFees and only return the `label`
+     * const serviceFeeWithLabelOnly = await prisma.serviceFee.updateManyAndReturn({
+     *   select: { label: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ServiceFeeUpdateManyAndReturnArgs>(args: SelectSubset<T, ServiceFeeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServiceFeePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ServiceFee.
+     * @param {ServiceFeeUpsertArgs} args - Arguments to update or create a ServiceFee.
+     * @example
+     * // Update or create a ServiceFee
+     * const serviceFee = await prisma.serviceFee.upsert({
+     *   create: {
+     *     // ... data to create a ServiceFee
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ServiceFee we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ServiceFeeUpsertArgs>(args: SelectSubset<T, ServiceFeeUpsertArgs<ExtArgs>>): Prisma__ServiceFeeClient<$Result.GetResult<Prisma.$ServiceFeePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ServiceFees.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceFeeCountArgs} args - Arguments to filter ServiceFees to count.
+     * @example
+     * // Count the number of ServiceFees
+     * const count = await prisma.serviceFee.count({
+     *   where: {
+     *     // ... the filter for the ServiceFees we want to count
+     *   }
+     * })
+    **/
+    count<T extends ServiceFeeCountArgs>(
+      args?: Subset<T, ServiceFeeCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ServiceFeeCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ServiceFee.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceFeeAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ServiceFeeAggregateArgs>(args: Subset<T, ServiceFeeAggregateArgs>): Prisma.PrismaPromise<GetServiceFeeAggregateType<T>>
+
+    /**
+     * Group by ServiceFee.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ServiceFeeGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ServiceFeeGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ServiceFeeGroupByArgs['orderBy'] }
+        : { orderBy?: ServiceFeeGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ServiceFeeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetServiceFeeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ServiceFee model
+   */
+  readonly fields: ServiceFeeFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ServiceFee.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ServiceFeeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ServiceFee model
+   */
+  interface ServiceFeeFieldRefs {
+    readonly division: FieldRef<"ServiceFee", 'ApplicationType'>
+    readonly label: FieldRef<"ServiceFee", 'String'>
+    readonly amount: FieldRef<"ServiceFee", 'Decimal'>
+    readonly minimumPayment: FieldRef<"ServiceFee", 'Decimal'>
+    readonly updatedAt: FieldRef<"ServiceFee", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ServiceFee findUnique
+   */
+  export type ServiceFeeFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceFee
+     */
+    select?: ServiceFeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceFee
+     */
+    omit?: ServiceFeeOmit<ExtArgs> | null
+    /**
+     * Filter, which ServiceFee to fetch.
+     */
+    where: ServiceFeeWhereUniqueInput
+  }
+
+  /**
+   * ServiceFee findUniqueOrThrow
+   */
+  export type ServiceFeeFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceFee
+     */
+    select?: ServiceFeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceFee
+     */
+    omit?: ServiceFeeOmit<ExtArgs> | null
+    /**
+     * Filter, which ServiceFee to fetch.
+     */
+    where: ServiceFeeWhereUniqueInput
+  }
+
+  /**
+   * ServiceFee findFirst
+   */
+  export type ServiceFeeFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceFee
+     */
+    select?: ServiceFeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceFee
+     */
+    omit?: ServiceFeeOmit<ExtArgs> | null
+    /**
+     * Filter, which ServiceFee to fetch.
+     */
+    where?: ServiceFeeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ServiceFees to fetch.
+     */
+    orderBy?: ServiceFeeOrderByWithRelationInput | ServiceFeeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ServiceFees.
+     */
+    cursor?: ServiceFeeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ServiceFees from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ServiceFees.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ServiceFees.
+     */
+    distinct?: ServiceFeeScalarFieldEnum | ServiceFeeScalarFieldEnum[]
+  }
+
+  /**
+   * ServiceFee findFirstOrThrow
+   */
+  export type ServiceFeeFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceFee
+     */
+    select?: ServiceFeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceFee
+     */
+    omit?: ServiceFeeOmit<ExtArgs> | null
+    /**
+     * Filter, which ServiceFee to fetch.
+     */
+    where?: ServiceFeeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ServiceFees to fetch.
+     */
+    orderBy?: ServiceFeeOrderByWithRelationInput | ServiceFeeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ServiceFees.
+     */
+    cursor?: ServiceFeeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ServiceFees from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ServiceFees.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ServiceFees.
+     */
+    distinct?: ServiceFeeScalarFieldEnum | ServiceFeeScalarFieldEnum[]
+  }
+
+  /**
+   * ServiceFee findMany
+   */
+  export type ServiceFeeFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceFee
+     */
+    select?: ServiceFeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceFee
+     */
+    omit?: ServiceFeeOmit<ExtArgs> | null
+    /**
+     * Filter, which ServiceFees to fetch.
+     */
+    where?: ServiceFeeWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ServiceFees to fetch.
+     */
+    orderBy?: ServiceFeeOrderByWithRelationInput | ServiceFeeOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ServiceFees.
+     */
+    cursor?: ServiceFeeWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ServiceFees from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ServiceFees.
+     */
+    skip?: number
+    distinct?: ServiceFeeScalarFieldEnum | ServiceFeeScalarFieldEnum[]
+  }
+
+  /**
+   * ServiceFee create
+   */
+  export type ServiceFeeCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceFee
+     */
+    select?: ServiceFeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceFee
+     */
+    omit?: ServiceFeeOmit<ExtArgs> | null
+    /**
+     * The data needed to create a ServiceFee.
+     */
+    data: XOR<ServiceFeeCreateInput, ServiceFeeUncheckedCreateInput>
+  }
+
+  /**
+   * ServiceFee createMany
+   */
+  export type ServiceFeeCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ServiceFees.
+     */
+    data: ServiceFeeCreateManyInput | ServiceFeeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ServiceFee createManyAndReturn
+   */
+  export type ServiceFeeCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceFee
+     */
+    select?: ServiceFeeSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceFee
+     */
+    omit?: ServiceFeeOmit<ExtArgs> | null
+    /**
+     * The data used to create many ServiceFees.
+     */
+    data: ServiceFeeCreateManyInput | ServiceFeeCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ServiceFee update
+   */
+  export type ServiceFeeUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceFee
+     */
+    select?: ServiceFeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceFee
+     */
+    omit?: ServiceFeeOmit<ExtArgs> | null
+    /**
+     * The data needed to update a ServiceFee.
+     */
+    data: XOR<ServiceFeeUpdateInput, ServiceFeeUncheckedUpdateInput>
+    /**
+     * Choose, which ServiceFee to update.
+     */
+    where: ServiceFeeWhereUniqueInput
+  }
+
+  /**
+   * ServiceFee updateMany
+   */
+  export type ServiceFeeUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ServiceFees.
+     */
+    data: XOR<ServiceFeeUpdateManyMutationInput, ServiceFeeUncheckedUpdateManyInput>
+    /**
+     * Filter which ServiceFees to update
+     */
+    where?: ServiceFeeWhereInput
+    /**
+     * Limit how many ServiceFees to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ServiceFee updateManyAndReturn
+   */
+  export type ServiceFeeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceFee
+     */
+    select?: ServiceFeeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceFee
+     */
+    omit?: ServiceFeeOmit<ExtArgs> | null
+    /**
+     * The data used to update ServiceFees.
+     */
+    data: XOR<ServiceFeeUpdateManyMutationInput, ServiceFeeUncheckedUpdateManyInput>
+    /**
+     * Filter which ServiceFees to update
+     */
+    where?: ServiceFeeWhereInput
+    /**
+     * Limit how many ServiceFees to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ServiceFee upsert
+   */
+  export type ServiceFeeUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceFee
+     */
+    select?: ServiceFeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceFee
+     */
+    omit?: ServiceFeeOmit<ExtArgs> | null
+    /**
+     * The filter to search for the ServiceFee to update in case it exists.
+     */
+    where: ServiceFeeWhereUniqueInput
+    /**
+     * In case the ServiceFee found by the `where` argument doesn't exist, create a new ServiceFee with this data.
+     */
+    create: XOR<ServiceFeeCreateInput, ServiceFeeUncheckedCreateInput>
+    /**
+     * In case the ServiceFee was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ServiceFeeUpdateInput, ServiceFeeUncheckedUpdateInput>
+  }
+
+  /**
+   * ServiceFee delete
+   */
+  export type ServiceFeeDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceFee
+     */
+    select?: ServiceFeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceFee
+     */
+    omit?: ServiceFeeOmit<ExtArgs> | null
+    /**
+     * Filter which ServiceFee to delete.
+     */
+    where: ServiceFeeWhereUniqueInput
+  }
+
+  /**
+   * ServiceFee deleteMany
+   */
+  export type ServiceFeeDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ServiceFees to delete
+     */
+    where?: ServiceFeeWhereInput
+    /**
+     * Limit how many ServiceFees to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ServiceFee without action
+   */
+  export type ServiceFeeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ServiceFee
+     */
+    select?: ServiceFeeSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ServiceFee
+     */
+    omit?: ServiceFeeOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model GatewayToken
+   */
+
+  export type AggregateGatewayToken = {
+    _count: GatewayTokenCountAggregateOutputType | null
+    _min: GatewayTokenMinAggregateOutputType | null
+    _max: GatewayTokenMaxAggregateOutputType | null
+  }
+
+  export type GatewayTokenMinAggregateOutputType = {
+    provider: string | null
+    idToken: string | null
+    refreshToken: string | null
+    expiresAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GatewayTokenMaxAggregateOutputType = {
+    provider: string | null
+    idToken: string | null
+    refreshToken: string | null
+    expiresAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type GatewayTokenCountAggregateOutputType = {
+    provider: number
+    idToken: number
+    refreshToken: number
+    expiresAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type GatewayTokenMinAggregateInputType = {
+    provider?: true
+    idToken?: true
+    refreshToken?: true
+    expiresAt?: true
+    updatedAt?: true
+  }
+
+  export type GatewayTokenMaxAggregateInputType = {
+    provider?: true
+    idToken?: true
+    refreshToken?: true
+    expiresAt?: true
+    updatedAt?: true
+  }
+
+  export type GatewayTokenCountAggregateInputType = {
+    provider?: true
+    idToken?: true
+    refreshToken?: true
+    expiresAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type GatewayTokenAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GatewayToken to aggregate.
+     */
+    where?: GatewayTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GatewayTokens to fetch.
+     */
+    orderBy?: GatewayTokenOrderByWithRelationInput | GatewayTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: GatewayTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GatewayTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GatewayTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned GatewayTokens
+    **/
+    _count?: true | GatewayTokenCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: GatewayTokenMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: GatewayTokenMaxAggregateInputType
+  }
+
+  export type GetGatewayTokenAggregateType<T extends GatewayTokenAggregateArgs> = {
+        [P in keyof T & keyof AggregateGatewayToken]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateGatewayToken[P]>
+      : GetScalarType<T[P], AggregateGatewayToken[P]>
+  }
+
+
+
+
+  export type GatewayTokenGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: GatewayTokenWhereInput
+    orderBy?: GatewayTokenOrderByWithAggregationInput | GatewayTokenOrderByWithAggregationInput[]
+    by: GatewayTokenScalarFieldEnum[] | GatewayTokenScalarFieldEnum
+    having?: GatewayTokenScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: GatewayTokenCountAggregateInputType | true
+    _min?: GatewayTokenMinAggregateInputType
+    _max?: GatewayTokenMaxAggregateInputType
+  }
+
+  export type GatewayTokenGroupByOutputType = {
+    provider: string
+    idToken: string
+    refreshToken: string
+    expiresAt: Date
+    updatedAt: Date
+    _count: GatewayTokenCountAggregateOutputType | null
+    _min: GatewayTokenMinAggregateOutputType | null
+    _max: GatewayTokenMaxAggregateOutputType | null
+  }
+
+  type GetGatewayTokenGroupByPayload<T extends GatewayTokenGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<GatewayTokenGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof GatewayTokenGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], GatewayTokenGroupByOutputType[P]>
+            : GetScalarType<T[P], GatewayTokenGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type GatewayTokenSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    provider?: boolean
+    idToken?: boolean
+    refreshToken?: boolean
+    expiresAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gatewayToken"]>
+
+  export type GatewayTokenSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    provider?: boolean
+    idToken?: boolean
+    refreshToken?: boolean
+    expiresAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gatewayToken"]>
+
+  export type GatewayTokenSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    provider?: boolean
+    idToken?: boolean
+    refreshToken?: boolean
+    expiresAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["gatewayToken"]>
+
+  export type GatewayTokenSelectScalar = {
+    provider?: boolean
+    idToken?: boolean
+    refreshToken?: boolean
+    expiresAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type GatewayTokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"provider" | "idToken" | "refreshToken" | "expiresAt" | "updatedAt", ExtArgs["result"]["gatewayToken"]>
+
+  export type $GatewayTokenPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "GatewayToken"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      provider: string
+      idToken: string
+      refreshToken: string
+      expiresAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["gatewayToken"]>
+    composites: {}
+  }
+
+  type GatewayTokenGetPayload<S extends boolean | null | undefined | GatewayTokenDefaultArgs> = $Result.GetResult<Prisma.$GatewayTokenPayload, S>
+
+  type GatewayTokenCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<GatewayTokenFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: GatewayTokenCountAggregateInputType | true
+    }
+
+  export interface GatewayTokenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GatewayToken'], meta: { name: 'GatewayToken' } }
+    /**
+     * Find zero or one GatewayToken that matches the filter.
+     * @param {GatewayTokenFindUniqueArgs} args - Arguments to find a GatewayToken
+     * @example
+     * // Get one GatewayToken
+     * const gatewayToken = await prisma.gatewayToken.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends GatewayTokenFindUniqueArgs>(args: SelectSubset<T, GatewayTokenFindUniqueArgs<ExtArgs>>): Prisma__GatewayTokenClient<$Result.GetResult<Prisma.$GatewayTokenPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one GatewayToken that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {GatewayTokenFindUniqueOrThrowArgs} args - Arguments to find a GatewayToken
+     * @example
+     * // Get one GatewayToken
+     * const gatewayToken = await prisma.gatewayToken.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends GatewayTokenFindUniqueOrThrowArgs>(args: SelectSubset<T, GatewayTokenFindUniqueOrThrowArgs<ExtArgs>>): Prisma__GatewayTokenClient<$Result.GetResult<Prisma.$GatewayTokenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GatewayToken that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GatewayTokenFindFirstArgs} args - Arguments to find a GatewayToken
+     * @example
+     * // Get one GatewayToken
+     * const gatewayToken = await prisma.gatewayToken.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends GatewayTokenFindFirstArgs>(args?: SelectSubset<T, GatewayTokenFindFirstArgs<ExtArgs>>): Prisma__GatewayTokenClient<$Result.GetResult<Prisma.$GatewayTokenPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first GatewayToken that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GatewayTokenFindFirstOrThrowArgs} args - Arguments to find a GatewayToken
+     * @example
+     * // Get one GatewayToken
+     * const gatewayToken = await prisma.gatewayToken.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends GatewayTokenFindFirstOrThrowArgs>(args?: SelectSubset<T, GatewayTokenFindFirstOrThrowArgs<ExtArgs>>): Prisma__GatewayTokenClient<$Result.GetResult<Prisma.$GatewayTokenPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more GatewayTokens that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GatewayTokenFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all GatewayTokens
+     * const gatewayTokens = await prisma.gatewayToken.findMany()
+     * 
+     * // Get first 10 GatewayTokens
+     * const gatewayTokens = await prisma.gatewayToken.findMany({ take: 10 })
+     * 
+     * // Only select the `provider`
+     * const gatewayTokenWithProviderOnly = await prisma.gatewayToken.findMany({ select: { provider: true } })
+     * 
+     */
+    findMany<T extends GatewayTokenFindManyArgs>(args?: SelectSubset<T, GatewayTokenFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GatewayTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a GatewayToken.
+     * @param {GatewayTokenCreateArgs} args - Arguments to create a GatewayToken.
+     * @example
+     * // Create one GatewayToken
+     * const GatewayToken = await prisma.gatewayToken.create({
+     *   data: {
+     *     // ... data to create a GatewayToken
+     *   }
+     * })
+     * 
+     */
+    create<T extends GatewayTokenCreateArgs>(args: SelectSubset<T, GatewayTokenCreateArgs<ExtArgs>>): Prisma__GatewayTokenClient<$Result.GetResult<Prisma.$GatewayTokenPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many GatewayTokens.
+     * @param {GatewayTokenCreateManyArgs} args - Arguments to create many GatewayTokens.
+     * @example
+     * // Create many GatewayTokens
+     * const gatewayToken = await prisma.gatewayToken.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends GatewayTokenCreateManyArgs>(args?: SelectSubset<T, GatewayTokenCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many GatewayTokens and returns the data saved in the database.
+     * @param {GatewayTokenCreateManyAndReturnArgs} args - Arguments to create many GatewayTokens.
+     * @example
+     * // Create many GatewayTokens
+     * const gatewayToken = await prisma.gatewayToken.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many GatewayTokens and only return the `provider`
+     * const gatewayTokenWithProviderOnly = await prisma.gatewayToken.createManyAndReturn({
+     *   select: { provider: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends GatewayTokenCreateManyAndReturnArgs>(args?: SelectSubset<T, GatewayTokenCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GatewayTokenPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a GatewayToken.
+     * @param {GatewayTokenDeleteArgs} args - Arguments to delete one GatewayToken.
+     * @example
+     * // Delete one GatewayToken
+     * const GatewayToken = await prisma.gatewayToken.delete({
+     *   where: {
+     *     // ... filter to delete one GatewayToken
+     *   }
+     * })
+     * 
+     */
+    delete<T extends GatewayTokenDeleteArgs>(args: SelectSubset<T, GatewayTokenDeleteArgs<ExtArgs>>): Prisma__GatewayTokenClient<$Result.GetResult<Prisma.$GatewayTokenPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one GatewayToken.
+     * @param {GatewayTokenUpdateArgs} args - Arguments to update one GatewayToken.
+     * @example
+     * // Update one GatewayToken
+     * const gatewayToken = await prisma.gatewayToken.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends GatewayTokenUpdateArgs>(args: SelectSubset<T, GatewayTokenUpdateArgs<ExtArgs>>): Prisma__GatewayTokenClient<$Result.GetResult<Prisma.$GatewayTokenPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more GatewayTokens.
+     * @param {GatewayTokenDeleteManyArgs} args - Arguments to filter GatewayTokens to delete.
+     * @example
+     * // Delete a few GatewayTokens
+     * const { count } = await prisma.gatewayToken.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends GatewayTokenDeleteManyArgs>(args?: SelectSubset<T, GatewayTokenDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GatewayTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GatewayTokenUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many GatewayTokens
+     * const gatewayToken = await prisma.gatewayToken.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends GatewayTokenUpdateManyArgs>(args: SelectSubset<T, GatewayTokenUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more GatewayTokens and returns the data updated in the database.
+     * @param {GatewayTokenUpdateManyAndReturnArgs} args - Arguments to update many GatewayTokens.
+     * @example
+     * // Update many GatewayTokens
+     * const gatewayToken = await prisma.gatewayToken.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more GatewayTokens and only return the `provider`
+     * const gatewayTokenWithProviderOnly = await prisma.gatewayToken.updateManyAndReturn({
+     *   select: { provider: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends GatewayTokenUpdateManyAndReturnArgs>(args: SelectSubset<T, GatewayTokenUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GatewayTokenPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one GatewayToken.
+     * @param {GatewayTokenUpsertArgs} args - Arguments to update or create a GatewayToken.
+     * @example
+     * // Update or create a GatewayToken
+     * const gatewayToken = await prisma.gatewayToken.upsert({
+     *   create: {
+     *     // ... data to create a GatewayToken
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the GatewayToken we want to update
+     *   }
+     * })
+     */
+    upsert<T extends GatewayTokenUpsertArgs>(args: SelectSubset<T, GatewayTokenUpsertArgs<ExtArgs>>): Prisma__GatewayTokenClient<$Result.GetResult<Prisma.$GatewayTokenPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of GatewayTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GatewayTokenCountArgs} args - Arguments to filter GatewayTokens to count.
+     * @example
+     * // Count the number of GatewayTokens
+     * const count = await prisma.gatewayToken.count({
+     *   where: {
+     *     // ... the filter for the GatewayTokens we want to count
+     *   }
+     * })
+    **/
+    count<T extends GatewayTokenCountArgs>(
+      args?: Subset<T, GatewayTokenCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], GatewayTokenCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a GatewayToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GatewayTokenAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends GatewayTokenAggregateArgs>(args: Subset<T, GatewayTokenAggregateArgs>): Prisma.PrismaPromise<GetGatewayTokenAggregateType<T>>
+
+    /**
+     * Group by GatewayToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {GatewayTokenGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends GatewayTokenGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: GatewayTokenGroupByArgs['orderBy'] }
+        : { orderBy?: GatewayTokenGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, GatewayTokenGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetGatewayTokenGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the GatewayToken model
+   */
+  readonly fields: GatewayTokenFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for GatewayToken.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__GatewayTokenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the GatewayToken model
+   */
+  interface GatewayTokenFieldRefs {
+    readonly provider: FieldRef<"GatewayToken", 'String'>
+    readonly idToken: FieldRef<"GatewayToken", 'String'>
+    readonly refreshToken: FieldRef<"GatewayToken", 'String'>
+    readonly expiresAt: FieldRef<"GatewayToken", 'DateTime'>
+    readonly updatedAt: FieldRef<"GatewayToken", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * GatewayToken findUnique
+   */
+  export type GatewayTokenFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GatewayToken
+     */
+    select?: GatewayTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GatewayToken
+     */
+    omit?: GatewayTokenOmit<ExtArgs> | null
+    /**
+     * Filter, which GatewayToken to fetch.
+     */
+    where: GatewayTokenWhereUniqueInput
+  }
+
+  /**
+   * GatewayToken findUniqueOrThrow
+   */
+  export type GatewayTokenFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GatewayToken
+     */
+    select?: GatewayTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GatewayToken
+     */
+    omit?: GatewayTokenOmit<ExtArgs> | null
+    /**
+     * Filter, which GatewayToken to fetch.
+     */
+    where: GatewayTokenWhereUniqueInput
+  }
+
+  /**
+   * GatewayToken findFirst
+   */
+  export type GatewayTokenFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GatewayToken
+     */
+    select?: GatewayTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GatewayToken
+     */
+    omit?: GatewayTokenOmit<ExtArgs> | null
+    /**
+     * Filter, which GatewayToken to fetch.
+     */
+    where?: GatewayTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GatewayTokens to fetch.
+     */
+    orderBy?: GatewayTokenOrderByWithRelationInput | GatewayTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GatewayTokens.
+     */
+    cursor?: GatewayTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GatewayTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GatewayTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GatewayTokens.
+     */
+    distinct?: GatewayTokenScalarFieldEnum | GatewayTokenScalarFieldEnum[]
+  }
+
+  /**
+   * GatewayToken findFirstOrThrow
+   */
+  export type GatewayTokenFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GatewayToken
+     */
+    select?: GatewayTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GatewayToken
+     */
+    omit?: GatewayTokenOmit<ExtArgs> | null
+    /**
+     * Filter, which GatewayToken to fetch.
+     */
+    where?: GatewayTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GatewayTokens to fetch.
+     */
+    orderBy?: GatewayTokenOrderByWithRelationInput | GatewayTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for GatewayTokens.
+     */
+    cursor?: GatewayTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GatewayTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GatewayTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of GatewayTokens.
+     */
+    distinct?: GatewayTokenScalarFieldEnum | GatewayTokenScalarFieldEnum[]
+  }
+
+  /**
+   * GatewayToken findMany
+   */
+  export type GatewayTokenFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GatewayToken
+     */
+    select?: GatewayTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GatewayToken
+     */
+    omit?: GatewayTokenOmit<ExtArgs> | null
+    /**
+     * Filter, which GatewayTokens to fetch.
+     */
+    where?: GatewayTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of GatewayTokens to fetch.
+     */
+    orderBy?: GatewayTokenOrderByWithRelationInput | GatewayTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing GatewayTokens.
+     */
+    cursor?: GatewayTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` GatewayTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` GatewayTokens.
+     */
+    skip?: number
+    distinct?: GatewayTokenScalarFieldEnum | GatewayTokenScalarFieldEnum[]
+  }
+
+  /**
+   * GatewayToken create
+   */
+  export type GatewayTokenCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GatewayToken
+     */
+    select?: GatewayTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GatewayToken
+     */
+    omit?: GatewayTokenOmit<ExtArgs> | null
+    /**
+     * The data needed to create a GatewayToken.
+     */
+    data: XOR<GatewayTokenCreateInput, GatewayTokenUncheckedCreateInput>
+  }
+
+  /**
+   * GatewayToken createMany
+   */
+  export type GatewayTokenCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many GatewayTokens.
+     */
+    data: GatewayTokenCreateManyInput | GatewayTokenCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GatewayToken createManyAndReturn
+   */
+  export type GatewayTokenCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GatewayToken
+     */
+    select?: GatewayTokenSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GatewayToken
+     */
+    omit?: GatewayTokenOmit<ExtArgs> | null
+    /**
+     * The data used to create many GatewayTokens.
+     */
+    data: GatewayTokenCreateManyInput | GatewayTokenCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * GatewayToken update
+   */
+  export type GatewayTokenUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GatewayToken
+     */
+    select?: GatewayTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GatewayToken
+     */
+    omit?: GatewayTokenOmit<ExtArgs> | null
+    /**
+     * The data needed to update a GatewayToken.
+     */
+    data: XOR<GatewayTokenUpdateInput, GatewayTokenUncheckedUpdateInput>
+    /**
+     * Choose, which GatewayToken to update.
+     */
+    where: GatewayTokenWhereUniqueInput
+  }
+
+  /**
+   * GatewayToken updateMany
+   */
+  export type GatewayTokenUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update GatewayTokens.
+     */
+    data: XOR<GatewayTokenUpdateManyMutationInput, GatewayTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which GatewayTokens to update
+     */
+    where?: GatewayTokenWhereInput
+    /**
+     * Limit how many GatewayTokens to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GatewayToken updateManyAndReturn
+   */
+  export type GatewayTokenUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GatewayToken
+     */
+    select?: GatewayTokenSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the GatewayToken
+     */
+    omit?: GatewayTokenOmit<ExtArgs> | null
+    /**
+     * The data used to update GatewayTokens.
+     */
+    data: XOR<GatewayTokenUpdateManyMutationInput, GatewayTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which GatewayTokens to update
+     */
+    where?: GatewayTokenWhereInput
+    /**
+     * Limit how many GatewayTokens to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * GatewayToken upsert
+   */
+  export type GatewayTokenUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GatewayToken
+     */
+    select?: GatewayTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GatewayToken
+     */
+    omit?: GatewayTokenOmit<ExtArgs> | null
+    /**
+     * The filter to search for the GatewayToken to update in case it exists.
+     */
+    where: GatewayTokenWhereUniqueInput
+    /**
+     * In case the GatewayToken found by the `where` argument doesn't exist, create a new GatewayToken with this data.
+     */
+    create: XOR<GatewayTokenCreateInput, GatewayTokenUncheckedCreateInput>
+    /**
+     * In case the GatewayToken was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<GatewayTokenUpdateInput, GatewayTokenUncheckedUpdateInput>
+  }
+
+  /**
+   * GatewayToken delete
+   */
+  export type GatewayTokenDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GatewayToken
+     */
+    select?: GatewayTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GatewayToken
+     */
+    omit?: GatewayTokenOmit<ExtArgs> | null
+    /**
+     * Filter which GatewayToken to delete.
+     */
+    where: GatewayTokenWhereUniqueInput
+  }
+
+  /**
+   * GatewayToken deleteMany
+   */
+  export type GatewayTokenDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which GatewayTokens to delete
+     */
+    where?: GatewayTokenWhereInput
+    /**
+     * Limit how many GatewayTokens to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * GatewayToken without action
+   */
+  export type GatewayTokenDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the GatewayToken
+     */
+    select?: GatewayTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the GatewayToken
+     */
+    omit?: GatewayTokenOmit<ExtArgs> | null
   }
 
 
@@ -22980,6 +25302,7 @@ export namespace Prisma {
     email: 'email',
     phone: 'phone',
     details: 'details',
+    amountDue: 'amountDue',
     userId: 'userId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -23106,6 +25429,11 @@ export namespace Prisma {
     transactionId: 'transactionId',
     status: 'status',
     provider: 'provider',
+    gatewayPaymentId: 'gatewayPaymentId',
+    gatewayTransactionId: 'gatewayTransactionId',
+    gatewayStatus: 'gatewayStatus',
+    gatewaySignature: 'gatewaySignature',
+    payerAccount: 'payerAccount',
     paidAt: 'paidAt',
     createdAt: 'createdAt'
   };
@@ -23123,6 +25451,28 @@ export namespace Prisma {
   };
 
   export type ReceiptScalarFieldEnum = (typeof ReceiptScalarFieldEnum)[keyof typeof ReceiptScalarFieldEnum]
+
+
+  export const ServiceFeeScalarFieldEnum: {
+    division: 'division',
+    label: 'label',
+    amount: 'amount',
+    minimumPayment: 'minimumPayment',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ServiceFeeScalarFieldEnum = (typeof ServiceFeeScalarFieldEnum)[keyof typeof ServiceFeeScalarFieldEnum]
+
+
+  export const GatewayTokenScalarFieldEnum: {
+    provider: 'provider',
+    idToken: 'idToken',
+    refreshToken: 'refreshToken',
+    expiresAt: 'expiresAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type GatewayTokenScalarFieldEnum = (typeof GatewayTokenScalarFieldEnum)[keyof typeof GatewayTokenScalarFieldEnum]
 
 
   export const FinancialCategoryScalarFieldEnum: {
@@ -23371,6 +25721,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Decimal'
+   */
+  export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+  /**
+   * Reference to a field of type 'Decimal[]'
+   */
+  export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Bytes'
    */
   export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
@@ -23395,20 +25759,6 @@ export namespace Prisma {
    * Reference to a field of type 'OpportunityCategory[]'
    */
   export type ListEnumOpportunityCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OpportunityCategory[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Decimal'
-   */
-  export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
-    
-
-
-  /**
-   * Reference to a field of type 'Decimal[]'
-   */
-  export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
 
@@ -23737,6 +26087,7 @@ export namespace Prisma {
     email?: StringFilter<"Application"> | string
     phone?: StringFilter<"Application"> | string
     details?: JsonFilter<"Application">
+    amountDue?: DecimalNullableFilter<"Application"> | Decimal | DecimalJsLike | number | string | null
     userId?: StringNullableFilter<"Application"> | string | null
     createdAt?: DateTimeFilter<"Application"> | Date | string
     updatedAt?: DateTimeFilter<"Application"> | Date | string
@@ -23754,6 +26105,7 @@ export namespace Prisma {
     email?: SortOrder
     phone?: SortOrder
     details?: SortOrder
+    amountDue?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -23774,6 +26126,7 @@ export namespace Prisma {
     email?: StringFilter<"Application"> | string
     phone?: StringFilter<"Application"> | string
     details?: JsonFilter<"Application">
+    amountDue?: DecimalNullableFilter<"Application"> | Decimal | DecimalJsLike | number | string | null
     userId?: StringNullableFilter<"Application"> | string | null
     createdAt?: DateTimeFilter<"Application"> | Date | string
     updatedAt?: DateTimeFilter<"Application"> | Date | string
@@ -23791,12 +26144,15 @@ export namespace Prisma {
     email?: SortOrder
     phone?: SortOrder
     details?: SortOrder
+    amountDue?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ApplicationCountOrderByAggregateInput
+    _avg?: ApplicationAvgOrderByAggregateInput
     _max?: ApplicationMaxOrderByAggregateInput
     _min?: ApplicationMinOrderByAggregateInput
+    _sum?: ApplicationSumOrderByAggregateInput
   }
 
   export type ApplicationScalarWhereWithAggregatesInput = {
@@ -23811,6 +26167,7 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"Application"> | string
     phone?: StringWithAggregatesFilter<"Application"> | string
     details?: JsonWithAggregatesFilter<"Application">
+    amountDue?: DecimalNullableWithAggregatesFilter<"Application"> | Decimal | DecimalJsLike | number | string | null
     userId?: StringNullableWithAggregatesFilter<"Application"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Application"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Application"> | Date | string
@@ -24358,6 +26715,11 @@ export namespace Prisma {
     transactionId?: StringFilter<"Payment"> | string
     status?: EnumPaymentStatusFilter<"Payment"> | $Enums.PaymentStatus
     provider?: StringFilter<"Payment"> | string
+    gatewayPaymentId?: StringNullableFilter<"Payment"> | string | null
+    gatewayTransactionId?: StringNullableFilter<"Payment"> | string | null
+    gatewayStatus?: StringNullableFilter<"Payment"> | string | null
+    gatewaySignature?: StringNullableFilter<"Payment"> | string | null
+    payerAccount?: StringNullableFilter<"Payment"> | string | null
     paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
     createdAt?: DateTimeFilter<"Payment"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -24376,6 +26738,11 @@ export namespace Prisma {
     transactionId?: SortOrder
     status?: SortOrder
     provider?: SortOrder
+    gatewayPaymentId?: SortOrderInput | SortOrder
+    gatewayTransactionId?: SortOrderInput | SortOrder
+    gatewayStatus?: SortOrderInput | SortOrder
+    gatewaySignature?: SortOrderInput | SortOrder
+    payerAccount?: SortOrderInput | SortOrder
     paidAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -24386,6 +26753,7 @@ export namespace Prisma {
   export type PaymentWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     transactionId?: string
+    gatewayPaymentId?: string
     AND?: PaymentWhereInput | PaymentWhereInput[]
     OR?: PaymentWhereInput[]
     NOT?: PaymentWhereInput | PaymentWhereInput[]
@@ -24397,12 +26765,16 @@ export namespace Prisma {
     method?: StringFilter<"Payment"> | string
     status?: EnumPaymentStatusFilter<"Payment"> | $Enums.PaymentStatus
     provider?: StringFilter<"Payment"> | string
+    gatewayTransactionId?: StringNullableFilter<"Payment"> | string | null
+    gatewayStatus?: StringNullableFilter<"Payment"> | string | null
+    gatewaySignature?: StringNullableFilter<"Payment"> | string | null
+    payerAccount?: StringNullableFilter<"Payment"> | string | null
     paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
     createdAt?: DateTimeFilter<"Payment"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     application?: XOR<ApplicationNullableScalarRelationFilter, ApplicationWhereInput> | null
     receipt?: XOR<ReceiptNullableScalarRelationFilter, ReceiptWhereInput> | null
-  }, "id" | "transactionId">
+  }, "id" | "transactionId" | "gatewayPaymentId">
 
   export type PaymentOrderByWithAggregationInput = {
     id?: SortOrder
@@ -24415,6 +26787,11 @@ export namespace Prisma {
     transactionId?: SortOrder
     status?: SortOrder
     provider?: SortOrder
+    gatewayPaymentId?: SortOrderInput | SortOrder
+    gatewayTransactionId?: SortOrderInput | SortOrder
+    gatewayStatus?: SortOrderInput | SortOrder
+    gatewaySignature?: SortOrderInput | SortOrder
+    payerAccount?: SortOrderInput | SortOrder
     paidAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: PaymentCountOrderByAggregateInput
@@ -24438,6 +26815,11 @@ export namespace Prisma {
     transactionId?: StringWithAggregatesFilter<"Payment"> | string
     status?: EnumPaymentStatusWithAggregatesFilter<"Payment"> | $Enums.PaymentStatus
     provider?: StringWithAggregatesFilter<"Payment"> | string
+    gatewayPaymentId?: StringNullableWithAggregatesFilter<"Payment"> | string | null
+    gatewayTransactionId?: StringNullableWithAggregatesFilter<"Payment"> | string | null
+    gatewayStatus?: StringNullableWithAggregatesFilter<"Payment"> | string | null
+    gatewaySignature?: StringNullableWithAggregatesFilter<"Payment"> | string | null
+    payerAccount?: StringNullableWithAggregatesFilter<"Payment"> | string | null
     paidAt?: DateTimeNullableWithAggregatesFilter<"Payment"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
   }
@@ -24502,6 +26884,112 @@ export namespace Prisma {
     previousDue?: DecimalWithAggregatesFilter<"Receipt"> | Decimal | DecimalJsLike | number | string
     remainingDue?: DecimalWithAggregatesFilter<"Receipt"> | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeWithAggregatesFilter<"Receipt"> | Date | string
+  }
+
+  export type ServiceFeeWhereInput = {
+    AND?: ServiceFeeWhereInput | ServiceFeeWhereInput[]
+    OR?: ServiceFeeWhereInput[]
+    NOT?: ServiceFeeWhereInput | ServiceFeeWhereInput[]
+    division?: EnumApplicationTypeFilter<"ServiceFee"> | $Enums.ApplicationType
+    label?: StringFilter<"ServiceFee"> | string
+    amount?: DecimalFilter<"ServiceFee"> | Decimal | DecimalJsLike | number | string
+    minimumPayment?: DecimalFilter<"ServiceFee"> | Decimal | DecimalJsLike | number | string
+    updatedAt?: DateTimeFilter<"ServiceFee"> | Date | string
+  }
+
+  export type ServiceFeeOrderByWithRelationInput = {
+    division?: SortOrder
+    label?: SortOrder
+    amount?: SortOrder
+    minimumPayment?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ServiceFeeWhereUniqueInput = Prisma.AtLeast<{
+    division?: $Enums.ApplicationType
+    AND?: ServiceFeeWhereInput | ServiceFeeWhereInput[]
+    OR?: ServiceFeeWhereInput[]
+    NOT?: ServiceFeeWhereInput | ServiceFeeWhereInput[]
+    label?: StringFilter<"ServiceFee"> | string
+    amount?: DecimalFilter<"ServiceFee"> | Decimal | DecimalJsLike | number | string
+    minimumPayment?: DecimalFilter<"ServiceFee"> | Decimal | DecimalJsLike | number | string
+    updatedAt?: DateTimeFilter<"ServiceFee"> | Date | string
+  }, "division">
+
+  export type ServiceFeeOrderByWithAggregationInput = {
+    division?: SortOrder
+    label?: SortOrder
+    amount?: SortOrder
+    minimumPayment?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ServiceFeeCountOrderByAggregateInput
+    _avg?: ServiceFeeAvgOrderByAggregateInput
+    _max?: ServiceFeeMaxOrderByAggregateInput
+    _min?: ServiceFeeMinOrderByAggregateInput
+    _sum?: ServiceFeeSumOrderByAggregateInput
+  }
+
+  export type ServiceFeeScalarWhereWithAggregatesInput = {
+    AND?: ServiceFeeScalarWhereWithAggregatesInput | ServiceFeeScalarWhereWithAggregatesInput[]
+    OR?: ServiceFeeScalarWhereWithAggregatesInput[]
+    NOT?: ServiceFeeScalarWhereWithAggregatesInput | ServiceFeeScalarWhereWithAggregatesInput[]
+    division?: EnumApplicationTypeWithAggregatesFilter<"ServiceFee"> | $Enums.ApplicationType
+    label?: StringWithAggregatesFilter<"ServiceFee"> | string
+    amount?: DecimalWithAggregatesFilter<"ServiceFee"> | Decimal | DecimalJsLike | number | string
+    minimumPayment?: DecimalWithAggregatesFilter<"ServiceFee"> | Decimal | DecimalJsLike | number | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ServiceFee"> | Date | string
+  }
+
+  export type GatewayTokenWhereInput = {
+    AND?: GatewayTokenWhereInput | GatewayTokenWhereInput[]
+    OR?: GatewayTokenWhereInput[]
+    NOT?: GatewayTokenWhereInput | GatewayTokenWhereInput[]
+    provider?: StringFilter<"GatewayToken"> | string
+    idToken?: StringFilter<"GatewayToken"> | string
+    refreshToken?: StringFilter<"GatewayToken"> | string
+    expiresAt?: DateTimeFilter<"GatewayToken"> | Date | string
+    updatedAt?: DateTimeFilter<"GatewayToken"> | Date | string
+  }
+
+  export type GatewayTokenOrderByWithRelationInput = {
+    provider?: SortOrder
+    idToken?: SortOrder
+    refreshToken?: SortOrder
+    expiresAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GatewayTokenWhereUniqueInput = Prisma.AtLeast<{
+    provider?: string
+    AND?: GatewayTokenWhereInput | GatewayTokenWhereInput[]
+    OR?: GatewayTokenWhereInput[]
+    NOT?: GatewayTokenWhereInput | GatewayTokenWhereInput[]
+    idToken?: StringFilter<"GatewayToken"> | string
+    refreshToken?: StringFilter<"GatewayToken"> | string
+    expiresAt?: DateTimeFilter<"GatewayToken"> | Date | string
+    updatedAt?: DateTimeFilter<"GatewayToken"> | Date | string
+  }, "provider">
+
+  export type GatewayTokenOrderByWithAggregationInput = {
+    provider?: SortOrder
+    idToken?: SortOrder
+    refreshToken?: SortOrder
+    expiresAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: GatewayTokenCountOrderByAggregateInput
+    _max?: GatewayTokenMaxOrderByAggregateInput
+    _min?: GatewayTokenMinOrderByAggregateInput
+  }
+
+  export type GatewayTokenScalarWhereWithAggregatesInput = {
+    AND?: GatewayTokenScalarWhereWithAggregatesInput | GatewayTokenScalarWhereWithAggregatesInput[]
+    OR?: GatewayTokenScalarWhereWithAggregatesInput[]
+    NOT?: GatewayTokenScalarWhereWithAggregatesInput | GatewayTokenScalarWhereWithAggregatesInput[]
+    provider?: StringWithAggregatesFilter<"GatewayToken"> | string
+    idToken?: StringWithAggregatesFilter<"GatewayToken"> | string
+    refreshToken?: StringWithAggregatesFilter<"GatewayToken"> | string
+    expiresAt?: DateTimeWithAggregatesFilter<"GatewayToken"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"GatewayToken"> | Date | string
   }
 
   export type FinancialCategoryWhereInput = {
@@ -25116,6 +27604,7 @@ export namespace Prisma {
     email: string
     phone: string
     details: JsonNullValueInput | InputJsonValue
+    amountDue?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutApplicationsInput
@@ -25132,6 +27621,7 @@ export namespace Prisma {
     email: string
     phone: string
     details: JsonNullValueInput | InputJsonValue
+    amountDue?: Decimal | DecimalJsLike | number | string | null
     userId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25148,6 +27638,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutApplicationsNestedInput
@@ -25164,6 +27655,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25180,6 +27672,7 @@ export namespace Prisma {
     email: string
     phone: string
     details: JsonNullValueInput | InputJsonValue
+    amountDue?: Decimal | DecimalJsLike | number | string | null
     userId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25194,6 +27687,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25207,6 +27701,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25807,6 +28302,11 @@ export namespace Prisma {
     transactionId: string
     status: $Enums.PaymentStatus
     provider?: string
+    gatewayPaymentId?: string | null
+    gatewayTransactionId?: string | null
+    gatewayStatus?: string | null
+    gatewaySignature?: string | null
+    payerAccount?: string | null
     paidAt?: Date | string | null
     createdAt?: Date | string
     user?: UserCreateNestedOneWithoutPaymentsInput
@@ -25825,6 +28325,11 @@ export namespace Prisma {
     transactionId: string
     status: $Enums.PaymentStatus
     provider?: string
+    gatewayPaymentId?: string | null
+    gatewayTransactionId?: string | null
+    gatewayStatus?: string | null
+    gatewaySignature?: string | null
+    payerAccount?: string | null
     paidAt?: Date | string | null
     createdAt?: Date | string
     receipt?: ReceiptUncheckedCreateNestedOneWithoutPaymentInput
@@ -25839,6 +28344,11 @@ export namespace Prisma {
     transactionId?: StringFieldUpdateOperationsInput | string
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
+    gatewayPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewaySignature?: NullableStringFieldUpdateOperationsInput | string | null
+    payerAccount?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutPaymentsNestedInput
@@ -25857,6 +28367,11 @@ export namespace Prisma {
     transactionId?: StringFieldUpdateOperationsInput | string
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
+    gatewayPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewaySignature?: NullableStringFieldUpdateOperationsInput | string | null
+    payerAccount?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipt?: ReceiptUncheckedUpdateOneWithoutPaymentNestedInput
@@ -25873,6 +28388,11 @@ export namespace Prisma {
     transactionId: string
     status: $Enums.PaymentStatus
     provider?: string
+    gatewayPaymentId?: string | null
+    gatewayTransactionId?: string | null
+    gatewayStatus?: string | null
+    gatewaySignature?: string | null
+    payerAccount?: string | null
     paidAt?: Date | string | null
     createdAt?: Date | string
   }
@@ -25886,6 +28406,11 @@ export namespace Prisma {
     transactionId?: StringFieldUpdateOperationsInput | string
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
+    gatewayPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewaySignature?: NullableStringFieldUpdateOperationsInput | string | null
+    payerAccount?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25901,6 +28426,11 @@ export namespace Prisma {
     transactionId?: StringFieldUpdateOperationsInput | string
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
+    gatewayPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewaySignature?: NullableStringFieldUpdateOperationsInput | string | null
+    payerAccount?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25965,6 +28495,118 @@ export namespace Prisma {
     previousDue?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     remainingDue?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ServiceFeeCreateInput = {
+    division: $Enums.ApplicationType
+    label?: string
+    amount?: Decimal | DecimalJsLike | number | string
+    minimumPayment?: Decimal | DecimalJsLike | number | string
+    updatedAt?: Date | string
+  }
+
+  export type ServiceFeeUncheckedCreateInput = {
+    division: $Enums.ApplicationType
+    label?: string
+    amount?: Decimal | DecimalJsLike | number | string
+    minimumPayment?: Decimal | DecimalJsLike | number | string
+    updatedAt?: Date | string
+  }
+
+  export type ServiceFeeUpdateInput = {
+    division?: EnumApplicationTypeFieldUpdateOperationsInput | $Enums.ApplicationType
+    label?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    minimumPayment?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ServiceFeeUncheckedUpdateInput = {
+    division?: EnumApplicationTypeFieldUpdateOperationsInput | $Enums.ApplicationType
+    label?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    minimumPayment?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ServiceFeeCreateManyInput = {
+    division: $Enums.ApplicationType
+    label?: string
+    amount?: Decimal | DecimalJsLike | number | string
+    minimumPayment?: Decimal | DecimalJsLike | number | string
+    updatedAt?: Date | string
+  }
+
+  export type ServiceFeeUpdateManyMutationInput = {
+    division?: EnumApplicationTypeFieldUpdateOperationsInput | $Enums.ApplicationType
+    label?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    minimumPayment?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ServiceFeeUncheckedUpdateManyInput = {
+    division?: EnumApplicationTypeFieldUpdateOperationsInput | $Enums.ApplicationType
+    label?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    minimumPayment?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GatewayTokenCreateInput = {
+    provider: string
+    idToken: string
+    refreshToken: string
+    expiresAt: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GatewayTokenUncheckedCreateInput = {
+    provider: string
+    idToken: string
+    refreshToken: string
+    expiresAt: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GatewayTokenUpdateInput = {
+    provider?: StringFieldUpdateOperationsInput | string
+    idToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GatewayTokenUncheckedUpdateInput = {
+    provider?: StringFieldUpdateOperationsInput | string
+    idToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GatewayTokenCreateManyInput = {
+    provider: string
+    idToken: string
+    refreshToken: string
+    expiresAt: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type GatewayTokenUpdateManyMutationInput = {
+    provider?: StringFieldUpdateOperationsInput | string
+    idToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type GatewayTokenUncheckedUpdateManyInput = {
+    provider?: StringFieldUpdateOperationsInput | string
+    idToken?: StringFieldUpdateOperationsInput | string
+    refreshToken?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type FinancialCategoryCreateInput = {
@@ -26797,6 +29439,17 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
+  export type DecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
   export type ApplicationDocumentListRelationFilter = {
     every?: ApplicationDocumentWhereInput
     some?: ApplicationDocumentWhereInput
@@ -26816,9 +29469,14 @@ export namespace Prisma {
     email?: SortOrder
     phone?: SortOrder
     details?: SortOrder
+    amountDue?: SortOrder
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type ApplicationAvgOrderByAggregateInput = {
+    amountDue?: SortOrder
   }
 
   export type ApplicationMaxOrderByAggregateInput = {
@@ -26829,6 +29487,7 @@ export namespace Prisma {
     fullName?: SortOrder
     email?: SortOrder
     phone?: SortOrder
+    amountDue?: SortOrder
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -26842,9 +29501,14 @@ export namespace Prisma {
     fullName?: SortOrder
     email?: SortOrder
     phone?: SortOrder
+    amountDue?: SortOrder
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type ApplicationSumOrderByAggregateInput = {
+    amountDue?: SortOrder
   }
 
   export type EnumApplicationTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -26881,6 +29545,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedJsonFilter<$PrismaModel>
     _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type BytesFilter<$PrismaModel = never> = {
@@ -27248,6 +29928,11 @@ export namespace Prisma {
     transactionId?: SortOrder
     status?: SortOrder
     provider?: SortOrder
+    gatewayPaymentId?: SortOrder
+    gatewayTransactionId?: SortOrder
+    gatewayStatus?: SortOrder
+    gatewaySignature?: SortOrder
+    payerAccount?: SortOrder
     paidAt?: SortOrder
     createdAt?: SortOrder
   }
@@ -27268,6 +29953,11 @@ export namespace Prisma {
     transactionId?: SortOrder
     status?: SortOrder
     provider?: SortOrder
+    gatewayPaymentId?: SortOrder
+    gatewayTransactionId?: SortOrder
+    gatewayStatus?: SortOrder
+    gatewaySignature?: SortOrder
+    payerAccount?: SortOrder
     paidAt?: SortOrder
     createdAt?: SortOrder
   }
@@ -27283,6 +29973,11 @@ export namespace Prisma {
     transactionId?: SortOrder
     status?: SortOrder
     provider?: SortOrder
+    gatewayPaymentId?: SortOrder
+    gatewayTransactionId?: SortOrder
+    gatewayStatus?: SortOrder
+    gatewaySignature?: SortOrder
+    payerAccount?: SortOrder
     paidAt?: SortOrder
     createdAt?: SortOrder
   }
@@ -27360,6 +30055,64 @@ export namespace Prisma {
     remainingDue?: SortOrder
   }
 
+  export type ServiceFeeCountOrderByAggregateInput = {
+    division?: SortOrder
+    label?: SortOrder
+    amount?: SortOrder
+    minimumPayment?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ServiceFeeAvgOrderByAggregateInput = {
+    amount?: SortOrder
+    minimumPayment?: SortOrder
+  }
+
+  export type ServiceFeeMaxOrderByAggregateInput = {
+    division?: SortOrder
+    label?: SortOrder
+    amount?: SortOrder
+    minimumPayment?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ServiceFeeMinOrderByAggregateInput = {
+    division?: SortOrder
+    label?: SortOrder
+    amount?: SortOrder
+    minimumPayment?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ServiceFeeSumOrderByAggregateInput = {
+    amount?: SortOrder
+    minimumPayment?: SortOrder
+  }
+
+  export type GatewayTokenCountOrderByAggregateInput = {
+    provider?: SortOrder
+    idToken?: SortOrder
+    refreshToken?: SortOrder
+    expiresAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GatewayTokenMaxOrderByAggregateInput = {
+    provider?: SortOrder
+    idToken?: SortOrder
+    refreshToken?: SortOrder
+    expiresAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type GatewayTokenMinOrderByAggregateInput = {
+    provider?: SortOrder
+    idToken?: SortOrder
+    refreshToken?: SortOrder
+    expiresAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type EnumTransactionTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.TransactionType | EnumTransactionTypeFieldRefInput<$PrismaModel>
     in?: $Enums.TransactionType[] | ListEnumTransactionTypeFieldRefInput<$PrismaModel>
@@ -27403,17 +30156,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumTransactionTypeFilter<$PrismaModel>
     _max?: NestedEnumTransactionTypeFilter<$PrismaModel>
-  }
-
-  export type DecimalNullableFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
   }
 
   export type EnumPaymentStatusNullableFilter<$PrismaModel = never> = {
@@ -27483,22 +30225,6 @@ export namespace Prisma {
     quantity?: SortOrder
     unitPrice?: SortOrder
     total?: SortOrder
-  }
-
-  export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedDecimalNullableFilter<$PrismaModel>
-    _sum?: NestedDecimalNullableFilter<$PrismaModel>
-    _min?: NestedDecimalNullableFilter<$PrismaModel>
-    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type EnumPaymentStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -27887,6 +30613,14 @@ export namespace Prisma {
     set?: $Enums.ApplicationType
   }
 
+  export type NullableDecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string | null
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
+  }
+
   export type UserUpdateOneWithoutApplicationsNestedInput = {
     create?: XOR<UserCreateWithoutApplicationsInput, UserUncheckedCreateWithoutApplicationsInput>
     connectOrCreate?: UserCreateOrConnectWithoutApplicationsInput
@@ -28231,14 +30965,6 @@ export namespace Prisma {
     connect?: FinancialCategoryWhereUniqueInput
   }
 
-  export type NullableDecimalFieldUpdateOperationsInput = {
-    set?: Decimal | DecimalJsLike | number | string | null
-    increment?: Decimal | DecimalJsLike | number | string
-    decrement?: Decimal | DecimalJsLike | number | string
-    multiply?: Decimal | DecimalJsLike | number | string
-    divide?: Decimal | DecimalJsLike | number | string
-  }
-
   export type NullableEnumPaymentStatusFieldUpdateOperationsInput = {
     set?: $Enums.PaymentStatus | null
   }
@@ -28523,6 +31249,17 @@ export namespace Prisma {
     not?: NestedEnumApplicationTypeFilter<$PrismaModel> | $Enums.ApplicationType
   }
 
+  export type NestedDecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
   export type NestedEnumApplicationTypeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.ApplicationType | EnumApplicationTypeFieldRefInput<$PrismaModel>
     in?: $Enums.ApplicationType[] | ListEnumApplicationTypeFieldRefInput<$PrismaModel>
@@ -28554,6 +31291,22 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type NestedBytesFilter<$PrismaModel = never> = {
@@ -28651,38 +31404,11 @@ export namespace Prisma {
     _max?: NestedEnumTransactionTypeFilter<$PrismaModel>
   }
 
-  export type NestedDecimalNullableFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-  }
-
   export type NestedEnumPaymentStatusNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.PaymentStatus | EnumPaymentStatusFieldRefInput<$PrismaModel> | null
     in?: $Enums.PaymentStatus[] | ListEnumPaymentStatusFieldRefInput<$PrismaModel> | null
     notIn?: $Enums.PaymentStatus[] | ListEnumPaymentStatusFieldRefInput<$PrismaModel> | null
     not?: NestedEnumPaymentStatusNullableFilter<$PrismaModel> | $Enums.PaymentStatus | null
-  }
-
-  export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedDecimalNullableFilter<$PrismaModel>
-    _sum?: NestedDecimalNullableFilter<$PrismaModel>
-    _min?: NestedDecimalNullableFilter<$PrismaModel>
-    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumPaymentStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -28740,6 +31466,7 @@ export namespace Prisma {
     email: string
     phone: string
     details: JsonNullValueInput | InputJsonValue
+    amountDue?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentCreateNestedManyWithoutApplicationInput
@@ -28755,6 +31482,7 @@ export namespace Prisma {
     email: string
     phone: string
     details: JsonNullValueInput | InputJsonValue
+    amountDue?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentUncheckedCreateNestedManyWithoutApplicationInput
@@ -28780,6 +31508,11 @@ export namespace Prisma {
     transactionId: string
     status: $Enums.PaymentStatus
     provider?: string
+    gatewayPaymentId?: string | null
+    gatewayTransactionId?: string | null
+    gatewayStatus?: string | null
+    gatewaySignature?: string | null
+    payerAccount?: string | null
     paidAt?: Date | string | null
     createdAt?: Date | string
     application?: ApplicationCreateNestedOneWithoutPaymentsInput
@@ -28796,6 +31529,11 @@ export namespace Prisma {
     transactionId: string
     status: $Enums.PaymentStatus
     provider?: string
+    gatewayPaymentId?: string | null
+    gatewayTransactionId?: string | null
+    gatewayStatus?: string | null
+    gatewaySignature?: string | null
+    payerAccount?: string | null
     paidAt?: Date | string | null
     createdAt?: Date | string
     receipt?: ReceiptUncheckedCreateNestedOneWithoutPaymentInput
@@ -28902,6 +31640,7 @@ export namespace Prisma {
     email?: StringFilter<"Application"> | string
     phone?: StringFilter<"Application"> | string
     details?: JsonFilter<"Application">
+    amountDue?: DecimalNullableFilter<"Application"> | Decimal | DecimalJsLike | number | string | null
     userId?: StringNullableFilter<"Application"> | string | null
     createdAt?: DateTimeFilter<"Application"> | Date | string
     updatedAt?: DateTimeFilter<"Application"> | Date | string
@@ -28937,6 +31676,11 @@ export namespace Prisma {
     transactionId?: StringFilter<"Payment"> | string
     status?: EnumPaymentStatusFilter<"Payment"> | $Enums.PaymentStatus
     provider?: StringFilter<"Payment"> | string
+    gatewayPaymentId?: StringNullableFilter<"Payment"> | string | null
+    gatewayTransactionId?: StringNullableFilter<"Payment"> | string | null
+    gatewayStatus?: StringNullableFilter<"Payment"> | string | null
+    gatewaySignature?: StringNullableFilter<"Payment"> | string | null
+    payerAccount?: StringNullableFilter<"Payment"> | string | null
     paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
     createdAt?: DateTimeFilter<"Payment"> | Date | string
   }
@@ -29217,6 +31961,11 @@ export namespace Prisma {
     transactionId: string
     status: $Enums.PaymentStatus
     provider?: string
+    gatewayPaymentId?: string | null
+    gatewayTransactionId?: string | null
+    gatewayStatus?: string | null
+    gatewaySignature?: string | null
+    payerAccount?: string | null
     paidAt?: Date | string | null
     createdAt?: Date | string
     user?: UserCreateNestedOneWithoutPaymentsInput
@@ -29233,6 +31982,11 @@ export namespace Prisma {
     transactionId: string
     status: $Enums.PaymentStatus
     provider?: string
+    gatewayPaymentId?: string | null
+    gatewayTransactionId?: string | null
+    gatewayStatus?: string | null
+    gatewaySignature?: string | null
+    payerAccount?: string | null
     paidAt?: Date | string | null
     createdAt?: Date | string
     receipt?: ReceiptUncheckedCreateNestedOneWithoutPaymentInput
@@ -29381,6 +32135,7 @@ export namespace Prisma {
     email: string
     phone: string
     details: JsonNullValueInput | InputJsonValue
+    amountDue?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutApplicationsInput
@@ -29396,6 +32151,7 @@ export namespace Prisma {
     email: string
     phone: string
     details: JsonNullValueInput | InputJsonValue
+    amountDue?: Decimal | DecimalJsLike | number | string | null
     userId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29427,6 +32183,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutApplicationsNestedInput
@@ -29442,6 +32199,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29707,6 +32465,7 @@ export namespace Prisma {
     email: string
     phone: string
     details: JsonNullValueInput | InputJsonValue
+    amountDue?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutApplicationsInput
@@ -29722,6 +32481,7 @@ export namespace Prisma {
     email: string
     phone: string
     details: JsonNullValueInput | InputJsonValue
+    amountDue?: Decimal | DecimalJsLike | number | string | null
     userId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29825,6 +32585,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutApplicationsNestedInput
@@ -29840,6 +32601,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29882,6 +32644,11 @@ export namespace Prisma {
     transactionId: string
     status: $Enums.PaymentStatus
     provider?: string
+    gatewayPaymentId?: string | null
+    gatewayTransactionId?: string | null
+    gatewayStatus?: string | null
+    gatewaySignature?: string | null
+    payerAccount?: string | null
     paidAt?: Date | string | null
     createdAt?: Date | string
     user?: UserCreateNestedOneWithoutPaymentsInput
@@ -29899,6 +32666,11 @@ export namespace Prisma {
     transactionId: string
     status: $Enums.PaymentStatus
     provider?: string
+    gatewayPaymentId?: string | null
+    gatewayTransactionId?: string | null
+    gatewayStatus?: string | null
+    gatewaySignature?: string | null
+    payerAccount?: string | null
     paidAt?: Date | string | null
     createdAt?: Date | string
   }
@@ -29928,6 +32700,11 @@ export namespace Prisma {
     transactionId?: StringFieldUpdateOperationsInput | string
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
+    gatewayPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewaySignature?: NullableStringFieldUpdateOperationsInput | string | null
+    payerAccount?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutPaymentsNestedInput
@@ -29945,6 +32722,11 @@ export namespace Prisma {
     transactionId?: StringFieldUpdateOperationsInput | string
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
+    gatewayPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewaySignature?: NullableStringFieldUpdateOperationsInput | string | null
+    payerAccount?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -30083,6 +32865,7 @@ export namespace Prisma {
     email: string
     phone: string
     details: JsonNullValueInput | InputJsonValue
+    amountDue?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -30097,6 +32880,11 @@ export namespace Prisma {
     transactionId: string
     status: $Enums.PaymentStatus
     provider?: string
+    gatewayPaymentId?: string | null
+    gatewayTransactionId?: string | null
+    gatewayStatus?: string | null
+    gatewaySignature?: string | null
+    payerAccount?: string | null
     paidAt?: Date | string | null
     createdAt?: Date | string
   }
@@ -30159,6 +32947,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUpdateManyWithoutApplicationNestedInput
@@ -30174,6 +32963,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUncheckedUpdateManyWithoutApplicationNestedInput
@@ -30189,6 +32979,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     phone?: StringFieldUpdateOperationsInput | string
     details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -30202,6 +32993,11 @@ export namespace Prisma {
     transactionId?: StringFieldUpdateOperationsInput | string
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
+    gatewayPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewaySignature?: NullableStringFieldUpdateOperationsInput | string | null
+    payerAccount?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     application?: ApplicationUpdateOneWithoutPaymentsNestedInput
@@ -30218,6 +33014,11 @@ export namespace Prisma {
     transactionId?: StringFieldUpdateOperationsInput | string
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
+    gatewayPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewaySignature?: NullableStringFieldUpdateOperationsInput | string | null
+    payerAccount?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipt?: ReceiptUncheckedUpdateOneWithoutPaymentNestedInput
@@ -30233,6 +33034,11 @@ export namespace Prisma {
     transactionId?: StringFieldUpdateOperationsInput | string
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
+    gatewayPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewaySignature?: NullableStringFieldUpdateOperationsInput | string | null
+    payerAccount?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -30277,6 +33083,11 @@ export namespace Prisma {
     transactionId: string
     status: $Enums.PaymentStatus
     provider?: string
+    gatewayPaymentId?: string | null
+    gatewayTransactionId?: string | null
+    gatewayStatus?: string | null
+    gatewaySignature?: string | null
+    payerAccount?: string | null
     paidAt?: Date | string | null
     createdAt?: Date | string
   }
@@ -30299,6 +33110,11 @@ export namespace Prisma {
     transactionId?: StringFieldUpdateOperationsInput | string
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
+    gatewayPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewaySignature?: NullableStringFieldUpdateOperationsInput | string | null
+    payerAccount?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutPaymentsNestedInput
@@ -30315,6 +33131,11 @@ export namespace Prisma {
     transactionId?: StringFieldUpdateOperationsInput | string
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
+    gatewayPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewaySignature?: NullableStringFieldUpdateOperationsInput | string | null
+    payerAccount?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     receipt?: ReceiptUncheckedUpdateOneWithoutPaymentNestedInput
@@ -30330,6 +33151,11 @@ export namespace Prisma {
     transactionId?: StringFieldUpdateOperationsInput | string
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
+    gatewayPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewayStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    gatewaySignature?: NullableStringFieldUpdateOperationsInput | string | null
+    payerAccount?: NullableStringFieldUpdateOperationsInput | string | null
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

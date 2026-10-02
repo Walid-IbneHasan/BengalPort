@@ -11,10 +11,12 @@ import adminRoutes from "./routes/admin.js";
 import paymentRoutes from "./routes/payments.js";
 import documentRoutes from "./routes/documents.js";
 import { createMailer, type Mailer } from "./lib/email.js";
+import { createBkashGateway, type Gateway } from "./lib/bkash.js";
+import { databaseTokens } from "./lib/bkash-store.js";
 
-declare module "fastify" { interface FastifyInstance { mailer: Mailer } }
+declare module "fastify" { interface FastifyInstance { mailer: Mailer; gateway: Gateway } }
 
-export async function buildApp(options:{mailer?:Mailer}={}) {
+export async function buildApp(options:{mailer?:Mailer;gateway?:Gateway}={}) {
   // TRUST_PROXY=true makes rate limits and generated URLs use the real client
   // address and protocol when the API runs behind a reverse proxy.
   const app=Fastify({logger:{level:process.env.LOG_LEVEL||"info"},trustProxy:process.env.TRUST_PROXY==="true"});
@@ -25,6 +27,8 @@ export async function buildApp(options:{mailer?:Mailer}={}) {
   await app.register(multipart,{limits:{files:1,fileSize:Number.MAX_SAFE_INTEGER,parts:20}});
   app.decorate("mailer",options.mailer??createMailer());
   if(!app.mailer.configured)app.log.warn("SMTP is not configured: sign-up, password reset and notification emails are disabled.");
+  app.decorate("gateway",options.gateway??createBkashGateway({tokens:databaseTokens}));
+  if(!app.gateway.configured)app.log.warn("bKash is not configured: online payment is switched off.");
   await app.register(authPlugin);
   await app.register(publicRoutes,{prefix:"/api"});
   await app.register(authRoutes,{prefix:"/api/auth"});

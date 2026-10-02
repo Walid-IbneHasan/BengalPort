@@ -49,6 +49,35 @@ export function notifyNewEnquiry(app: FastifyInstance, enquiry: EnquiryRecord) {
   deliver(app, mails);
 }
 
+type PaymentNotice = {
+  application: { reference: string; type: string; fullName: string; email: string };
+  amount: number;
+  remaining: number;
+  transactionId: string;
+  receiptUrl: string;
+};
+const money = (amount: number) => `BDT ${new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(amount)}`;
+
+// A payment bKash has confirmed: the team is told, and the payer is sent
+// their receipt link.
+export function notifyPayment(app: FastifyInstance, notice: PaymentNotice) {
+  const { application, amount, remaining } = notice;
+  const balance = remaining > 0 ? `Still due: ${money(remaining)}` : "The application is now fully paid.";
+  const mails = teamAddresses().map((to) => mail(to, `Payment received for ${application.reference}: ${money(amount)}`, [
+    "A bKash payment was received on the Bengal Port website.",
+    [`Reference: ${application.reference}`, `Applicant: ${application.fullName}`, `Division: ${application.type}`, `Amount: ${money(amount)}`, `bKash transaction: ${notice.transactionId}`, balance].join("\n"),
+    `Payments in the admin: ${adminUrl("payments")}`,
+  ]));
+  mails.push(mail(application.email, `Payment received | Bengal Port ${application.reference}`, [
+    "Hello,",
+    `We have received your bKash payment of ${money(amount)} for application ${application.reference}. bKash transaction: ${notice.transactionId}.`,
+    balance,
+    `Your receipt: ${notice.receiptUrl}`,
+    notYou("make this payment"),
+  ]));
+  deliver(app, mails);
+}
+
 export function notifyNewApplication(app: FastifyInstance, application: ApplicationRecord) {
   const mails = teamAddresses().map((to) => mail(to, `New ${application.type.toLowerCase()} application ${application.reference}`, [
     "A new application was submitted on the Bengal Port website.",

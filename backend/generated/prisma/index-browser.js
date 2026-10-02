@@ -172,6 +172,7 @@ exports.Prisma.ApplicationScalarFieldEnum = {
   email: 'email',
   phone: 'phone',
   details: 'details',
+  amountDue: 'amountDue',
   userId: 'userId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -271,6 +272,11 @@ exports.Prisma.PaymentScalarFieldEnum = {
   transactionId: 'transactionId',
   status: 'status',
   provider: 'provider',
+  gatewayPaymentId: 'gatewayPaymentId',
+  gatewayTransactionId: 'gatewayTransactionId',
+  gatewayStatus: 'gatewayStatus',
+  gatewaySignature: 'gatewaySignature',
+  payerAccount: 'payerAccount',
   paidAt: 'paidAt',
   createdAt: 'createdAt'
 };
@@ -282,6 +288,22 @@ exports.Prisma.ReceiptScalarFieldEnum = {
   previousDue: 'previousDue',
   remainingDue: 'remainingDue',
   createdAt: 'createdAt'
+};
+
+exports.Prisma.ServiceFeeScalarFieldEnum = {
+  division: 'division',
+  label: 'label',
+  amount: 'amount',
+  minimumPayment: 'minimumPayment',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.GatewayTokenScalarFieldEnum = {
+  provider: 'provider',
+  idToken: 'idToken',
+  refreshToken: 'refreshToken',
+  expiresAt: 'expiresAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.FinancialCategoryScalarFieldEnum = {
@@ -435,6 +457,8 @@ exports.Prisma.ModelName = {
   HealthcareService: 'HealthcareService',
   Payment: 'Payment',
   Receipt: 'Receipt',
+  ServiceFee: 'ServiceFee',
+  GatewayToken: 'GatewayToken',
   FinancialCategory: 'FinancialCategory',
   FinancialTransaction: 'FinancialTransaction',
   PageContent: 'PageContent',

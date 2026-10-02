@@ -9,6 +9,8 @@ import {
   pageContentUpdateSchema,
   businessContentUpdateSchema,
   divisionContentUpdateSchema,
+  feeSettingsSchema,
+  amountDueSchema,
 } from "../lib/schemas.js";
 import { defaultHomeContent } from "../lib/home-content.js";
 import { defaultBusinessContent } from "../lib/business-content.js";
@@ -269,6 +271,7 @@ const admin: FastifyPluginAsync = async (app) => {
               user: person,
               _count: { select: { payments: true } },
               documents: { select: documentSummary },
+              payments: { select: { amount: true, status: true } },
             },
             orderBy: newest,
           },
@@ -365,6 +368,18 @@ const admin: FastifyPluginAsync = async (app) => {
   app.patch("/resources/:resource/:id", async (req, reply) => {
     const { resource, id } = req.params as { resource: string; id: string };
     const body = req.body as Record<string, unknown>;
+    // What an application costs, set by staff after quoting the customer.
+    if (resource === "applications" && body.amountDue !== undefined) {
+      const amountDue = amountDueSchema.safeParse(body.amountDue);
+      if (!amountDue.success)
+        return reply.badRequest("Enter the amount due as a positive number");
+      await prisma.application.update({
+        where: { id },
+        data: { amountDue: amountDue.data },
+      });
+      if (body.status === undefined)
+        return { data: await prisma.application.findUnique({ where: { id } }) };
+    }
     if (resource === "enquiries" || resource === "applications") {
       const parsed = [
         "DRAFT",
@@ -744,6 +759,49 @@ const admin: FastifyPluginAsync = async (app) => {
       return { data: page };
     });
   }
+
+  // Service fees: what each division charges when an application is
+  // submitted, and the smallest part payment accepted online.
+  const feeSettings = async () => {
+    const saved = await prisma.serviceFee.findMany();
+    return (["BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH"] as const).map(
+      (division) => {
+        const fee = saved.find((item) => item.division === division);
+        return {
+          division,
+          label: fee?.label ?? "Service fee",
+          amount: Number(fee?.amount ?? 0),
+          minimumPayment: Number(fee?.minimumPayment ?? 0),
+        };
+      },
+    );
+  };
+
+  app.get("/payment-settings", async () => ({
+    data: { onlinePayment: app.gateway.configured, fees: await feeSettings() },
+  }));
+
+  app.put("/payment-settings", async (req, reply) => {
+    const parsed = feeSettingsSchema.safeParse(req.body);
+    if (!parsed.success)
+      return reply.code(400).send({
+        error: {
+          code: "VALIDATION_ERROR",
+          message:
+            "Check the fees. The smallest part payment cannot be more than the fee.",
+          details: parsed.error.flatten(),
+        },
+      });
+    for (const { division, ...fee } of parsed.data.fees)
+      await prisma.serviceFee.upsert({
+        where: { division },
+        update: fee,
+        create: { division, ...fee },
+      });
+    return {
+      data: { onlinePayment: app.gateway.configured, fees: await feeSettings() },
+    };
+  });
 
   app.get("/accounts/categories", async () => ({
     data: await prisma.financialCategory.findMany({ orderBy: { name: "asc" } }),
