@@ -157,6 +157,7 @@ describe("what the settings page says about the system", () => {
       assert.equal(data.email, app.mailer.configured);
       assert.equal(data.onlinePayment, app.gateway.configured);
       assert.equal(data.teamInbox, true);
+      assert.equal(data.formProtection, app.spamCheck.siteKey !== null);
     } finally {
       process.env.ADMIN_NOTIFY_EMAIL = before ?? "";
     }

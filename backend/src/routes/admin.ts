@@ -986,6 +986,7 @@ const admin: FastifyPluginAsync = async (app) => {
         email: app.mailer.configured,
         onlinePayment: app.gateway.configured,
         teamInbox: teamAddresses().length > 0,
+        formProtection: app.spamCheck.siteKey !== null,
       },
     };
   });

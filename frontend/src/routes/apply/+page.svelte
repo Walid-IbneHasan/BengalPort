@@ -2,6 +2,7 @@
   import { api } from "$lib/api";
   import { page } from "$app/state";
   import DivisionApplicationForm from "$lib/components/DivisionApplicationForm.svelte";
+  import FormGuard from "$lib/components/FormGuard.svelte";
   import type { ApplicationDivision } from "$lib/application-forms";
   import { applyState, type ApplyForm, type ApplyTab } from "$lib/apply-route";
   import { onMount } from "svelte";
@@ -19,6 +20,7 @@
   let tab = $state<ApplyTab>(opened.tab), form = $state<ApplyForm>(opened.form);
   let name = $state(""), phone = $state(""), email = $state(""), subject = $state(opened.subject), message = $state("");
   let sending = $state(false), success = $state(""), error = $state("");
+  let guard = $state<{ fields(): Record<string, string>; problem(): string; reset(): void }>();
   // Keeps following links to /apply?tab=…&form=…&about=… while the page is open.
   $effect(() => {
     const requested = applyState(page.url.searchParams);
@@ -34,10 +36,11 @@
     tab = next; form = applyState(new URLSearchParams({ tab: next })).form; success = ""; error = "";
   }
   async function submitEnquiry() {
-    sending = true; error = "";
-    try { await api("/enquiries", { method: "POST", body: JSON.stringify({ type: tab, name, phone, email, message, details: { subject, service: tab } }) }); success = "Thank you. Your enquiry has been received and our team will contact you."; name = phone = email = subject = message = ""; }
+    error = guard?.problem() ?? ""; if (error) return;
+    sending = true;
+    try { await api("/enquiries", { method: "POST", body: JSON.stringify({ type: tab, name, phone, email, message, details: { subject, service: tab }, ...guard?.fields() }) }); success = "Thank you. Your enquiry has been received and our team will contact you."; name = phone = email = subject = message = ""; }
     catch (e) { error = e instanceof Error ? e.message : "Could not submit the enquiry."; }
-    finally { sending = false; }
+    finally { sending = false; guard?.reset(); }
   }
 </script>
 
@@ -50,7 +53,7 @@
   {#if form === "enquiry"}
     <div class="general-box"><div class="general-intro"><span>{copy.eyebrow}</span><h2>{copy.title}</h2><p>{copy.text}</p></div>
       {#if success}<p class="success" role="status">{success}</p>{/if}{#if error}<p class="error" role="alert">{error}</p>{/if}
-      <form onsubmit={(e)=>{e.preventDefault();submitEnquiry()}}><div class="form-grid"><div class="field"><label for="name">Full name *</label><input id="name" bind:value={name} autocomplete="name" required minlength="2" maxlength="120"/></div><div class="field"><label for="phone">Phone number *</label><input id="phone" bind:value={phone} autocomplete="tel" inputmode="tel" required minlength="7" maxlength="30"/></div><div class="field"><label for="email">Email address</label><input id="email" type="email" bind:value={email} autocomplete="email" maxlength="160"/></div><div class="field"><label for="subject">Subject *</label><input id="subject" bind:value={subject} required maxlength="150"/></div></div><div class="field full"><label for="message">Enquiry information *</label><textarea id="message" bind:value={message} required minlength="5" maxlength="5000" rows="6"></textarea></div><button class="btn" disabled={sending}>{sending?"SENDING...":"SUBMIT ENQUIRY"}</button><p class="legal-note">By submitting you agree to our <a href="/privacy">Privacy Policy</a>.</p></form>
+      <form onsubmit={(e)=>{e.preventDefault();submitEnquiry()}}><div class="form-grid"><div class="field"><label for="name">Full name *</label><input id="name" bind:value={name} autocomplete="name" required minlength="2" maxlength="120"/></div><div class="field"><label for="phone">Phone number *</label><input id="phone" bind:value={phone} autocomplete="tel" inputmode="tel" required minlength="7" maxlength="30"/></div><div class="field"><label for="email">Email address</label><input id="email" type="email" bind:value={email} autocomplete="email" maxlength="160"/></div><div class="field"><label for="subject">Subject *</label><input id="subject" bind:value={subject} required maxlength="150"/></div></div><div class="field full"><label for="message">Enquiry information *</label><textarea id="message" bind:value={message} required minlength="5" maxlength="5000" rows="6"></textarea></div><FormGuard bind:this={guard} /><button class="btn" disabled={sending}>{sending?"SENDING...":"SUBMIT ENQUIRY"}</button><p class="legal-note">By submitting you agree to our <a href="/privacy">Privacy Policy</a>.</p></form>
     </div>
   {:else}{#key tab}<DivisionApplicationForm division={tab as ApplicationDivision}/>{/key}{/if}
 </div></section>

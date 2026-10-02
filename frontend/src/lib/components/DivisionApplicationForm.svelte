@@ -5,12 +5,14 @@
   import { fieldError } from "$lib/application-validation";
   import DocumentList from "./DocumentList.svelte";
   import PaymentPanel from "./PaymentPanel.svelte";
+  import FormGuard from "./FormGuard.svelte";
   import { ArrowLeft, ArrowRight, Check, ShieldCheck } from "lucide-svelte";
 
   let { division }: { division: ApplicationDivision } = $props();
   let step = $state(0), form = $state<Record<string, any>>({}), sending = $state(false), error = $state(""), reference = $state("");
   // The submitted application and the link that lets its sender attach documents.
   let submitted = $state<{ id: string; uploadToken: string; payToken: string; amountDue: string | null } | null>(null);
+  let guard = $state<{ fields(): Record<string, string>; problem(): string; reset(): void }>();
   let config = $derived(applicationForms[division]);
   let current = $derived(config.steps[step]);
 
@@ -56,14 +58,15 @@
     else submit();
   }
   async function submit() {
-    sending = true; error = "";
+    error = guard?.problem() ?? ""; if (error) return;
+    sending = true;
     try {
-      const result = await api<{ id: string; reference: string; uploadToken: string; payToken: string; amountDue: string | null }>("/applications", { method: "POST", body: JSON.stringify({ division, type: division, fullName: form.fullName, email: form.email, phone: form.phone, details: form }) });
+      const result = await api<{ id: string; reference: string; uploadToken: string; payToken: string; amountDue: string | null }>("/applications", { method: "POST", body: JSON.stringify({ division, type: division, fullName: form.fullName, email: form.email, phone: form.phone, details: form, ...guard?.fields() }) });
       submitted = { id: result.id, uploadToken: result.uploadToken, payToken: result.payToken, amountDue: result.amountDue };
       reference = result.reference;
       clearDraft();
     } catch (e) { error = e instanceof Error ? e.message : "The application could not be submitted."; }
-    finally { sending = false; }
+    finally { sending = false; guard?.reset(); }
   }
 </script>
 
@@ -94,7 +97,7 @@
           </div>
         {/each}
       </div>
-      {#if step===config.steps.length-1}<p class="legal-note">Your details are handled as described in our <a href="/privacy" target="_blank">Privacy Policy</a> and <a href="/terms" target="_blank">Terms of Use</a>.</p>{/if}
+      {#if step===config.steps.length-1}<FormGuard bind:this={guard} /><p class="legal-note">Your details are handled as described in our <a href="/privacy" target="_blank">Privacy Policy</a> and <a href="/terms" target="_blank">Terms of Use</a>.</p>{/if}
       <div class="actions">{#if step>0}<button type="button" class="secondary" onclick={()=>{step-=1;error=""}}><ArrowLeft size={17}/> BACK</button>{/if}<button class="primary" disabled={sending}>{sending?"SUBMITTING...":step===config.steps.length-1?"SUBMIT APPLICATION":"SAVE & CONTINUE"}<ArrowRight size={17}/></button></div>
     </form>
   {/if}

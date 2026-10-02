@@ -101,6 +101,12 @@ BKASH_PASSWORD=""
 BKASH_APP_KEY=""
 BKASH_APP_SECRET=""
 
+# Cloudflare Turnstile on the enquiry and application forms (stays off until
+# both keys are set). Create a widget for your website address at
+# dash.cloudflare.com -> Turnstile.
+TURNSTILE_SITE_KEY=""
+TURNSTILE_SECRET_KEY=""
+
 # Used once by "db:seed" to create the admin account.
 SEED_ADMIN_EMAIL=""
 SEED_ADMIN_PASSWORD=""

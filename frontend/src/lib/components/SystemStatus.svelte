@@ -3,7 +3,7 @@
   import { api } from "$lib/api";
 
   // Admin settings: what is actually working on the server right now.
-  type Status = { database: boolean; email: boolean; onlinePayment: boolean; teamInbox: boolean };
+  type Status = { database: boolean; email: boolean; onlinePayment: boolean; teamInbox: boolean; formProtection: boolean };
   let status = $state<Status | null>(null);
   let failed = $state(false);
 
@@ -22,6 +22,7 @@
           { name: "Email", ok: status.email, on: "Sending", off: "Not set up", note: status.email ? "" : "Sign-up codes, password resets and notifications are not sent until the SMTP settings are added on the server." },
           { name: "Team inbox", ok: status.teamInbox, on: "Set", off: "Not set", note: status.teamInbox ? "" : "Nobody is emailed about new enquiries and applications until ADMIN_NOTIFY_EMAIL is set on the server." },
           { name: "bKash payments", ok: status.onlinePayment, on: "Connected", off: "Not connected", note: status.onlinePayment ? "" : "Customers cannot pay online until the bKash settings are added on the server." },
+          { name: "Spam check on forms", ok: status.formProtection, on: "On", off: "Off", note: status.formProtection ? "" : "The enquiry and application forms are protected by rate limits and a hidden field only. Add the Cloudflare Turnstile keys on the server to also check that visitors are people." },
         ]
       : [],
   );

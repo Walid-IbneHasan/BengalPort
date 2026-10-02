@@ -61,6 +61,10 @@ bKash allows two token requests per hour, so the API stores its token in the dat
 
 **Going live.** bKash normally asks you to complete a set of sandbox test cases with your own sandbox credentials before issuing live ones. Put the sandbox credentials in the API's `.env`, set a small fee, and run a payment through `/apply` and `/pay`; then switch the five `BKASH_*` values to the live ones and restart the API.
 
+## Spam protection on the public forms
+
+The enquiry and application forms are rate-limited per visitor and carry a hidden field that only automated scripts fill in; such submissions are discarded. For a stronger check, create a free **Cloudflare Turnstile** widget for your website address and set `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` in the API's settings. The forms then show Cloudflare's check to visitors (signed-in members are not asked), and the API refuses a guest submission that has not passed it. If Cloudflare cannot be reached, submissions are let through rather than lost. Admin → Settings shows whether the check is on.
+
 ## Production
 
 Production settings for the API:

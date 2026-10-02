@@ -16,8 +16,16 @@ const routes:FastifyPluginAsync=async app=>{
  app.get('/education',async()=>({data:await prisma.institution.findMany({include:{programs:true}})}));
  app.get('/healthcare',async()=>({data:await prisma.hospital.findMany({include:{services:true}})}));
  const formLimit={config:{rateLimit:{max:10,timeWindow:'10 minutes'}}};
- app.post('/enquiries',formLimit,async(req,reply)=>{const parsed=enquirySchema.safeParse(req.body);if(!parsed.success)return reply.code(400).send({error:{code:'VALIDATION_ERROR',message:'Please check the enquiry fields',details:parsed.error.flatten()}});const userId=await optionalUser(req);const data=await prisma.enquiry.create({data:{...parsed.data,email:parsed.data.email||null,details:parsed.data.details as any,userId}});notifyNewEnquiry(app,data);return reply.code(201).send({data})});
- app.post('/applications',formLimit,async(req,reply)=>{const parsed=applicationSchema.safeParse(req.body);if(!parsed.success)return reply.code(400).send({error:{code:'VALIDATION_ERROR',message:'Please check the application fields',details:parsed.error.flatten()}});const reference=`BP-${randomCode(8)}`;const userId=await optionalUser(req);
+ // Spam protection for the two public forms. The forms carry a field no
+ // person sees; a submission that fills it in is answered as if it had
+ // worked and is thrown away. Visitors who are not signed in must also pass
+ // the Cloudflare check while it is switched on.
+ app.get('/form-protection',async()=>({data:{siteKey:app.spamCheck.siteKey}}));
+ const trapped=(req:any)=>String(req.body?.contact_time_slot??'').trim()!=='';
+ const human=async(req:any,userId?:string)=>Boolean(userId)||app.spamCheck.passed(typeof req.body?.captchaToken==='string'?req.body.captchaToken:undefined,req.ip);
+ const captchaFailed=(reply:any)=>reply.code(400).send({error:{code:'CAPTCHA_FAILED',message:'Please complete the security check and try again.'}});
+ app.post('/enquiries',formLimit,async(req,reply)=>{if(trapped(req))return reply.code(201).send({data:{}});if(!await human(req,await optionalUser(req)))return captchaFailed(reply);const parsed=enquirySchema.safeParse(req.body);if(!parsed.success)return reply.code(400).send({error:{code:'VALIDATION_ERROR',message:'Please check the enquiry fields',details:parsed.error.flatten()}});const userId=await optionalUser(req);const data=await prisma.enquiry.create({data:{...parsed.data,email:parsed.data.email||null,details:parsed.data.details as any,userId}});notifyNewEnquiry(app,data);return reply.code(201).send({data})});
+ app.post('/applications',formLimit,async(req,reply)=>{if(trapped(req))return reply.code(201).send({data:{reference:`BP-${randomCode(8)}`}});if(!await human(req,await optionalUser(req)))return captchaFailed(reply);const parsed=applicationSchema.safeParse(req.body);if(!parsed.success)return reply.code(400).send({error:{code:'VALIDATION_ERROR',message:'Please check the application fields',details:parsed.error.flatten()}});const reference=`BP-${randomCode(8)}`;const userId=await optionalUser(req);
   // The division's service fee, when one is set, is what the new application owes.
   const fee=await prisma.serviceFee.findUnique({where:{division:parsed.data.type}});const amountDue=fee&&Number(fee.amount)>0?fee.amount:null;
   const data=await prisma.application.create({data:{...parsed.data,details:parsed.data.details as any,reference,userId,amountDue}});notifyNewApplication(app,data);
