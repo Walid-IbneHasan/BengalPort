@@ -37,6 +37,7 @@ run("npm run build -w frontend");
 const api = path.join(out, "api");
 const backend = path.join(root, "backend");
 const backendPackage = JSON.parse(readFileSync(path.join(backend, "package.json"), "utf8"));
+const rootPackage = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
 cpSync(path.join(backend, "dist"), path.join(api, "dist"), { recursive: true });
 cpSync(path.join(backend, "prisma", "schema.prisma"), path.join(api, "prisma", "schema.prisma"));
 cpSync(path.join(backend, "prisma", "migrations"), path.join(api, "prisma", "migrations"), { recursive: true });
@@ -60,6 +61,8 @@ write(
       // The Prisma CLI is a runtime dependency here: the server generates its
       // own client and applies migrations.
       dependencies: { ...backendPackage.dependencies, prisma: backendPackage.devDependencies.prisma },
+      // Same patched transitive dependency as the workspace root.
+      overrides: rootPackage.overrides,
     },
     null,
     2,

@@ -26,7 +26,7 @@ Run the tests with `npm test`. The backend tests use the database in `backend/.e
 
 ## Optional member authentication
 
-Guest browsing and enquiries do not require an account. Member accounts support email verification, password recovery, password changes, optional email-code 2FA, profiles, and Google sign-in. Signed-in members follow their applications, enquiries, payments and receipts on `/dashboard`.
+Guest browsing and enquiries do not require an account. Member accounts support email verification, password recovery, password changes, optional email-code 2FA, profiles, and Google sign-in. Signed-in members follow their applications, enquiries, payments and receipts on `/dashboard`. Changing or resetting a password signs the account out everywhere else, and a change of role takes effect immediately.
 
 Sign-in codes are sent by email (see [Email](#email)). Without email configured, sign-up, password reset and 2FA are refused, because the code could not reach its owner. For local testing set `AUTH_DEV_CODES="true"` to have the code returned in the response and shown on screen; this switch is ignored when `NODE_ENV=production`.
 
@@ -75,6 +75,8 @@ To update later, run `npm run package:cpanel` again, upload and extract the new 
 Payments are recorded by an administrator after the money is received (Admin → Payments → Record payment), and each one creates its receipt atomically. There is no online payment provider yet. A receipt can be opened only by an administrator or the customer it belongs to; payments recorded against a member's application appear on their dashboard.
 
 The public enquiry and application endpoints accept 10 submissions per client every 10 minutes, and JSON request bodies are limited to 1 MB.
+
+Applicants can attach documents to an application (PDF, JPEG, PNG or WebP; 10 MB each; 10 per application). They are stored in PostgreSQL, are never public, and can be downloaded only by an administrator or the member who applied. A guest attaches files through an upload link that is valid for two hours after submitting.
 
 ## CMS media storage
 
