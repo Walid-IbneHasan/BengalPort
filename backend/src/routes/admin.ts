@@ -2,6 +2,9 @@ import type { FastifyPluginAsync } from "fastify";
 import { prisma } from "../lib/prisma.js";
 import {
   opportunitySchema,
+  partnerSchema,
+  institutionSchema,
+  hospitalSchema,
   transactionSchema,
   pageContentUpdateSchema,
   businessContentUpdateSchema,
@@ -215,9 +218,13 @@ const admin: FastifyPluginAsync = async (app) => {
             details: parsed.error.flatten(),
           },
         });
-    return reply
-      .code(201)
-      .send({ data: await prisma.opportunity.create({ data: parsed.data }) });
+    try {
+      const created = await prisma.opportunity.create({ data: parsed.data });
+      return reply.code(201).send({ data: created });
+    } catch (error) {
+      if (isUniqueViolation(error)) return slugTaken(reply);
+      throw error;
+    }
   });
 
   app.get("/resources/:resource", async (req, reply) => {
@@ -447,47 +454,140 @@ const admin: FastifyPluginAsync = async (app) => {
     return reply.badRequest("This resource cannot be updated here");
   });
 
+  // Records an admin can add, correct and remove: partners, the education
+  // and hospital directories, and opportunities. Institutions and hospitals
+  // are saved together with their programmes or services.
+  const resourceSchemas = {
+    opportunities: opportunitySchema,
+    suppliers: partnerSchema,
+    factories: partnerSchema,
+    education: institutionSchema,
+    healthcare: hospitalSchema,
+  };
+  type ManagedResource = keyof typeof resourceSchemas;
+  const isManaged = (resource: string): resource is ManagedResource =>
+    resource in resourceSchemas;
+  const invalid = (reply: any, error: { flatten(): unknown }) =>
+    reply.code(400).send({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "Complete all required fields",
+        details: error.flatten(),
+      },
+    });
+  const slugTaken = (reply: any) =>
+    reply.code(409).send({
+      error: {
+        code: "SLUG_TAKEN",
+        message: "Another opportunity already uses this link name",
+      },
+    });
+  const isUniqueViolation = (error: unknown) =>
+    (error as { code?: string })?.code === "P2002";
+
   app.post("/resources/:resource", async (req, reply) => {
     const { resource } = req.params as { resource: string };
-    const body = req.body as any;
-    const basic = {
-      name: String(body.name || "").trim(),
-      country: String(body.country || "").trim(),
-      industry: String(body.industry || "").trim(),
-      product: String(body.product || "").trim(),
-      description: String(body.description || "").trim(),
-      image: String(body.image || "/images/global-business.webp"),
-      featured: Boolean(body.featured),
-    };
-    if (
-      !basic.name ||
-      !basic.country ||
-      !basic.industry ||
-      !basic.product ||
-      basic.description.length < 10
-    )
-      return reply.badRequest("Complete all required partner fields");
-    if (resource === "suppliers")
-      return reply
-        .code(201)
-        .send({ data: await prisma.supplier.create({ data: basic }) });
-    if (resource === "factories")
-      return reply
-        .code(201)
-        .send({ data: await prisma.factory.create({ data: basic }) });
-    return reply.badRequest("This resource cannot be created here");
+    if (!isManaged(resource) || resource === "opportunities")
+      return reply.badRequest("This resource cannot be created here");
+    const parsed = resourceSchemas[resource].safeParse(req.body);
+    if (!parsed.success) return invalid(reply, parsed.error);
+    const data: any = parsed.data;
+    const created =
+      resource === "suppliers"
+        ? await prisma.supplier.create({ data })
+        : resource === "factories"
+          ? await prisma.factory.create({ data })
+          : resource === "education"
+            ? await prisma.institution.create({
+                data: { ...data, programs: { create: data.programs } },
+                include: { programs: true },
+              })
+            : await prisma.hospital.create({
+                data: { ...data, services: { create: data.services } },
+                include: { services: true },
+              });
+    return reply.code(201).send({ data: created });
+  });
+
+  app.put("/resources/:resource/:id", async (req, reply) => {
+    const { resource, id } = req.params as { resource: string; id: string };
+    if (!isManaged(resource))
+      return reply.badRequest("This resource cannot be edited here");
+    const parsed = resourceSchemas[resource].safeParse(req.body);
+    if (!parsed.success) return invalid(reply, parsed.error);
+    const data: any = parsed.data;
+    const where = { id };
+    try {
+      if (resource === "opportunities") {
+        if (!(await prisma.opportunity.count({ where })))
+          return reply.notFound("Record not found");
+        return { data: await prisma.opportunity.update({ where, data }) };
+      }
+      if (resource === "suppliers" || resource === "factories") {
+        const table: any =
+          resource === "suppliers" ? prisma.supplier : prisma.factory;
+        if (!(await table.count({ where })))
+          return reply.notFound("Record not found");
+        return { data: await table.update({ where, data }) };
+      }
+      if (resource === "education") {
+        if (!(await prisma.institution.count({ where })))
+          return reply.notFound("Record not found");
+        const { programs, ...fields } = data;
+        const [, , updated] = await prisma.$transaction([
+          prisma.educationProgram.deleteMany({ where: { institutionId: id } }),
+          prisma.institution.update({ where, data: fields }),
+          prisma.institution.update({
+            where,
+            data: { programs: { create: programs } },
+            include: { programs: true },
+          }),
+        ]);
+        return { data: updated };
+      }
+      if (!(await prisma.hospital.count({ where })))
+        return reply.notFound("Record not found");
+      const { services, ...fields } = data;
+      const [, , updated] = await prisma.$transaction([
+        prisma.healthcareService.deleteMany({ where: { hospitalId: id } }),
+        prisma.hospital.update({ where, data: fields }),
+        prisma.hospital.update({
+          where,
+          data: { services: { create: services } },
+          include: { services: true },
+        }),
+      ]);
+      return { data: updated };
+    } catch (error) {
+      if (isUniqueViolation(error)) return slugTaken(reply);
+      throw error;
+    }
   });
 
   app.delete("/resources/:resource/:id", async (req, reply) => {
     const { resource, id } = req.params as { resource: string; id: string };
+    const where = { id };
+    let removed: number;
     if (resource === "opportunities")
-      await prisma.opportunity.delete({ where: { id } });
+      removed = (await prisma.opportunity.deleteMany({ where })).count;
     else if (resource === "suppliers")
-      await prisma.supplier.delete({ where: { id } });
+      removed = (await prisma.supplier.deleteMany({ where })).count;
     else if (resource === "factories")
-      await prisma.factory.delete({ where: { id } });
+      removed = (await prisma.factory.deleteMany({ where })).count;
+    else if (resource === "enquiries")
+      removed = (await prisma.enquiry.deleteMany({ where })).count;
+    else if (resource === "education")
+      [, { count: removed }] = await prisma.$transaction([
+        prisma.educationProgram.deleteMany({ where: { institutionId: id } }),
+        prisma.institution.deleteMany({ where }),
+      ]);
+    else if (resource === "healthcare")
+      [, { count: removed }] = await prisma.$transaction([
+        prisma.healthcareService.deleteMany({ where: { hospitalId: id } }),
+        prisma.hospital.deleteMany({ where }),
+      ]);
     else return reply.badRequest("This resource cannot be deleted here");
-    return reply.code(204).send();
+    return removed ? reply.code(204).send() : reply.notFound("Record not found");
   });
 
   app.get("/content/home", async () => {

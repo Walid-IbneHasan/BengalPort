@@ -277,6 +277,49 @@ const link = z
   .string()
   .trim()
   .regex(/^(\/|https?:\/\/)/, "Use a local path or an HTTP(S) media URL");
+const label = z.string().trim().min(1).max(200);
+const image = (fallback: string) =>
+  z.preprocess((v) => v || undefined, link.default(fallback));
+export const partnerSchema = z.object({
+  name: label,
+  country: label,
+  industry: label,
+  product: label,
+  description: z.string().trim().min(10).max(2000),
+  image: image("/images/global-business.webp"),
+  featured: z.boolean().default(false),
+});
+export const institutionSchema = z.object({
+  name: label,
+  country: label,
+  description: z.string().trim().min(10).max(2000),
+  image: image("/images/global-education.webp"),
+  programs: z
+    .array(
+      z.object({
+        title: label,
+        level: label,
+        discipline: label,
+        deadline: z.preprocess(
+          (v) => (v === "" ? null : v),
+          z.coerce.date().nullable().optional(),
+        ),
+      }),
+    )
+    .max(100)
+    .default([]),
+});
+export const hospitalSchema = z.object({
+  name: label,
+  country: label,
+  city: label,
+  description: z.string().trim().min(10).max(2000),
+  image: image("/images/global-healthcare.webp"),
+  services: z
+    .array(z.object({ title: label, category: label, description: paragraph }))
+    .max(100)
+    .default([]),
+});
 export const homeContentSchema = z.object({
   utility: z.object({ message: text, email: z.string().email(), phone: text }),
   hero: z.object({

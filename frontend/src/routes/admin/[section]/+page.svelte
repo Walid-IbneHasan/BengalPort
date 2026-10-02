@@ -15,11 +15,19 @@
   } from "lucide-svelte";
   import CmsImageField from "$lib/components/CmsImageField.svelte";
   import { detailGroups } from "$lib/submission-details";
+  import {
+    blankProgram,
+    blankRecord,
+    blankService,
+    recordBody,
+    recordFromRow,
+    type RecordKind,
+  } from "$lib/admin-records";
   type Config = {
     title: string;
     description: string;
     columns: [string, string][];
-    add?: "partner" | "opportunity";
+    add?: RecordKind;
   };
   const configs: Record<string, Config> = {
     enquiries: {
@@ -90,24 +98,26 @@
     education: {
       title: "Education",
       description:
-        "Review institutions and the programs available to students.",
+        "Manage institutions and the programs available to students.",
       columns: [
         ["name", "Institution"],
         ["country", "Country"],
         ["programs", "Programs"],
         ["description", "Description"],
       ],
+      add: "institution",
     },
     healthcare: {
       title: "Healthcare",
       description:
-        "Review partner hospitals and international patient services.",
+        "Manage partner hospitals and international patient services.",
       columns: [
         ["name", "Hospital"],
         ["place", "Location"],
         ["services", "Services"],
         ["description", "Description"],
       ],
+      add: "hospital",
     },
     users: {
       title: "Users",
@@ -182,21 +192,30 @@
         viewing.details,
       )
     : [];
-  let form: any = {
-    name: "",
-    country: "",
-    industry: "",
-    product: "",
-    description: "",
-    featured: false,
-    title: "",
-    slug: "",
-    category: "BUSINESS",
-    location: "",
-    deadline: "",
-    image: "/images/global-business.webp",
-    published: true,
+  let form: any = blankRecord();
+  // What one record of each kind is called in buttons and headings.
+  const nouns: Record<RecordKind, string> = {
+    opportunity: "opportunity",
+    partner: "partner",
+    institution: "institution",
+    hospital: "hospital",
   };
+  $: noun =
+    section === "suppliers"
+      ? "supplier"
+      : section === "factories"
+        ? "factory"
+        : config?.add
+          ? nouns[config.add]
+          : "record";
+  function startAdding() {
+    form = blankRecord(config.add);
+    drawer = true;
+  }
+  function startEditing(row: any) {
+    form = recordFromRow(config.add as RecordKind, row);
+    drawer = true;
+  }
   const token = () => localStorage.getItem("bp_token");
   const headers = () => ({ authorization: `Bearer ${token()}` });
   async function load() {
@@ -278,69 +297,31 @@
       error = e instanceof Error ? e.message : "Delete failed";
     }
   }
-  async function create() {
+  async function save() {
     saving = true;
     error = "";
     try {
-      let body: any;
-      if (config.add === "opportunity") {
-        body = {
-          slug:
-            form.slug ||
-            form.title
-              .toLowerCase()
-              .trim()
-              .replace(/[^a-z0-9]+/g, "-"),
-          category: form.category,
-          title: form.title,
-          description: form.description,
-          country: form.country,
-          location: form.location,
-          deadline: form.deadline || null,
-          image: form.image,
-          published: form.published,
-        };
-        await api("/admin/opportunities", {
-          method: "POST",
+      const kind = config.add as RecordKind;
+      const body = JSON.stringify(recordBody(kind, form));
+      if (form.id)
+        await api(`/admin/resources/${section}/${form.id}`, {
+          method: "PUT",
           headers: headers(),
-          body: JSON.stringify(body),
+          body,
         });
-      } else {
-        body = {
-          name: form.name,
-          country: form.country,
-          industry: form.industry,
-          product: form.product,
-          description: form.description,
-          image: form.image,
-          featured: form.featured,
-        };
-        await api(`/admin/resources/${section}`, {
-          method: "POST",
-          headers: headers(),
-          body: JSON.stringify(body),
-        });
-      }
+      else
+        await api(
+          kind === "opportunity"
+            ? "/admin/opportunities"
+            : `/admin/resources/${section}`,
+          { method: "POST", headers: headers(), body },
+        );
       drawer = false;
-      success = "Record created";
-      form = {
-        name: "",
-        country: "",
-        industry: "",
-        product: "",
-        description: "",
-        featured: false,
-        title: "",
-        slug: "",
-        category: "BUSINESS",
-        location: "",
-        deadline: "",
-        image: "/images/global-business.webp",
-        published: true,
-      };
+      success = form.id ? "Changes saved" : "Record created";
+      setTimeout(() => (success = ""), 1800);
       await load();
     } catch (e) {
-      error = e instanceof Error ? e.message : "Unable to create record";
+      error = e instanceof Error ? e.message : "Unable to save the record";
     } finally {
       saving = false;
     }
@@ -377,10 +358,8 @@
         <h1>{config.title}</h1>
         <p>{config.description}</p>
       </div>
-      {#if config.add}<button class="primary" onclick={() => (drawer = true)}
-          ><Plus size={18} /> Add {section === "opportunities"
-            ? "opportunity"
-            : section.slice(0, -1)}</button
+      {#if config.add}<button class="primary" onclick={startAdding}
+          ><Plus size={18} /> Add {noun}</button
         >{/if}
     </header>
     {#if error}<div class="notice error">
@@ -429,9 +408,7 @@
             <thead
               ><tr
                 >{#each config.columns as column}<th>{column[1]}</th
-                  >{/each}{#if ["opportunities", "suppliers", "factories"].includes(section)}<th
-                    class="actions">Actions</th
-                  >{/if}{#if viewable}<th class="actions">Details</th>{/if}</tr
+                  >{/each}{#if config.add}<th class="actions">Actions</th>{/if}{#if viewable}<th class="actions">Details</th>{/if}</tr
               ></thead
             ><tbody
               >{#if loading}{#each Array(5) as _}<tr class="skeleton"
@@ -477,8 +454,9 @@
                               "receiptNumber",
                             ].includes(column[0])}>{value(row, column[0])}</span
                           >{/if}</td
-                      >{/each}{#if ["opportunities", "suppliers", "factories"].includes(section)}<td
-                        class="actions"
+                      >{/each}{#if config.add}<td class="actions"
+                        ><button class="view" onclick={() => startEditing(row)}
+                          >Edit</button
                         ><button
                           class="delete"
                           aria-label="Delete record"
@@ -488,7 +466,12 @@
                       >{/if}{#if viewable}<td class="actions"
                         ><button class="view" onclick={() => (viewing = row)}
                           >View</button
-                        ></td
+                        >{#if section === "enquiries"}<button
+                            class="delete"
+                            aria-label="Delete enquiry"
+                            onclick={() => remove(row.id)}
+                            ><Trash2 size={16} /></button
+                          >{/if}</td
                       >{/if}</tr
                   >{/each}{/if}</tbody
             >
@@ -514,12 +497,8 @@
     >
       <header>
         <div>
-          <span>NEW RECORD</span>
-          <h2 id="drawer-title">
-            Add {section === "opportunities"
-              ? "opportunity"
-              : section.slice(0, -1)}
-          </h2>
+          <span>{form.id ? "EDIT RECORD" : "NEW RECORD"}</span>
+          <h2 id="drawer-title">{form.id ? "Edit" : "Add"} {noun}</h2>
         </div>
         <button aria-label="Close" onclick={() => (drawer = false)}
           ><X /></button
@@ -528,7 +507,7 @@
       <form
         onsubmit={(e) => {
           e.preventDefault();
-          create();
+          save();
         }}
       >
         {#if config.add === "opportunity"}<label
@@ -560,6 +539,25 @@
                 bind:value={form.deadline}
               /></label
             >
+          </div>{:else if config.add === "institution" || config.add === "hospital"}<div
+            class="form-grid"
+          >
+            <label
+              ><span>Name *</span><input
+                bind:value={form.name}
+                required
+              /></label
+            ><label
+              ><span>Country *</span><input
+                bind:value={form.country}
+                required
+              /></label
+            >{#if config.add === "hospital"}<label
+                ><span>City *</span><input
+                  bind:value={form.city}
+                  required
+                /></label
+              >{/if}
           </div>{:else}<div class="form-grid">
             <label
               ><span>Name *</span><input
@@ -600,11 +598,47 @@
             required
             minlength="10"></textarea></label
         >
+        {#if config.add === "institution"}<fieldset class="items">
+            <legend>Programs</legend>
+            {#each form.programs as program, i}<div class="item">
+                <input bind:value={program.title} placeholder="Program title" aria-label="Program title" required />
+                <input bind:value={program.level} placeholder="Level, e.g. Undergraduate" aria-label="Level" required />
+                <input bind:value={program.discipline} placeholder="Discipline, e.g. Medicine" aria-label="Discipline" required />
+                <input type="date" bind:value={program.deadline} aria-label="Application deadline" />
+                <button
+                  type="button"
+                  class="delete"
+                  aria-label="Remove program"
+                  onclick={() => (form.programs = form.programs.filter((_: unknown, n: number) => n !== i))}
+                  ><Trash2 size={15} /></button
+                >
+              </div>{/each}
+            <button type="button" class="add-item" onclick={() => (form.programs = [...form.programs, blankProgram()])}
+              ><Plus size={15} /> Add program</button
+            >
+          </fieldset>{:else if config.add === "hospital"}<fieldset class="items">
+            <legend>Services</legend>
+            {#each form.services as service, i}<div class="item">
+                <input bind:value={service.title} placeholder="Service title" aria-label="Service title" required />
+                <input bind:value={service.category} placeholder="Category, e.g. Specialist care" aria-label="Category" required />
+                <input class="wide" bind:value={service.description} placeholder="Short description" aria-label="Description" required />
+                <button
+                  type="button"
+                  class="delete"
+                  aria-label="Remove service"
+                  onclick={() => (form.services = form.services.filter((_: unknown, n: number) => n !== i))}
+                  ><Trash2 size={15} /></button
+                >
+              </div>{/each}
+            <button type="button" class="add-item" onclick={() => (form.services = [...form.services, blankService()])}
+              ><Plus size={15} /> Add service</button
+            >
+          </fieldset>{/if}
         <footer>
           <button type="button" class="cancel" onclick={() => (drawer = false)}
             >Cancel</button
           ><button class="primary" disabled={saving}
-            >{saving ? "Saving…" : "Create record"}</button
+            >{saving ? "Saving…" : form.id ? "Save changes" : "Create record"}</button
           >
         </footer>
       </form>
@@ -902,6 +936,11 @@
   .actions {
     text-align: right;
     width: 5rem;
+    white-space: nowrap;
+  }
+  .actions button + button {
+    margin-left: 0.4rem;
+    vertical-align: middle;
   }
   .delete {
     width: 2.2rem;
@@ -1004,6 +1043,7 @@
     background: #f7f8f9;
     box-shadow: -2rem 0 5rem #07182f2b;
     animation: drawer-in 240ms var(--ease-drawer);
+    overflow-y: auto;
   }
   .drawer > header {
     background: #102640;
@@ -1135,6 +1175,47 @@
     color: #23384f;
     overflow-wrap: anywhere;
     white-space: pre-wrap;
+  }
+  .items {
+    margin: 0;
+    padding: 0.9rem;
+    border: 1px solid #d6dde2;
+    border-radius: 0.7rem;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .items legend {
+    padding: 0 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 750;
+    color: #405267;
+  }
+  .item {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.5rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid #e6eaed;
+  }
+  .item .delete {
+    grid-row: 1;
+    grid-column: 3;
+  }
+  .item .wide {
+    grid-column: 1 / 3;
+  }
+  .add-item {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px dashed #c3ccd3;
+    background: #fff;
+    border-radius: 0.6rem;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--heading);
   }
   .cancel {
     border: 1px solid #d7dde2;
