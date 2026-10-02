@@ -165,8 +165,10 @@
           class="division {division.class}"
           href={division.href}
           style={`--arrival-delay:${160 + index * 90}ms`}
-          ><div class="photo">
-            <img src={division.image} alt={division.title} decoding="async" />
+          ><div class="photo-slot">
+            <div class="photo">
+              <img src={division.image} alt={division.title} decoding="async" />
+            </div>
           </div>
           <div class="panel">
             <div class="division-icon">
@@ -509,6 +511,9 @@
   .division:hover {
     transform: translateY(-0.5rem);
     filter: drop-shadow(0 1.15rem 1.35rem rgba(23, 48, 79, 0.16));
+  }
+  .photo-slot {
+    display: contents;
   }
   .photo {
     width: 83%;
@@ -2806,12 +2811,21 @@
       justify-content: center;
       align-items: center;
     }
-    .photo {
-      flex: 0 1 auto;
+    /* The hero is fitted to one screen, so a short screen (a real phone,
+       with the browser's bars showing) leaves the cards less height. The
+       slot gives up that height, and the circle is as wide as the slot is
+       tall, so it gets smaller but stays round. The slot is never taller
+       than the card is wide inside, so the width never limits the circle. */
+    .photo-slot {
+      display: block;
+      flex: 0 1 min(7.25rem, calc(50vw - 2.7rem));
       min-height: 0;
       width: 100%;
-      max-width: 7.25rem;
-      height: auto;
+    }
+    .photo {
+      width: auto;
+      max-width: none;
+      height: 100%;
       aspect-ratio: 1;
       margin: 0 auto;
     }
@@ -2835,6 +2849,15 @@
       top: clamp(-2.2rem, -20%, -1.6rem);
       width: clamp(2rem, 15vw, 2.5rem);
       height: clamp(2rem, 15vw, 2.5rem);
+      /* On a short screen the badge gets smaller along with the circle it
+         sits on. Browsers without the svh unit keep the sizes above. */
+      width: min(clamp(2rem, 15vw, 2.5rem), max(1.5rem, 5.2svh));
+      height: min(clamp(2rem, 15vw, 2.5rem), max(1.5rem, 5.2svh));
+      top: calc(min(clamp(2rem, 15vw, 2.5rem), max(1.5rem, 5.2svh)) * -0.64);
+    }
+    .division-icon :global(svg) {
+      width: 47%;
+      height: 47%;
     }
     .mobile-division-name,
     .business .mobile-division-name,
