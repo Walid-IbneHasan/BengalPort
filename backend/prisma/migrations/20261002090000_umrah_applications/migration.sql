@@ -1,0 +1,1 @@
+ALTER TYPE "ApplicationType" ADD VALUE IF NOT EXISTS 'UMRAH';

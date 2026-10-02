@@ -38,7 +38,7 @@
     applications: {
       title: "Applications",
       description:
-        "Track submitted business, education and healthcare applications.",
+        "Track submitted business, education, healthcare and Umrah applications.",
       columns: [
         ["reference", "Reference"],
         ["fullName", "Applicant"],

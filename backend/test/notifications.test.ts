@@ -51,7 +51,9 @@ const enquiry = (overrides: Record<string, unknown> = {}) => ({
 });
 
 // What the website sends when every required question has been answered.
-function completedForm(division: "BUSINESS" | "EDUCATION" | "HEALTHCARE") {
+function completedForm(
+  division: "BUSINESS" | "EDUCATION" | "HEALTHCARE" | "UMRAH",
+) {
   const details: Record<string, unknown> = {};
   for (const field of applicationForms[division].steps.flatMap(
     (step) => step.fields,
@@ -107,7 +109,7 @@ const mailTo = (sent: Mail[], address: string) =>
   sent.find((mail) => mail.to === address);
 
 describe("the website's application forms", () => {
-  for (const division of ["BUSINESS", "EDUCATION", "HEALTHCARE"] as const)
+  for (const division of ["BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH"] as const)
     test(`a completed ${division} form is accepted`, async () => {
       const { res } = await submit("/api/applications", completedForm(division));
       assert.equal(res.statusCode, 201);

@@ -20,6 +20,7 @@
     Stethoscope,
   } from "lucide-svelte";
   import type { DivisionContent } from "$lib/division-content";
+  import { applyHref, type ApplyTab } from "$lib/apply-route";
   let {
     content,
     records,
@@ -62,7 +63,7 @@
       );
     }),
   );
-  const applyHref = (kind: string) => `/apply?tab=${kind}`;
+  let tab = $derived(kind.toUpperCase() as ApplyTab);
   function reveal(node: HTMLElement) {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return {};
     node.style.opacity = "0";
@@ -94,9 +95,11 @@
       <h2>{content.hero.tagline}</h2>
       <p>{content.hero.description}</p>
       <div>
-        <a class="primary" href={applyHref(kind)}
+        <a class="primary" href={applyHref(tab)}
           >{content.hero.primary}<ArrowRight size={18} /></a
-        ><a class="secondary" href="#directory">{content.hero.secondary}</a>
+        ><a class="secondary" href={kind === "umrah" ? "/contact" : "#directory"}
+          >{content.hero.secondary}</a
+        >
       </div>
     </div>
     <div class="hero-visual">
@@ -105,7 +108,9 @@
         <i></i><span
           >{kind === "education"
             ? "International study pathways"
-            : "International patient coordination"}</span
+            : kind === "umrah"
+              ? "Guided pilgrimage support"
+              : "International patient coordination"}</span
         >
       </div>
     </div>
@@ -118,7 +123,7 @@
         ><ArrowRight size={15} /></a
       >{/each}
   </nav>
-  <section class="section services" use:reveal>
+  <section class="section services" id="services" use:reveal>
     <header>
       <span>{content.services.eyebrow}</span>
       <h2>{content.services.title}</h2>
@@ -156,7 +161,8 @@
         </article>{/each}
     </div>
   </section>
-  <section class="directory" id="directory" use:reveal>
+  <!-- Umrah has no partner directory; its page goes straight to the process. -->
+  {#if kind !== "umrah"}<section class="directory" id="directory" use:reveal>
     <div class="section directory-inner">
       <header>
         <span>{content.directory.eyebrow}</span>
@@ -178,7 +184,7 @@
               class="record skeleton"
             ></article>{/each}{:else}{#each filtered as record}<a
               class="record"
-              href={applyHref(kind)}
+              href={applyHref(tab, "enquiry", record.name)}
               ><div class="record-image">
                 <img src={record.image} alt={record.name} loading="lazy" decoding="async" /><span
                   ><MapPin size={13} />{record.city
@@ -212,7 +218,7 @@
           No matching records. Try a different country or search.
         </div>{/if}
     </div>
-  </section>
+  </section>{/if}
   <section class="section process" id="process" use:reveal>
     <header>
       <span>{content.process.eyebrow}</span>
@@ -233,7 +239,7 @@
       <p>{content.closing.description}</p>
     </div>
     <div>
-      <a class="primary" href={applyHref(kind)}
+      <a class="primary" href={applyHref(tab)}
         >{content.closing.primary}<ArrowRight size={17} /></a
       ><a class="outline" href="/contact">{content.closing.secondary}</a>
     </div>

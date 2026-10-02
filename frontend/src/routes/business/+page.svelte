@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { api } from "$lib/api";
+  import { applyHref } from "$lib/apply-route";
   import {
     defaultBusinessContent,
     type BusinessContent,
@@ -106,7 +107,7 @@
       <h2>{content.hero.tagline}</h2>
       <p class="hero-description">{content.hero.description}</p>
       <div class="hero-actions">
-        <a class="gold-button" href="/apply?type=business"
+        <a class="gold-button" href={applyHref("BUSINESS", "enquiry")}
           >START AN ENQUIRY <ArrowRight size={18} /></a
         ><a class="ghost-button" href="/business/apply">PLAN A BUSINESS VISIT</a
         >
@@ -185,7 +186,7 @@
               class="partner-card skeleton"
             ></article>{/each}{:else}{#each partners as partner}<a
               class="partner-card"
-              href="/apply?type=business"
+              href={applyHref("BUSINESS", "enquiry", partner.name)}
               ><div class="partner-image">
                 <img
                   src={partner.image}
@@ -252,7 +253,7 @@
             >৳{landed.toLocaleString("en-BD", { maximumFractionDigits: 0 })}</b
           ><small>Planning estimate only; taxes and fees may vary.</small>
         </div>
-        <a class="gold-button" href="/apply?type=business"
+        <a class="gold-button" href={applyHref("BUSINESS", "enquiry", "Detailed landed cost quote")}
           >REQUEST A DETAILED QUOTE <ArrowRight size={17} /></a
         >
       </form>

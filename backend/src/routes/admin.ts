@@ -12,6 +12,7 @@ import { defaultBusinessContent } from "../lib/business-content.js";
 import {
   defaultEducationContent,
   defaultHealthcareContent,
+  defaultUmrahContent,
 } from "../lib/division-content.js";
 import sharp from "sharp";
 
@@ -613,13 +614,13 @@ const admin: FastifyPluginAsync = async (app) => {
     return { data: page };
   });
 
-  for (const division of ["education", "healthcare"] as const) {
-    const fallback =
-      division === "education"
-        ? defaultEducationContent
-        : defaultHealthcareContent;
-    const name =
-      division === "education" ? "Global Education" : "Global Healthcare";
+  const divisionPages = {
+    education: { name: "Global Education", fallback: defaultEducationContent },
+    healthcare: { name: "Global Healthcare", fallback: defaultHealthcareContent },
+    umrah: { name: "Global Umrah", fallback: defaultUmrahContent },
+  };
+  for (const division of ["education", "healthcare", "umrah"] as const) {
+    const { name, fallback } = divisionPages[division];
     app.get(`/content/${division}`, async () => {
       const page = await prisma.pageContent.findUnique({
         where: { slug: division },

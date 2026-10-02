@@ -1,4 +1,8 @@
-export type ApplicationDivision = "BUSINESS" | "EDUCATION" | "HEALTHCARE";
+export type ApplicationDivision =
+  | "BUSINESS"
+  | "EDUCATION"
+  | "HEALTHCARE"
+  | "UMRAH";
 export type ApplicationField = {
   key: string;
   label: string;
@@ -955,6 +959,274 @@ export const applicationForms: Record<
           {
             key: "signature",
             label: "Patient / legal representative signature (type full name)",
+            required: true,
+          },
+          { key: "signatureDate", label: "Date", type: "date", required: true },
+        ],
+      },
+    ],
+  },
+  UMRAH: {
+    title: "Global Umrah Application",
+    intro:
+      "For individual, family and group Umrah journeys, including visa, flights, accommodation and ground support.",
+    steps: [
+      {
+        title: "Journey plan & lead pilgrim",
+        description: "Tell us when you plan to travel and who is applying.",
+        fields: [
+          {
+            key: "packageTypes",
+            label: "Type of Umrah journey",
+            type: "multi",
+            required: true,
+            options: [
+              "Individual Umrah",
+              "Family Umrah",
+              "Group Umrah",
+              "Ramadan Umrah",
+              "Umrah with Ziyarat",
+              "Customized Package",
+            ],
+          },
+          {
+            key: "preferredTravelDate",
+            label: "Preferred travel date",
+            type: "date",
+            required: true,
+          },
+          {
+            key: "stayDuration",
+            label: "Length of stay",
+            type: "select",
+            required: true,
+            options: [
+              "7 days",
+              "10 days",
+              "14 days",
+              "15 to 21 days",
+              "Custom duration",
+            ],
+          },
+          {
+            key: "numberOfPilgrims",
+            label: "Number of pilgrims",
+            type: "number",
+            required: true,
+          },
+          {
+            key: "departureCity",
+            label: "Departure city / airport",
+            required: true,
+          },
+          {
+            key: "fullName",
+            label: "Full name (as per passport)",
+            required: true,
+          },
+          {
+            key: "dateOfBirth",
+            label: "Date of birth",
+            type: "date",
+            required: true,
+          },
+          {
+            key: "gender",
+            label: "Gender",
+            type: "select",
+            required: true,
+            options: ["Male", "Female"],
+          },
+          { key: "nationality", label: "Nationality", required: true },
+          {
+            key: "phone",
+            label: "Mobile / WhatsApp",
+            type: "tel",
+            required: true,
+          },
+          {
+            key: "email",
+            label: "Email address",
+            type: "email",
+            required: true,
+          },
+          {
+            key: "currentAddress",
+            label: "Current address",
+            type: "textarea",
+            required: true,
+          },
+        ],
+      },
+      {
+        title: "Passport & travel group",
+        description: "Passport details and the people travelling with you.",
+        fields: [
+          { key: "passportNumber", label: "Passport number", required: true },
+          {
+            key: "passportExpiryDate",
+            label: "Passport expiry date",
+            type: "date",
+            required: true,
+            hint: "Should be valid for at least six months from the travel date.",
+          },
+          {
+            key: "passportPlaceOfIssue",
+            label: "Place of issue",
+            required: true,
+          },
+          {
+            key: "previousUmrahOrHajj",
+            label: "Have you performed Umrah or Hajj before?",
+            type: "select",
+            required: true,
+            options: yesNo,
+          },
+          {
+            key: "travelGroup",
+            label: "Pilgrims travelling with you",
+            type: "textarea",
+            required: true,
+            hint: "List the name, age and relationship of each person, or write “Travelling alone”.",
+          },
+          {
+            key: "emergencyName",
+            label: "Emergency contact name",
+            required: true,
+          },
+          {
+            key: "emergencyRelationship",
+            label: "Relationship to you",
+            required: true,
+          },
+          {
+            key: "emergencyPhone",
+            label: "Emergency contact phone",
+            type: "tel",
+            required: true,
+          },
+        ],
+      },
+      {
+        title: "Stay & services",
+        description: "Accommodation, flights and support on the ground.",
+        fields: [
+          {
+            key: "makkahHotel",
+            label: "Hotel preference in Makkah",
+            type: "select",
+            required: true,
+            options: [
+              "Walking distance to Masjid al-Haram",
+              "Standard hotel with shuttle",
+              "Economy hotel",
+              "No preference",
+            ],
+          },
+          {
+            key: "madinahHotel",
+            label: "Hotel preference in Madinah",
+            type: "select",
+            required: true,
+            options: [
+              "Walking distance to Masjid an-Nabawi",
+              "Standard hotel with shuttle",
+              "Economy hotel",
+              "No preference",
+            ],
+          },
+          {
+            key: "roomType",
+            label: "Room type",
+            type: "select",
+            required: true,
+            options: ["Double", "Triple", "Quad", "Family room", "No preference"],
+          },
+          {
+            key: "flightPreference",
+            label: "Flight preference",
+            type: "select",
+            required: true,
+            options: [
+              "Direct flight",
+              "Transit flight is fine",
+              "I will arrange my own flight",
+            ],
+          },
+          {
+            key: "groundTransport",
+            label: "Ground transport",
+            type: "select",
+            required: true,
+            options: ["Private transfers", "Shared transfers", "No preference"],
+          },
+          {
+            key: "ziyaratRequired",
+            label: "Ziyarat tours required?",
+            type: "select",
+            required: true,
+            options: yesNo,
+          },
+          {
+            key: "specialAssistance",
+            label: "Wheelchair or special assistance needed?",
+            type: "select",
+            required: true,
+            options: yesNo,
+          },
+          {
+            key: "budgetPerPerson",
+            label: "Approximate budget per person",
+            required: true,
+          },
+          {
+            key: "specialRequests",
+            label: "Health conditions or special requests",
+            type: "textarea",
+          },
+        ],
+      },
+      {
+        title: "Documents & consent",
+        description: "Confirm available documents and your declaration.",
+        fields: [
+          {
+            key: "documents",
+            label: "Documents available",
+            type: "multi",
+            options: [
+              "Passport Bio Page",
+              "Recent Photograph",
+              "National ID / Birth Certificate",
+              "Vaccination Certificate",
+              "Previous Visa Copies",
+              "Other Supporting Documents",
+            ],
+          },
+          {
+            key: "truthDeclaration",
+            label:
+              "I confirm that the information provided is accurate and matches my passport.",
+            type: "checkbox",
+            required: true,
+          },
+          {
+            key: "contactConsent",
+            label:
+              "I authorize Bengal Port to contact me and use this information to arrange visa, travel and accommodation for this Umrah request.",
+            type: "checkbox",
+            required: true,
+          },
+          {
+            key: "visaAcknowledgement",
+            label:
+              "I understand that visa approval, flight schedules and hotel availability are decided by the relevant authorities and providers.",
+            type: "checkbox",
+            required: true,
+          },
+          {
+            key: "signature",
+            label: "Applicant signature (type full name)",
             required: true,
           },
           { key: "signatureDate", label: "Date", type: "date", required: true },

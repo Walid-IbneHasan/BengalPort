@@ -443,14 +443,14 @@ export const defaultUmrahContent: DivisionContent = {
         title: "Trusted accommodation",
         description:
           "Makkah and Madinah stays selected for comfort and accessibility.",
-        href: "#directory",
+        href: "/apply?tab=umrah",
       },
       {
         icon: "bus",
         title: "Ground support",
         description:
           "Airport transfers, intercity transport and guided Ziyarat coordination.",
-        href: "#directory",
+        href: "/apply?tab=umrah",
       },
     ],
   },

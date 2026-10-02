@@ -380,7 +380,8 @@ exports.RecordStatus = exports.$Enums.RecordStatus = {
 exports.ApplicationType = exports.$Enums.ApplicationType = {
   BUSINESS: 'BUSINESS',
   EDUCATION: 'EDUCATION',
-  HEALTHCARE: 'HEALTHCARE'
+  HEALTHCARE: 'HEALTHCARE',
+  UMRAH: 'UMRAH'
 };
 
 exports.OpportunityCategory = exports.$Enums.OpportunityCategory = {

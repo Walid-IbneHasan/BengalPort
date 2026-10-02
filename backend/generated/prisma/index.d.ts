@@ -125,7 +125,8 @@ export type EnquiryType = (typeof EnquiryType)[keyof typeof EnquiryType]
 export const ApplicationType: {
   BUSINESS: 'BUSINESS',
   EDUCATION: 'EDUCATION',
-  HEALTHCARE: 'HEALTHCARE'
+  HEALTHCARE: 'HEALTHCARE',
+  UMRAH: 'UMRAH'
 };
 
 export type ApplicationType = (typeof ApplicationType)[keyof typeof ApplicationType]

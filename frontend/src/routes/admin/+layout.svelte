@@ -16,6 +16,7 @@
     LayoutDashboard,
     Menu,
     MessageSquare,
+    MoonStar,
     Receipt,
     Settings,
     Store,
@@ -55,6 +56,11 @@
       label: "Healthcare page",
       href: "/admin/division-content/healthcare",
       icon: HeartPulse,
+    },
+    {
+      label: "Umrah page",
+      href: "/admin/division-content/umrah",
+      icon: MoonStar,
     },
     { label: "Settings", href: "/admin/settings", icon: Settings },
   ];

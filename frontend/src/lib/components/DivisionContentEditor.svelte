@@ -14,8 +14,10 @@
   let {
     division,
     fallback,
-  }: { division: "education" | "healthcare"; fallback: DivisionContent } =
-    $props();
+  }: {
+    division: "education" | "healthcare" | "umrah";
+    fallback: DivisionContent;
+  } = $props();
   let draft = $state<DivisionContent>(structuredClone(fallback)),
     revision = $state(0),
     published = $state(true),
@@ -27,7 +29,11 @@
     json = $state("");
   let fields = $derived(flatten(draft));
   const name = $derived(
-    division === "education" ? "Global Education" : "Global Healthcare",
+    {
+      education: "Global Education",
+      healthcare: "Global Healthcare",
+      umrah: "Global Umrah",
+    }[division],
   );
   function title(path: string) {
     return path

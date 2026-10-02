@@ -25,6 +25,7 @@ enum ApplicationType {
   BUSINESS
   EDUCATION
   HEALTHCARE
+  UMRAH
 }
 
 enum RecordStatus {

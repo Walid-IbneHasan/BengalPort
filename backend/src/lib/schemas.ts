@@ -8,9 +8,44 @@ export const enquirySchema = z.object({
   details: z.record(z.unknown()).optional(),
 });
 const requiredApplicationFields: Record<
-  "BUSINESS" | "EDUCATION" | "HEALTHCARE",
+  "BUSINESS" | "EDUCATION" | "HEALTHCARE" | "UMRAH",
   string[]
 > = {
+  UMRAH: [
+    "packageTypes",
+    "preferredTravelDate",
+    "stayDuration",
+    "numberOfPilgrims",
+    "departureCity",
+    "fullName",
+    "dateOfBirth",
+    "gender",
+    "nationality",
+    "phone",
+    "email",
+    "currentAddress",
+    "passportNumber",
+    "passportExpiryDate",
+    "passportPlaceOfIssue",
+    "previousUmrahOrHajj",
+    "travelGroup",
+    "emergencyName",
+    "emergencyRelationship",
+    "emergencyPhone",
+    "makkahHotel",
+    "madinahHotel",
+    "roomType",
+    "flightPreference",
+    "groundTransport",
+    "ziyaratRequired",
+    "specialAssistance",
+    "budgetPerPerson",
+    "truthDeclaration",
+    "contactConsent",
+    "visaAcknowledgement",
+    "signature",
+    "signatureDate",
+  ],
   BUSINESS: [
     "applicationTypes",
     "preferredCountry",
@@ -149,7 +184,7 @@ const requiredApplicationFields: Record<
 };
 export const applicationSchema = z
   .object({
-    type: z.enum(["BUSINESS", "EDUCATION", "HEALTHCARE"]),
+    type: z.enum(["BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH"]),
     fullName: z.string().trim().min(2),
     email: z.string().email(),
     phone: z.string().trim().min(7),
