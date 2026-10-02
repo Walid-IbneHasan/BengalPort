@@ -75,6 +75,18 @@
           ></tbody
         >
       </table>
+      {#if receipt.payment.refunds?.length}<div class="refunds">
+          <h2>Refunded since this payment</h2>
+          <table>
+            <tbody
+              >{#each receipt.payment.refunds as refund}<tr
+                  ><td
+                    >{new Date(refund.createdAt).toLocaleDateString()} · {refund.method}</td
+                  ><td>৳{Number(refund.amount).toLocaleString()}</td></tr
+                >{/each}</tbody
+            >
+          </table>
+        </div>{/if}
       <button class="btn" onclick={() => window.print()}
         >PRINT / DOWNLOAD PDF</button
       >{/if}
@@ -130,6 +142,11 @@
   td:last-child,
   th:last-child {
     text-align: right;
+  }
+  .refunds h2 {
+    font-size: 1rem;
+    color: var(--navy);
+    margin: 0 0 10px;
   }
   @media print {
     /* Hide the site header, footer and chat button around the receipt. */

@@ -22,6 +22,7 @@
     new Date(value).toLocaleDateString("en-BD", { day: "numeric", month: "short", year: "numeric" });
   const division = (type: string) => type.charAt(0) + type.slice(1).toLowerCase();
   const toggle = (id: string) => (open = open === id ? "" : id);
+  const refundedOf = (payment: any) => (payment.refunds ?? []).reduce((sum: number, refund: any) => sum + Number(refund.amount), 0);
   // An application added with its reference number: show it, opened.
   async function claimed(reference: string) {
     activity = await api<Activity>("/auth/me/activity");
@@ -131,7 +132,7 @@
           {@const status = statusInfo(item.status)}
           <div class="row payment">
             <span class="main"><b>{item.service}</b><small>{day(item.createdAt)} · {item.method}</small></span>
-            <span class="amounts"><b>{money(item.amount)} paid</b>{#if item.receipt && Number(item.receipt.remainingDue) > 0}<small>{money(item.receipt.remainingDue)} remaining</small>{/if}</span>
+            <span class="amounts"><b>{money(item.amount)} paid</b>{#if refundedOf(item) > 0}<small>{money(refundedOf(item))} refunded</small>{:else if item.receipt && Number(item.receipt.remainingDue) > 0}<small>{money(item.receipt.remainingDue)} remaining</small>{/if}</span>
             <i class={status.tone}>{status.label}</i>
             {#if item.receipt}<a class="receipt" href={`/receipt/${item.receipt.receiptNumber}`}>Receipt <ArrowRight size={15} /></a>{/if}
           </div>

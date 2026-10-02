@@ -54,6 +54,13 @@ const gateway: Gateway = {
     if (bkash.query === "silent") throw new GatewayError("bKash did not respond", "NO_RESPONSE");
     return status(paymentId, bkash.query === "completed" ? "Completed" : "Initiated");
   },
+  // Refunds have their own tests.
+  async refundPayment() {
+    throw new Error("Not used in these tests");
+  },
+  async refundStatus() {
+    return [];
+  },
 };
 const sent: Mail[] = [];
 const mailer: Mailer = { configured: true, async send(mail) { sent.push(mail); } };

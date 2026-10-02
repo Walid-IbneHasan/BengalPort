@@ -3,7 +3,10 @@
 // The flow: createPayment() returns a bKash page; the customer approves the
 // payment there with their wallet PIN and is sent back to our callback; only
 // executePayment() then moves the money. queryPayment() reports the state of
-// a payment when an execute call went unanswered.
+// a payment when an execute call went unanswered. refundPayment() sends money
+// back to the wallet that paid, in full or in part (bKash allows up to ten
+// part refunds, within 60 days of the payment); refundStatus() lists the
+// refunds bKash holds for a payment.
 //
 // Settings: BKASH_USERNAME, BKASH_PASSWORD, BKASH_APP_KEY, BKASH_APP_SECRET,
 // and BKASH_BASE_URL (the sandbox when unset; bKash supplies the live address
@@ -14,11 +17,17 @@ export type TokenStore = { load(): Promise<StoredToken | null>; save(token: Stor
 export type GatewayPayment = { paymentId: string; bkashURL: string; signature: string | null };
 export type GatewayStatus = { paymentId: string; status: string; trxId: string | null; amount: number | null; payerAccount: string | null };
 export type PaymentOrder = { amount: number; invoice: string; payerReference: string; callbackURL: string };
+// `paymentId` and `trxId` are the ones bKash gave the original payment; `sku`
+// is a tag for what was bought, which bKash requires.
+export type RefundOrder = { paymentId: string; trxId: string; amount: number; reason: string; sku: string };
+export type GatewayRefund = { refundTrxId: string | null; status: string; amount: number | null };
 export type Gateway = {
   configured: boolean;
   createPayment(order: PaymentOrder): Promise<GatewayPayment>;
   executePayment(paymentId: string): Promise<GatewayStatus>;
   queryPayment(paymentId: string): Promise<GatewayStatus>;
+  refundPayment(order: RefundOrder): Promise<GatewayRefund>;
+  refundStatus(paymentId: string, trxId: string): Promise<GatewayRefund[]>;
 };
 
 export class GatewayError extends Error {
@@ -130,6 +139,12 @@ export function createBkashGateway(options: {
     payerAccount: data.payerAccount ?? data.customerMsisdn ?? null,
   });
 
+  const refund = (data: Record<string, any>): GatewayRefund => ({
+    refundTrxId: data.refundTrxId ?? null,
+    status: data.refundTransactionStatus ?? "Unknown",
+    amount: data.refundAmount == null ? null : Number(data.refundAmount),
+  });
+
   return {
     configured,
     async createPayment(order) {
@@ -154,6 +169,24 @@ export function createBkashGateway(options: {
     },
     async queryPayment(paymentId) {
       return status(await call("/query/payment", { paymentId }, "bKash could not report the payment"), paymentId);
+    },
+    async refundPayment(order) {
+      const data = await call(
+        "/refund/payment/transaction",
+        {
+          paymentId: order.paymentId,
+          trxId: order.trxId,
+          refundAmount: order.amount.toFixed(2),
+          reason: order.reason.slice(0, 255),
+          sku: order.sku.slice(0, 255),
+        },
+        "bKash could not make the refund",
+      );
+      return refund(data);
+    },
+    async refundStatus(paymentId, trxId) {
+      const data = await call("/refund/payment/status", { paymentId, trxId }, "bKash could not report the refunds");
+      return Array.isArray(data.refundTransactions) ? data.refundTransactions.map(refund) : [];
     },
   };
 }

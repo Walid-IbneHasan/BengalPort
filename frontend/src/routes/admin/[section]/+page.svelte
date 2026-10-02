@@ -22,6 +22,7 @@
   import SystemStatus from "$lib/components/SystemStatus.svelte";
   import StaffNotes from "$lib/components/StaffNotes.svelte";
   import ApplicationEditor from "$lib/components/ApplicationEditor.svelte";
+  import RefundDialog from "$lib/components/RefundDialog.svelte";
   import { xlsx } from "$lib/xlsx";
   import {
     applicationRows,
@@ -211,6 +212,16 @@
   // Whether the open application's answers are being corrected.
   let editing = false;
   let exporting = false;
+  // The payment whose refunds are open.
+  let refunding = "";
+  const refundedOf = (row: any) =>
+    (row.refunds ?? [])
+      .filter((refund: any) => refund.status === "COMPLETED")
+      .reduce((sum: number, refund: any) => sum + Number(refund.amount), 0);
+  const refundPending = (row: any) =>
+    (row.refunds ?? []).some((refund: any) => refund.status === "PENDING");
+  const canRefund = (row: any) =>
+    ["PAID", "PARTIALLY_PAID", "REFUNDED"].includes(row.status);
   async function openDetails(row: any) {
     viewing = row;
     editing = false;
@@ -536,7 +547,7 @@
             <thead
               ><tr
                 >{#each config.columns as column}<th>{column[1]}</th
-                  >{/each}{#if editable}<th class="actions">Actions</th>{/if}{#if viewable}<th class="actions">Details</th>{/if}</tr
+                  >{/each}{#if editable}<th class="actions">Actions</th>{/if}{#if viewable}<th class="actions">Details</th>{/if}{#if section === "payments"}<th class="actions">Refunds</th>{/if}</tr
               ></thead
             ><tbody
               >{#if loading}{#each Array(5) as _}<tr class="skeleton"
@@ -581,7 +592,10 @@
                               "reference",
                               "receiptNumber",
                             ].includes(column[0])}>{value(row, column[0])}</span
-                          >{/if}</td
+                          >{#if section === "payments" && column[0] === "amount" && (refundedOf(row) > 0 || refundPending(row))}<small
+                              class="refunded"
+                              >{#if refundedOf(row) > 0}{money(refundedOf(row))} refunded{/if}{#if refundPending(row)}{refundedOf(row) > 0 ? " · " : ""}refund waiting{/if}</small
+                            >{/if}{/if}</td
                       >{/each}{#if editable}<td class="actions"
                         ><button class="view" onclick={() => startEditing(row)}
                           >Edit</button
@@ -606,6 +620,12 @@
                           onclick={() => remove(row.id)}
                           ><Trash2 size={16} /></button
                         ></td
+                      >{/if}{#if section === "payments"}<td class="actions"
+                        >{#if canRefund(row)}<button
+                            class="view"
+                            onclick={() => (refunding = row.id)}
+                            >{row.status === "REFUNDED" ? "Refunds" : "Refund"}</button
+                          >{/if}</td
                       >{/if}</tr
                   >{/each}{/if}</tbody
             >
@@ -842,6 +862,11 @@
       </form>
     </aside>
   </div>{/if}
+{#if refunding}{#key refunding}<RefundDialog
+      paymentId={refunding}
+      onchange={load}
+      onclose={() => (refunding = "")}
+    />{/key}{/if}
 {#if viewing}<div
     class="backdrop"
     role="presentation"
@@ -1100,6 +1125,12 @@
   }
   .toolbar .export:disabled {
     opacity: 0.5;
+  }
+  .refunded {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.68rem;
+    color: #8a5a12;
   }
   .note-count {
     display: inline-block;

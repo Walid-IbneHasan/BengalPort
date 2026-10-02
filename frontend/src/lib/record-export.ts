@@ -21,6 +21,16 @@ const when = (value: unknown) => {
 };
 
 const received = (status: string) => status === "PAID" || status === "PARTIALLY_PAID";
+const paisa = (value: unknown) => Math.round(Number(value) * 100);
+// What was received, less what was sent back.
+const netPaid = (payments: Row[]) =>
+  payments
+    .filter((payment) => received(payment.status))
+    .reduce(
+      (sum, payment) =>
+        sum + paisa(payment.amount) - (payment.refunds ?? []).filter((refund: Row) => refund.status === "COMPLETED").reduce((back: number, refund: Row) => back + paisa(refund.amount), 0),
+      0,
+    ) / 100;
 const amount = (value: unknown) => (value === null || value === undefined || value === "" ? null : Number(value));
 
 // The applicant's own details have columns of their own.
@@ -53,7 +63,7 @@ export function applicationRows(applications: Row[]): Cell[][] {
     heading,
     ...applications.map((row, index) => {
       const due = amount(row.amountDue);
-      const paid = (row.payments ?? []).filter((payment: Row) => received(payment.status)).reduce((sum: number, payment: Row) => sum + Math.round(Number(payment.amount) * 100), 0) / 100;
+      const paid = netPaid(row.payments ?? []);
       return [
         row.reference,
         words(row.type),

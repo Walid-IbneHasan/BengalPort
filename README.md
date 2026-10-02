@@ -49,7 +49,9 @@ Paying online is optional for the customer. An enquiry is always free; an applic
 
 **What an application costs.** In Admin → Settings, each division has a service fee and a smallest part payment. A new application owes its division's fee; leave a fee at 0 if staff quote each application instead. The amount due can be set or changed per application in Admin → Applications → View. Payments recorded by staff (cash, bank transfer) count toward the same balance.
 
-**How a payment works.** The site uses bKash Tokenized Checkout (API v2). The customer is sent to bKash's own page to approve the payment with their wallet PIN and is then sent back. The money is counted only when bKash itself confirms the payment; if that confirmation goes unanswered the payment is checked with bKash again rather than assumed. Each payment gets a receipt, which is emailed to the payer and can be opened through its own link without an account. Refunds are made in the bKash merchant portal and are not recorded automatically.
+**How a payment works.** The site uses bKash Tokenized Checkout (API v2). The customer is sent to bKash's own page to approve the payment with their wallet PIN and is then sent back. The money is counted only when bKash itself confirms the payment; if that confirmation goes unanswered the payment is checked with bKash again rather than assumed. Each payment gets a receipt, which is emailed to the payer and can be opened through its own link without an account.
+
+**Refunds.** In Admin → Payments, *Refund* sends all or part of a bKash payment back to the wallet that paid (bKash allows this for 60 days, in up to ten parts) and records it; for a payment taken by staff it records a refund staff made by hand. Refunded money is owed again on the application, the payer is emailed, and the receipt lists the refunds. If bKash does not answer, the refund is shown as waiting and its amount is held back until bKash's own records settle it. A refund made directly in the bKash merchant portal is not seen by the website, so make refunds here.
 
 **Settings (backend).** Online payment stays switched off until all four keys are set:
 

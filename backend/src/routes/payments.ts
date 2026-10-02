@@ -2,10 +2,10 @@ import type { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { randomCode } from "../lib/reference.js";
-import { balance, paymentProblem, received } from "../lib/payment-rules.js";
-import { notifyPayment } from "../lib/notifications.js";
+import { balance, paymentProblem, received, refundProblem, refundable, refundedInFull } from "../lib/payment-rules.js";
+import { notifyPayment, notifyRefund } from "../lib/notifications.js";
 import { findApplication } from "../lib/application-lookup.js";
-import type { GatewayStatus } from "../lib/bkash.js";
+import { GatewayError, type GatewayRefund, type GatewayStatus } from "../lib/bkash.js";
 
 const manualPaymentSchema = z
   .object({
@@ -22,6 +22,17 @@ const manualPaymentSchema = z
 // How long a customer has to finish on bKash's page before the attempt is
 // treated as abandoned.
 const ABANDONED_AFTER_MS = 30 * 60_000;
+
+const refundSchema = z.object({
+  amount: z.coerce.number(),
+  reason: z.string().trim().min(3).max(255),
+  // How staff returned the money, for a payment that did not come through bKash.
+  method: z.string().trim().min(1).max(60).optional(),
+});
+// bKash answers a refund within half a minute. One it still does not list
+// after this long was never made.
+const REFUND_GIVEN_UP_AFTER_MS = 2 * 60_000;
+const refundFields = { id: true, amount: true, reason: true, method: true, status: true, gatewayRefundId: true, recordedBy: true, createdAt: true } as const;
 
 const routes: FastifyPluginAsync = async (app) => {
   const siteUrl = () => (process.env.FRONTEND_URL || "http://localhost:5173").split(",")[0].trim();
@@ -53,7 +64,7 @@ const routes: FastifyPluginAsync = async (app) => {
     const { payment, created } = await prisma.$transaction(async (tx) => {
       const row = await tx.payment.findUniqueOrThrow({
         where: { id: paymentId },
-        include: { receipt: true, application: { include: { payments: true } } },
+        include: { receipt: true, application: { include: { payments: { include: { refunds: true } } } } },
       });
       if (row.receipt) return { payment: row, created: false };
       const amount = result.amount ?? Number(row.amount);
@@ -115,7 +126,7 @@ const routes: FastifyPluginAsync = async (app) => {
     for (const payment of unsettled) await confirm(payment);
     const application = await prisma.application.findUnique({
       where: { id: applicationId },
-      include: { payments: { include: { receipt: true }, orderBy: { createdAt: "desc" } } },
+      include: { payments: { include: { receipt: true, refunds: true }, orderBy: { createdAt: "desc" } } },
     });
     if (!application) return null;
     const fee = await prisma.serviceFee.findUnique({ where: { division: application.type } });
@@ -337,10 +348,147 @@ const routes: FastifyPluginAsync = async (app) => {
     }
     const receipt = await prisma.receipt.findUnique({
       where: { receiptNumber: number },
-      include: { payment: { include: { user: { select: { name: true } }, application: { select: { reference: true, fullName: true } } } } },
+      include: {
+        payment: {
+          include: {
+            user: { select: { name: true } },
+            application: { select: { reference: true, fullName: true } },
+            // Money sent back, so that the receipt tells the whole story.
+            refunds: { where: { status: "COMPLETED" }, select: { amount: true, method: true, createdAt: true }, orderBy: { createdAt: "asc" } },
+          },
+        },
+      },
     });
     if (!receipt || !allowed(receipt.payment)) return reply.notFound("Receipt not found");
     return { data: receipt };
+  });
+
+  // A refund that has gone through: recorded, the payment closed when nothing
+  // of it is left, and the payer and the team told.
+  async function completeRefund(refundId: string, gatewayRefundId: string | null) {
+    const refund = await prisma.refund.update({
+      where: { id: refundId },
+      data: { status: "COMPLETED", gatewayRefundId },
+      include: { payment: { include: { refunds: true, application: true } } },
+    });
+    if (refundedInFull(refund.payment)) await prisma.payment.update({ where: { id: refund.paymentId }, data: { status: "REFUNDED" } });
+    if (refund.payment.application)
+      notifyRefund(app, { application: refund.payment.application, amount: Number(refund.amount), method: refund.method, transactionId: gatewayRefundId });
+  }
+
+  // Settles the refunds bKash never answered, from bKash's own list of the
+  // refunds it made for the payment. One it lists is completed; one it still
+  // does not list after a few minutes was never made and is given up.
+  async function settleRefunds(payment: { id: string; gatewayPaymentId: string | null; gatewayTransactionId: string | null }) {
+    const waiting = await prisma.refund.findMany({ where: { paymentId: payment.id, status: "PENDING" }, orderBy: { createdAt: "asc" } });
+    if (!waiting.length || !payment.gatewayPaymentId || !payment.gatewayTransactionId) return;
+    let held: GatewayRefund[];
+    try {
+      held = await app.gateway.refundStatus(payment.gatewayPaymentId, payment.gatewayTransactionId);
+    } catch {
+      return; // Still unknown; the amount stays held back.
+    }
+    const recorded = await prisma.refund.findMany({ where: { paymentId: payment.id, gatewayRefundId: { not: null } }, select: { gatewayRefundId: true } });
+    const known = new Set(recorded.map((refund) => refund.gatewayRefundId));
+    const unmatched = held.filter((item) => item.status === "Completed" && item.refundTrxId && !known.has(item.refundTrxId));
+    const paisa = (value: unknown) => Math.round(Number(value) * 100);
+    for (const refund of waiting) {
+      const at = unmatched.findIndex((item) => item.amount !== null && paisa(item.amount) === paisa(refund.amount));
+      if (at >= 0) await completeRefund(refund.id, unmatched.splice(at, 1)[0].refundTrxId);
+      else if (Date.now() - refund.createdAt.getTime() > REFUND_GIVEN_UP_AFTER_MS)
+        await prisma.refund.update({ where: { id: refund.id }, data: { status: "FAILED" } });
+    }
+  }
+
+  const adminOnly = async (req: any, reply: any) => {
+    await app.authenticate(req, reply);
+    if (req.user.role !== "ADMIN") throw app.httpErrors.forbidden("Admin access required");
+  };
+
+  // The refunds of one payment and how much of it can still be sent back.
+  app.get("/:id/refunds", { preHandler: adminOnly }, async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const found = await prisma.payment.findUnique({ where: { id } });
+    if (!found) return reply.notFound("Payment not found");
+    if (found.provider === "bkash") await settleRefunds(found);
+    const payment = await prisma.payment.findUniqueOrThrow({
+      where: { id },
+      include: { refunds: { select: refundFields, orderBy: { createdAt: "desc" } }, application: { select: { reference: true, fullName: true } } },
+    });
+    return {
+      data: {
+        payment: { id: payment.id, amount: Number(payment.amount), method: payment.method, status: payment.status, payerAccount: payment.payerAccount, application: payment.application },
+        // A bKash payment is refunded through bKash; any other is recorded by staff.
+        viaGateway: payment.provider === "bkash",
+        gatewayReady: app.gateway.configured,
+        refundable: refundable(payment),
+        refunds: payment.refunds,
+      },
+    };
+  });
+
+  // Sends money back for a payment, in full or in part.
+  app.post("/:id/refunds", { preHandler: adminOnly }, async (req: any, reply) => {
+    const { id } = req.params as { id: string };
+    const parsed = refundSchema.safeParse(req.body);
+    if (!parsed.success) return reply.badRequest("Enter the amount to refund and the reason for it.");
+    const { amount, reason } = parsed.data;
+    const payment = await prisma.payment.findUnique({ where: { id }, include: { refunds: true, application: true } });
+    if (!payment) return reply.notFound("Payment not found");
+    const viaGateway = payment.provider === "bkash";
+    const problem = refundProblem(amount, payment);
+    if (problem) return reply.badRequest(problem);
+    if (!viaGateway && !parsed.data.method) return reply.badRequest("Say how the money was returned.");
+    if (viaGateway && !app.gateway.configured)
+      return reply.serviceUnavailable("bKash is not connected, so this payment cannot be refunded here. Refund it in the bKash merchant portal.");
+    if (viaGateway && (!payment.gatewayPaymentId || !payment.gatewayTransactionId))
+      return reply.code(409).send({ error: { code: "NO_GATEWAY_TRANSACTION", message: "This payment has no bKash transaction to refund." } });
+    const staff = await prisma.user.findUnique({ where: { id: req.user.sub }, select: { name: true } });
+
+    // The payment is locked while the refund is added, so two refunds started
+    // at the same moment cannot both take the same money.
+    const refund = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "Payment" WHERE id = ${id} FOR UPDATE`;
+      const current = await tx.payment.findUniqueOrThrow({ where: { id }, include: { refunds: true } });
+      const late = refundProblem(amount, current);
+      if (late) return late;
+      return tx.refund.create({
+        data: { paymentId: id, amount, reason, method: viaGateway ? "bKash" : parsed.data.method!, status: "PENDING", recordedBy: staff?.name ?? "Staff" },
+      });
+    });
+    if (typeof refund === "string") return reply.badRequest(refund);
+    const answer = async () => {
+      const current = await prisma.refund.findUniqueOrThrow({ where: { id: refund.id }, select: refundFields });
+      return reply.code(current.status === "COMPLETED" ? 201 : 202).send({ data: current });
+    };
+
+    if (!viaGateway) {
+      await completeRefund(refund.id, null);
+      return answer();
+    }
+    try {
+      const result = await app.gateway.refundPayment({
+        paymentId: payment.gatewayPaymentId!,
+        trxId: payment.gatewayTransactionId!,
+        amount,
+        reason,
+        sku: payment.application?.reference ?? payment.transactionId,
+      });
+      if (result.status === "Completed" && result.refundTrxId) {
+        await completeRefund(refund.id, result.refundTrxId);
+        return answer();
+      }
+    } catch (error) {
+      if (error instanceof GatewayError && error.code !== "NO_RESPONSE") {
+        await prisma.refund.update({ where: { id: refund.id }, data: { status: "FAILED" } });
+        return reply.code(502).send({ error: { code: "REFUND_REFUSED", message: `bKash refused the refund: ${error.message}` } });
+      }
+      req.log.warn({ error }, "bKash did not answer a refund; checking its list of refunds");
+    }
+    // No clear answer. bKash's own list decides; until it shows the refund,
+    // the refund waits and its amount cannot be refunded again.
+    await settleRefunds(payment);
+    return answer();
   });
 };
 

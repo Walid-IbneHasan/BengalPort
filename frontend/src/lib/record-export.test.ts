@@ -60,6 +60,13 @@ describe("exporting applications", () => {
     assert.deepEqual(column(rows, "Remaining"), [135000, null]);
   });
 
+  test("money that was refunded no longer counts as paid", () => {
+    const refunded = { ...umrah, payments: [{ amount: "50000", status: "PARTIALLY_PAID", refunds: [{ amount: "10000", status: "COMPLETED" }, { amount: "5000", status: "PENDING" }] }] };
+    const rows = applicationRows([refunded]);
+    assert.deepEqual(column(rows, "Paid"), [40000]);
+    assert.deepEqual(column(rows, "Remaining"), [145000]);
+  });
+
   test("the number of attached documents is given", () => {
     assert.deepEqual(column(applicationRows([umrah, education]), "Documents"), [2, 0]);
   });

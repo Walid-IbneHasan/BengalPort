@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { balance, paymentProblem } from "../src/lib/payment-rules.js";
+import { balance, paymentProblem, refundProblem, refundable } from "../src/lib/payment-rules.js";
 
 describe("what is still owed on an application", () => {
   test("nothing has been paid yet", () => {
@@ -77,5 +77,54 @@ describe("checking the amount a customer wants to pay", () => {
 
   test("an application without a confirmed amount cannot be paid yet", () => {
     assert.equal(paymentProblem(100, { remaining: null, minimum: 0 }), "The amount due has not been confirmed yet.");
+  });
+});
+
+describe("refunds and what is owed", () => {
+  test("money sent back no longer counts as paid", () => {
+    const payments = [{ amount: 25000, status: "PARTIALLY_PAID", refunds: [{ amount: "10000.00", status: "COMPLETED" }] }];
+    assert.deepEqual(balance(60000, payments), { amountDue: 60000, paid: 15000, remaining: 45000 });
+  });
+
+  test("a refund bKash has not confirmed, or refused, changes nothing yet", () => {
+    const payments = [{ amount: 25000, status: "PARTIALLY_PAID", refunds: [{ amount: 10000, status: "PENDING" }, { amount: 5000, status: "FAILED" }] }];
+    assert.equal(balance(60000, payments).paid, 25000);
+  });
+
+  test("a payment refunded in full counts for nothing", () => {
+    const payments = [{ amount: 25000, status: "REFUNDED", refunds: [{ amount: 25000, status: "COMPLETED" }] }];
+    assert.deepEqual(balance(60000, payments), { amountDue: 60000, paid: 0, remaining: 60000 });
+  });
+});
+
+describe("what can be refunded on a payment", () => {
+  const payment = (refunds: { amount: unknown; status: string }[] = [], status = "PAID") => ({ amount: "5000.00", status, refunds });
+
+  test("a received payment can be refunded in full", () => {
+    assert.equal(refundable(payment()), 5000);
+    assert.equal(refundProblem(5000, payment()), "");
+  });
+
+  test("earlier refunds, and ones still waiting for bKash, reduce what is left", () => {
+    const refunded = payment([{ amount: 1500, status: "COMPLETED" }, { amount: 500, status: "PENDING" }, { amount: 900, status: "FAILED" }]);
+    assert.equal(refundable(refunded), 3000);
+    assert.equal(refundProblem(3000, refunded), "");
+    assert.match(refundProblem(3000.01, refunded), /up to ৳3,000/);
+  });
+
+  test("a payment already refunded in full has nothing left", () => {
+    const refunded = payment([{ amount: 5000, status: "COMPLETED" }], "REFUNDED");
+    assert.equal(refundable(refunded), 0);
+    assert.match(refundProblem(1, refunded), /already been refunded in full/);
+  });
+
+  test("a payment that was never received cannot be refunded", () => {
+    for (const status of ["PENDING", "FAILED", "DUE"]) assert.match(refundProblem(100, payment([], status)), /was not received/);
+  });
+
+  test("the amount must be a positive sum with at most two decimals", () => {
+    assert.match(refundProblem(0, payment()), /Enter the amount/);
+    assert.match(refundProblem(Number.NaN, payment()), /Enter the amount/);
+    assert.match(refundProblem(10.005, payment()), /two decimal places/);
   });
 });

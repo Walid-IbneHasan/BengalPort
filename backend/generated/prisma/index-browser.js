@@ -291,6 +291,18 @@ exports.Prisma.PaymentScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.RefundScalarFieldEnum = {
+  id: 'id',
+  paymentId: 'paymentId',
+  amount: 'amount',
+  reason: 'reason',
+  method: 'method',
+  status: 'status',
+  gatewayRefundId: 'gatewayRefundId',
+  recordedBy: 'recordedBy',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.ReceiptScalarFieldEnum = {
   id: 'id',
   receiptNumber: 'receiptNumber',
@@ -447,6 +459,12 @@ exports.PaymentStatus = exports.$Enums.PaymentStatus = {
   REFUNDED: 'REFUNDED'
 };
 
+exports.RefundStatus = exports.$Enums.RefundStatus = {
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+};
+
 exports.TransactionType = exports.$Enums.TransactionType = {
   INCOME: 'INCOME',
   EXPENSE: 'EXPENSE'
@@ -467,6 +485,7 @@ exports.Prisma.ModelName = {
   Hospital: 'Hospital',
   HealthcareService: 'HealthcareService',
   Payment: 'Payment',
+  Refund: 'Refund',
   Receipt: 'Receipt',
   ServiceFee: 'ServiceFee',
   GatewayToken: 'GatewayToken',

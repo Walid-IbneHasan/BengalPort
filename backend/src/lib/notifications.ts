@@ -115,6 +115,30 @@ export function notifyAmountDue(app: FastifyInstance, application: ApplicantReco
   ])]);
 }
 
+type RefundNotice = {
+  application: { reference: string; fullName: string; email: string };
+  amount: number;
+  method: string;
+  transactionId: string | null;
+};
+
+// Money sent back to a customer: the team is told, and so is the payer.
+export function notifyRefund(app: FastifyInstance, notice: RefundNotice) {
+  const { application, amount, method } = notice;
+  const trace = notice.transactionId ? ` bKash refund transaction: ${notice.transactionId}.` : "";
+  const mails = teamAddresses().map((to) => mail(to, `Refund made for ${application.reference}: ${money(amount)}`, [
+    "A refund was recorded on the Bengal Port website.",
+    [`Reference: ${application.reference}`, `Applicant: ${application.fullName}`, `Amount: ${money(amount)}`, `Returned by: ${method}`, ...(notice.transactionId ? [`bKash refund transaction: ${notice.transactionId}`] : [])].join("\n"),
+    `Payments in the admin: ${adminUrl("payments")}`,
+  ]));
+  mails.push(mail(application.email, `Refund made | Bengal Port ${application.reference}`, [
+    "Hello,",
+    `We have refunded ${money(amount)} of your payment for application ${application.reference}${method === "bKash" ? " to the bKash wallet it was paid from" : ` by ${method.toLowerCase()}`}.${trace}`,
+    "If you have a question about this refund, please contact us and quote your reference number.",
+  ]));
+  deliver(app, mails);
+}
+
 export function notifyNewApplication(app: FastifyInstance, application: ApplicationRecord) {
   const mails = teamAddresses().map((to) => mail(to, `New ${application.type.toLowerCase()} application ${application.reference}`, [
     "A new application was submitted on the Bengal Port website.",

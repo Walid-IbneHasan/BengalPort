@@ -204,3 +204,74 @@ describe("finishing and checking a payment", () => {
     assert.ok(Date.now() - started < 2000);
   });
 });
+
+describe("refunding a payment through bKash", () => {
+  const refund = { paymentId: "TR0011abc", trxId: "DIK20PG0H4", amount: 1000.5, reason: "Application withdrawn", sku: "BP-7KQ2M9XA" };
+  const completed = (call: Call) => ({ body: { originalTrxId: call.body.trxId, refundTrxId: "DIK50PG0VX", refundTransactionStatus: "Completed", originalTrxAmount: "2500", refundAmount: "1000.50", currency: "BDT", completedTime: "2026-09-20T14:47:03:555 GMT+0600", sku: call.body.sku, reason: call.body.reason } });
+
+  test("bKash is told which payment, how much and why", async () => {
+    const bkash = fakeBkash({ "/v2/tokenized-checkout/refund/payment/transaction": completed });
+    await createBkashGateway({ env: settings, fetch: bkash.fetch, tokens: memoryStore() }).refundPayment(refund);
+    const [call] = bkash.to("/refund/payment/transaction");
+    assert.deepEqual(call.body, { paymentId: "TR0011abc", trxId: "DIK20PG0H4", refundAmount: "1000.50", reason: "Application withdrawn", sku: "BP-7KQ2M9XA" });
+    assert.equal(call.headers["x-app-key"], "app-key");
+    assert.equal(call.headers.authorization, "id-token-1");
+  });
+
+  test("a completed refund comes back with bKash's own refund number", async () => {
+    const bkash = fakeBkash({ "/v2/tokenized-checkout/refund/payment/transaction": completed });
+    const result = await createBkashGateway({ env: settings, fetch: bkash.fetch, tokens: memoryStore() }).refundPayment(refund);
+    assert.deepEqual(result, { refundTrxId: "DIK50PG0VX", status: "Completed", amount: 1000.5 });
+  });
+
+  test("the reason and the product tag are cut to what bKash accepts", async () => {
+    const bkash = fakeBkash({ "/v2/tokenized-checkout/refund/payment/transaction": completed });
+    await createBkashGateway({ env: settings, fetch: bkash.fetch, tokens: memoryStore() }).refundPayment({ ...refund, reason: "r".repeat(400), sku: "s".repeat(400) });
+    const [call] = bkash.to("/refund/payment/transaction");
+    assert.equal(call.body.reason.length, 255);
+    assert.equal(call.body.sku.length, 255);
+  });
+
+  test("a refusal carries bKash's explanation", async () => {
+    const bkash = fakeBkash({ "/v2/tokenized-checkout/refund/payment/transaction": () => ({ status: 400, body: { internalCode: "refund_amount_exceed_payment_amount", externalCode: "2072", errorMessageEn: "Refund amount not valid", errorMessageBn: null } }) });
+    await assert.rejects(
+      createBkashGateway({ env: settings, fetch: bkash.fetch, tokens: memoryStore() }).refundPayment(refund),
+      (error: unknown) => error instanceof GatewayError && error.message === "Refund amount not valid" && error.code === "2072",
+    );
+  });
+
+  test("no answer from bKash is told apart from a refusal", async () => {
+    const bkash = fakeBkash({ "/v2/tokenized-checkout/refund/payment/transaction": () => Promise.reject(new Error("socket hang up")) });
+    await assert.rejects(
+      createBkashGateway({ env: settings, fetch: bkash.fetch, tokens: memoryStore() }).refundPayment(refund),
+      (error: unknown) => error instanceof GatewayError && error.code === "NO_RESPONSE",
+    );
+  });
+
+  test("the refunds bKash holds for a payment can be listed", async () => {
+    const bkash = fakeBkash({
+      "/v2/tokenized-checkout/refund/payment/status": (call) => ({
+        body: {
+          originalTrxId: call.body.trxId,
+          originalTrxAmount: "2500",
+          originalTrxCompletedTime: "2026-09-20T14:39:02:266 GMT+0600",
+          refundTransactions: [
+            { refundTrxId: "DIK50PG0VX", refundTransactionStatus: "Completed", refundAmount: "1000.50", completedTime: "2026-09-20T14:47:02:000" },
+            { refundTrxId: "DIK60PG0ZZ", refundTransactionStatus: "Completed", refundAmount: "200.00", completedTime: "2026-09-21T10:00:00:000" },
+          ],
+        },
+      }),
+    });
+    const list = await createBkashGateway({ env: settings, fetch: bkash.fetch, tokens: memoryStore() }).refundStatus("TR0011abc", "DIK20PG0H4");
+    assert.deepEqual(bkash.to("/refund/payment/status")[0].body, { paymentId: "TR0011abc", trxId: "DIK20PG0H4" });
+    assert.deepEqual(list, [
+      { refundTrxId: "DIK50PG0VX", status: "Completed", amount: 1000.5 },
+      { refundTrxId: "DIK60PG0ZZ", status: "Completed", amount: 200 },
+    ]);
+  });
+
+  test("a payment bKash has no refunds for gives an empty list", async () => {
+    const bkash = fakeBkash({ "/v2/tokenized-checkout/refund/payment/status": (call) => ({ body: { originalTrxId: call.body.trxId, originalTrxAmount: "2500" } }) });
+    assert.deepEqual(await createBkashGateway({ env: settings, fetch: bkash.fetch, tokens: memoryStore() }).refundStatus("TR0011abc", "DIK20PG0H4"), []);
+  });
+});

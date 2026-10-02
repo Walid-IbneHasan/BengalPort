@@ -16,7 +16,7 @@ const { bearer, createUser, deleteUsers, stamp } = await import("./helpers.js");
 const sent: Mail[] = [];
 const mailer: Mailer = { configured: true, async send(mail) { sent.push(mail); } };
 const unused = async (): Promise<never> => { throw new Error("The gateway is not used here"); };
-const gateway: Gateway = { configured: true, createPayment: unused, executePayment: unused, queryPayment: unused };
+const gateway: Gateway = { configured: true, createPayment: unused, executePayment: unused, queryPayment: unused, refundPayment: unused, refundStatus: unused };
 let app: Awaited<ReturnType<typeof buildApp>>;
 let admin: Awaited<ReturnType<typeof createUser>>;
 const applications: string[] = [];

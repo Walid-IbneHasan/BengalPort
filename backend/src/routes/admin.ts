@@ -190,7 +190,7 @@ const admin: FastifyPluginAsync = async (app) => {
 
   app.get("/dashboard", async () => {
     const today = rangeStart("day");
-    const [enquiries, applications, payments, transactions, due] =
+    const [enquiries, applications, payments, transactions, due, refunded] =
       await Promise.all([
         prisma.enquiry.count({ where: { status: "SUBMITTED" } }),
         prisma.application.count({
@@ -207,6 +207,14 @@ const admin: FastifyPluginAsync = async (app) => {
           _sum: { remainingDue: true },
           where: { payment: { status: { in: ["DUE", "PARTIALLY_PAID"] } } },
         }),
+        // Part refunds of payments that still count as received.
+        prisma.refund.aggregate({
+          _sum: { amount: true },
+          where: {
+            status: "COMPLETED",
+            payment: { status: { in: ["PAID", "PARTIALLY_PAID"] } },
+          },
+        }),
       ]);
     const income = transactions
       .filter((x) => x.type === "INCOME")
@@ -222,7 +230,8 @@ const admin: FastifyPluginAsync = async (app) => {
         todayExpense: expense,
         todayProfit: income - expense,
         totalDue: Number(due._sum.remainingDue || 0),
-        paymentsReceived: Number(payments._sum.amount || 0),
+        paymentsReceived:
+          Number(payments._sum.amount || 0) - Number(refunded._sum.amount || 0),
       },
     };
   });
@@ -289,7 +298,13 @@ const admin: FastifyPluginAsync = async (app) => {
               user: person,
               _count: { select: { payments: true, notes: true } },
               documents: { select: documentSummary },
-              payments: { select: { amount: true, status: true } },
+              payments: {
+                select: {
+                  amount: true,
+                  status: true,
+                  refunds: { select: { amount: true, status: true } },
+                },
+              },
             },
             orderBy: newest,
           },
@@ -353,7 +368,12 @@ const admin: FastifyPluginAsync = async (app) => {
           table: prisma.payment,
           args: {
             where: matching("service", "transactionId", "method"),
-            include: { user: person, application, receipt: true },
+            include: {
+              user: person,
+              application,
+              receipt: true,
+              refunds: { select: { amount: true, status: true } },
+            },
             orderBy: newest,
           },
         },
@@ -399,7 +419,15 @@ const admin: FastifyPluginAsync = async (app) => {
       const updated = await prisma.application.update({
         where: { id },
         data: { amountDue: amountDue.data },
-        include: { payments: { select: { amount: true, status: true } } },
+        include: {
+          payments: {
+            select: {
+              amount: true,
+              status: true,
+              refunds: { select: { amount: true, status: true } },
+            },
+          },
+        },
       });
       // The applicant hears about a new amount, not about one saved again.
       const previous = before.amountDue === null ? null : Number(before.amountDue);
