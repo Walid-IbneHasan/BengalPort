@@ -12,7 +12,7 @@ const routes:FastifyPluginAsync=async app=>{
  app.get('/content/healthcare',async()=>{const page=await prisma.pageContent.findUnique({where:{slug:'healthcare'}});return {data:page?.published?{content:page.content,revision:page.revision,updatedAt:page.updatedAt}:{content:defaultHealthcareContent,revision:0,updatedAt:null}}});
  app.get('/content/umrah',async()=>{const page=await prisma.pageContent.findUnique({where:{slug:'umrah'}});return {data:page?.published?{content:page.content,revision:page.revision,updatedAt:page.updatedAt}:{content:defaultUmrahContent,revision:0,updatedAt:null}}});
  app.get('/opportunities',async req=>{const q=req.query as any;const where:any={published:true};if(q.category)where.category=q.category;if(q.country)where.country=q.country;if(q.search)where.OR=[{title:{contains:q.search,mode:'insensitive'}},{description:{contains:q.search,mode:'insensitive'}}];return {data:await prisma.opportunity.findMany({where,orderBy:{createdAt:'desc'}})}});
- app.get('/opportunities/:slug',async(req,reply)=>{const item=await prisma.opportunity.findUnique({where:{slug:(req.params as any).slug}});return item?{data:item}:reply.notFound('Opportunity not found')});
+ app.get('/opportunities/:slug',async(req,reply)=>{const item=await prisma.opportunity.findUnique({where:{slug:(req.params as any).slug}});return item?.published?{data:item}:reply.notFound('Opportunity not found')});
  app.get('/suppliers',async()=>({data:await prisma.supplier.findMany({orderBy:[{featured:'desc'},{createdAt:'desc'}]})}));
  app.get('/factories',async()=>({data:await prisma.factory.findMany({orderBy:[{featured:'desc'},{createdAt:'desc'}]})}));
  app.get('/education',async()=>({data:await prisma.institution.findMany({include:{programs:true}})}));

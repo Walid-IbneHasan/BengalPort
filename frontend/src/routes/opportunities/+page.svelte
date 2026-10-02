@@ -69,14 +69,14 @@
             <img src={o.image} alt={o.title} loading="lazy" decoding="async" />
             <div>
               <small>{o.category.replaceAll("_", " ")}</small>
-              <h3>{o.title}</h3>
+              <h3><a class="title" href={`/opportunities/${o.slug}`}>{o.title}</a></h3>
               <p>{o.description}</p>
               <span><MapPin size={15} />{o.location}, {o.country}</span
               >{#if o.deadline}<span
                   ><Calendar size={15} />Deadline {new Date(
                     o.deadline,
                   ).toLocaleDateString()}</span
-                >{/if}<a href="/apply">VIEW & APPLY →</a>
+                >{/if}<a href={`/opportunities/${o.slug}`}>VIEW DETAILS →</a>
             </div>
           </article>{/each}
       </div>{/if}
@@ -146,6 +146,11 @@
     margin: 8px 0;
     color: #5b6676;
     font-size: 13px;
+  }
+  .opp h3 .title {
+    margin: 0;
+    color: inherit;
+    font-weight: inherit;
   }
   .opp a {
     display: inline-block;
