@@ -1,5 +1,11 @@
-import adapter from '@sveltejs/adapter-node';
+import nodeAdapter from '@sveltejs/adapter-node';
+import vercelAdapter from '@sveltejs/adapter-vercel';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+
+// The website is built for wherever it is being deployed: Vercel sets VERCEL
+// while it builds; everywhere else (cPanel, a VPS, `node build`) gets a plain
+// Node server.
+const adapter = process.env.VERCEL ? vercelAdapter() : nodeAdapter();
 
 // What a page may load. The API's own address is added when the site runs
 // (src/hooks.server.ts). Google sign-in and the Cloudflare check on the public
@@ -23,4 +29,4 @@ const csp = {
   }
 };
 
-export default { preprocess: vitePreprocess(), kit: { adapter: adapter(), csp } };
+export default { preprocess: vitePreprocess(), kit: { adapter, csp } };

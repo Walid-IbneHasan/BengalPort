@@ -92,11 +92,20 @@ Production settings for the API:
 - `API_PUBLIC_URL`: the public API address, used in uploaded image URLs.
 - `TRUST_PROXY="true"` when the API sits behind a reverse proxy, as it does on cPanel, so rate limits apply per visitor rather than to the proxy.
 
-Settings for the website: `ORIGIN` (its public address), `PUBLIC_API_URL` (the API address ending in `/api`), `PUBLIC_WHATSAPP_NUMBER` and `PUBLIC_GOOGLE_CLIENT_ID`. They are read when the website starts, so they can be changed without rebuilding.
+Settings for the website: `ORIGIN` (its public address; not needed on Vercel), `PUBLIC_API_URL` (the API address ending in `/api`), `PUBLIC_WHATSAPP_NUMBER` and `PUBLIC_GOOGLE_CLIENT_ID`. They are read when the website starts, so they can be changed without rebuilding.
 
 **Security headers.** Both apps send them without any setting. The website's content security policy (in `frontend/svelte.config.js`) lets pages load scripts only from the site itself, Google sign-in and the Cloudflare check on the public forms; the API's address from `PUBLIC_API_URL` is added when the site starts. If you embed something from another service (a map, a video, an analytics script), add its address there and rebuild, or the browser will block it. Over HTTPS both apps also tell browsers to keep using HTTPS for their own address for a year, so serve them over HTTPS from the first day.
 
 Seeding a production database requires `SEED_ADMIN_PASSWORD` (12+ characters; the local default is rejected) and optionally `SEED_ADMIN_EMAIL`. It creates the admin account, page content and accounting categories only. Demo partners, enquiries, payments and ledger entries are added only with `SEED_DEMO_DATA="true"`.
+
+### Deploying the website to Vercel
+
+The website builds for Vercel automatically (Vercel sets `VERCEL` while building; everywhere else the build is a plain Node server). In the Vercel project set the **Root Directory** to `frontend` and add these environment variables:
+
+- `PUBLIC_API_URL`: the public address of the API, ending in `/api`, for example `https://api.example.com/api`.
+- `PUBLIC_WHATSAPP_NUMBER` and `PUBLIC_GOOGLE_CLIENT_ID`, if used.
+
+Vercel hosts the website only. The API and its PostgreSQL database must run somewhere else (cPanel as described below, or any Node host), and the API's `FRONTEND_URL` must list the website's addresses, for example `https://www.example.com,https://example.com`. Until `PUBLIC_API_URL` is set, the site shows its built-in content and forms cannot be submitted; it looks for the API at `/api` on its own address and never on the visitor's computer.
 
 ### Deploying to cPanel
 
