@@ -6,6 +6,7 @@
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import WhatsApp from '$lib/components/WhatsApp.svelte';
+  import Toasts from '$lib/components/Toasts.svelte';
   let { children } = $props();
 </script>
 
@@ -17,3 +18,4 @@
   <Footer/>
   <WhatsApp/>
 {/if}
+<Toasts/>
