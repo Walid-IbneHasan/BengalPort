@@ -8,16 +8,18 @@ process.env.LOG_LEVEL = "silent";
 
 const { buildApp } = await import("../src/app.js");
 const { prisma } = await import("../src/lib/prisma.js");
+const { bearer, createUser, deleteUsers } = await import("./helpers.js");
 
 const stamp = `test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 let app: Awaited<ReturnType<typeof buildApp>>;
 let memberId = "";
+let admin: Awaited<ReturnType<typeof createUser>>;
 let applicationId = "";
 const token = (sub: string, role: "ADMIN" | "USER") => ({
   authorization: `Bearer ${app.jwt.sign({ sub, role })}`,
 });
 const record = (payload: Record<string, unknown>) =>
-  app.inject({ method: "POST", url: "/api/payments", headers: token("an-admin", "ADMIN"), payload });
+  app.inject({ method: "POST", url: "/api/payments", headers: bearer(app, admin), payload });
 const payment = (overrides: Record<string, unknown> = {}) => ({
   applicationId,
   service: "Umrah package",
@@ -29,6 +31,7 @@ const payment = (overrides: Record<string, unknown> = {}) => ({
 
 before(async () => {
   app = await buildApp();
+  admin = await createUser("ADMIN");
   const member = await prisma.user.create({
     data: { name: "Paying Member", email: `${stamp}@example.test`, emailVerifiedAt: new Date() },
   });
@@ -45,6 +48,7 @@ after(async () => {
   await prisma.payment.deleteMany({ where: mine });
   await prisma.application.deleteMany({ where: { id: applicationId } });
   await prisma.user.deleteMany({ where: { id: memberId } });
+  await deleteUsers(admin.id);
   await app.close();
   await prisma.$disconnect();
 });

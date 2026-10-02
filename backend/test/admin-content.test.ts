@@ -1,4 +1,5 @@
-// These tests only read content and send invalid saves, so they write nothing.
+// These tests read content and send invalid saves; the only rows they create
+// are their own two accounts, removed afterwards.
 import "dotenv/config";
 import { after, before, describe, test } from "node:test";
 import assert from "node:assert/strict";
@@ -7,15 +8,19 @@ process.env.LOG_LEVEL = "silent";
 
 const { buildApp } = await import("../src/app.js");
 const { prisma } = await import("../src/lib/prisma.js");
+const { bearer, createUser, deleteUsers } = await import("./helpers.js");
 
 let app: Awaited<ReturnType<typeof buildApp>>;
-const admin = () => ({
-  authorization: `Bearer ${app.jwt.sign({ sub: "an-admin", role: "ADMIN" })}`,
-});
+let adminUser: Awaited<ReturnType<typeof createUser>>;
+let member: Awaited<ReturnType<typeof createUser>>;
+const admin = () => bearer(app, adminUser);
 before(async () => {
   app = await buildApp();
+  adminUser = await createUser("ADMIN");
+  member = await createUser("USER");
 });
 after(async () => {
+  await deleteUsers(adminUser.id, member.id);
   await app.close();
   await prisma.$disconnect();
 });
@@ -46,9 +51,7 @@ describe("editing the Global Umrah page", () => {
     const res = await app.inject({
       method: "GET",
       url: "/api/admin/content/umrah",
-      headers: {
-        authorization: `Bearer ${app.jwt.sign({ sub: "a-member", role: "USER" })}`,
-      },
+      headers: bearer(app, member),
     });
     assert.equal(res.statusCode, 403);
   });

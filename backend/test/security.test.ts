@@ -13,6 +13,7 @@ for (const key of ["SMTP_HOST", "SMTP_USER", "SMTP_PASS", "AUTH_DEV_CODES"])
 
 const { buildApp } = await import("../src/app.js");
 const { prisma } = await import("../src/lib/prisma.js");
+const { createUser, deleteUsers, sessionToken } = await import("./helpers.js");
 
 const stamp = `test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const ownerEmail = `${stamp}-owner@example.test`;
@@ -20,6 +21,8 @@ const registerEmail = `${stamp}-new@example.test`;
 const receiptNumber = `TEST-${stamp}`;
 let ownerId = "";
 let paymentId = "";
+let admin: Awaited<ReturnType<typeof createUser>>;
+let stranger: Awaited<ReturnType<typeof createUser>>;
 
 before(async () => {
   const owner = await prisma.user.create({
@@ -31,6 +34,8 @@ before(async () => {
     },
   });
   ownerId = owner.id;
+  admin = await createUser("ADMIN");
+  stranger = await createUser("USER");
   const payment = await prisma.payment.create({
     data: {
       userId: owner.id,
@@ -54,6 +59,7 @@ after(async () => {
   await prisma.user.deleteMany({
     where: { email: { in: [ownerEmail, registerEmail] } },
   });
+  await deleteUsers(admin.id, stranger.id);
   await prisma.$disconnect();
 });
 
@@ -78,7 +84,7 @@ describe("payment receipts", () => {
   });
 
   test("a receipt is hidden from a user who does not own it", async () => {
-    const res = await open(bearer("someone-else", "USER"));
+    const res = await open(bearer(stranger.id, "USER"));
     assert.equal(res.statusCode, 404);
   });
 
@@ -89,12 +95,12 @@ describe("payment receipts", () => {
   });
 
   test("an admin can open any receipt", async () => {
-    const res = await open(bearer("an-admin", "ADMIN"));
+    const res = await open(bearer(admin.id, "ADMIN"));
     assert.equal(res.statusCode, 200);
   });
 
   test("a receipt exposes only the customer's name", async () => {
-    const res = await open(bearer("an-admin", "ADMIN"));
+    const res = await open(bearer(admin.id, "ADMIN"));
     assert.deepEqual(res.json().data.payment.user, { name: "Receipt Owner" });
   });
 });
@@ -178,7 +184,7 @@ describe("public form abuse limits", () => {
         method: "POST",
         url: "/api/admin/media",
         headers: {
-          authorization: `Bearer ${app.jwt.sign({ sub: "an-admin", role: "ADMIN" })}`,
+          authorization: `Bearer ${sessionToken(app, admin)}`,
           "content-type": `multipart/form-data; boundary=${boundary}`,
         },
         payload: `--${boundary}\r\nContent-Disposition: form-data; name="image"; filename="notes.txt"\r\nContent-Type: text/plain\r\n\r\n${"x".repeat(2 * 1024 * 1024)}\r\n--${boundary}--\r\n`,

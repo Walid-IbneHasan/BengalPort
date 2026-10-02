@@ -14,3 +14,6 @@ backend/prisma/dev.db
 
 # cPanel upload bundles (npm run package:cpanel)
 deploy
+
+# Leftovers when Prisma cannot replace its engine while the API is running
+backend/generated/prisma/*.tmp*

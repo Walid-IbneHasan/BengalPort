@@ -8,12 +8,12 @@ process.env.LOG_LEVEL = "silent";
 
 const { buildApp } = await import("../src/app.js");
 const { prisma } = await import("../src/lib/prisma.js");
+const { bearer, createUser, deleteUsers } = await import("./helpers.js");
 
 const stamp = `Test ${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 let app: Awaited<ReturnType<typeof buildApp>>;
-const as = (role: "ADMIN" | "USER") => ({
-  authorization: `Bearer ${app.jwt.sign({ sub: "test-user", role })}`,
-});
+const users = {} as Record<"ADMIN" | "USER", Awaited<ReturnType<typeof createUser>>>;
+const as = (role: "ADMIN" | "USER") => bearer(app, users[role]);
 const call = (method: "GET" | "POST" | "PUT" | "DELETE", url: string, payload?: Record<string, unknown>, role: "ADMIN" | "USER" = "ADMIN") =>
   app.inject({ method, url, payload, headers: as(role) });
 const publicList = async (path: string) =>
@@ -21,6 +21,8 @@ const publicList = async (path: string) =>
 
 before(async () => {
   app = await buildApp();
+  users.ADMIN = await createUser("ADMIN");
+  users.USER = await createUser("USER");
 });
 after(async () => {
   const named = { name: { startsWith: stamp } };
@@ -31,6 +33,7 @@ after(async () => {
   await prisma.supplier.deleteMany({ where: named });
   await prisma.opportunity.deleteMany({ where: { title: { startsWith: stamp } } });
   await prisma.enquiry.deleteMany({ where: named });
+  await deleteUsers(users.ADMIN.id, users.USER.id);
   await app.close();
   await prisma.$disconnect();
 });

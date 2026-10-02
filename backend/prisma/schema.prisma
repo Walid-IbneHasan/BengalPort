@@ -68,6 +68,8 @@ model User {
   avatarUrl String?
   emailVerifiedAt DateTime?
   twoFactorEnabled Boolean @default(false)
+  // Raised when the password changes; sessions issued for an older value stop working.
+  tokenVersion Int @default(0)
   lastLoginAt DateTime?
   role Role @default(USER)
   createdAt DateTime @default(now())
