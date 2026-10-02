@@ -790,58 +790,79 @@ const admin: FastifyPluginAsync = async (app) => {
     };
   });
 
-  app.post("/accounts", async (req, reply) => {
+  // Checks a ledger entry. When it is not acceptable the problem is sent as
+  // the reply and null is returned.
+  async function ledgerEntry(req: any, reply: any) {
+    const problem = (code: string, message: string, details?: unknown) => {
+      reply.code(400).send({ error: { code, message, details } });
+      return null;
+    };
     const parsed = transactionSchema.safeParse(req.body);
     if (!parsed.success)
-      return reply
-        .code(400)
-        .send({
-          error: {
-            code: "VALIDATION_ERROR",
-            message: "Enter a total amount, or quantity with unit price",
-            details: parsed.error.flatten(),
-          },
-        });
+      return problem(
+        "VALIDATION_ERROR",
+        "Enter a total amount, or quantity with unit price",
+        parsed.error.flatten(),
+      );
     const { total, quantity, unitPrice, ...rest } = parsed.data;
     const category = await prisma.financialCategory.findUnique({
       where: { id: rest.categoryId },
     });
     if (!category)
-      return reply
-        .code(400)
-        .send({
-          error: {
-            code: "INVALID_CATEGORY",
-            message: "The selected financial category does not exist",
-          },
-        });
+      return problem(
+        "INVALID_CATEGORY",
+        "The selected financial category does not exist",
+      );
     if (category.type !== rest.type)
-      return reply
-        .code(400)
-        .send({
-          error: {
-            code: "CATEGORY_TYPE_MISMATCH",
-            message: `Choose an ${rest.type.toLowerCase()} category for this transaction`,
-          },
-        });
+      return problem(
+        "CATEGORY_TYPE_MISMATCH",
+        `Choose an ${rest.type.toLowerCase()} category for this transaction`,
+      );
     if (
       total !== undefined &&
       (quantity !== undefined || unitPrice !== undefined)
     )
-      return reply
-        .code(400)
-        .send({
-          error: {
-            code: "AMOUNT_METHOD_CONFLICT",
-            message:
-              "Use either a direct total or quantity with unit price, not both",
-          },
-        });
-    const calculatedTotal = total ?? Number(quantity) * Number(unitPrice);
-    const data = await prisma.financialTransaction.create({
-      data: { ...rest, quantity, unitPrice, total: calculatedTotal },
-    });
-    return reply.code(201).send({ data });
+      return problem(
+        "AMOUNT_METHOD_CONFLICT",
+        "Use either a direct total or quantity with unit price, not both",
+      );
+    return {
+      ...rest,
+      quantity: quantity ?? null,
+      unitPrice: unitPrice ?? null,
+      total: total ?? Number(quantity) * Number(unitPrice),
+    };
+  }
+
+  app.post("/accounts", async (req, reply) => {
+    const data = await ledgerEntry(req, reply);
+    if (!data) return reply;
+    return reply
+      .code(201)
+      .send({ data: await prisma.financialTransaction.create({ data }) });
+  });
+
+  app.put("/accounts/:id", async (req, reply) => {
+    const where = { id: (req.params as { id: string }).id };
+    if (!(await prisma.financialTransaction.count({ where })))
+      return reply.notFound("Ledger entry not found");
+    const data = await ledgerEntry(req, reply);
+    if (!data) return reply;
+    return {
+      data: await prisma.financialTransaction.update({
+        where,
+        data,
+        include: { category: true },
+      }),
+    };
+  });
+
+  app.delete("/accounts/:id", async (req, reply) => {
+    const where = { id: (req.params as { id: string }).id };
+    const { count } = await prisma.financialTransaction.deleteMany({ where });
+    return count
+      ? reply.code(204).send()
+      : reply.notFound("Ledger entry not found");
   });
 };
 
