@@ -17,12 +17,13 @@
     MoonStar,
   } from "lucide-svelte";
   import { page } from "$app/state";
-  import { onMount } from "svelte";
+  import { afterNavigate } from "$app/navigation";
   import { cmsContent } from "$lib/cms";
   let open = false;
   let servicesOpen = false;
   let accountHref = "/login";
-  onMount(() => { accountHref = localStorage.getItem("bp_token") ? "/profile" : "/login"; });
+  // Re-checked on every navigation so the link follows sign-in and sign-out.
+  afterNavigate(() => { accountHref = localStorage.getItem("bp_token") ? "/dashboard" : "/login"; });
   const links = [
     ["HOME", "/"],
     ["ABOUT US", "/about"],

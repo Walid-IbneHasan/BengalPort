@@ -44,7 +44,7 @@
     goto(
       data.user.role === "ADMIN"
         ? "/admin"
-        : page.url.searchParams.get("next") || "/profile",
+        : page.url.searchParams.get("next") || "/dashboard",
     );
   };
   const setChallenge = (next: Mode, data: any) => {
