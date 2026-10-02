@@ -5,7 +5,7 @@ type EnquiryRecord = { type: string; name: string; phone: string; email: string 
 type ApplicationRecord = { type: string; reference: string; fullName: string; phone: string; email: string };
 
 // ADMIN_NOTIFY_EMAIL holds one or more comma-separated team addresses.
-const teamAddresses = () => (process.env.ADMIN_NOTIFY_EMAIL || "").split(",").map((x) => x.trim()).filter(Boolean);
+export const teamAddresses = () => (process.env.ADMIN_NOTIFY_EMAIL || "").split(",").map((x) => x.trim()).filter(Boolean);
 const siteUrl = () => (process.env.FRONTEND_URL || "http://localhost:5173").split(",")[0].trim();
 const adminUrl = (section: string) => `${siteUrl()}/admin/${section}`;
 const oneLine = (value: string) => value.replace(/\s+/g, " ").trim().slice(0, 120);

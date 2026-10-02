@@ -34,6 +34,11 @@ export type Enquiry = $Result.DefaultSelection<Prisma.$EnquiryPayload>
  */
 export type Application = $Result.DefaultSelection<Prisma.$ApplicationPayload>
 /**
+ * Model StaffNote
+ * 
+ */
+export type StaffNote = $Result.DefaultSelection<Prisma.$StaffNotePayload>
+/**
  * Model ApplicationDocument
  * 
  */
@@ -392,6 +397,16 @@ export class PrismaClient<
     * ```
     */
   get application(): Prisma.ApplicationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.staffNote`: Exposes CRUD operations for the **StaffNote** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more StaffNotes
+    * const staffNotes = await prisma.staffNote.findMany()
+    * ```
+    */
+  get staffNote(): Prisma.StaffNoteDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.applicationDocument`: Exposes CRUD operations for the **ApplicationDocument** model.
@@ -997,6 +1012,7 @@ export namespace Prisma {
     AuthCode: 'AuthCode',
     Enquiry: 'Enquiry',
     Application: 'Application',
+    StaffNote: 'StaffNote',
     ApplicationDocument: 'ApplicationDocument',
     Opportunity: 'Opportunity',
     Supplier: 'Supplier',
@@ -1031,7 +1047,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "authCode" | "enquiry" | "application" | "applicationDocument" | "opportunity" | "supplier" | "factory" | "institution" | "educationProgram" | "hospital" | "healthcareService" | "payment" | "receipt" | "serviceFee" | "gatewayToken" | "financialCategory" | "financialTransaction" | "pageContent" | "mediaAsset"
+      modelProps: "user" | "authCode" | "enquiry" | "application" | "staffNote" | "applicationDocument" | "opportunity" | "supplier" | "factory" | "institution" | "educationProgram" | "hospital" | "healthcareService" | "payment" | "receipt" | "serviceFee" | "gatewayToken" | "financialCategory" | "financialTransaction" | "pageContent" | "mediaAsset"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1328,6 +1344,80 @@ export namespace Prisma {
           count: {
             args: Prisma.ApplicationCountArgs<ExtArgs>
             result: $Utils.Optional<ApplicationCountAggregateOutputType> | number
+          }
+        }
+      }
+      StaffNote: {
+        payload: Prisma.$StaffNotePayload<ExtArgs>
+        fields: Prisma.StaffNoteFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StaffNoteFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffNotePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StaffNoteFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffNotePayload>
+          }
+          findFirst: {
+            args: Prisma.StaffNoteFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffNotePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StaffNoteFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffNotePayload>
+          }
+          findMany: {
+            args: Prisma.StaffNoteFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffNotePayload>[]
+          }
+          create: {
+            args: Prisma.StaffNoteCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffNotePayload>
+          }
+          createMany: {
+            args: Prisma.StaffNoteCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StaffNoteCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffNotePayload>[]
+          }
+          delete: {
+            args: Prisma.StaffNoteDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffNotePayload>
+          }
+          update: {
+            args: Prisma.StaffNoteUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffNotePayload>
+          }
+          deleteMany: {
+            args: Prisma.StaffNoteDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StaffNoteUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.StaffNoteUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffNotePayload>[]
+          }
+          upsert: {
+            args: Prisma.StaffNoteUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StaffNotePayload>
+          }
+          aggregate: {
+            args: Prisma.StaffNoteAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStaffNote>
+          }
+          groupBy: {
+            args: Prisma.StaffNoteGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StaffNoteGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StaffNoteCountArgs<ExtArgs>
+            result: $Utils.Optional<StaffNoteCountAggregateOutputType> | number
           }
         }
       }
@@ -2615,6 +2705,7 @@ export namespace Prisma {
     authCode?: AuthCodeOmit
     enquiry?: EnquiryOmit
     application?: ApplicationOmit
+    staffNote?: StaffNoteOmit
     applicationDocument?: ApplicationDocumentOmit
     opportunity?: OpportunityOmit
     supplier?: SupplierOmit
@@ -2711,6 +2802,7 @@ export namespace Prisma {
    */
 
   export type UserCountOutputType = {
+    staffNotes: number
     enquiries: number
     applications: number
     payments: number
@@ -2718,6 +2810,7 @@ export namespace Prisma {
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    staffNotes?: boolean | UserCountOutputTypeCountStaffNotesArgs
     enquiries?: boolean | UserCountOutputTypeCountEnquiriesArgs
     applications?: boolean | UserCountOutputTypeCountApplicationsArgs
     payments?: boolean | UserCountOutputTypeCountPaymentsArgs
@@ -2733,6 +2826,13 @@ export namespace Prisma {
      * Select specific fields to fetch from the UserCountOutputType
      */
     select?: UserCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountStaffNotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffNoteWhereInput
   }
 
   /**
@@ -2765,17 +2865,50 @@ export namespace Prisma {
 
 
   /**
+   * Count Type EnquiryCountOutputType
+   */
+
+  export type EnquiryCountOutputType = {
+    notes: number
+  }
+
+  export type EnquiryCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    notes?: boolean | EnquiryCountOutputTypeCountNotesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * EnquiryCountOutputType without action
+   */
+  export type EnquiryCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the EnquiryCountOutputType
+     */
+    select?: EnquiryCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * EnquiryCountOutputType without action
+   */
+  export type EnquiryCountOutputTypeCountNotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffNoteWhereInput
+  }
+
+
+  /**
    * Count Type ApplicationCountOutputType
    */
 
   export type ApplicationCountOutputType = {
     payments: number
     documents: number
+    notes: number
   }
 
   export type ApplicationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     payments?: boolean | ApplicationCountOutputTypeCountPaymentsArgs
     documents?: boolean | ApplicationCountOutputTypeCountDocumentsArgs
+    notes?: boolean | ApplicationCountOutputTypeCountNotesArgs
   }
 
   // Custom InputTypes
@@ -2801,6 +2934,13 @@ export namespace Prisma {
    */
   export type ApplicationCountOutputTypeCountDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ApplicationDocumentWhereInput
+  }
+
+  /**
+   * ApplicationCountOutputType without action
+   */
+  export type ApplicationCountOutputTypeCountNotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffNoteWhereInput
   }
 
 
@@ -3171,6 +3311,7 @@ export namespace Prisma {
     role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    staffNotes?: boolean | User$staffNotesArgs<ExtArgs>
     enquiries?: boolean | User$enquiriesArgs<ExtArgs>
     applications?: boolean | User$applicationsArgs<ExtArgs>
     payments?: boolean | User$paymentsArgs<ExtArgs>
@@ -3231,6 +3372,7 @@ export namespace Prisma {
 
   export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phone" | "passwordHash" | "googleId" | "avatarUrl" | "emailVerifiedAt" | "twoFactorEnabled" | "tokenVersion" | "lastLoginAt" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    staffNotes?: boolean | User$staffNotesArgs<ExtArgs>
     enquiries?: boolean | User$enquiriesArgs<ExtArgs>
     applications?: boolean | User$applicationsArgs<ExtArgs>
     payments?: boolean | User$paymentsArgs<ExtArgs>
@@ -3243,6 +3385,7 @@ export namespace Prisma {
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
     objects: {
+      staffNotes: Prisma.$StaffNotePayload<ExtArgs>[]
       enquiries: Prisma.$EnquiryPayload<ExtArgs>[]
       applications: Prisma.$ApplicationPayload<ExtArgs>[]
       payments: Prisma.$PaymentPayload<ExtArgs>[]
@@ -3657,6 +3800,7 @@ export namespace Prisma {
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    staffNotes<T extends User$staffNotesArgs<ExtArgs> = {}>(args?: Subset<T, User$staffNotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     enquiries<T extends User$enquiriesArgs<ExtArgs> = {}>(args?: Subset<T, User$enquiriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EnquiryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     applications<T extends User$applicationsArgs<ExtArgs> = {}>(args?: Subset<T, User$applicationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     payments<T extends User$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4089,6 +4233,30 @@ export namespace Prisma {
      * Limit how many Users to delete.
      */
     limit?: number
+  }
+
+  /**
+   * User.staffNotes
+   */
+  export type User$staffNotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
+    where?: StaffNoteWhereInput
+    orderBy?: StaffNoteOrderByWithRelationInput | StaffNoteOrderByWithRelationInput[]
+    cursor?: StaffNoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StaffNoteScalarFieldEnum | StaffNoteScalarFieldEnum[]
   }
 
   /**
@@ -5546,6 +5714,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | Enquiry$userArgs<ExtArgs>
+    notes?: boolean | Enquiry$notesArgs<ExtArgs>
+    _count?: boolean | EnquiryCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["enquiry"]>
 
   export type EnquirySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5595,6 +5765,8 @@ export namespace Prisma {
   export type EnquiryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "name" | "email" | "phone" | "message" | "details" | "status" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["enquiry"]>
   export type EnquiryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Enquiry$userArgs<ExtArgs>
+    notes?: boolean | Enquiry$notesArgs<ExtArgs>
+    _count?: boolean | EnquiryCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type EnquiryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Enquiry$userArgs<ExtArgs>
@@ -5607,6 +5779,7 @@ export namespace Prisma {
     name: "Enquiry"
     objects: {
       user: Prisma.$UserPayload<ExtArgs> | null
+      notes: Prisma.$StaffNotePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -6015,6 +6188,7 @@ export namespace Prisma {
   export interface Prisma__EnquiryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends Enquiry$userArgs<ExtArgs> = {}>(args?: Subset<T, Enquiry$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    notes<T extends Enquiry$notesArgs<ExtArgs> = {}>(args?: Subset<T, Enquiry$notesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6470,6 +6644,30 @@ export namespace Prisma {
   }
 
   /**
+   * Enquiry.notes
+   */
+  export type Enquiry$notesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
+    where?: StaffNoteWhereInput
+    orderBy?: StaffNoteOrderByWithRelationInput | StaffNoteOrderByWithRelationInput[]
+    cursor?: StaffNoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StaffNoteScalarFieldEnum | StaffNoteScalarFieldEnum[]
+  }
+
+  /**
    * Enquiry without action
    */
   export type EnquiryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6741,6 +6939,7 @@ export namespace Prisma {
     user?: boolean | Application$userArgs<ExtArgs>
     payments?: boolean | Application$paymentsArgs<ExtArgs>
     documents?: boolean | Application$documentsArgs<ExtArgs>
+    notes?: boolean | Application$notesArgs<ExtArgs>
     _count?: boolean | ApplicationCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["application"]>
 
@@ -6796,6 +6995,7 @@ export namespace Prisma {
     user?: boolean | Application$userArgs<ExtArgs>
     payments?: boolean | Application$paymentsArgs<ExtArgs>
     documents?: boolean | Application$documentsArgs<ExtArgs>
+    notes?: boolean | Application$notesArgs<ExtArgs>
     _count?: boolean | ApplicationCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ApplicationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6811,6 +7011,7 @@ export namespace Prisma {
       user: Prisma.$UserPayload<ExtArgs> | null
       payments: Prisma.$PaymentPayload<ExtArgs>[]
       documents: Prisma.$ApplicationDocumentPayload<ExtArgs>[]
+      notes: Prisma.$StaffNotePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -7222,6 +7423,7 @@ export namespace Prisma {
     user<T extends Application$userArgs<ExtArgs> = {}>(args?: Subset<T, Application$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     payments<T extends Application$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, Application$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     documents<T extends Application$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Application$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    notes<T extends Application$notesArgs<ExtArgs> = {}>(args?: Subset<T, Application$notesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7726,6 +7928,30 @@ export namespace Prisma {
   }
 
   /**
+   * Application.notes
+   */
+  export type Application$notesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
+    where?: StaffNoteWhereInput
+    orderBy?: StaffNoteOrderByWithRelationInput | StaffNoteOrderByWithRelationInput[]
+    cursor?: StaffNoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StaffNoteScalarFieldEnum | StaffNoteScalarFieldEnum[]
+  }
+
+  /**
    * Application without action
    */
   export type ApplicationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7741,6 +7967,1163 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ApplicationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model StaffNote
+   */
+
+  export type AggregateStaffNote = {
+    _count: StaffNoteCountAggregateOutputType | null
+    _min: StaffNoteMinAggregateOutputType | null
+    _max: StaffNoteMaxAggregateOutputType | null
+  }
+
+  export type StaffNoteMinAggregateOutputType = {
+    id: string | null
+    body: string | null
+    applicationId: string | null
+    enquiryId: string | null
+    authorId: string | null
+    authorName: string | null
+    createdAt: Date | null
+  }
+
+  export type StaffNoteMaxAggregateOutputType = {
+    id: string | null
+    body: string | null
+    applicationId: string | null
+    enquiryId: string | null
+    authorId: string | null
+    authorName: string | null
+    createdAt: Date | null
+  }
+
+  export type StaffNoteCountAggregateOutputType = {
+    id: number
+    body: number
+    applicationId: number
+    enquiryId: number
+    authorId: number
+    authorName: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type StaffNoteMinAggregateInputType = {
+    id?: true
+    body?: true
+    applicationId?: true
+    enquiryId?: true
+    authorId?: true
+    authorName?: true
+    createdAt?: true
+  }
+
+  export type StaffNoteMaxAggregateInputType = {
+    id?: true
+    body?: true
+    applicationId?: true
+    enquiryId?: true
+    authorId?: true
+    authorName?: true
+    createdAt?: true
+  }
+
+  export type StaffNoteCountAggregateInputType = {
+    id?: true
+    body?: true
+    applicationId?: true
+    enquiryId?: true
+    authorId?: true
+    authorName?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type StaffNoteAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StaffNote to aggregate.
+     */
+    where?: StaffNoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffNotes to fetch.
+     */
+    orderBy?: StaffNoteOrderByWithRelationInput | StaffNoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StaffNoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffNotes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffNotes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned StaffNotes
+    **/
+    _count?: true | StaffNoteCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StaffNoteMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StaffNoteMaxAggregateInputType
+  }
+
+  export type GetStaffNoteAggregateType<T extends StaffNoteAggregateArgs> = {
+        [P in keyof T & keyof AggregateStaffNote]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStaffNote[P]>
+      : GetScalarType<T[P], AggregateStaffNote[P]>
+  }
+
+
+
+
+  export type StaffNoteGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StaffNoteWhereInput
+    orderBy?: StaffNoteOrderByWithAggregationInput | StaffNoteOrderByWithAggregationInput[]
+    by: StaffNoteScalarFieldEnum[] | StaffNoteScalarFieldEnum
+    having?: StaffNoteScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StaffNoteCountAggregateInputType | true
+    _min?: StaffNoteMinAggregateInputType
+    _max?: StaffNoteMaxAggregateInputType
+  }
+
+  export type StaffNoteGroupByOutputType = {
+    id: string
+    body: string
+    applicationId: string | null
+    enquiryId: string | null
+    authorId: string | null
+    authorName: string
+    createdAt: Date
+    _count: StaffNoteCountAggregateOutputType | null
+    _min: StaffNoteMinAggregateOutputType | null
+    _max: StaffNoteMaxAggregateOutputType | null
+  }
+
+  type GetStaffNoteGroupByPayload<T extends StaffNoteGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StaffNoteGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StaffNoteGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StaffNoteGroupByOutputType[P]>
+            : GetScalarType<T[P], StaffNoteGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StaffNoteSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    body?: boolean
+    applicationId?: boolean
+    enquiryId?: boolean
+    authorId?: boolean
+    authorName?: boolean
+    createdAt?: boolean
+    application?: boolean | StaffNote$applicationArgs<ExtArgs>
+    enquiry?: boolean | StaffNote$enquiryArgs<ExtArgs>
+    author?: boolean | StaffNote$authorArgs<ExtArgs>
+  }, ExtArgs["result"]["staffNote"]>
+
+  export type StaffNoteSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    body?: boolean
+    applicationId?: boolean
+    enquiryId?: boolean
+    authorId?: boolean
+    authorName?: boolean
+    createdAt?: boolean
+    application?: boolean | StaffNote$applicationArgs<ExtArgs>
+    enquiry?: boolean | StaffNote$enquiryArgs<ExtArgs>
+    author?: boolean | StaffNote$authorArgs<ExtArgs>
+  }, ExtArgs["result"]["staffNote"]>
+
+  export type StaffNoteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    body?: boolean
+    applicationId?: boolean
+    enquiryId?: boolean
+    authorId?: boolean
+    authorName?: boolean
+    createdAt?: boolean
+    application?: boolean | StaffNote$applicationArgs<ExtArgs>
+    enquiry?: boolean | StaffNote$enquiryArgs<ExtArgs>
+    author?: boolean | StaffNote$authorArgs<ExtArgs>
+  }, ExtArgs["result"]["staffNote"]>
+
+  export type StaffNoteSelectScalar = {
+    id?: boolean
+    body?: boolean
+    applicationId?: boolean
+    enquiryId?: boolean
+    authorId?: boolean
+    authorName?: boolean
+    createdAt?: boolean
+  }
+
+  export type StaffNoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "body" | "applicationId" | "enquiryId" | "authorId" | "authorName" | "createdAt", ExtArgs["result"]["staffNote"]>
+  export type StaffNoteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    application?: boolean | StaffNote$applicationArgs<ExtArgs>
+    enquiry?: boolean | StaffNote$enquiryArgs<ExtArgs>
+    author?: boolean | StaffNote$authorArgs<ExtArgs>
+  }
+  export type StaffNoteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    application?: boolean | StaffNote$applicationArgs<ExtArgs>
+    enquiry?: boolean | StaffNote$enquiryArgs<ExtArgs>
+    author?: boolean | StaffNote$authorArgs<ExtArgs>
+  }
+  export type StaffNoteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    application?: boolean | StaffNote$applicationArgs<ExtArgs>
+    enquiry?: boolean | StaffNote$enquiryArgs<ExtArgs>
+    author?: boolean | StaffNote$authorArgs<ExtArgs>
+  }
+
+  export type $StaffNotePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "StaffNote"
+    objects: {
+      application: Prisma.$ApplicationPayload<ExtArgs> | null
+      enquiry: Prisma.$EnquiryPayload<ExtArgs> | null
+      author: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      body: string
+      applicationId: string | null
+      enquiryId: string | null
+      authorId: string | null
+      authorName: string
+      createdAt: Date
+    }, ExtArgs["result"]["staffNote"]>
+    composites: {}
+  }
+
+  type StaffNoteGetPayload<S extends boolean | null | undefined | StaffNoteDefaultArgs> = $Result.GetResult<Prisma.$StaffNotePayload, S>
+
+  type StaffNoteCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<StaffNoteFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: StaffNoteCountAggregateInputType | true
+    }
+
+  export interface StaffNoteDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StaffNote'], meta: { name: 'StaffNote' } }
+    /**
+     * Find zero or one StaffNote that matches the filter.
+     * @param {StaffNoteFindUniqueArgs} args - Arguments to find a StaffNote
+     * @example
+     * // Get one StaffNote
+     * const staffNote = await prisma.staffNote.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StaffNoteFindUniqueArgs>(args: SelectSubset<T, StaffNoteFindUniqueArgs<ExtArgs>>): Prisma__StaffNoteClient<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one StaffNote that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {StaffNoteFindUniqueOrThrowArgs} args - Arguments to find a StaffNote
+     * @example
+     * // Get one StaffNote
+     * const staffNote = await prisma.staffNote.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StaffNoteFindUniqueOrThrowArgs>(args: SelectSubset<T, StaffNoteFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StaffNoteClient<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StaffNote that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffNoteFindFirstArgs} args - Arguments to find a StaffNote
+     * @example
+     * // Get one StaffNote
+     * const staffNote = await prisma.staffNote.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StaffNoteFindFirstArgs>(args?: SelectSubset<T, StaffNoteFindFirstArgs<ExtArgs>>): Prisma__StaffNoteClient<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StaffNote that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffNoteFindFirstOrThrowArgs} args - Arguments to find a StaffNote
+     * @example
+     * // Get one StaffNote
+     * const staffNote = await prisma.staffNote.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StaffNoteFindFirstOrThrowArgs>(args?: SelectSubset<T, StaffNoteFindFirstOrThrowArgs<ExtArgs>>): Prisma__StaffNoteClient<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more StaffNotes that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffNoteFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all StaffNotes
+     * const staffNotes = await prisma.staffNote.findMany()
+     * 
+     * // Get first 10 StaffNotes
+     * const staffNotes = await prisma.staffNote.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const staffNoteWithIdOnly = await prisma.staffNote.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends StaffNoteFindManyArgs>(args?: SelectSubset<T, StaffNoteFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a StaffNote.
+     * @param {StaffNoteCreateArgs} args - Arguments to create a StaffNote.
+     * @example
+     * // Create one StaffNote
+     * const StaffNote = await prisma.staffNote.create({
+     *   data: {
+     *     // ... data to create a StaffNote
+     *   }
+     * })
+     * 
+     */
+    create<T extends StaffNoteCreateArgs>(args: SelectSubset<T, StaffNoteCreateArgs<ExtArgs>>): Prisma__StaffNoteClient<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many StaffNotes.
+     * @param {StaffNoteCreateManyArgs} args - Arguments to create many StaffNotes.
+     * @example
+     * // Create many StaffNotes
+     * const staffNote = await prisma.staffNote.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StaffNoteCreateManyArgs>(args?: SelectSubset<T, StaffNoteCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many StaffNotes and returns the data saved in the database.
+     * @param {StaffNoteCreateManyAndReturnArgs} args - Arguments to create many StaffNotes.
+     * @example
+     * // Create many StaffNotes
+     * const staffNote = await prisma.staffNote.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many StaffNotes and only return the `id`
+     * const staffNoteWithIdOnly = await prisma.staffNote.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StaffNoteCreateManyAndReturnArgs>(args?: SelectSubset<T, StaffNoteCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a StaffNote.
+     * @param {StaffNoteDeleteArgs} args - Arguments to delete one StaffNote.
+     * @example
+     * // Delete one StaffNote
+     * const StaffNote = await prisma.staffNote.delete({
+     *   where: {
+     *     // ... filter to delete one StaffNote
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StaffNoteDeleteArgs>(args: SelectSubset<T, StaffNoteDeleteArgs<ExtArgs>>): Prisma__StaffNoteClient<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one StaffNote.
+     * @param {StaffNoteUpdateArgs} args - Arguments to update one StaffNote.
+     * @example
+     * // Update one StaffNote
+     * const staffNote = await prisma.staffNote.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StaffNoteUpdateArgs>(args: SelectSubset<T, StaffNoteUpdateArgs<ExtArgs>>): Prisma__StaffNoteClient<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more StaffNotes.
+     * @param {StaffNoteDeleteManyArgs} args - Arguments to filter StaffNotes to delete.
+     * @example
+     * // Delete a few StaffNotes
+     * const { count } = await prisma.staffNote.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StaffNoteDeleteManyArgs>(args?: SelectSubset<T, StaffNoteDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StaffNotes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffNoteUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many StaffNotes
+     * const staffNote = await prisma.staffNote.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StaffNoteUpdateManyArgs>(args: SelectSubset<T, StaffNoteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StaffNotes and returns the data updated in the database.
+     * @param {StaffNoteUpdateManyAndReturnArgs} args - Arguments to update many StaffNotes.
+     * @example
+     * // Update many StaffNotes
+     * const staffNote = await prisma.staffNote.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more StaffNotes and only return the `id`
+     * const staffNoteWithIdOnly = await prisma.staffNote.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends StaffNoteUpdateManyAndReturnArgs>(args: SelectSubset<T, StaffNoteUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one StaffNote.
+     * @param {StaffNoteUpsertArgs} args - Arguments to update or create a StaffNote.
+     * @example
+     * // Update or create a StaffNote
+     * const staffNote = await prisma.staffNote.upsert({
+     *   create: {
+     *     // ... data to create a StaffNote
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the StaffNote we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StaffNoteUpsertArgs>(args: SelectSubset<T, StaffNoteUpsertArgs<ExtArgs>>): Prisma__StaffNoteClient<$Result.GetResult<Prisma.$StaffNotePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of StaffNotes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffNoteCountArgs} args - Arguments to filter StaffNotes to count.
+     * @example
+     * // Count the number of StaffNotes
+     * const count = await prisma.staffNote.count({
+     *   where: {
+     *     // ... the filter for the StaffNotes we want to count
+     *   }
+     * })
+    **/
+    count<T extends StaffNoteCountArgs>(
+      args?: Subset<T, StaffNoteCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StaffNoteCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a StaffNote.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffNoteAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StaffNoteAggregateArgs>(args: Subset<T, StaffNoteAggregateArgs>): Prisma.PrismaPromise<GetStaffNoteAggregateType<T>>
+
+    /**
+     * Group by StaffNote.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StaffNoteGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StaffNoteGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StaffNoteGroupByArgs['orderBy'] }
+        : { orderBy?: StaffNoteGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StaffNoteGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStaffNoteGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the StaffNote model
+   */
+  readonly fields: StaffNoteFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for StaffNote.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StaffNoteClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    application<T extends StaffNote$applicationArgs<ExtArgs> = {}>(args?: Subset<T, StaffNote$applicationArgs<ExtArgs>>): Prisma__ApplicationClient<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    enquiry<T extends StaffNote$enquiryArgs<ExtArgs> = {}>(args?: Subset<T, StaffNote$enquiryArgs<ExtArgs>>): Prisma__EnquiryClient<$Result.GetResult<Prisma.$EnquiryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    author<T extends StaffNote$authorArgs<ExtArgs> = {}>(args?: Subset<T, StaffNote$authorArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the StaffNote model
+   */
+  interface StaffNoteFieldRefs {
+    readonly id: FieldRef<"StaffNote", 'String'>
+    readonly body: FieldRef<"StaffNote", 'String'>
+    readonly applicationId: FieldRef<"StaffNote", 'String'>
+    readonly enquiryId: FieldRef<"StaffNote", 'String'>
+    readonly authorId: FieldRef<"StaffNote", 'String'>
+    readonly authorName: FieldRef<"StaffNote", 'String'>
+    readonly createdAt: FieldRef<"StaffNote", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * StaffNote findUnique
+   */
+  export type StaffNoteFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffNote to fetch.
+     */
+    where: StaffNoteWhereUniqueInput
+  }
+
+  /**
+   * StaffNote findUniqueOrThrow
+   */
+  export type StaffNoteFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffNote to fetch.
+     */
+    where: StaffNoteWhereUniqueInput
+  }
+
+  /**
+   * StaffNote findFirst
+   */
+  export type StaffNoteFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffNote to fetch.
+     */
+    where?: StaffNoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffNotes to fetch.
+     */
+    orderBy?: StaffNoteOrderByWithRelationInput | StaffNoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StaffNotes.
+     */
+    cursor?: StaffNoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffNotes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffNotes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StaffNotes.
+     */
+    distinct?: StaffNoteScalarFieldEnum | StaffNoteScalarFieldEnum[]
+  }
+
+  /**
+   * StaffNote findFirstOrThrow
+   */
+  export type StaffNoteFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffNote to fetch.
+     */
+    where?: StaffNoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffNotes to fetch.
+     */
+    orderBy?: StaffNoteOrderByWithRelationInput | StaffNoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StaffNotes.
+     */
+    cursor?: StaffNoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffNotes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffNotes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StaffNotes.
+     */
+    distinct?: StaffNoteScalarFieldEnum | StaffNoteScalarFieldEnum[]
+  }
+
+  /**
+   * StaffNote findMany
+   */
+  export type StaffNoteFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
+    /**
+     * Filter, which StaffNotes to fetch.
+     */
+    where?: StaffNoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StaffNotes to fetch.
+     */
+    orderBy?: StaffNoteOrderByWithRelationInput | StaffNoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing StaffNotes.
+     */
+    cursor?: StaffNoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StaffNotes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StaffNotes.
+     */
+    skip?: number
+    distinct?: StaffNoteScalarFieldEnum | StaffNoteScalarFieldEnum[]
+  }
+
+  /**
+   * StaffNote create
+   */
+  export type StaffNoteCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
+    /**
+     * The data needed to create a StaffNote.
+     */
+    data: XOR<StaffNoteCreateInput, StaffNoteUncheckedCreateInput>
+  }
+
+  /**
+   * StaffNote createMany
+   */
+  export type StaffNoteCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many StaffNotes.
+     */
+    data: StaffNoteCreateManyInput | StaffNoteCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StaffNote createManyAndReturn
+   */
+  export type StaffNoteCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * The data used to create many StaffNotes.
+     */
+    data: StaffNoteCreateManyInput | StaffNoteCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StaffNote update
+   */
+  export type StaffNoteUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
+    /**
+     * The data needed to update a StaffNote.
+     */
+    data: XOR<StaffNoteUpdateInput, StaffNoteUncheckedUpdateInput>
+    /**
+     * Choose, which StaffNote to update.
+     */
+    where: StaffNoteWhereUniqueInput
+  }
+
+  /**
+   * StaffNote updateMany
+   */
+  export type StaffNoteUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update StaffNotes.
+     */
+    data: XOR<StaffNoteUpdateManyMutationInput, StaffNoteUncheckedUpdateManyInput>
+    /**
+     * Filter which StaffNotes to update
+     */
+    where?: StaffNoteWhereInput
+    /**
+     * Limit how many StaffNotes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StaffNote updateManyAndReturn
+   */
+  export type StaffNoteUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * The data used to update StaffNotes.
+     */
+    data: XOR<StaffNoteUpdateManyMutationInput, StaffNoteUncheckedUpdateManyInput>
+    /**
+     * Filter which StaffNotes to update
+     */
+    where?: StaffNoteWhereInput
+    /**
+     * Limit how many StaffNotes to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StaffNote upsert
+   */
+  export type StaffNoteUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
+    /**
+     * The filter to search for the StaffNote to update in case it exists.
+     */
+    where: StaffNoteWhereUniqueInput
+    /**
+     * In case the StaffNote found by the `where` argument doesn't exist, create a new StaffNote with this data.
+     */
+    create: XOR<StaffNoteCreateInput, StaffNoteUncheckedCreateInput>
+    /**
+     * In case the StaffNote was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StaffNoteUpdateInput, StaffNoteUncheckedUpdateInput>
+  }
+
+  /**
+   * StaffNote delete
+   */
+  export type StaffNoteDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
+    /**
+     * Filter which StaffNote to delete.
+     */
+    where: StaffNoteWhereUniqueInput
+  }
+
+  /**
+   * StaffNote deleteMany
+   */
+  export type StaffNoteDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StaffNotes to delete
+     */
+    where?: StaffNoteWhereInput
+    /**
+     * Limit how many StaffNotes to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * StaffNote.application
+   */
+  export type StaffNote$applicationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Application
+     */
+    select?: ApplicationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Application
+     */
+    omit?: ApplicationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationInclude<ExtArgs> | null
+    where?: ApplicationWhereInput
+  }
+
+  /**
+   * StaffNote.enquiry
+   */
+  export type StaffNote$enquiryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Enquiry
+     */
+    select?: EnquirySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Enquiry
+     */
+    omit?: EnquiryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: EnquiryInclude<ExtArgs> | null
+    where?: EnquiryWhereInput
+  }
+
+  /**
+   * StaffNote.author
+   */
+  export type StaffNote$authorArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * StaffNote without action
+   */
+  export type StaffNoteDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StaffNote
+     */
+    select?: StaffNoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StaffNote
+     */
+    omit?: StaffNoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StaffNoteInclude<ExtArgs> | null
   }
 
 
@@ -25311,6 +26694,19 @@ export namespace Prisma {
   export type ApplicationScalarFieldEnum = (typeof ApplicationScalarFieldEnum)[keyof typeof ApplicationScalarFieldEnum]
 
 
+  export const StaffNoteScalarFieldEnum: {
+    id: 'id',
+    body: 'body',
+    applicationId: 'applicationId',
+    enquiryId: 'enquiryId',
+    authorId: 'authorId',
+    authorName: 'authorName',
+    createdAt: 'createdAt'
+  };
+
+  export type StaffNoteScalarFieldEnum = (typeof StaffNoteScalarFieldEnum)[keyof typeof StaffNoteScalarFieldEnum]
+
+
   export const ApplicationDocumentScalarFieldEnum: {
     id: 'id',
     applicationId: 'applicationId',
@@ -25825,6 +27221,7 @@ export namespace Prisma {
     role?: EnumRoleFilter<"User"> | $Enums.Role
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    staffNotes?: StaffNoteListRelationFilter
     enquiries?: EnquiryListRelationFilter
     applications?: ApplicationListRelationFilter
     payments?: PaymentListRelationFilter
@@ -25846,6 +27243,7 @@ export namespace Prisma {
     role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    staffNotes?: StaffNoteOrderByRelationAggregateInput
     enquiries?: EnquiryOrderByRelationAggregateInput
     applications?: ApplicationOrderByRelationAggregateInput
     payments?: PaymentOrderByRelationAggregateInput
@@ -25870,6 +27268,7 @@ export namespace Prisma {
     role?: EnumRoleFilter<"User"> | $Enums.Role
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    staffNotes?: StaffNoteListRelationFilter
     enquiries?: EnquiryListRelationFilter
     applications?: ApplicationListRelationFilter
     payments?: PaymentListRelationFilter
@@ -26006,6 +27405,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Enquiry"> | Date | string
     updatedAt?: DateTimeFilter<"Enquiry"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    notes?: StaffNoteListRelationFilter
   }
 
   export type EnquiryOrderByWithRelationInput = {
@@ -26021,6 +27421,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    notes?: StaffNoteOrderByRelationAggregateInput
   }
 
   export type EnquiryWhereUniqueInput = Prisma.AtLeast<{
@@ -26039,6 +27440,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Enquiry"> | Date | string
     updatedAt?: DateTimeFilter<"Enquiry"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    notes?: StaffNoteListRelationFilter
   }, "id">
 
   export type EnquiryOrderByWithAggregationInput = {
@@ -26094,6 +27496,7 @@ export namespace Prisma {
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     payments?: PaymentListRelationFilter
     documents?: ApplicationDocumentListRelationFilter
+    notes?: StaffNoteListRelationFilter
   }
 
   export type ApplicationOrderByWithRelationInput = {
@@ -26112,6 +27515,7 @@ export namespace Prisma {
     user?: UserOrderByWithRelationInput
     payments?: PaymentOrderByRelationAggregateInput
     documents?: ApplicationDocumentOrderByRelationAggregateInput
+    notes?: StaffNoteOrderByRelationAggregateInput
   }
 
   export type ApplicationWhereUniqueInput = Prisma.AtLeast<{
@@ -26133,6 +27537,7 @@ export namespace Prisma {
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     payments?: PaymentListRelationFilter
     documents?: ApplicationDocumentListRelationFilter
+    notes?: StaffNoteListRelationFilter
   }, "id" | "reference">
 
   export type ApplicationOrderByWithAggregationInput = {
@@ -26171,6 +27576,77 @@ export namespace Prisma {
     userId?: StringNullableWithAggregatesFilter<"Application"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Application"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Application"> | Date | string
+  }
+
+  export type StaffNoteWhereInput = {
+    AND?: StaffNoteWhereInput | StaffNoteWhereInput[]
+    OR?: StaffNoteWhereInput[]
+    NOT?: StaffNoteWhereInput | StaffNoteWhereInput[]
+    id?: StringFilter<"StaffNote"> | string
+    body?: StringFilter<"StaffNote"> | string
+    applicationId?: StringNullableFilter<"StaffNote"> | string | null
+    enquiryId?: StringNullableFilter<"StaffNote"> | string | null
+    authorId?: StringNullableFilter<"StaffNote"> | string | null
+    authorName?: StringFilter<"StaffNote"> | string
+    createdAt?: DateTimeFilter<"StaffNote"> | Date | string
+    application?: XOR<ApplicationNullableScalarRelationFilter, ApplicationWhereInput> | null
+    enquiry?: XOR<EnquiryNullableScalarRelationFilter, EnquiryWhereInput> | null
+    author?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type StaffNoteOrderByWithRelationInput = {
+    id?: SortOrder
+    body?: SortOrder
+    applicationId?: SortOrderInput | SortOrder
+    enquiryId?: SortOrderInput | SortOrder
+    authorId?: SortOrderInput | SortOrder
+    authorName?: SortOrder
+    createdAt?: SortOrder
+    application?: ApplicationOrderByWithRelationInput
+    enquiry?: EnquiryOrderByWithRelationInput
+    author?: UserOrderByWithRelationInput
+  }
+
+  export type StaffNoteWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: StaffNoteWhereInput | StaffNoteWhereInput[]
+    OR?: StaffNoteWhereInput[]
+    NOT?: StaffNoteWhereInput | StaffNoteWhereInput[]
+    body?: StringFilter<"StaffNote"> | string
+    applicationId?: StringNullableFilter<"StaffNote"> | string | null
+    enquiryId?: StringNullableFilter<"StaffNote"> | string | null
+    authorId?: StringNullableFilter<"StaffNote"> | string | null
+    authorName?: StringFilter<"StaffNote"> | string
+    createdAt?: DateTimeFilter<"StaffNote"> | Date | string
+    application?: XOR<ApplicationNullableScalarRelationFilter, ApplicationWhereInput> | null
+    enquiry?: XOR<EnquiryNullableScalarRelationFilter, EnquiryWhereInput> | null
+    author?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id">
+
+  export type StaffNoteOrderByWithAggregationInput = {
+    id?: SortOrder
+    body?: SortOrder
+    applicationId?: SortOrderInput | SortOrder
+    enquiryId?: SortOrderInput | SortOrder
+    authorId?: SortOrderInput | SortOrder
+    authorName?: SortOrder
+    createdAt?: SortOrder
+    _count?: StaffNoteCountOrderByAggregateInput
+    _max?: StaffNoteMaxOrderByAggregateInput
+    _min?: StaffNoteMinOrderByAggregateInput
+  }
+
+  export type StaffNoteScalarWhereWithAggregatesInput = {
+    AND?: StaffNoteScalarWhereWithAggregatesInput | StaffNoteScalarWhereWithAggregatesInput[]
+    OR?: StaffNoteScalarWhereWithAggregatesInput[]
+    NOT?: StaffNoteScalarWhereWithAggregatesInput | StaffNoteScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"StaffNote"> | string
+    body?: StringWithAggregatesFilter<"StaffNote"> | string
+    applicationId?: StringNullableWithAggregatesFilter<"StaffNote"> | string | null
+    enquiryId?: StringNullableWithAggregatesFilter<"StaffNote"> | string | null
+    authorId?: StringNullableWithAggregatesFilter<"StaffNote"> | string | null
+    authorName?: StringWithAggregatesFilter<"StaffNote"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"StaffNote"> | Date | string
   }
 
   export type ApplicationDocumentWhereInput = {
@@ -27302,6 +28778,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    staffNotes?: StaffNoteCreateNestedManyWithoutAuthorInput
     enquiries?: EnquiryCreateNestedManyWithoutUserInput
     applications?: ApplicationCreateNestedManyWithoutUserInput
     payments?: PaymentCreateNestedManyWithoutUserInput
@@ -27323,6 +28800,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    staffNotes?: StaffNoteUncheckedCreateNestedManyWithoutAuthorInput
     enquiries?: EnquiryUncheckedCreateNestedManyWithoutUserInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutUserInput
     payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -27344,6 +28822,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffNotes?: StaffNoteUpdateManyWithoutAuthorNestedInput
     enquiries?: EnquiryUpdateManyWithoutUserNestedInput
     applications?: ApplicationUpdateManyWithoutUserNestedInput
     payments?: PaymentUpdateManyWithoutUserNestedInput
@@ -27365,6 +28844,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffNotes?: StaffNoteUncheckedUpdateManyWithoutAuthorNestedInput
     enquiries?: EnquiryUncheckedUpdateManyWithoutUserNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutUserNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -27510,6 +28990,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutEnquiriesInput
+    notes?: StaffNoteCreateNestedManyWithoutEnquiryInput
   }
 
   export type EnquiryUncheckedCreateInput = {
@@ -27524,6 +29005,7 @@ export namespace Prisma {
     userId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    notes?: StaffNoteUncheckedCreateNestedManyWithoutEnquiryInput
   }
 
   export type EnquiryUpdateInput = {
@@ -27538,6 +29020,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutEnquiriesNestedInput
+    notes?: StaffNoteUpdateManyWithoutEnquiryNestedInput
   }
 
   export type EnquiryUncheckedUpdateInput = {
@@ -27552,6 +29035,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    notes?: StaffNoteUncheckedUpdateManyWithoutEnquiryNestedInput
   }
 
   export type EnquiryCreateManyInput = {
@@ -27610,6 +29094,7 @@ export namespace Prisma {
     user?: UserCreateNestedOneWithoutApplicationsInput
     payments?: PaymentCreateNestedManyWithoutApplicationInput
     documents?: ApplicationDocumentCreateNestedManyWithoutApplicationInput
+    notes?: StaffNoteCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationUncheckedCreateInput = {
@@ -27627,6 +29112,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     payments?: PaymentUncheckedCreateNestedManyWithoutApplicationInput
     documents?: ApplicationDocumentUncheckedCreateNestedManyWithoutApplicationInput
+    notes?: StaffNoteUncheckedCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationUpdateInput = {
@@ -27644,6 +29130,7 @@ export namespace Prisma {
     user?: UserUpdateOneWithoutApplicationsNestedInput
     payments?: PaymentUpdateManyWithoutApplicationNestedInput
     documents?: ApplicationDocumentUpdateManyWithoutApplicationNestedInput
+    notes?: StaffNoteUpdateManyWithoutApplicationNestedInput
   }
 
   export type ApplicationUncheckedUpdateInput = {
@@ -27661,6 +29148,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUncheckedUpdateManyWithoutApplicationNestedInput
     documents?: ApplicationDocumentUncheckedUpdateManyWithoutApplicationNestedInput
+    notes?: StaffNoteUncheckedUpdateManyWithoutApplicationNestedInput
   }
 
   export type ApplicationCreateManyInput = {
@@ -27705,6 +29193,73 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffNoteCreateInput = {
+    id?: string
+    body: string
+    authorName: string
+    createdAt?: Date | string
+    application?: ApplicationCreateNestedOneWithoutNotesInput
+    enquiry?: EnquiryCreateNestedOneWithoutNotesInput
+    author?: UserCreateNestedOneWithoutStaffNotesInput
+  }
+
+  export type StaffNoteUncheckedCreateInput = {
+    id?: string
+    body: string
+    applicationId?: string | null
+    enquiryId?: string | null
+    authorId?: string | null
+    authorName: string
+    createdAt?: Date | string
+  }
+
+  export type StaffNoteUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    authorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    application?: ApplicationUpdateOneWithoutNotesNestedInput
+    enquiry?: EnquiryUpdateOneWithoutNotesNestedInput
+    author?: UserUpdateOneWithoutStaffNotesNestedInput
+  }
+
+  export type StaffNoteUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    applicationId?: NullableStringFieldUpdateOperationsInput | string | null
+    enquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffNoteCreateManyInput = {
+    id?: string
+    body: string
+    applicationId?: string | null
+    enquiryId?: string | null
+    authorId?: string | null
+    authorName: string
+    createdAt?: Date | string
+  }
+
+  export type StaffNoteUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    authorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffNoteUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    applicationId?: NullableStringFieldUpdateOperationsInput | string | null
+    enquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ApplicationDocumentCreateInput = {
@@ -29016,6 +30571,12 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type StaffNoteListRelationFilter = {
+    every?: StaffNoteWhereInput
+    some?: StaffNoteWhereInput
+    none?: StaffNoteWhereInput
+  }
+
   export type EnquiryListRelationFilter = {
     every?: EnquiryWhereInput
     some?: EnquiryWhereInput
@@ -29043,6 +30604,10 @@ export namespace Prisma {
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
+  }
+
+  export type StaffNoteOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type EnquiryOrderByRelationAggregateInput = {
@@ -29563,6 +31128,46 @@ export namespace Prisma {
     _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
+  export type ApplicationNullableScalarRelationFilter = {
+    is?: ApplicationWhereInput | null
+    isNot?: ApplicationWhereInput | null
+  }
+
+  export type EnquiryNullableScalarRelationFilter = {
+    is?: EnquiryWhereInput | null
+    isNot?: EnquiryWhereInput | null
+  }
+
+  export type StaffNoteCountOrderByAggregateInput = {
+    id?: SortOrder
+    body?: SortOrder
+    applicationId?: SortOrder
+    enquiryId?: SortOrder
+    authorId?: SortOrder
+    authorName?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StaffNoteMaxOrderByAggregateInput = {
+    id?: SortOrder
+    body?: SortOrder
+    applicationId?: SortOrder
+    enquiryId?: SortOrder
+    authorId?: SortOrder
+    authorName?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StaffNoteMinOrderByAggregateInput = {
+    id?: SortOrder
+    body?: SortOrder
+    applicationId?: SortOrder
+    enquiryId?: SortOrder
+    authorId?: SortOrder
+    authorName?: SortOrder
+    createdAt?: SortOrder
+  }
+
   export type BytesFilter<$PrismaModel = never> = {
     equals?: Bytes | BytesFieldRefInput<$PrismaModel>
     in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
@@ -29905,11 +31510,6 @@ export namespace Prisma {
     in?: $Enums.PaymentStatus[] | ListEnumPaymentStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.PaymentStatus[] | ListEnumPaymentStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumPaymentStatusFilter<$PrismaModel> | $Enums.PaymentStatus
-  }
-
-  export type ApplicationNullableScalarRelationFilter = {
-    is?: ApplicationWhereInput | null
-    isNot?: ApplicationWhereInput | null
   }
 
   export type ReceiptNullableScalarRelationFilter = {
@@ -30333,6 +31933,13 @@ export namespace Prisma {
     byteSize?: SortOrder
   }
 
+  export type StaffNoteCreateNestedManyWithoutAuthorInput = {
+    create?: XOR<StaffNoteCreateWithoutAuthorInput, StaffNoteUncheckedCreateWithoutAuthorInput> | StaffNoteCreateWithoutAuthorInput[] | StaffNoteUncheckedCreateWithoutAuthorInput[]
+    connectOrCreate?: StaffNoteCreateOrConnectWithoutAuthorInput | StaffNoteCreateOrConnectWithoutAuthorInput[]
+    createMany?: StaffNoteCreateManyAuthorInputEnvelope
+    connect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+  }
+
   export type EnquiryCreateNestedManyWithoutUserInput = {
     create?: XOR<EnquiryCreateWithoutUserInput, EnquiryUncheckedCreateWithoutUserInput> | EnquiryCreateWithoutUserInput[] | EnquiryUncheckedCreateWithoutUserInput[]
     connectOrCreate?: EnquiryCreateOrConnectWithoutUserInput | EnquiryCreateOrConnectWithoutUserInput[]
@@ -30359,6 +31966,13 @@ export namespace Prisma {
     connectOrCreate?: AuthCodeCreateOrConnectWithoutUserInput | AuthCodeCreateOrConnectWithoutUserInput[]
     createMany?: AuthCodeCreateManyUserInputEnvelope
     connect?: AuthCodeWhereUniqueInput | AuthCodeWhereUniqueInput[]
+  }
+
+  export type StaffNoteUncheckedCreateNestedManyWithoutAuthorInput = {
+    create?: XOR<StaffNoteCreateWithoutAuthorInput, StaffNoteUncheckedCreateWithoutAuthorInput> | StaffNoteCreateWithoutAuthorInput[] | StaffNoteUncheckedCreateWithoutAuthorInput[]
+    connectOrCreate?: StaffNoteCreateOrConnectWithoutAuthorInput | StaffNoteCreateOrConnectWithoutAuthorInput[]
+    createMany?: StaffNoteCreateManyAuthorInputEnvelope
+    connect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
   }
 
   export type EnquiryUncheckedCreateNestedManyWithoutUserInput = {
@@ -30421,6 +32035,20 @@ export namespace Prisma {
     set?: Date | string
   }
 
+  export type StaffNoteUpdateManyWithoutAuthorNestedInput = {
+    create?: XOR<StaffNoteCreateWithoutAuthorInput, StaffNoteUncheckedCreateWithoutAuthorInput> | StaffNoteCreateWithoutAuthorInput[] | StaffNoteUncheckedCreateWithoutAuthorInput[]
+    connectOrCreate?: StaffNoteCreateOrConnectWithoutAuthorInput | StaffNoteCreateOrConnectWithoutAuthorInput[]
+    upsert?: StaffNoteUpsertWithWhereUniqueWithoutAuthorInput | StaffNoteUpsertWithWhereUniqueWithoutAuthorInput[]
+    createMany?: StaffNoteCreateManyAuthorInputEnvelope
+    set?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    disconnect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    delete?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    connect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    update?: StaffNoteUpdateWithWhereUniqueWithoutAuthorInput | StaffNoteUpdateWithWhereUniqueWithoutAuthorInput[]
+    updateMany?: StaffNoteUpdateManyWithWhereWithoutAuthorInput | StaffNoteUpdateManyWithWhereWithoutAuthorInput[]
+    deleteMany?: StaffNoteScalarWhereInput | StaffNoteScalarWhereInput[]
+  }
+
   export type EnquiryUpdateManyWithoutUserNestedInput = {
     create?: XOR<EnquiryCreateWithoutUserInput, EnquiryUncheckedCreateWithoutUserInput> | EnquiryCreateWithoutUserInput[] | EnquiryUncheckedCreateWithoutUserInput[]
     connectOrCreate?: EnquiryCreateOrConnectWithoutUserInput | EnquiryCreateOrConnectWithoutUserInput[]
@@ -30475,6 +32103,20 @@ export namespace Prisma {
     update?: AuthCodeUpdateWithWhereUniqueWithoutUserInput | AuthCodeUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: AuthCodeUpdateManyWithWhereWithoutUserInput | AuthCodeUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: AuthCodeScalarWhereInput | AuthCodeScalarWhereInput[]
+  }
+
+  export type StaffNoteUncheckedUpdateManyWithoutAuthorNestedInput = {
+    create?: XOR<StaffNoteCreateWithoutAuthorInput, StaffNoteUncheckedCreateWithoutAuthorInput> | StaffNoteCreateWithoutAuthorInput[] | StaffNoteUncheckedCreateWithoutAuthorInput[]
+    connectOrCreate?: StaffNoteCreateOrConnectWithoutAuthorInput | StaffNoteCreateOrConnectWithoutAuthorInput[]
+    upsert?: StaffNoteUpsertWithWhereUniqueWithoutAuthorInput | StaffNoteUpsertWithWhereUniqueWithoutAuthorInput[]
+    createMany?: StaffNoteCreateManyAuthorInputEnvelope
+    set?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    disconnect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    delete?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    connect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    update?: StaffNoteUpdateWithWhereUniqueWithoutAuthorInput | StaffNoteUpdateWithWhereUniqueWithoutAuthorInput[]
+    updateMany?: StaffNoteUpdateManyWithWhereWithoutAuthorInput | StaffNoteUpdateManyWithWhereWithoutAuthorInput[]
+    deleteMany?: StaffNoteScalarWhereInput | StaffNoteScalarWhereInput[]
   }
 
   export type EnquiryUncheckedUpdateManyWithoutUserNestedInput = {
@@ -30557,6 +32199,20 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type StaffNoteCreateNestedManyWithoutEnquiryInput = {
+    create?: XOR<StaffNoteCreateWithoutEnquiryInput, StaffNoteUncheckedCreateWithoutEnquiryInput> | StaffNoteCreateWithoutEnquiryInput[] | StaffNoteUncheckedCreateWithoutEnquiryInput[]
+    connectOrCreate?: StaffNoteCreateOrConnectWithoutEnquiryInput | StaffNoteCreateOrConnectWithoutEnquiryInput[]
+    createMany?: StaffNoteCreateManyEnquiryInputEnvelope
+    connect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+  }
+
+  export type StaffNoteUncheckedCreateNestedManyWithoutEnquiryInput = {
+    create?: XOR<StaffNoteCreateWithoutEnquiryInput, StaffNoteUncheckedCreateWithoutEnquiryInput> | StaffNoteCreateWithoutEnquiryInput[] | StaffNoteUncheckedCreateWithoutEnquiryInput[]
+    connectOrCreate?: StaffNoteCreateOrConnectWithoutEnquiryInput | StaffNoteCreateOrConnectWithoutEnquiryInput[]
+    createMany?: StaffNoteCreateManyEnquiryInputEnvelope
+    connect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+  }
+
   export type EnumEnquiryTypeFieldUpdateOperationsInput = {
     set?: $Enums.EnquiryType
   }
@@ -30573,6 +32229,34 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutEnquiriesInput, UserUpdateWithoutEnquiriesInput>, UserUncheckedUpdateWithoutEnquiriesInput>
+  }
+
+  export type StaffNoteUpdateManyWithoutEnquiryNestedInput = {
+    create?: XOR<StaffNoteCreateWithoutEnquiryInput, StaffNoteUncheckedCreateWithoutEnquiryInput> | StaffNoteCreateWithoutEnquiryInput[] | StaffNoteUncheckedCreateWithoutEnquiryInput[]
+    connectOrCreate?: StaffNoteCreateOrConnectWithoutEnquiryInput | StaffNoteCreateOrConnectWithoutEnquiryInput[]
+    upsert?: StaffNoteUpsertWithWhereUniqueWithoutEnquiryInput | StaffNoteUpsertWithWhereUniqueWithoutEnquiryInput[]
+    createMany?: StaffNoteCreateManyEnquiryInputEnvelope
+    set?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    disconnect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    delete?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    connect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    update?: StaffNoteUpdateWithWhereUniqueWithoutEnquiryInput | StaffNoteUpdateWithWhereUniqueWithoutEnquiryInput[]
+    updateMany?: StaffNoteUpdateManyWithWhereWithoutEnquiryInput | StaffNoteUpdateManyWithWhereWithoutEnquiryInput[]
+    deleteMany?: StaffNoteScalarWhereInput | StaffNoteScalarWhereInput[]
+  }
+
+  export type StaffNoteUncheckedUpdateManyWithoutEnquiryNestedInput = {
+    create?: XOR<StaffNoteCreateWithoutEnquiryInput, StaffNoteUncheckedCreateWithoutEnquiryInput> | StaffNoteCreateWithoutEnquiryInput[] | StaffNoteUncheckedCreateWithoutEnquiryInput[]
+    connectOrCreate?: StaffNoteCreateOrConnectWithoutEnquiryInput | StaffNoteCreateOrConnectWithoutEnquiryInput[]
+    upsert?: StaffNoteUpsertWithWhereUniqueWithoutEnquiryInput | StaffNoteUpsertWithWhereUniqueWithoutEnquiryInput[]
+    createMany?: StaffNoteCreateManyEnquiryInputEnvelope
+    set?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    disconnect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    delete?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    connect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    update?: StaffNoteUpdateWithWhereUniqueWithoutEnquiryInput | StaffNoteUpdateWithWhereUniqueWithoutEnquiryInput[]
+    updateMany?: StaffNoteUpdateManyWithWhereWithoutEnquiryInput | StaffNoteUpdateManyWithWhereWithoutEnquiryInput[]
+    deleteMany?: StaffNoteScalarWhereInput | StaffNoteScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutApplicationsInput = {
@@ -30595,6 +32279,13 @@ export namespace Prisma {
     connect?: ApplicationDocumentWhereUniqueInput | ApplicationDocumentWhereUniqueInput[]
   }
 
+  export type StaffNoteCreateNestedManyWithoutApplicationInput = {
+    create?: XOR<StaffNoteCreateWithoutApplicationInput, StaffNoteUncheckedCreateWithoutApplicationInput> | StaffNoteCreateWithoutApplicationInput[] | StaffNoteUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: StaffNoteCreateOrConnectWithoutApplicationInput | StaffNoteCreateOrConnectWithoutApplicationInput[]
+    createMany?: StaffNoteCreateManyApplicationInputEnvelope
+    connect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+  }
+
   export type PaymentUncheckedCreateNestedManyWithoutApplicationInput = {
     create?: XOR<PaymentCreateWithoutApplicationInput, PaymentUncheckedCreateWithoutApplicationInput> | PaymentCreateWithoutApplicationInput[] | PaymentUncheckedCreateWithoutApplicationInput[]
     connectOrCreate?: PaymentCreateOrConnectWithoutApplicationInput | PaymentCreateOrConnectWithoutApplicationInput[]
@@ -30607,6 +32298,13 @@ export namespace Prisma {
     connectOrCreate?: ApplicationDocumentCreateOrConnectWithoutApplicationInput | ApplicationDocumentCreateOrConnectWithoutApplicationInput[]
     createMany?: ApplicationDocumentCreateManyApplicationInputEnvelope
     connect?: ApplicationDocumentWhereUniqueInput | ApplicationDocumentWhereUniqueInput[]
+  }
+
+  export type StaffNoteUncheckedCreateNestedManyWithoutApplicationInput = {
+    create?: XOR<StaffNoteCreateWithoutApplicationInput, StaffNoteUncheckedCreateWithoutApplicationInput> | StaffNoteCreateWithoutApplicationInput[] | StaffNoteUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: StaffNoteCreateOrConnectWithoutApplicationInput | StaffNoteCreateOrConnectWithoutApplicationInput[]
+    createMany?: StaffNoteCreateManyApplicationInputEnvelope
+    connect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
   }
 
   export type EnumApplicationTypeFieldUpdateOperationsInput = {
@@ -30659,6 +32357,20 @@ export namespace Prisma {
     deleteMany?: ApplicationDocumentScalarWhereInput | ApplicationDocumentScalarWhereInput[]
   }
 
+  export type StaffNoteUpdateManyWithoutApplicationNestedInput = {
+    create?: XOR<StaffNoteCreateWithoutApplicationInput, StaffNoteUncheckedCreateWithoutApplicationInput> | StaffNoteCreateWithoutApplicationInput[] | StaffNoteUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: StaffNoteCreateOrConnectWithoutApplicationInput | StaffNoteCreateOrConnectWithoutApplicationInput[]
+    upsert?: StaffNoteUpsertWithWhereUniqueWithoutApplicationInput | StaffNoteUpsertWithWhereUniqueWithoutApplicationInput[]
+    createMany?: StaffNoteCreateManyApplicationInputEnvelope
+    set?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    disconnect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    delete?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    connect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    update?: StaffNoteUpdateWithWhereUniqueWithoutApplicationInput | StaffNoteUpdateWithWhereUniqueWithoutApplicationInput[]
+    updateMany?: StaffNoteUpdateManyWithWhereWithoutApplicationInput | StaffNoteUpdateManyWithWhereWithoutApplicationInput[]
+    deleteMany?: StaffNoteScalarWhereInput | StaffNoteScalarWhereInput[]
+  }
+
   export type PaymentUncheckedUpdateManyWithoutApplicationNestedInput = {
     create?: XOR<PaymentCreateWithoutApplicationInput, PaymentUncheckedCreateWithoutApplicationInput> | PaymentCreateWithoutApplicationInput[] | PaymentUncheckedCreateWithoutApplicationInput[]
     connectOrCreate?: PaymentCreateOrConnectWithoutApplicationInput | PaymentCreateOrConnectWithoutApplicationInput[]
@@ -30685,6 +32397,68 @@ export namespace Prisma {
     update?: ApplicationDocumentUpdateWithWhereUniqueWithoutApplicationInput | ApplicationDocumentUpdateWithWhereUniqueWithoutApplicationInput[]
     updateMany?: ApplicationDocumentUpdateManyWithWhereWithoutApplicationInput | ApplicationDocumentUpdateManyWithWhereWithoutApplicationInput[]
     deleteMany?: ApplicationDocumentScalarWhereInput | ApplicationDocumentScalarWhereInput[]
+  }
+
+  export type StaffNoteUncheckedUpdateManyWithoutApplicationNestedInput = {
+    create?: XOR<StaffNoteCreateWithoutApplicationInput, StaffNoteUncheckedCreateWithoutApplicationInput> | StaffNoteCreateWithoutApplicationInput[] | StaffNoteUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: StaffNoteCreateOrConnectWithoutApplicationInput | StaffNoteCreateOrConnectWithoutApplicationInput[]
+    upsert?: StaffNoteUpsertWithWhereUniqueWithoutApplicationInput | StaffNoteUpsertWithWhereUniqueWithoutApplicationInput[]
+    createMany?: StaffNoteCreateManyApplicationInputEnvelope
+    set?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    disconnect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    delete?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    connect?: StaffNoteWhereUniqueInput | StaffNoteWhereUniqueInput[]
+    update?: StaffNoteUpdateWithWhereUniqueWithoutApplicationInput | StaffNoteUpdateWithWhereUniqueWithoutApplicationInput[]
+    updateMany?: StaffNoteUpdateManyWithWhereWithoutApplicationInput | StaffNoteUpdateManyWithWhereWithoutApplicationInput[]
+    deleteMany?: StaffNoteScalarWhereInput | StaffNoteScalarWhereInput[]
+  }
+
+  export type ApplicationCreateNestedOneWithoutNotesInput = {
+    create?: XOR<ApplicationCreateWithoutNotesInput, ApplicationUncheckedCreateWithoutNotesInput>
+    connectOrCreate?: ApplicationCreateOrConnectWithoutNotesInput
+    connect?: ApplicationWhereUniqueInput
+  }
+
+  export type EnquiryCreateNestedOneWithoutNotesInput = {
+    create?: XOR<EnquiryCreateWithoutNotesInput, EnquiryUncheckedCreateWithoutNotesInput>
+    connectOrCreate?: EnquiryCreateOrConnectWithoutNotesInput
+    connect?: EnquiryWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutStaffNotesInput = {
+    create?: XOR<UserCreateWithoutStaffNotesInput, UserUncheckedCreateWithoutStaffNotesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStaffNotesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type ApplicationUpdateOneWithoutNotesNestedInput = {
+    create?: XOR<ApplicationCreateWithoutNotesInput, ApplicationUncheckedCreateWithoutNotesInput>
+    connectOrCreate?: ApplicationCreateOrConnectWithoutNotesInput
+    upsert?: ApplicationUpsertWithoutNotesInput
+    disconnect?: ApplicationWhereInput | boolean
+    delete?: ApplicationWhereInput | boolean
+    connect?: ApplicationWhereUniqueInput
+    update?: XOR<XOR<ApplicationUpdateToOneWithWhereWithoutNotesInput, ApplicationUpdateWithoutNotesInput>, ApplicationUncheckedUpdateWithoutNotesInput>
+  }
+
+  export type EnquiryUpdateOneWithoutNotesNestedInput = {
+    create?: XOR<EnquiryCreateWithoutNotesInput, EnquiryUncheckedCreateWithoutNotesInput>
+    connectOrCreate?: EnquiryCreateOrConnectWithoutNotesInput
+    upsert?: EnquiryUpsertWithoutNotesInput
+    disconnect?: EnquiryWhereInput | boolean
+    delete?: EnquiryWhereInput | boolean
+    connect?: EnquiryWhereUniqueInput
+    update?: XOR<XOR<EnquiryUpdateToOneWithWhereWithoutNotesInput, EnquiryUpdateWithoutNotesInput>, EnquiryUncheckedUpdateWithoutNotesInput>
+  }
+
+  export type UserUpdateOneWithoutStaffNotesNestedInput = {
+    create?: XOR<UserCreateWithoutStaffNotesInput, UserUncheckedCreateWithoutStaffNotesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStaffNotesInput
+    upsert?: UserUpsertWithoutStaffNotesInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutStaffNotesInput, UserUpdateWithoutStaffNotesInput>, UserUncheckedUpdateWithoutStaffNotesInput>
   }
 
   export type ApplicationCreateNestedOneWithoutDocumentsInput = {
@@ -31421,6 +33195,34 @@ export namespace Prisma {
     _max?: NestedEnumPaymentStatusNullableFilter<$PrismaModel>
   }
 
+  export type StaffNoteCreateWithoutAuthorInput = {
+    id?: string
+    body: string
+    authorName: string
+    createdAt?: Date | string
+    application?: ApplicationCreateNestedOneWithoutNotesInput
+    enquiry?: EnquiryCreateNestedOneWithoutNotesInput
+  }
+
+  export type StaffNoteUncheckedCreateWithoutAuthorInput = {
+    id?: string
+    body: string
+    applicationId?: string | null
+    enquiryId?: string | null
+    authorName: string
+    createdAt?: Date | string
+  }
+
+  export type StaffNoteCreateOrConnectWithoutAuthorInput = {
+    where: StaffNoteWhereUniqueInput
+    create: XOR<StaffNoteCreateWithoutAuthorInput, StaffNoteUncheckedCreateWithoutAuthorInput>
+  }
+
+  export type StaffNoteCreateManyAuthorInputEnvelope = {
+    data: StaffNoteCreateManyAuthorInput | StaffNoteCreateManyAuthorInput[]
+    skipDuplicates?: boolean
+  }
+
   export type EnquiryCreateWithoutUserInput = {
     id?: string
     type: $Enums.EnquiryType
@@ -31432,6 +33234,7 @@ export namespace Prisma {
     status?: $Enums.RecordStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    notes?: StaffNoteCreateNestedManyWithoutEnquiryInput
   }
 
   export type EnquiryUncheckedCreateWithoutUserInput = {
@@ -31445,6 +33248,7 @@ export namespace Prisma {
     status?: $Enums.RecordStatus
     createdAt?: Date | string
     updatedAt?: Date | string
+    notes?: StaffNoteUncheckedCreateNestedManyWithoutEnquiryInput
   }
 
   export type EnquiryCreateOrConnectWithoutUserInput = {
@@ -31471,6 +33275,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     payments?: PaymentCreateNestedManyWithoutApplicationInput
     documents?: ApplicationDocumentCreateNestedManyWithoutApplicationInput
+    notes?: StaffNoteCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationUncheckedCreateWithoutUserInput = {
@@ -31487,6 +33292,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     payments?: PaymentUncheckedCreateNestedManyWithoutApplicationInput
     documents?: ApplicationDocumentUncheckedCreateNestedManyWithoutApplicationInput
+    notes?: StaffNoteUncheckedCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationCreateOrConnectWithoutUserInput = {
@@ -31577,6 +33383,35 @@ export namespace Prisma {
   export type AuthCodeCreateManyUserInputEnvelope = {
     data: AuthCodeCreateManyUserInput | AuthCodeCreateManyUserInput[]
     skipDuplicates?: boolean
+  }
+
+  export type StaffNoteUpsertWithWhereUniqueWithoutAuthorInput = {
+    where: StaffNoteWhereUniqueInput
+    update: XOR<StaffNoteUpdateWithoutAuthorInput, StaffNoteUncheckedUpdateWithoutAuthorInput>
+    create: XOR<StaffNoteCreateWithoutAuthorInput, StaffNoteUncheckedCreateWithoutAuthorInput>
+  }
+
+  export type StaffNoteUpdateWithWhereUniqueWithoutAuthorInput = {
+    where: StaffNoteWhereUniqueInput
+    data: XOR<StaffNoteUpdateWithoutAuthorInput, StaffNoteUncheckedUpdateWithoutAuthorInput>
+  }
+
+  export type StaffNoteUpdateManyWithWhereWithoutAuthorInput = {
+    where: StaffNoteScalarWhereInput
+    data: XOR<StaffNoteUpdateManyMutationInput, StaffNoteUncheckedUpdateManyWithoutAuthorInput>
+  }
+
+  export type StaffNoteScalarWhereInput = {
+    AND?: StaffNoteScalarWhereInput | StaffNoteScalarWhereInput[]
+    OR?: StaffNoteScalarWhereInput[]
+    NOT?: StaffNoteScalarWhereInput | StaffNoteScalarWhereInput[]
+    id?: StringFilter<"StaffNote"> | string
+    body?: StringFilter<"StaffNote"> | string
+    applicationId?: StringNullableFilter<"StaffNote"> | string | null
+    enquiryId?: StringNullableFilter<"StaffNote"> | string | null
+    authorId?: StringNullableFilter<"StaffNote"> | string | null
+    authorName?: StringFilter<"StaffNote"> | string
+    createdAt?: DateTimeFilter<"StaffNote"> | Date | string
   }
 
   export type EnquiryUpsertWithWhereUniqueWithoutUserInput = {
@@ -31730,6 +33565,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    staffNotes?: StaffNoteCreateNestedManyWithoutAuthorInput
     enquiries?: EnquiryCreateNestedManyWithoutUserInput
     applications?: ApplicationCreateNestedManyWithoutUserInput
     payments?: PaymentCreateNestedManyWithoutUserInput
@@ -31750,6 +33586,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    staffNotes?: StaffNoteUncheckedCreateNestedManyWithoutAuthorInput
     enquiries?: EnquiryUncheckedCreateNestedManyWithoutUserInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutUserInput
     payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
@@ -31786,6 +33623,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffNotes?: StaffNoteUpdateManyWithoutAuthorNestedInput
     enquiries?: EnquiryUpdateManyWithoutUserNestedInput
     applications?: ApplicationUpdateManyWithoutUserNestedInput
     payments?: PaymentUpdateManyWithoutUserNestedInput
@@ -31806,6 +33644,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffNotes?: StaffNoteUncheckedUpdateManyWithoutAuthorNestedInput
     enquiries?: EnquiryUncheckedUpdateManyWithoutUserNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutUserNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
@@ -31826,6 +33665,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    staffNotes?: StaffNoteCreateNestedManyWithoutAuthorInput
     applications?: ApplicationCreateNestedManyWithoutUserInput
     payments?: PaymentCreateNestedManyWithoutUserInput
     authCodes?: AuthCodeCreateNestedManyWithoutUserInput
@@ -31846,6 +33686,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    staffNotes?: StaffNoteUncheckedCreateNestedManyWithoutAuthorInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutUserInput
     payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
     authCodes?: AuthCodeUncheckedCreateNestedManyWithoutUserInput
@@ -31854,6 +33695,34 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutEnquiriesInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutEnquiriesInput, UserUncheckedCreateWithoutEnquiriesInput>
+  }
+
+  export type StaffNoteCreateWithoutEnquiryInput = {
+    id?: string
+    body: string
+    authorName: string
+    createdAt?: Date | string
+    application?: ApplicationCreateNestedOneWithoutNotesInput
+    author?: UserCreateNestedOneWithoutStaffNotesInput
+  }
+
+  export type StaffNoteUncheckedCreateWithoutEnquiryInput = {
+    id?: string
+    body: string
+    applicationId?: string | null
+    authorId?: string | null
+    authorName: string
+    createdAt?: Date | string
+  }
+
+  export type StaffNoteCreateOrConnectWithoutEnquiryInput = {
+    where: StaffNoteWhereUniqueInput
+    create: XOR<StaffNoteCreateWithoutEnquiryInput, StaffNoteUncheckedCreateWithoutEnquiryInput>
+  }
+
+  export type StaffNoteCreateManyEnquiryInputEnvelope = {
+    data: StaffNoteCreateManyEnquiryInput | StaffNoteCreateManyEnquiryInput[]
+    skipDuplicates?: boolean
   }
 
   export type UserUpsertWithoutEnquiriesInput = {
@@ -31882,6 +33751,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffNotes?: StaffNoteUpdateManyWithoutAuthorNestedInput
     applications?: ApplicationUpdateManyWithoutUserNestedInput
     payments?: PaymentUpdateManyWithoutUserNestedInput
     authCodes?: AuthCodeUpdateManyWithoutUserNestedInput
@@ -31902,9 +33772,26 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffNotes?: StaffNoteUncheckedUpdateManyWithoutAuthorNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutUserNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
     authCodes?: AuthCodeUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type StaffNoteUpsertWithWhereUniqueWithoutEnquiryInput = {
+    where: StaffNoteWhereUniqueInput
+    update: XOR<StaffNoteUpdateWithoutEnquiryInput, StaffNoteUncheckedUpdateWithoutEnquiryInput>
+    create: XOR<StaffNoteCreateWithoutEnquiryInput, StaffNoteUncheckedCreateWithoutEnquiryInput>
+  }
+
+  export type StaffNoteUpdateWithWhereUniqueWithoutEnquiryInput = {
+    where: StaffNoteWhereUniqueInput
+    data: XOR<StaffNoteUpdateWithoutEnquiryInput, StaffNoteUncheckedUpdateWithoutEnquiryInput>
+  }
+
+  export type StaffNoteUpdateManyWithWhereWithoutEnquiryInput = {
+    where: StaffNoteScalarWhereInput
+    data: XOR<StaffNoteUpdateManyMutationInput, StaffNoteUncheckedUpdateManyWithoutEnquiryInput>
   }
 
   export type UserCreateWithoutApplicationsInput = {
@@ -31922,6 +33809,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    staffNotes?: StaffNoteCreateNestedManyWithoutAuthorInput
     enquiries?: EnquiryCreateNestedManyWithoutUserInput
     payments?: PaymentCreateNestedManyWithoutUserInput
     authCodes?: AuthCodeCreateNestedManyWithoutUserInput
@@ -31942,6 +33830,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    staffNotes?: StaffNoteUncheckedCreateNestedManyWithoutAuthorInput
     enquiries?: EnquiryUncheckedCreateNestedManyWithoutUserInput
     payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
     authCodes?: AuthCodeUncheckedCreateNestedManyWithoutUserInput
@@ -32030,6 +33919,34 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type StaffNoteCreateWithoutApplicationInput = {
+    id?: string
+    body: string
+    authorName: string
+    createdAt?: Date | string
+    enquiry?: EnquiryCreateNestedOneWithoutNotesInput
+    author?: UserCreateNestedOneWithoutStaffNotesInput
+  }
+
+  export type StaffNoteUncheckedCreateWithoutApplicationInput = {
+    id?: string
+    body: string
+    enquiryId?: string | null
+    authorId?: string | null
+    authorName: string
+    createdAt?: Date | string
+  }
+
+  export type StaffNoteCreateOrConnectWithoutApplicationInput = {
+    where: StaffNoteWhereUniqueInput
+    create: XOR<StaffNoteCreateWithoutApplicationInput, StaffNoteUncheckedCreateWithoutApplicationInput>
+  }
+
+  export type StaffNoteCreateManyApplicationInputEnvelope = {
+    data: StaffNoteCreateManyApplicationInput | StaffNoteCreateManyApplicationInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutApplicationsInput = {
     update: XOR<UserUpdateWithoutApplicationsInput, UserUncheckedUpdateWithoutApplicationsInput>
     create: XOR<UserCreateWithoutApplicationsInput, UserUncheckedCreateWithoutApplicationsInput>
@@ -32056,6 +33973,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffNotes?: StaffNoteUpdateManyWithoutAuthorNestedInput
     enquiries?: EnquiryUpdateManyWithoutUserNestedInput
     payments?: PaymentUpdateManyWithoutUserNestedInput
     authCodes?: AuthCodeUpdateManyWithoutUserNestedInput
@@ -32076,6 +33994,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffNotes?: StaffNoteUncheckedUpdateManyWithoutAuthorNestedInput
     enquiries?: EnquiryUncheckedUpdateManyWithoutUserNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
     authCodes?: AuthCodeUncheckedUpdateManyWithoutUserNestedInput
@@ -32126,6 +34045,278 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"ApplicationDocument"> | Date | string
   }
 
+  export type StaffNoteUpsertWithWhereUniqueWithoutApplicationInput = {
+    where: StaffNoteWhereUniqueInput
+    update: XOR<StaffNoteUpdateWithoutApplicationInput, StaffNoteUncheckedUpdateWithoutApplicationInput>
+    create: XOR<StaffNoteCreateWithoutApplicationInput, StaffNoteUncheckedCreateWithoutApplicationInput>
+  }
+
+  export type StaffNoteUpdateWithWhereUniqueWithoutApplicationInput = {
+    where: StaffNoteWhereUniqueInput
+    data: XOR<StaffNoteUpdateWithoutApplicationInput, StaffNoteUncheckedUpdateWithoutApplicationInput>
+  }
+
+  export type StaffNoteUpdateManyWithWhereWithoutApplicationInput = {
+    where: StaffNoteScalarWhereInput
+    data: XOR<StaffNoteUpdateManyMutationInput, StaffNoteUncheckedUpdateManyWithoutApplicationInput>
+  }
+
+  export type ApplicationCreateWithoutNotesInput = {
+    id?: string
+    reference: string
+    type: $Enums.ApplicationType
+    status?: $Enums.RecordStatus
+    fullName: string
+    email: string
+    phone: string
+    details: JsonNullValueInput | InputJsonValue
+    amountDue?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutApplicationsInput
+    payments?: PaymentCreateNestedManyWithoutApplicationInput
+    documents?: ApplicationDocumentCreateNestedManyWithoutApplicationInput
+  }
+
+  export type ApplicationUncheckedCreateWithoutNotesInput = {
+    id?: string
+    reference: string
+    type: $Enums.ApplicationType
+    status?: $Enums.RecordStatus
+    fullName: string
+    email: string
+    phone: string
+    details: JsonNullValueInput | InputJsonValue
+    amountDue?: Decimal | DecimalJsLike | number | string | null
+    userId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    payments?: PaymentUncheckedCreateNestedManyWithoutApplicationInput
+    documents?: ApplicationDocumentUncheckedCreateNestedManyWithoutApplicationInput
+  }
+
+  export type ApplicationCreateOrConnectWithoutNotesInput = {
+    where: ApplicationWhereUniqueInput
+    create: XOR<ApplicationCreateWithoutNotesInput, ApplicationUncheckedCreateWithoutNotesInput>
+  }
+
+  export type EnquiryCreateWithoutNotesInput = {
+    id?: string
+    type: $Enums.EnquiryType
+    name: string
+    email?: string | null
+    phone: string
+    message: string
+    details?: NullableJsonNullValueInput | InputJsonValue
+    status?: $Enums.RecordStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutEnquiriesInput
+  }
+
+  export type EnquiryUncheckedCreateWithoutNotesInput = {
+    id?: string
+    type: $Enums.EnquiryType
+    name: string
+    email?: string | null
+    phone: string
+    message: string
+    details?: NullableJsonNullValueInput | InputJsonValue
+    status?: $Enums.RecordStatus
+    userId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type EnquiryCreateOrConnectWithoutNotesInput = {
+    where: EnquiryWhereUniqueInput
+    create: XOR<EnquiryCreateWithoutNotesInput, EnquiryUncheckedCreateWithoutNotesInput>
+  }
+
+  export type UserCreateWithoutStaffNotesInput = {
+    id?: string
+    name: string
+    email: string
+    phone?: string | null
+    passwordHash?: string | null
+    googleId?: string | null
+    avatarUrl?: string | null
+    emailVerifiedAt?: Date | string | null
+    twoFactorEnabled?: boolean
+    tokenVersion?: number
+    lastLoginAt?: Date | string | null
+    role?: $Enums.Role
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    enquiries?: EnquiryCreateNestedManyWithoutUserInput
+    applications?: ApplicationCreateNestedManyWithoutUserInput
+    payments?: PaymentCreateNestedManyWithoutUserInput
+    authCodes?: AuthCodeCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutStaffNotesInput = {
+    id?: string
+    name: string
+    email: string
+    phone?: string | null
+    passwordHash?: string | null
+    googleId?: string | null
+    avatarUrl?: string | null
+    emailVerifiedAt?: Date | string | null
+    twoFactorEnabled?: boolean
+    tokenVersion?: number
+    lastLoginAt?: Date | string | null
+    role?: $Enums.Role
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    enquiries?: EnquiryUncheckedCreateNestedManyWithoutUserInput
+    applications?: ApplicationUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    authCodes?: AuthCodeUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutStaffNotesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutStaffNotesInput, UserUncheckedCreateWithoutStaffNotesInput>
+  }
+
+  export type ApplicationUpsertWithoutNotesInput = {
+    update: XOR<ApplicationUpdateWithoutNotesInput, ApplicationUncheckedUpdateWithoutNotesInput>
+    create: XOR<ApplicationCreateWithoutNotesInput, ApplicationUncheckedCreateWithoutNotesInput>
+    where?: ApplicationWhereInput
+  }
+
+  export type ApplicationUpdateToOneWithWhereWithoutNotesInput = {
+    where?: ApplicationWhereInput
+    data: XOR<ApplicationUpdateWithoutNotesInput, ApplicationUncheckedUpdateWithoutNotesInput>
+  }
+
+  export type ApplicationUpdateWithoutNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    type?: EnumApplicationTypeFieldUpdateOperationsInput | $Enums.ApplicationType
+    status?: EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutApplicationsNestedInput
+    payments?: PaymentUpdateManyWithoutApplicationNestedInput
+    documents?: ApplicationDocumentUpdateManyWithoutApplicationNestedInput
+  }
+
+  export type ApplicationUncheckedUpdateWithoutNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    type?: EnumApplicationTypeFieldUpdateOperationsInput | $Enums.ApplicationType
+    status?: EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    details?: JsonNullValueInput | InputJsonValue
+    amountDue?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    payments?: PaymentUncheckedUpdateManyWithoutApplicationNestedInput
+    documents?: ApplicationDocumentUncheckedUpdateManyWithoutApplicationNestedInput
+  }
+
+  export type EnquiryUpsertWithoutNotesInput = {
+    update: XOR<EnquiryUpdateWithoutNotesInput, EnquiryUncheckedUpdateWithoutNotesInput>
+    create: XOR<EnquiryCreateWithoutNotesInput, EnquiryUncheckedCreateWithoutNotesInput>
+    where?: EnquiryWhereInput
+  }
+
+  export type EnquiryUpdateToOneWithWhereWithoutNotesInput = {
+    where?: EnquiryWhereInput
+    data: XOR<EnquiryUpdateWithoutNotesInput, EnquiryUncheckedUpdateWithoutNotesInput>
+  }
+
+  export type EnquiryUpdateWithoutNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumEnquiryTypeFieldUpdateOperationsInput | $Enums.EnquiryType
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    details?: NullableJsonNullValueInput | InputJsonValue
+    status?: EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutEnquiriesNestedInput
+  }
+
+  export type EnquiryUncheckedUpdateWithoutNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumEnquiryTypeFieldUpdateOperationsInput | $Enums.EnquiryType
+    name?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    message?: StringFieldUpdateOperationsInput | string
+    details?: NullableJsonNullValueInput | InputJsonValue
+    status?: EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUpsertWithoutStaffNotesInput = {
+    update: XOR<UserUpdateWithoutStaffNotesInput, UserUncheckedUpdateWithoutStaffNotesInput>
+    create: XOR<UserCreateWithoutStaffNotesInput, UserUncheckedCreateWithoutStaffNotesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutStaffNotesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutStaffNotesInput, UserUncheckedUpdateWithoutStaffNotesInput>
+  }
+
+  export type UserUpdateWithoutStaffNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    googleId?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
+    tokenVersion?: IntFieldUpdateOperationsInput | number
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    enquiries?: EnquiryUpdateManyWithoutUserNestedInput
+    applications?: ApplicationUpdateManyWithoutUserNestedInput
+    payments?: PaymentUpdateManyWithoutUserNestedInput
+    authCodes?: AuthCodeUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutStaffNotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    googleId?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
+    tokenVersion?: IntFieldUpdateOperationsInput | number
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    enquiries?: EnquiryUncheckedUpdateManyWithoutUserNestedInput
+    applications?: ApplicationUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    authCodes?: AuthCodeUncheckedUpdateManyWithoutUserNestedInput
+  }
+
   export type ApplicationCreateWithoutDocumentsInput = {
     id?: string
     reference: string
@@ -32140,6 +34331,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutApplicationsInput
     payments?: PaymentCreateNestedManyWithoutApplicationInput
+    notes?: StaffNoteCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationUncheckedCreateWithoutDocumentsInput = {
@@ -32156,6 +34348,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentUncheckedCreateNestedManyWithoutApplicationInput
+    notes?: StaffNoteUncheckedCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationCreateOrConnectWithoutDocumentsInput = {
@@ -32188,6 +34381,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutApplicationsNestedInput
     payments?: PaymentUpdateManyWithoutApplicationNestedInput
+    notes?: StaffNoteUpdateManyWithoutApplicationNestedInput
   }
 
   export type ApplicationUncheckedUpdateWithoutDocumentsInput = {
@@ -32204,6 +34398,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUncheckedUpdateManyWithoutApplicationNestedInput
+    notes?: StaffNoteUncheckedUpdateManyWithoutApplicationNestedInput
   }
 
   export type EducationProgramCreateWithoutInstitutionInput = {
@@ -32426,6 +34621,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    staffNotes?: StaffNoteCreateNestedManyWithoutAuthorInput
     enquiries?: EnquiryCreateNestedManyWithoutUserInput
     applications?: ApplicationCreateNestedManyWithoutUserInput
     authCodes?: AuthCodeCreateNestedManyWithoutUserInput
@@ -32446,6 +34642,7 @@ export namespace Prisma {
     role?: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    staffNotes?: StaffNoteUncheckedCreateNestedManyWithoutAuthorInput
     enquiries?: EnquiryUncheckedCreateNestedManyWithoutUserInput
     applications?: ApplicationUncheckedCreateNestedManyWithoutUserInput
     authCodes?: AuthCodeUncheckedCreateNestedManyWithoutUserInput
@@ -32470,6 +34667,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutApplicationsInput
     documents?: ApplicationDocumentCreateNestedManyWithoutApplicationInput
+    notes?: StaffNoteCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationUncheckedCreateWithoutPaymentsInput = {
@@ -32486,6 +34684,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: ApplicationDocumentUncheckedCreateNestedManyWithoutApplicationInput
+    notes?: StaffNoteUncheckedCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationCreateOrConnectWithoutPaymentsInput = {
@@ -32540,6 +34739,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffNotes?: StaffNoteUpdateManyWithoutAuthorNestedInput
     enquiries?: EnquiryUpdateManyWithoutUserNestedInput
     applications?: ApplicationUpdateManyWithoutUserNestedInput
     authCodes?: AuthCodeUpdateManyWithoutUserNestedInput
@@ -32560,6 +34760,7 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffNotes?: StaffNoteUncheckedUpdateManyWithoutAuthorNestedInput
     enquiries?: EnquiryUncheckedUpdateManyWithoutUserNestedInput
     applications?: ApplicationUncheckedUpdateManyWithoutUserNestedInput
     authCodes?: AuthCodeUncheckedUpdateManyWithoutUserNestedInput
@@ -32590,6 +34791,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutApplicationsNestedInput
     documents?: ApplicationDocumentUpdateManyWithoutApplicationNestedInput
+    notes?: StaffNoteUpdateManyWithoutApplicationNestedInput
   }
 
   export type ApplicationUncheckedUpdateWithoutPaymentsInput = {
@@ -32606,6 +34808,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     documents?: ApplicationDocumentUncheckedUpdateManyWithoutApplicationNestedInput
+    notes?: StaffNoteUncheckedUpdateManyWithoutApplicationNestedInput
   }
 
   export type ReceiptUpsertWithoutPaymentInput = {
@@ -32843,6 +35046,15 @@ export namespace Prisma {
     type?: EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
   }
 
+  export type StaffNoteCreateManyAuthorInput = {
+    id?: string
+    body: string
+    applicationId?: string | null
+    enquiryId?: string | null
+    authorName: string
+    createdAt?: Date | string
+  }
+
   export type EnquiryCreateManyUserInput = {
     id?: string
     type: $Enums.EnquiryType
@@ -32899,6 +35111,33 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type StaffNoteUpdateWithoutAuthorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    authorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    application?: ApplicationUpdateOneWithoutNotesNestedInput
+    enquiry?: EnquiryUpdateOneWithoutNotesNestedInput
+  }
+
+  export type StaffNoteUncheckedUpdateWithoutAuthorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    applicationId?: NullableStringFieldUpdateOperationsInput | string | null
+    enquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffNoteUncheckedUpdateManyWithoutAuthorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    applicationId?: NullableStringFieldUpdateOperationsInput | string | null
+    enquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type EnquiryUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumEnquiryTypeFieldUpdateOperationsInput | $Enums.EnquiryType
@@ -32910,6 +35149,7 @@ export namespace Prisma {
     status?: EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    notes?: StaffNoteUpdateManyWithoutEnquiryNestedInput
   }
 
   export type EnquiryUncheckedUpdateWithoutUserInput = {
@@ -32923,6 +35163,7 @@ export namespace Prisma {
     status?: EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    notes?: StaffNoteUncheckedUpdateManyWithoutEnquiryNestedInput
   }
 
   export type EnquiryUncheckedUpdateManyWithoutUserInput = {
@@ -32952,6 +35193,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUpdateManyWithoutApplicationNestedInput
     documents?: ApplicationDocumentUpdateManyWithoutApplicationNestedInput
+    notes?: StaffNoteUpdateManyWithoutApplicationNestedInput
   }
 
   export type ApplicationUncheckedUpdateWithoutUserInput = {
@@ -32968,6 +35210,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUncheckedUpdateManyWithoutApplicationNestedInput
     documents?: ApplicationDocumentUncheckedUpdateManyWithoutApplicationNestedInput
+    notes?: StaffNoteUncheckedUpdateManyWithoutApplicationNestedInput
   }
 
   export type ApplicationUncheckedUpdateManyWithoutUserInput = {
@@ -33073,6 +35316,42 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type StaffNoteCreateManyEnquiryInput = {
+    id?: string
+    body: string
+    applicationId?: string | null
+    authorId?: string | null
+    authorName: string
+    createdAt?: Date | string
+  }
+
+  export type StaffNoteUpdateWithoutEnquiryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    authorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    application?: ApplicationUpdateOneWithoutNotesNestedInput
+    author?: UserUpdateOneWithoutStaffNotesNestedInput
+  }
+
+  export type StaffNoteUncheckedUpdateWithoutEnquiryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    applicationId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffNoteUncheckedUpdateManyWithoutEnquiryInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    applicationId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type PaymentCreateManyApplicationInput = {
     id?: string
     userId?: string | null
@@ -33098,6 +35377,15 @@ export namespace Prisma {
     mimeType: string
     byteSize: number
     data: Bytes
+    createdAt?: Date | string
+  }
+
+  export type StaffNoteCreateManyApplicationInput = {
+    id?: string
+    body: string
+    enquiryId?: string | null
+    authorId?: string | null
+    authorName: string
     createdAt?: Date | string
   }
 
@@ -33184,6 +35472,33 @@ export namespace Prisma {
     mimeType?: StringFieldUpdateOperationsInput | string
     byteSize?: IntFieldUpdateOperationsInput | number
     data?: BytesFieldUpdateOperationsInput | Bytes
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffNoteUpdateWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    authorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    enquiry?: EnquiryUpdateOneWithoutNotesNestedInput
+    author?: UserUpdateOneWithoutStaffNotesNestedInput
+  }
+
+  export type StaffNoteUncheckedUpdateWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    enquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StaffNoteUncheckedUpdateManyWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    body?: StringFieldUpdateOperationsInput | string
+    enquiryId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorId?: NullableStringFieldUpdateOperationsInput | string | null
+    authorName?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

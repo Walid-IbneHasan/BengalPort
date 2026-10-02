@@ -90,3 +90,65 @@ describe("removing a ledger entry", () => {
     assert.equal((await call("DELETE", `/api/admin/accounts/${id}`)).statusCode, 404);
   });
 });
+
+describe("the ledger's categories", () => {
+  const created: string[] = [];
+  const add = async (payload: Record<string, unknown>) => {
+    const res = await call("POST", "/api/admin/accounts/categories", payload);
+    if (res.statusCode === 201) created.push(res.json().data.id);
+    return res;
+  };
+  after(async () => {
+    await prisma.financialCategory.deleteMany({ where: { id: { in: created } } });
+  });
+
+  test("an admin can add a category for income or for expenses", async () => {
+    const res = await add({ name: `${tag} visa fees`, type: "INCOME" });
+    assert.equal(res.statusCode, 201);
+    assert.equal(res.json().data.type, "INCOME");
+    assert.equal(await prisma.financialCategory.count({ where: { name: `${tag} visa fees` } }), 1);
+  });
+
+  test("a second category with the same name is refused", async () => {
+    await add({ name: `${tag} courier`, type: "EXPENSE" });
+    const res = await add({ name: `${tag} courier`, type: "EXPENSE" });
+    assert.equal(res.statusCode, 409);
+    assert.equal(await prisma.financialCategory.count({ where: { name: `${tag} courier` } }), 1);
+  });
+
+  test("a category needs a name and a kind", async () => {
+    assert.equal((await add({ name: " ", type: "EXPENSE" })).statusCode, 400);
+    assert.equal((await add({ name: `${tag} unknown kind`, type: "OTHER" })).statusCode, 400);
+  });
+
+  test("a category can be renamed", async () => {
+    const id = (await add({ name: `${tag} ofice rent`, type: "EXPENSE" })).json().data.id;
+    const res = await call("PUT", `/api/admin/accounts/categories/${id}`, { name: `${tag} office rent` });
+    assert.equal(res.statusCode, 200);
+    assert.equal((await prisma.financialCategory.findUniqueOrThrow({ where: { id } })).name, `${tag} office rent`);
+  });
+
+  test("renaming a category that does not exist is reported as not found", async () => {
+    assert.equal((await call("PUT", "/api/admin/accounts/categories/no-such-category", { name: `${tag} anything` })).statusCode, 404);
+  });
+
+  test("a category nothing is recorded under can be deleted", async () => {
+    const id = (await add({ name: `${tag} unused`, type: "EXPENSE" })).json().data.id;
+    assert.equal((await call("DELETE", `/api/admin/accounts/categories/${id}`)).statusCode, 204);
+    assert.equal(await prisma.financialCategory.count({ where: { id } }), 0);
+  });
+
+  test("a category with ledger entries is kept", async () => {
+    await record();
+    const res = await call("DELETE", `/api/admin/accounts/categories/${expenseCategory}`);
+    assert.equal(res.statusCode, 409);
+    assert.equal(await prisma.financialCategory.count({ where: { id: expenseCategory } }), 1);
+  });
+
+  test("the list tells how many entries each category holds", async () => {
+    await record();
+    const list = (await app.inject({ method: "GET", url: "/api/admin/accounts/categories", headers: bearer(app, admin) })).json().data as any[];
+    assert.ok(list.find((item) => item.id === expenseCategory).entries >= 1);
+    assert.equal(list.find((item) => item.id === incomeCategory).entries, 0);
+  });
+});

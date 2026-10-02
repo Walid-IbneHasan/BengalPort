@@ -225,6 +225,19 @@ export const applicationSchema = z
         message: "Phone does not match application details",
       });
   });
+// A correction made by staff. Unlike a new application it may leave
+// questions unanswered: staff often complete one over the phone.
+export const applicationEditSchema = z.object({
+  fullName: z.string().trim().min(2),
+  email: z.string().email(),
+  phone: z.string().trim().min(7),
+  details: z.record(z.unknown()),
+});
+export const noteSchema = z.object({ body: z.string().trim().min(1).max(2000) });
+export const categorySchema = z.object({
+  name: z.string().trim().min(2).max(60),
+  type: z.enum(["INCOME", "EXPENSE"]),
+});
 export const opportunitySchema = z.object({
   slug: z.string().min(3),
   category: z.enum([

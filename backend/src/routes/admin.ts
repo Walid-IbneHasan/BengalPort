@@ -11,6 +11,9 @@ import {
   divisionContentUpdateSchema,
   feeSettingsSchema,
   amountDueSchema,
+  applicationEditSchema,
+  categorySchema,
+  noteSchema,
 } from "../lib/schemas.js";
 import { defaultHomeContent } from "../lib/home-content.js";
 import { defaultBusinessContent } from "../lib/business-content.js";
@@ -25,6 +28,7 @@ import { balance } from "../lib/payment-rules.js";
 import {
   notifyAmountDue,
   notifyApplicationStatus,
+  teamAddresses,
 } from "../lib/notifications.js";
 
 function rangeStart(period: string) {
@@ -264,7 +268,7 @@ const admin: FastifyPluginAsync = async (app) => {
           table: prisma.enquiry,
           args: {
             where: matching("name", "phone", "email", "message"),
-            include: { user: person },
+            include: { user: person, _count: { select: { notes: true } } },
             orderBy: newest,
           },
         },
@@ -274,7 +278,7 @@ const admin: FastifyPluginAsync = async (app) => {
             where: matching("reference", "fullName", "email", "phone"),
             include: {
               user: person,
-              _count: { select: { payments: true } },
+              _count: { select: { payments: true, notes: true } },
               documents: { select: documentSummary },
               payments: { select: { amount: true, status: true } },
             },
@@ -511,6 +515,26 @@ const admin: FastifyPluginAsync = async (app) => {
 
   app.put("/resources/:resource/:id", async (req, reply) => {
     const { resource, id } = req.params as { resource: string; id: string };
+    // Staff correct what an applicant told us. The reference, division,
+    // status and amount due have their own controls and are not touched.
+    if (resource === "applications") {
+      const parsed = applicationEditSchema.safeParse(req.body);
+      if (!parsed.success) return invalid(reply, parsed.error);
+      if (!(await prisma.application.count({ where: { id } })))
+        return reply.notFound("Application not found");
+      const { fullName, email, phone, details } = parsed.data;
+      return {
+        data: await prisma.application.update({
+          where: { id },
+          data: {
+            fullName,
+            email,
+            phone,
+            details: { ...details, fullName, email, phone } as any,
+          },
+        }),
+      };
+    }
     if (!isManaged(resource))
       return reply.badRequest("This resource cannot be edited here");
     const parsed = resourceSchemas[resource].safeParse(req.body);
@@ -568,7 +592,29 @@ const admin: FastifyPluginAsync = async (app) => {
     const { resource, id } = req.params as { resource: string; id: string };
     const where = { id };
     let removed: number;
-    if (resource === "opportunities")
+    // An application goes together with its documents and with payment
+    // attempts that never went through. Once money has been received, or a
+    // payment is still in progress, it is part of the accounts and is kept.
+    if (resource === "applications") {
+      const payments = await prisma.payment.findMany({
+        where: { applicationId: id },
+        select: { status: true },
+      });
+      if (payments.some((payment) => payment.status !== "FAILED"))
+        return reply.code(409).send({
+          error: {
+            code: "HAS_PAYMENTS",
+            message:
+              "This application has payments, so it is kept for the accounts. Set its status to Cancelled instead.",
+          },
+        });
+      [, { count: removed }] = await prisma.$transaction([
+        prisma.payment.deleteMany({
+          where: { applicationId: id, status: "FAILED" },
+        }),
+        prisma.application.deleteMany({ where }),
+      ]);
+    } else if (resource === "opportunities")
       removed = (await prisma.opportunity.deleteMany({ where })).count;
     else if (resource === "suppliers")
       removed = (await prisma.supplier.deleteMany({ where })).count;
@@ -826,9 +872,157 @@ const admin: FastifyPluginAsync = async (app) => {
     };
   });
 
-  app.get("/accounts/categories", async () => ({
-    data: await prisma.financialCategory.findMany({ orderBy: { name: "asc" } }),
-  }));
+  // Notes staff leave for each other on an application or an enquiry. They
+  // are only ever served here, under the admin-only routes.
+  const noted = { applications: "applicationId", enquiries: "enquiryId" } as const;
+  const notedRecord = async (resource: string, id: string) => {
+    if (resource !== "applications" && resource !== "enquiries") return null;
+    const exists =
+      resource === "applications"
+        ? await prisma.application.count({ where: { id } })
+        : await prisma.enquiry.count({ where: { id } });
+    return exists ? { [noted[resource]]: id } : null;
+  };
+  const noteFields = { id: true, body: true, authorName: true, createdAt: true };
+
+  app.get("/resources/:resource/:id/notes", async (req, reply) => {
+    const { resource, id } = req.params as { resource: string; id: string };
+    const where = await notedRecord(resource, id);
+    if (!where) return reply.notFound("Record not found");
+    return {
+      data: await prisma.staffNote.findMany({
+        where,
+        select: noteFields,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      }),
+    };
+  });
+
+  app.post("/resources/:resource/:id/notes", async (req, reply) => {
+    const { resource, id } = req.params as { resource: string; id: string };
+    const where = await notedRecord(resource, id);
+    if (!where) return reply.notFound("Record not found");
+    const staffId = (req.user as { sub: string }).sub;
+    const parsed = noteSchema.safeParse(req.body);
+    if (!parsed.success)
+      return reply.badRequest("Write a note of up to 2,000 characters");
+    const author = await prisma.user.findUnique({
+      where: { id: staffId },
+      select: { name: true },
+    });
+    return reply.code(201).send({
+      data: await prisma.staffNote.create({
+        data: {
+          ...where,
+          body: parsed.data.body,
+          authorId: staffId,
+          authorName: author?.name ?? "Staff",
+        },
+        select: noteFields,
+      }),
+    });
+  });
+
+  app.delete("/notes/:id", async (req, reply) => {
+    const { count } = await prisma.staffNote.deleteMany({
+      where: { id: (req.params as { id: string }).id },
+    });
+    return count ? reply.code(204).send() : reply.notFound("Note not found");
+  });
+
+  // What the settings page shows about the running system.
+  app.get("/status", async () => {
+    const database = await prisma.$queryRaw`SELECT 1`.then(
+      () => true,
+      () => false,
+    );
+    return {
+      data: {
+        database,
+        email: app.mailer.configured,
+        onlinePayment: app.gateway.configured,
+        teamInbox: teamAddresses().length > 0,
+      },
+    };
+  });
+
+  // Ledger categories, each with the number of entries recorded under it.
+  app.get("/accounts/categories", async () => {
+    const categories = await prisma.financialCategory.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { transactions: true } } },
+    });
+    return {
+      data: categories.map(({ _count, ...category }) => ({
+        ...category,
+        entries: _count.transactions,
+      })),
+    };
+  });
+
+  const categoryNameTaken = (reply: any) =>
+    reply.code(409).send({
+      error: {
+        code: "CATEGORY_EXISTS",
+        message: "A category with this name already exists",
+      },
+    });
+
+  app.post("/accounts/categories", async (req, reply) => {
+    const parsed = categorySchema.safeParse(req.body);
+    if (!parsed.success)
+      return reply.badRequest(
+        "Give the category a name and choose income or expense",
+      );
+    try {
+      return reply.code(201).send({
+        data: await prisma.financialCategory.create({ data: parsed.data }),
+      });
+    } catch (error) {
+      if (isUniqueViolation(error)) return categoryNameTaken(reply);
+      throw error;
+    }
+  });
+
+  // A category keeps its kind: entries already recorded under it are income
+  // or expenses, and renaming must not turn one into the other.
+  app.put("/accounts/categories/:id", async (req, reply) => {
+    const where = { id: (req.params as { id: string }).id };
+    const parsed = categorySchema.pick({ name: true }).safeParse(req.body);
+    if (!parsed.success) return reply.badRequest("Give the category a name");
+    if (!(await prisma.financialCategory.count({ where })))
+      return reply.notFound("Category not found");
+    try {
+      return {
+        data: await prisma.financialCategory.update({
+          where,
+          data: parsed.data,
+        }),
+      };
+    } catch (error) {
+      if (isUniqueViolation(error)) return categoryNameTaken(reply);
+      throw error;
+    }
+  });
+
+  app.delete("/accounts/categories/:id", async (req, reply) => {
+    const where = { id: (req.params as { id: string }).id };
+    const category = await prisma.financialCategory.findUnique({
+      where,
+      include: { _count: { select: { transactions: true } } },
+    });
+    if (!category) return reply.notFound("Category not found");
+    if (category._count.transactions)
+      return reply.code(409).send({
+        error: {
+          code: "CATEGORY_IN_USE",
+          message:
+            "This category has ledger entries. Move or delete them before deleting the category.",
+        },
+      });
+    await prisma.financialCategory.delete({ where });
+    return reply.code(204).send();
+  });
 
   app.get("/accounts", async (req) => {
     const query = req.query as {

@@ -72,6 +72,7 @@ model User {
   tokenVersion Int @default(0)
   lastLoginAt DateTime?
   role Role @default(USER)
+  staffNotes StaffNote[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   enquiries Enquiry[]
@@ -103,6 +104,7 @@ model Enquiry {
   status RecordStatus @default(SUBMITTED)
   userId String?
   user User? @relation(fields: [userId], references: [id])
+  notes StaffNote[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -122,8 +124,27 @@ model Application {
   user User? @relation(fields: [userId], references: [id])
   payments Payment[]
   documents ApplicationDocument[]
+  notes StaffNote[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+// What staff write to each other about an application or an enquiry. Never
+// shown to the customer. The author's name is kept with the note so that it
+// still reads properly after their account is removed.
+model StaffNote {
+  id String @id @default(cuid())
+  body String
+  applicationId String?
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  enquiryId String?
+  enquiry Enquiry? @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  authorId String?
+  author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorName String
+  createdAt DateTime @default(now())
+
+  @@index([applicationId])
+  @@index([enquiryId])
 }
 model ApplicationDocument {
   id String @id @default(cuid())
