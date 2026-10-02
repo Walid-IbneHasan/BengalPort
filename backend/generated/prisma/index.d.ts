@@ -34,6 +34,11 @@ export type Enquiry = $Result.DefaultSelection<Prisma.$EnquiryPayload>
  */
 export type Application = $Result.DefaultSelection<Prisma.$ApplicationPayload>
 /**
+ * Model ApplicationDocument
+ * 
+ */
+export type ApplicationDocument = $Result.DefaultSelection<Prisma.$ApplicationDocumentPayload>
+/**
  * Model Opportunity
  * 
  */
@@ -377,6 +382,16 @@ export class PrismaClient<
     * ```
     */
   get application(): Prisma.ApplicationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.applicationDocument`: Exposes CRUD operations for the **ApplicationDocument** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ApplicationDocuments
+    * const applicationDocuments = await prisma.applicationDocument.findMany()
+    * ```
+    */
+  get applicationDocument(): Prisma.ApplicationDocumentDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.opportunity`: Exposes CRUD operations for the **Opportunity** model.
@@ -952,6 +967,7 @@ export namespace Prisma {
     AuthCode: 'AuthCode',
     Enquiry: 'Enquiry',
     Application: 'Application',
+    ApplicationDocument: 'ApplicationDocument',
     Opportunity: 'Opportunity',
     Supplier: 'Supplier',
     Factory: 'Factory',
@@ -983,7 +999,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "authCode" | "enquiry" | "application" | "opportunity" | "supplier" | "factory" | "institution" | "educationProgram" | "hospital" | "healthcareService" | "payment" | "receipt" | "financialCategory" | "financialTransaction" | "pageContent" | "mediaAsset"
+      modelProps: "user" | "authCode" | "enquiry" | "application" | "applicationDocument" | "opportunity" | "supplier" | "factory" | "institution" | "educationProgram" | "hospital" | "healthcareService" | "payment" | "receipt" | "financialCategory" | "financialTransaction" | "pageContent" | "mediaAsset"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1280,6 +1296,80 @@ export namespace Prisma {
           count: {
             args: Prisma.ApplicationCountArgs<ExtArgs>
             result: $Utils.Optional<ApplicationCountAggregateOutputType> | number
+          }
+        }
+      }
+      ApplicationDocument: {
+        payload: Prisma.$ApplicationDocumentPayload<ExtArgs>
+        fields: Prisma.ApplicationDocumentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ApplicationDocumentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationDocumentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ApplicationDocumentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationDocumentPayload>
+          }
+          findFirst: {
+            args: Prisma.ApplicationDocumentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationDocumentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ApplicationDocumentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationDocumentPayload>
+          }
+          findMany: {
+            args: Prisma.ApplicationDocumentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationDocumentPayload>[]
+          }
+          create: {
+            args: Prisma.ApplicationDocumentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationDocumentPayload>
+          }
+          createMany: {
+            args: Prisma.ApplicationDocumentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ApplicationDocumentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationDocumentPayload>[]
+          }
+          delete: {
+            args: Prisma.ApplicationDocumentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationDocumentPayload>
+          }
+          update: {
+            args: Prisma.ApplicationDocumentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationDocumentPayload>
+          }
+          deleteMany: {
+            args: Prisma.ApplicationDocumentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ApplicationDocumentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ApplicationDocumentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationDocumentPayload>[]
+          }
+          upsert: {
+            args: Prisma.ApplicationDocumentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApplicationDocumentPayload>
+          }
+          aggregate: {
+            args: Prisma.ApplicationDocumentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateApplicationDocument>
+          }
+          groupBy: {
+            args: Prisma.ApplicationDocumentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ApplicationDocumentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ApplicationDocumentCountArgs<ExtArgs>
+            result: $Utils.Optional<ApplicationDocumentCountAggregateOutputType> | number
           }
         }
       }
@@ -2345,6 +2435,7 @@ export namespace Prisma {
     authCode?: AuthCodeOmit
     enquiry?: EnquiryOmit
     application?: ApplicationOmit
+    applicationDocument?: ApplicationDocumentOmit
     opportunity?: OpportunityOmit
     supplier?: SupplierOmit
     factory?: FactoryOmit
@@ -2497,10 +2588,12 @@ export namespace Prisma {
 
   export type ApplicationCountOutputType = {
     payments: number
+    documents: number
   }
 
   export type ApplicationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     payments?: boolean | ApplicationCountOutputTypeCountPaymentsArgs
+    documents?: boolean | ApplicationCountOutputTypeCountDocumentsArgs
   }
 
   // Custom InputTypes
@@ -2519,6 +2612,13 @@ export namespace Prisma {
    */
   export type ApplicationCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PaymentWhereInput
+  }
+
+  /**
+   * ApplicationCountOutputType without action
+   */
+  export type ApplicationCountOutputTypeCountDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ApplicationDocumentWhereInput
   }
 
 
@@ -6416,6 +6516,7 @@ export namespace Prisma {
     updatedAt?: boolean
     user?: boolean | Application$userArgs<ExtArgs>
     payments?: boolean | Application$paymentsArgs<ExtArgs>
+    documents?: boolean | Application$documentsArgs<ExtArgs>
     _count?: boolean | ApplicationCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["application"]>
 
@@ -6467,6 +6568,7 @@ export namespace Prisma {
   export type ApplicationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | Application$userArgs<ExtArgs>
     payments?: boolean | Application$paymentsArgs<ExtArgs>
+    documents?: boolean | Application$documentsArgs<ExtArgs>
     _count?: boolean | ApplicationCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ApplicationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6481,6 +6583,7 @@ export namespace Prisma {
     objects: {
       user: Prisma.$UserPayload<ExtArgs> | null
       payments: Prisma.$PaymentPayload<ExtArgs>[]
+      documents: Prisma.$ApplicationDocumentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -6890,6 +6993,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends Application$userArgs<ExtArgs> = {}>(args?: Subset<T, Application$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     payments<T extends Application$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, Application$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    documents<T extends Application$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Application$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7369,6 +7473,30 @@ export namespace Prisma {
   }
 
   /**
+   * Application.documents
+   */
+  export type Application$documentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentInclude<ExtArgs> | null
+    where?: ApplicationDocumentWhereInput
+    orderBy?: ApplicationDocumentOrderByWithRelationInput | ApplicationDocumentOrderByWithRelationInput[]
+    cursor?: ApplicationDocumentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ApplicationDocumentScalarFieldEnum | ApplicationDocumentScalarFieldEnum[]
+  }
+
+  /**
    * Application without action
    */
   export type ApplicationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7384,6 +7512,1124 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ApplicationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ApplicationDocument
+   */
+
+  export type AggregateApplicationDocument = {
+    _count: ApplicationDocumentCountAggregateOutputType | null
+    _avg: ApplicationDocumentAvgAggregateOutputType | null
+    _sum: ApplicationDocumentSumAggregateOutputType | null
+    _min: ApplicationDocumentMinAggregateOutputType | null
+    _max: ApplicationDocumentMaxAggregateOutputType | null
+  }
+
+  export type ApplicationDocumentAvgAggregateOutputType = {
+    byteSize: number | null
+  }
+
+  export type ApplicationDocumentSumAggregateOutputType = {
+    byteSize: number | null
+  }
+
+  export type ApplicationDocumentMinAggregateOutputType = {
+    id: string | null
+    applicationId: string | null
+    name: string | null
+    mimeType: string | null
+    byteSize: number | null
+    data: Bytes | null
+    createdAt: Date | null
+  }
+
+  export type ApplicationDocumentMaxAggregateOutputType = {
+    id: string | null
+    applicationId: string | null
+    name: string | null
+    mimeType: string | null
+    byteSize: number | null
+    data: Bytes | null
+    createdAt: Date | null
+  }
+
+  export type ApplicationDocumentCountAggregateOutputType = {
+    id: number
+    applicationId: number
+    name: number
+    mimeType: number
+    byteSize: number
+    data: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type ApplicationDocumentAvgAggregateInputType = {
+    byteSize?: true
+  }
+
+  export type ApplicationDocumentSumAggregateInputType = {
+    byteSize?: true
+  }
+
+  export type ApplicationDocumentMinAggregateInputType = {
+    id?: true
+    applicationId?: true
+    name?: true
+    mimeType?: true
+    byteSize?: true
+    data?: true
+    createdAt?: true
+  }
+
+  export type ApplicationDocumentMaxAggregateInputType = {
+    id?: true
+    applicationId?: true
+    name?: true
+    mimeType?: true
+    byteSize?: true
+    data?: true
+    createdAt?: true
+  }
+
+  export type ApplicationDocumentCountAggregateInputType = {
+    id?: true
+    applicationId?: true
+    name?: true
+    mimeType?: true
+    byteSize?: true
+    data?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type ApplicationDocumentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ApplicationDocument to aggregate.
+     */
+    where?: ApplicationDocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ApplicationDocuments to fetch.
+     */
+    orderBy?: ApplicationDocumentOrderByWithRelationInput | ApplicationDocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ApplicationDocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ApplicationDocuments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ApplicationDocuments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ApplicationDocuments
+    **/
+    _count?: true | ApplicationDocumentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ApplicationDocumentAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ApplicationDocumentSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ApplicationDocumentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ApplicationDocumentMaxAggregateInputType
+  }
+
+  export type GetApplicationDocumentAggregateType<T extends ApplicationDocumentAggregateArgs> = {
+        [P in keyof T & keyof AggregateApplicationDocument]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateApplicationDocument[P]>
+      : GetScalarType<T[P], AggregateApplicationDocument[P]>
+  }
+
+
+
+
+  export type ApplicationDocumentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ApplicationDocumentWhereInput
+    orderBy?: ApplicationDocumentOrderByWithAggregationInput | ApplicationDocumentOrderByWithAggregationInput[]
+    by: ApplicationDocumentScalarFieldEnum[] | ApplicationDocumentScalarFieldEnum
+    having?: ApplicationDocumentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ApplicationDocumentCountAggregateInputType | true
+    _avg?: ApplicationDocumentAvgAggregateInputType
+    _sum?: ApplicationDocumentSumAggregateInputType
+    _min?: ApplicationDocumentMinAggregateInputType
+    _max?: ApplicationDocumentMaxAggregateInputType
+  }
+
+  export type ApplicationDocumentGroupByOutputType = {
+    id: string
+    applicationId: string
+    name: string
+    mimeType: string
+    byteSize: number
+    data: Bytes
+    createdAt: Date
+    _count: ApplicationDocumentCountAggregateOutputType | null
+    _avg: ApplicationDocumentAvgAggregateOutputType | null
+    _sum: ApplicationDocumentSumAggregateOutputType | null
+    _min: ApplicationDocumentMinAggregateOutputType | null
+    _max: ApplicationDocumentMaxAggregateOutputType | null
+  }
+
+  type GetApplicationDocumentGroupByPayload<T extends ApplicationDocumentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ApplicationDocumentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ApplicationDocumentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ApplicationDocumentGroupByOutputType[P]>
+            : GetScalarType<T[P], ApplicationDocumentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ApplicationDocumentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    applicationId?: boolean
+    name?: boolean
+    mimeType?: boolean
+    byteSize?: boolean
+    data?: boolean
+    createdAt?: boolean
+    application?: boolean | ApplicationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["applicationDocument"]>
+
+  export type ApplicationDocumentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    applicationId?: boolean
+    name?: boolean
+    mimeType?: boolean
+    byteSize?: boolean
+    data?: boolean
+    createdAt?: boolean
+    application?: boolean | ApplicationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["applicationDocument"]>
+
+  export type ApplicationDocumentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    applicationId?: boolean
+    name?: boolean
+    mimeType?: boolean
+    byteSize?: boolean
+    data?: boolean
+    createdAt?: boolean
+    application?: boolean | ApplicationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["applicationDocument"]>
+
+  export type ApplicationDocumentSelectScalar = {
+    id?: boolean
+    applicationId?: boolean
+    name?: boolean
+    mimeType?: boolean
+    byteSize?: boolean
+    data?: boolean
+    createdAt?: boolean
+  }
+
+  export type ApplicationDocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "applicationId" | "name" | "mimeType" | "byteSize" | "data" | "createdAt", ExtArgs["result"]["applicationDocument"]>
+  export type ApplicationDocumentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    application?: boolean | ApplicationDefaultArgs<ExtArgs>
+  }
+  export type ApplicationDocumentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    application?: boolean | ApplicationDefaultArgs<ExtArgs>
+  }
+  export type ApplicationDocumentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    application?: boolean | ApplicationDefaultArgs<ExtArgs>
+  }
+
+  export type $ApplicationDocumentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ApplicationDocument"
+    objects: {
+      application: Prisma.$ApplicationPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      applicationId: string
+      name: string
+      mimeType: string
+      byteSize: number
+      data: Prisma.Bytes
+      createdAt: Date
+    }, ExtArgs["result"]["applicationDocument"]>
+    composites: {}
+  }
+
+  type ApplicationDocumentGetPayload<S extends boolean | null | undefined | ApplicationDocumentDefaultArgs> = $Result.GetResult<Prisma.$ApplicationDocumentPayload, S>
+
+  type ApplicationDocumentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ApplicationDocumentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ApplicationDocumentCountAggregateInputType | true
+    }
+
+  export interface ApplicationDocumentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ApplicationDocument'], meta: { name: 'ApplicationDocument' } }
+    /**
+     * Find zero or one ApplicationDocument that matches the filter.
+     * @param {ApplicationDocumentFindUniqueArgs} args - Arguments to find a ApplicationDocument
+     * @example
+     * // Get one ApplicationDocument
+     * const applicationDocument = await prisma.applicationDocument.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ApplicationDocumentFindUniqueArgs>(args: SelectSubset<T, ApplicationDocumentFindUniqueArgs<ExtArgs>>): Prisma__ApplicationDocumentClient<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ApplicationDocument that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ApplicationDocumentFindUniqueOrThrowArgs} args - Arguments to find a ApplicationDocument
+     * @example
+     * // Get one ApplicationDocument
+     * const applicationDocument = await prisma.applicationDocument.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ApplicationDocumentFindUniqueOrThrowArgs>(args: SelectSubset<T, ApplicationDocumentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ApplicationDocumentClient<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ApplicationDocument that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationDocumentFindFirstArgs} args - Arguments to find a ApplicationDocument
+     * @example
+     * // Get one ApplicationDocument
+     * const applicationDocument = await prisma.applicationDocument.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ApplicationDocumentFindFirstArgs>(args?: SelectSubset<T, ApplicationDocumentFindFirstArgs<ExtArgs>>): Prisma__ApplicationDocumentClient<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ApplicationDocument that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationDocumentFindFirstOrThrowArgs} args - Arguments to find a ApplicationDocument
+     * @example
+     * // Get one ApplicationDocument
+     * const applicationDocument = await prisma.applicationDocument.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ApplicationDocumentFindFirstOrThrowArgs>(args?: SelectSubset<T, ApplicationDocumentFindFirstOrThrowArgs<ExtArgs>>): Prisma__ApplicationDocumentClient<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ApplicationDocuments that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationDocumentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ApplicationDocuments
+     * const applicationDocuments = await prisma.applicationDocument.findMany()
+     * 
+     * // Get first 10 ApplicationDocuments
+     * const applicationDocuments = await prisma.applicationDocument.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const applicationDocumentWithIdOnly = await prisma.applicationDocument.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ApplicationDocumentFindManyArgs>(args?: SelectSubset<T, ApplicationDocumentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ApplicationDocument.
+     * @param {ApplicationDocumentCreateArgs} args - Arguments to create a ApplicationDocument.
+     * @example
+     * // Create one ApplicationDocument
+     * const ApplicationDocument = await prisma.applicationDocument.create({
+     *   data: {
+     *     // ... data to create a ApplicationDocument
+     *   }
+     * })
+     * 
+     */
+    create<T extends ApplicationDocumentCreateArgs>(args: SelectSubset<T, ApplicationDocumentCreateArgs<ExtArgs>>): Prisma__ApplicationDocumentClient<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ApplicationDocuments.
+     * @param {ApplicationDocumentCreateManyArgs} args - Arguments to create many ApplicationDocuments.
+     * @example
+     * // Create many ApplicationDocuments
+     * const applicationDocument = await prisma.applicationDocument.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ApplicationDocumentCreateManyArgs>(args?: SelectSubset<T, ApplicationDocumentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ApplicationDocuments and returns the data saved in the database.
+     * @param {ApplicationDocumentCreateManyAndReturnArgs} args - Arguments to create many ApplicationDocuments.
+     * @example
+     * // Create many ApplicationDocuments
+     * const applicationDocument = await prisma.applicationDocument.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ApplicationDocuments and only return the `id`
+     * const applicationDocumentWithIdOnly = await prisma.applicationDocument.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ApplicationDocumentCreateManyAndReturnArgs>(args?: SelectSubset<T, ApplicationDocumentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ApplicationDocument.
+     * @param {ApplicationDocumentDeleteArgs} args - Arguments to delete one ApplicationDocument.
+     * @example
+     * // Delete one ApplicationDocument
+     * const ApplicationDocument = await prisma.applicationDocument.delete({
+     *   where: {
+     *     // ... filter to delete one ApplicationDocument
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ApplicationDocumentDeleteArgs>(args: SelectSubset<T, ApplicationDocumentDeleteArgs<ExtArgs>>): Prisma__ApplicationDocumentClient<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ApplicationDocument.
+     * @param {ApplicationDocumentUpdateArgs} args - Arguments to update one ApplicationDocument.
+     * @example
+     * // Update one ApplicationDocument
+     * const applicationDocument = await prisma.applicationDocument.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ApplicationDocumentUpdateArgs>(args: SelectSubset<T, ApplicationDocumentUpdateArgs<ExtArgs>>): Prisma__ApplicationDocumentClient<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ApplicationDocuments.
+     * @param {ApplicationDocumentDeleteManyArgs} args - Arguments to filter ApplicationDocuments to delete.
+     * @example
+     * // Delete a few ApplicationDocuments
+     * const { count } = await prisma.applicationDocument.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ApplicationDocumentDeleteManyArgs>(args?: SelectSubset<T, ApplicationDocumentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ApplicationDocuments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationDocumentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ApplicationDocuments
+     * const applicationDocument = await prisma.applicationDocument.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ApplicationDocumentUpdateManyArgs>(args: SelectSubset<T, ApplicationDocumentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ApplicationDocuments and returns the data updated in the database.
+     * @param {ApplicationDocumentUpdateManyAndReturnArgs} args - Arguments to update many ApplicationDocuments.
+     * @example
+     * // Update many ApplicationDocuments
+     * const applicationDocument = await prisma.applicationDocument.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ApplicationDocuments and only return the `id`
+     * const applicationDocumentWithIdOnly = await prisma.applicationDocument.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ApplicationDocumentUpdateManyAndReturnArgs>(args: SelectSubset<T, ApplicationDocumentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ApplicationDocument.
+     * @param {ApplicationDocumentUpsertArgs} args - Arguments to update or create a ApplicationDocument.
+     * @example
+     * // Update or create a ApplicationDocument
+     * const applicationDocument = await prisma.applicationDocument.upsert({
+     *   create: {
+     *     // ... data to create a ApplicationDocument
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ApplicationDocument we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ApplicationDocumentUpsertArgs>(args: SelectSubset<T, ApplicationDocumentUpsertArgs<ExtArgs>>): Prisma__ApplicationDocumentClient<$Result.GetResult<Prisma.$ApplicationDocumentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ApplicationDocuments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationDocumentCountArgs} args - Arguments to filter ApplicationDocuments to count.
+     * @example
+     * // Count the number of ApplicationDocuments
+     * const count = await prisma.applicationDocument.count({
+     *   where: {
+     *     // ... the filter for the ApplicationDocuments we want to count
+     *   }
+     * })
+    **/
+    count<T extends ApplicationDocumentCountArgs>(
+      args?: Subset<T, ApplicationDocumentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ApplicationDocumentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ApplicationDocument.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationDocumentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ApplicationDocumentAggregateArgs>(args: Subset<T, ApplicationDocumentAggregateArgs>): Prisma.PrismaPromise<GetApplicationDocumentAggregateType<T>>
+
+    /**
+     * Group by ApplicationDocument.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApplicationDocumentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ApplicationDocumentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ApplicationDocumentGroupByArgs['orderBy'] }
+        : { orderBy?: ApplicationDocumentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ApplicationDocumentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetApplicationDocumentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ApplicationDocument model
+   */
+  readonly fields: ApplicationDocumentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ApplicationDocument.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ApplicationDocumentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    application<T extends ApplicationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ApplicationDefaultArgs<ExtArgs>>): Prisma__ApplicationClient<$Result.GetResult<Prisma.$ApplicationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ApplicationDocument model
+   */
+  interface ApplicationDocumentFieldRefs {
+    readonly id: FieldRef<"ApplicationDocument", 'String'>
+    readonly applicationId: FieldRef<"ApplicationDocument", 'String'>
+    readonly name: FieldRef<"ApplicationDocument", 'String'>
+    readonly mimeType: FieldRef<"ApplicationDocument", 'String'>
+    readonly byteSize: FieldRef<"ApplicationDocument", 'Int'>
+    readonly data: FieldRef<"ApplicationDocument", 'Bytes'>
+    readonly createdAt: FieldRef<"ApplicationDocument", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ApplicationDocument findUnique
+   */
+  export type ApplicationDocumentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which ApplicationDocument to fetch.
+     */
+    where: ApplicationDocumentWhereUniqueInput
+  }
+
+  /**
+   * ApplicationDocument findUniqueOrThrow
+   */
+  export type ApplicationDocumentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which ApplicationDocument to fetch.
+     */
+    where: ApplicationDocumentWhereUniqueInput
+  }
+
+  /**
+   * ApplicationDocument findFirst
+   */
+  export type ApplicationDocumentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which ApplicationDocument to fetch.
+     */
+    where?: ApplicationDocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ApplicationDocuments to fetch.
+     */
+    orderBy?: ApplicationDocumentOrderByWithRelationInput | ApplicationDocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ApplicationDocuments.
+     */
+    cursor?: ApplicationDocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ApplicationDocuments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ApplicationDocuments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ApplicationDocuments.
+     */
+    distinct?: ApplicationDocumentScalarFieldEnum | ApplicationDocumentScalarFieldEnum[]
+  }
+
+  /**
+   * ApplicationDocument findFirstOrThrow
+   */
+  export type ApplicationDocumentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which ApplicationDocument to fetch.
+     */
+    where?: ApplicationDocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ApplicationDocuments to fetch.
+     */
+    orderBy?: ApplicationDocumentOrderByWithRelationInput | ApplicationDocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ApplicationDocuments.
+     */
+    cursor?: ApplicationDocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ApplicationDocuments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ApplicationDocuments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ApplicationDocuments.
+     */
+    distinct?: ApplicationDocumentScalarFieldEnum | ApplicationDocumentScalarFieldEnum[]
+  }
+
+  /**
+   * ApplicationDocument findMany
+   */
+  export type ApplicationDocumentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentInclude<ExtArgs> | null
+    /**
+     * Filter, which ApplicationDocuments to fetch.
+     */
+    where?: ApplicationDocumentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ApplicationDocuments to fetch.
+     */
+    orderBy?: ApplicationDocumentOrderByWithRelationInput | ApplicationDocumentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ApplicationDocuments.
+     */
+    cursor?: ApplicationDocumentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ApplicationDocuments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ApplicationDocuments.
+     */
+    skip?: number
+    distinct?: ApplicationDocumentScalarFieldEnum | ApplicationDocumentScalarFieldEnum[]
+  }
+
+  /**
+   * ApplicationDocument create
+   */
+  export type ApplicationDocumentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ApplicationDocument.
+     */
+    data: XOR<ApplicationDocumentCreateInput, ApplicationDocumentUncheckedCreateInput>
+  }
+
+  /**
+   * ApplicationDocument createMany
+   */
+  export type ApplicationDocumentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ApplicationDocuments.
+     */
+    data: ApplicationDocumentCreateManyInput | ApplicationDocumentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ApplicationDocument createManyAndReturn
+   */
+  export type ApplicationDocumentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * The data used to create many ApplicationDocuments.
+     */
+    data: ApplicationDocumentCreateManyInput | ApplicationDocumentCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ApplicationDocument update
+   */
+  export type ApplicationDocumentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ApplicationDocument.
+     */
+    data: XOR<ApplicationDocumentUpdateInput, ApplicationDocumentUncheckedUpdateInput>
+    /**
+     * Choose, which ApplicationDocument to update.
+     */
+    where: ApplicationDocumentWhereUniqueInput
+  }
+
+  /**
+   * ApplicationDocument updateMany
+   */
+  export type ApplicationDocumentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ApplicationDocuments.
+     */
+    data: XOR<ApplicationDocumentUpdateManyMutationInput, ApplicationDocumentUncheckedUpdateManyInput>
+    /**
+     * Filter which ApplicationDocuments to update
+     */
+    where?: ApplicationDocumentWhereInput
+    /**
+     * Limit how many ApplicationDocuments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ApplicationDocument updateManyAndReturn
+   */
+  export type ApplicationDocumentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * The data used to update ApplicationDocuments.
+     */
+    data: XOR<ApplicationDocumentUpdateManyMutationInput, ApplicationDocumentUncheckedUpdateManyInput>
+    /**
+     * Filter which ApplicationDocuments to update
+     */
+    where?: ApplicationDocumentWhereInput
+    /**
+     * Limit how many ApplicationDocuments to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ApplicationDocument upsert
+   */
+  export type ApplicationDocumentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ApplicationDocument to update in case it exists.
+     */
+    where: ApplicationDocumentWhereUniqueInput
+    /**
+     * In case the ApplicationDocument found by the `where` argument doesn't exist, create a new ApplicationDocument with this data.
+     */
+    create: XOR<ApplicationDocumentCreateInput, ApplicationDocumentUncheckedCreateInput>
+    /**
+     * In case the ApplicationDocument was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ApplicationDocumentUpdateInput, ApplicationDocumentUncheckedUpdateInput>
+  }
+
+  /**
+   * ApplicationDocument delete
+   */
+  export type ApplicationDocumentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentInclude<ExtArgs> | null
+    /**
+     * Filter which ApplicationDocument to delete.
+     */
+    where: ApplicationDocumentWhereUniqueInput
+  }
+
+  /**
+   * ApplicationDocument deleteMany
+   */
+  export type ApplicationDocumentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ApplicationDocuments to delete
+     */
+    where?: ApplicationDocumentWhereInput
+    /**
+     * Limit how many ApplicationDocuments to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ApplicationDocument without action
+   */
+  export type ApplicationDocumentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApplicationDocument
+     */
+    select?: ApplicationDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ApplicationDocument
+     */
+    omit?: ApplicationDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApplicationDocumentInclude<ExtArgs> | null
   }
 
 
@@ -21742,6 +22988,19 @@ export namespace Prisma {
   export type ApplicationScalarFieldEnum = (typeof ApplicationScalarFieldEnum)[keyof typeof ApplicationScalarFieldEnum]
 
 
+  export const ApplicationDocumentScalarFieldEnum: {
+    id: 'id',
+    applicationId: 'applicationId',
+    name: 'name',
+    mimeType: 'mimeType',
+    byteSize: 'byteSize',
+    data: 'data',
+    createdAt: 'createdAt'
+  };
+
+  export type ApplicationDocumentScalarFieldEnum = (typeof ApplicationDocumentScalarFieldEnum)[keyof typeof ApplicationDocumentScalarFieldEnum]
+
+
   export const OpportunityScalarFieldEnum: {
     id: 'id',
     slug: 'slug',
@@ -22112,6 +23371,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Bytes'
+   */
+  export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
+    
+
+
+  /**
+   * Reference to a field of type 'Bytes[]'
+   */
+  export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
+    
+
+
+  /**
    * Reference to a field of type 'OpportunityCategory'
    */
   export type EnumOpportunityCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OpportunityCategory'>
@@ -22164,20 +23437,6 @@ export namespace Prisma {
    * Reference to a field of type 'TransactionType[]'
    */
   export type ListEnumTransactionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TransactionType[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Bytes'
-   */
-  export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
-    
-
-
-  /**
-   * Reference to a field of type 'Bytes[]'
-   */
-  export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
     
 
 
@@ -22483,6 +23742,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Application"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     payments?: PaymentListRelationFilter
+    documents?: ApplicationDocumentListRelationFilter
   }
 
   export type ApplicationOrderByWithRelationInput = {
@@ -22499,6 +23759,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
     payments?: PaymentOrderByRelationAggregateInput
+    documents?: ApplicationDocumentOrderByRelationAggregateInput
   }
 
   export type ApplicationWhereUniqueInput = Prisma.AtLeast<{
@@ -22518,6 +23779,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Application"> | Date | string
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     payments?: PaymentListRelationFilter
+    documents?: ApplicationDocumentListRelationFilter
   }, "id" | "reference">
 
   export type ApplicationOrderByWithAggregationInput = {
@@ -22552,6 +23814,73 @@ export namespace Prisma {
     userId?: StringNullableWithAggregatesFilter<"Application"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Application"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Application"> | Date | string
+  }
+
+  export type ApplicationDocumentWhereInput = {
+    AND?: ApplicationDocumentWhereInput | ApplicationDocumentWhereInput[]
+    OR?: ApplicationDocumentWhereInput[]
+    NOT?: ApplicationDocumentWhereInput | ApplicationDocumentWhereInput[]
+    id?: StringFilter<"ApplicationDocument"> | string
+    applicationId?: StringFilter<"ApplicationDocument"> | string
+    name?: StringFilter<"ApplicationDocument"> | string
+    mimeType?: StringFilter<"ApplicationDocument"> | string
+    byteSize?: IntFilter<"ApplicationDocument"> | number
+    data?: BytesFilter<"ApplicationDocument"> | Bytes
+    createdAt?: DateTimeFilter<"ApplicationDocument"> | Date | string
+    application?: XOR<ApplicationScalarRelationFilter, ApplicationWhereInput>
+  }
+
+  export type ApplicationDocumentOrderByWithRelationInput = {
+    id?: SortOrder
+    applicationId?: SortOrder
+    name?: SortOrder
+    mimeType?: SortOrder
+    byteSize?: SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+    application?: ApplicationOrderByWithRelationInput
+  }
+
+  export type ApplicationDocumentWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ApplicationDocumentWhereInput | ApplicationDocumentWhereInput[]
+    OR?: ApplicationDocumentWhereInput[]
+    NOT?: ApplicationDocumentWhereInput | ApplicationDocumentWhereInput[]
+    applicationId?: StringFilter<"ApplicationDocument"> | string
+    name?: StringFilter<"ApplicationDocument"> | string
+    mimeType?: StringFilter<"ApplicationDocument"> | string
+    byteSize?: IntFilter<"ApplicationDocument"> | number
+    data?: BytesFilter<"ApplicationDocument"> | Bytes
+    createdAt?: DateTimeFilter<"ApplicationDocument"> | Date | string
+    application?: XOR<ApplicationScalarRelationFilter, ApplicationWhereInput>
+  }, "id">
+
+  export type ApplicationDocumentOrderByWithAggregationInput = {
+    id?: SortOrder
+    applicationId?: SortOrder
+    name?: SortOrder
+    mimeType?: SortOrder
+    byteSize?: SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+    _count?: ApplicationDocumentCountOrderByAggregateInput
+    _avg?: ApplicationDocumentAvgOrderByAggregateInput
+    _max?: ApplicationDocumentMaxOrderByAggregateInput
+    _min?: ApplicationDocumentMinOrderByAggregateInput
+    _sum?: ApplicationDocumentSumOrderByAggregateInput
+  }
+
+  export type ApplicationDocumentScalarWhereWithAggregatesInput = {
+    AND?: ApplicationDocumentScalarWhereWithAggregatesInput | ApplicationDocumentScalarWhereWithAggregatesInput[]
+    OR?: ApplicationDocumentScalarWhereWithAggregatesInput[]
+    NOT?: ApplicationDocumentScalarWhereWithAggregatesInput | ApplicationDocumentScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ApplicationDocument"> | string
+    applicationId?: StringWithAggregatesFilter<"ApplicationDocument"> | string
+    name?: StringWithAggregatesFilter<"ApplicationDocument"> | string
+    mimeType?: StringWithAggregatesFilter<"ApplicationDocument"> | string
+    byteSize?: IntWithAggregatesFilter<"ApplicationDocument"> | number
+    data?: BytesWithAggregatesFilter<"ApplicationDocument"> | Bytes
+    createdAt?: DateTimeWithAggregatesFilter<"ApplicationDocument"> | Date | string
   }
 
   export type OpportunityWhereInput = {
@@ -23791,6 +25120,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutApplicationsInput
     payments?: PaymentCreateNestedManyWithoutApplicationInput
+    documents?: ApplicationDocumentCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationUncheckedCreateInput = {
@@ -23806,6 +25136,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentUncheckedCreateNestedManyWithoutApplicationInput
+    documents?: ApplicationDocumentUncheckedCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationUpdateInput = {
@@ -23821,6 +25152,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutApplicationsNestedInput
     payments?: PaymentUpdateManyWithoutApplicationNestedInput
+    documents?: ApplicationDocumentUpdateManyWithoutApplicationNestedInput
   }
 
   export type ApplicationUncheckedUpdateInput = {
@@ -23836,6 +25168,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUncheckedUpdateManyWithoutApplicationNestedInput
+    documents?: ApplicationDocumentUncheckedUpdateManyWithoutApplicationNestedInput
   }
 
   export type ApplicationCreateManyInput = {
@@ -23877,6 +25210,75 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApplicationDocumentCreateInput = {
+    id?: string
+    name: string
+    mimeType: string
+    byteSize: number
+    data: Bytes
+    createdAt?: Date | string
+    application: ApplicationCreateNestedOneWithoutDocumentsInput
+  }
+
+  export type ApplicationDocumentUncheckedCreateInput = {
+    id?: string
+    applicationId: string
+    name: string
+    mimeType: string
+    byteSize: number
+    data: Bytes
+    createdAt?: Date | string
+  }
+
+  export type ApplicationDocumentUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    byteSize?: IntFieldUpdateOperationsInput | number
+    data?: BytesFieldUpdateOperationsInput | Bytes
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    application?: ApplicationUpdateOneRequiredWithoutDocumentsNestedInput
+  }
+
+  export type ApplicationDocumentUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    applicationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    byteSize?: IntFieldUpdateOperationsInput | number
+    data?: BytesFieldUpdateOperationsInput | Bytes
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApplicationDocumentCreateManyInput = {
+    id?: string
+    applicationId: string
+    name: string
+    mimeType: string
+    byteSize: number
+    data: Bytes
+    createdAt?: Date | string
+  }
+
+  export type ApplicationDocumentUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    byteSize?: IntFieldUpdateOperationsInput | number
+    data?: BytesFieldUpdateOperationsInput | Bytes
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApplicationDocumentUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    applicationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    byteSize?: IntFieldUpdateOperationsInput | number
+    data?: BytesFieldUpdateOperationsInput | Bytes
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type OpportunityCreateInput = {
@@ -25395,6 +26797,16 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
+  export type ApplicationDocumentListRelationFilter = {
+    every?: ApplicationDocumentWhereInput
+    some?: ApplicationDocumentWhereInput
+    none?: ApplicationDocumentWhereInput
+  }
+
+  export type ApplicationDocumentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type ApplicationCountOrderByAggregateInput = {
     id?: SortOrder
     reference?: SortOrder
@@ -25469,6 +26881,66 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedJsonFilter<$PrismaModel>
     _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type BytesFilter<$PrismaModel = never> = {
+    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
+    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesFilter<$PrismaModel> | Bytes
+  }
+
+  export type ApplicationScalarRelationFilter = {
+    is?: ApplicationWhereInput
+    isNot?: ApplicationWhereInput
+  }
+
+  export type ApplicationDocumentCountOrderByAggregateInput = {
+    id?: SortOrder
+    applicationId?: SortOrder
+    name?: SortOrder
+    mimeType?: SortOrder
+    byteSize?: SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ApplicationDocumentAvgOrderByAggregateInput = {
+    byteSize?: SortOrder
+  }
+
+  export type ApplicationDocumentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    applicationId?: SortOrder
+    name?: SortOrder
+    mimeType?: SortOrder
+    byteSize?: SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ApplicationDocumentMinOrderByAggregateInput = {
+    id?: SortOrder
+    applicationId?: SortOrder
+    name?: SortOrder
+    mimeType?: SortOrder
+    byteSize?: SortOrder
+    data?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ApplicationDocumentSumOrderByAggregateInput = {
+    byteSize?: SortOrder
+  }
+
+  export type BytesWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
+    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Bytes
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBytesFilter<$PrismaModel>
+    _max?: NestedBytesFilter<$PrismaModel>
   }
 
   export type EnumOpportunityCategoryFilter<$PrismaModel = never> = {
@@ -26078,13 +27550,6 @@ export namespace Prisma {
     revision?: SortOrder
   }
 
-  export type BytesFilter<$PrismaModel = never> = {
-    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
-    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    not?: NestedBytesFilter<$PrismaModel> | Bytes
-  }
-
   export type MediaAssetCountOrderByAggregateInput = {
     id?: SortOrder
     originalName?: SortOrder
@@ -26140,16 +27605,6 @@ export namespace Prisma {
     width?: SortOrder
     height?: SortOrder
     byteSize?: SortOrder
-  }
-
-  export type BytesWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
-    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Bytes
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBytesFilter<$PrismaModel>
-    _max?: NestedBytesFilter<$PrismaModel>
   }
 
   export type EnquiryCreateNestedManyWithoutUserInput = {
@@ -26407,11 +27862,25 @@ export namespace Prisma {
     connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
   }
 
+  export type ApplicationDocumentCreateNestedManyWithoutApplicationInput = {
+    create?: XOR<ApplicationDocumentCreateWithoutApplicationInput, ApplicationDocumentUncheckedCreateWithoutApplicationInput> | ApplicationDocumentCreateWithoutApplicationInput[] | ApplicationDocumentUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: ApplicationDocumentCreateOrConnectWithoutApplicationInput | ApplicationDocumentCreateOrConnectWithoutApplicationInput[]
+    createMany?: ApplicationDocumentCreateManyApplicationInputEnvelope
+    connect?: ApplicationDocumentWhereUniqueInput | ApplicationDocumentWhereUniqueInput[]
+  }
+
   export type PaymentUncheckedCreateNestedManyWithoutApplicationInput = {
     create?: XOR<PaymentCreateWithoutApplicationInput, PaymentUncheckedCreateWithoutApplicationInput> | PaymentCreateWithoutApplicationInput[] | PaymentUncheckedCreateWithoutApplicationInput[]
     connectOrCreate?: PaymentCreateOrConnectWithoutApplicationInput | PaymentCreateOrConnectWithoutApplicationInput[]
     createMany?: PaymentCreateManyApplicationInputEnvelope
     connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+  }
+
+  export type ApplicationDocumentUncheckedCreateNestedManyWithoutApplicationInput = {
+    create?: XOR<ApplicationDocumentCreateWithoutApplicationInput, ApplicationDocumentUncheckedCreateWithoutApplicationInput> | ApplicationDocumentCreateWithoutApplicationInput[] | ApplicationDocumentUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: ApplicationDocumentCreateOrConnectWithoutApplicationInput | ApplicationDocumentCreateOrConnectWithoutApplicationInput[]
+    createMany?: ApplicationDocumentCreateManyApplicationInputEnvelope
+    connect?: ApplicationDocumentWhereUniqueInput | ApplicationDocumentWhereUniqueInput[]
   }
 
   export type EnumApplicationTypeFieldUpdateOperationsInput = {
@@ -26442,6 +27911,20 @@ export namespace Prisma {
     deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
   }
 
+  export type ApplicationDocumentUpdateManyWithoutApplicationNestedInput = {
+    create?: XOR<ApplicationDocumentCreateWithoutApplicationInput, ApplicationDocumentUncheckedCreateWithoutApplicationInput> | ApplicationDocumentCreateWithoutApplicationInput[] | ApplicationDocumentUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: ApplicationDocumentCreateOrConnectWithoutApplicationInput | ApplicationDocumentCreateOrConnectWithoutApplicationInput[]
+    upsert?: ApplicationDocumentUpsertWithWhereUniqueWithoutApplicationInput | ApplicationDocumentUpsertWithWhereUniqueWithoutApplicationInput[]
+    createMany?: ApplicationDocumentCreateManyApplicationInputEnvelope
+    set?: ApplicationDocumentWhereUniqueInput | ApplicationDocumentWhereUniqueInput[]
+    disconnect?: ApplicationDocumentWhereUniqueInput | ApplicationDocumentWhereUniqueInput[]
+    delete?: ApplicationDocumentWhereUniqueInput | ApplicationDocumentWhereUniqueInput[]
+    connect?: ApplicationDocumentWhereUniqueInput | ApplicationDocumentWhereUniqueInput[]
+    update?: ApplicationDocumentUpdateWithWhereUniqueWithoutApplicationInput | ApplicationDocumentUpdateWithWhereUniqueWithoutApplicationInput[]
+    updateMany?: ApplicationDocumentUpdateManyWithWhereWithoutApplicationInput | ApplicationDocumentUpdateManyWithWhereWithoutApplicationInput[]
+    deleteMany?: ApplicationDocumentScalarWhereInput | ApplicationDocumentScalarWhereInput[]
+  }
+
   export type PaymentUncheckedUpdateManyWithoutApplicationNestedInput = {
     create?: XOR<PaymentCreateWithoutApplicationInput, PaymentUncheckedCreateWithoutApplicationInput> | PaymentCreateWithoutApplicationInput[] | PaymentUncheckedCreateWithoutApplicationInput[]
     connectOrCreate?: PaymentCreateOrConnectWithoutApplicationInput | PaymentCreateOrConnectWithoutApplicationInput[]
@@ -26454,6 +27937,38 @@ export namespace Prisma {
     update?: PaymentUpdateWithWhereUniqueWithoutApplicationInput | PaymentUpdateWithWhereUniqueWithoutApplicationInput[]
     updateMany?: PaymentUpdateManyWithWhereWithoutApplicationInput | PaymentUpdateManyWithWhereWithoutApplicationInput[]
     deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
+  }
+
+  export type ApplicationDocumentUncheckedUpdateManyWithoutApplicationNestedInput = {
+    create?: XOR<ApplicationDocumentCreateWithoutApplicationInput, ApplicationDocumentUncheckedCreateWithoutApplicationInput> | ApplicationDocumentCreateWithoutApplicationInput[] | ApplicationDocumentUncheckedCreateWithoutApplicationInput[]
+    connectOrCreate?: ApplicationDocumentCreateOrConnectWithoutApplicationInput | ApplicationDocumentCreateOrConnectWithoutApplicationInput[]
+    upsert?: ApplicationDocumentUpsertWithWhereUniqueWithoutApplicationInput | ApplicationDocumentUpsertWithWhereUniqueWithoutApplicationInput[]
+    createMany?: ApplicationDocumentCreateManyApplicationInputEnvelope
+    set?: ApplicationDocumentWhereUniqueInput | ApplicationDocumentWhereUniqueInput[]
+    disconnect?: ApplicationDocumentWhereUniqueInput | ApplicationDocumentWhereUniqueInput[]
+    delete?: ApplicationDocumentWhereUniqueInput | ApplicationDocumentWhereUniqueInput[]
+    connect?: ApplicationDocumentWhereUniqueInput | ApplicationDocumentWhereUniqueInput[]
+    update?: ApplicationDocumentUpdateWithWhereUniqueWithoutApplicationInput | ApplicationDocumentUpdateWithWhereUniqueWithoutApplicationInput[]
+    updateMany?: ApplicationDocumentUpdateManyWithWhereWithoutApplicationInput | ApplicationDocumentUpdateManyWithWhereWithoutApplicationInput[]
+    deleteMany?: ApplicationDocumentScalarWhereInput | ApplicationDocumentScalarWhereInput[]
+  }
+
+  export type ApplicationCreateNestedOneWithoutDocumentsInput = {
+    create?: XOR<ApplicationCreateWithoutDocumentsInput, ApplicationUncheckedCreateWithoutDocumentsInput>
+    connectOrCreate?: ApplicationCreateOrConnectWithoutDocumentsInput
+    connect?: ApplicationWhereUniqueInput
+  }
+
+  export type BytesFieldUpdateOperationsInput = {
+    set?: Bytes
+  }
+
+  export type ApplicationUpdateOneRequiredWithoutDocumentsNestedInput = {
+    create?: XOR<ApplicationCreateWithoutDocumentsInput, ApplicationUncheckedCreateWithoutDocumentsInput>
+    connectOrCreate?: ApplicationCreateOrConnectWithoutDocumentsInput
+    upsert?: ApplicationUpsertWithoutDocumentsInput
+    connect?: ApplicationWhereUniqueInput
+    update?: XOR<XOR<ApplicationUpdateToOneWithWhereWithoutDocumentsInput, ApplicationUpdateWithoutDocumentsInput>, ApplicationUncheckedUpdateWithoutDocumentsInput>
   }
 
   export type EnumOpportunityCategoryFieldUpdateOperationsInput = {
@@ -26734,10 +28249,6 @@ export namespace Prisma {
     upsert?: FinancialCategoryUpsertWithoutTransactionsInput
     connect?: FinancialCategoryWhereUniqueInput
     update?: XOR<XOR<FinancialCategoryUpdateToOneWithWhereWithoutTransactionsInput, FinancialCategoryUpdateWithoutTransactionsInput>, FinancialCategoryUncheckedUpdateWithoutTransactionsInput>
-  }
-
-  export type BytesFieldUpdateOperationsInput = {
-    set?: Bytes
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -27045,6 +28556,23 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
+  export type NestedBytesFilter<$PrismaModel = never> = {
+    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
+    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesFilter<$PrismaModel> | Bytes
+  }
+
+  export type NestedBytesWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
+    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
+    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Bytes
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBytesFilter<$PrismaModel>
+    _max?: NestedBytesFilter<$PrismaModel>
+  }
+
   export type NestedEnumOpportunityCategoryFilter<$PrismaModel = never> = {
     equals?: $Enums.OpportunityCategory | EnumOpportunityCategoryFieldRefInput<$PrismaModel>
     in?: $Enums.OpportunityCategory[] | ListEnumOpportunityCategoryFieldRefInput<$PrismaModel>
@@ -27167,23 +28695,6 @@ export namespace Prisma {
     _max?: NestedEnumPaymentStatusNullableFilter<$PrismaModel>
   }
 
-  export type NestedBytesFilter<$PrismaModel = never> = {
-    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
-    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    not?: NestedBytesFilter<$PrismaModel> | Bytes
-  }
-
-  export type NestedBytesWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Bytes | BytesFieldRefInput<$PrismaModel>
-    in?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    notIn?: Bytes[] | ListBytesFieldRefInput<$PrismaModel>
-    not?: NestedBytesWithAggregatesFilter<$PrismaModel> | Bytes
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBytesFilter<$PrismaModel>
-    _max?: NestedBytesFilter<$PrismaModel>
-  }
-
   export type EnquiryCreateWithoutUserInput = {
     id?: string
     type: $Enums.EnquiryType
@@ -27232,6 +28743,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentCreateNestedManyWithoutApplicationInput
+    documents?: ApplicationDocumentCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationUncheckedCreateWithoutUserInput = {
@@ -27246,6 +28758,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     payments?: PaymentUncheckedCreateNestedManyWithoutApplicationInput
+    documents?: ApplicationDocumentUncheckedCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationCreateOrConnectWithoutUserInput = {
@@ -27735,6 +29248,34 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ApplicationDocumentCreateWithoutApplicationInput = {
+    id?: string
+    name: string
+    mimeType: string
+    byteSize: number
+    data: Bytes
+    createdAt?: Date | string
+  }
+
+  export type ApplicationDocumentUncheckedCreateWithoutApplicationInput = {
+    id?: string
+    name: string
+    mimeType: string
+    byteSize: number
+    data: Bytes
+    createdAt?: Date | string
+  }
+
+  export type ApplicationDocumentCreateOrConnectWithoutApplicationInput = {
+    where: ApplicationDocumentWhereUniqueInput
+    create: XOR<ApplicationDocumentCreateWithoutApplicationInput, ApplicationDocumentUncheckedCreateWithoutApplicationInput>
+  }
+
+  export type ApplicationDocumentCreateManyApplicationInputEnvelope = {
+    data: ApplicationDocumentCreateManyApplicationInput | ApplicationDocumentCreateManyApplicationInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutApplicationsInput = {
     update: XOR<UserUpdateWithoutApplicationsInput, UserUncheckedUpdateWithoutApplicationsInput>
     create: XOR<UserCreateWithoutApplicationsInput, UserUncheckedCreateWithoutApplicationsInput>
@@ -27800,6 +29341,111 @@ export namespace Prisma {
   export type PaymentUpdateManyWithWhereWithoutApplicationInput = {
     where: PaymentScalarWhereInput
     data: XOR<PaymentUpdateManyMutationInput, PaymentUncheckedUpdateManyWithoutApplicationInput>
+  }
+
+  export type ApplicationDocumentUpsertWithWhereUniqueWithoutApplicationInput = {
+    where: ApplicationDocumentWhereUniqueInput
+    update: XOR<ApplicationDocumentUpdateWithoutApplicationInput, ApplicationDocumentUncheckedUpdateWithoutApplicationInput>
+    create: XOR<ApplicationDocumentCreateWithoutApplicationInput, ApplicationDocumentUncheckedCreateWithoutApplicationInput>
+  }
+
+  export type ApplicationDocumentUpdateWithWhereUniqueWithoutApplicationInput = {
+    where: ApplicationDocumentWhereUniqueInput
+    data: XOR<ApplicationDocumentUpdateWithoutApplicationInput, ApplicationDocumentUncheckedUpdateWithoutApplicationInput>
+  }
+
+  export type ApplicationDocumentUpdateManyWithWhereWithoutApplicationInput = {
+    where: ApplicationDocumentScalarWhereInput
+    data: XOR<ApplicationDocumentUpdateManyMutationInput, ApplicationDocumentUncheckedUpdateManyWithoutApplicationInput>
+  }
+
+  export type ApplicationDocumentScalarWhereInput = {
+    AND?: ApplicationDocumentScalarWhereInput | ApplicationDocumentScalarWhereInput[]
+    OR?: ApplicationDocumentScalarWhereInput[]
+    NOT?: ApplicationDocumentScalarWhereInput | ApplicationDocumentScalarWhereInput[]
+    id?: StringFilter<"ApplicationDocument"> | string
+    applicationId?: StringFilter<"ApplicationDocument"> | string
+    name?: StringFilter<"ApplicationDocument"> | string
+    mimeType?: StringFilter<"ApplicationDocument"> | string
+    byteSize?: IntFilter<"ApplicationDocument"> | number
+    data?: BytesFilter<"ApplicationDocument"> | Bytes
+    createdAt?: DateTimeFilter<"ApplicationDocument"> | Date | string
+  }
+
+  export type ApplicationCreateWithoutDocumentsInput = {
+    id?: string
+    reference: string
+    type: $Enums.ApplicationType
+    status?: $Enums.RecordStatus
+    fullName: string
+    email: string
+    phone: string
+    details: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user?: UserCreateNestedOneWithoutApplicationsInput
+    payments?: PaymentCreateNestedManyWithoutApplicationInput
+  }
+
+  export type ApplicationUncheckedCreateWithoutDocumentsInput = {
+    id?: string
+    reference: string
+    type: $Enums.ApplicationType
+    status?: $Enums.RecordStatus
+    fullName: string
+    email: string
+    phone: string
+    details: JsonNullValueInput | InputJsonValue
+    userId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    payments?: PaymentUncheckedCreateNestedManyWithoutApplicationInput
+  }
+
+  export type ApplicationCreateOrConnectWithoutDocumentsInput = {
+    where: ApplicationWhereUniqueInput
+    create: XOR<ApplicationCreateWithoutDocumentsInput, ApplicationUncheckedCreateWithoutDocumentsInput>
+  }
+
+  export type ApplicationUpsertWithoutDocumentsInput = {
+    update: XOR<ApplicationUpdateWithoutDocumentsInput, ApplicationUncheckedUpdateWithoutDocumentsInput>
+    create: XOR<ApplicationCreateWithoutDocumentsInput, ApplicationUncheckedCreateWithoutDocumentsInput>
+    where?: ApplicationWhereInput
+  }
+
+  export type ApplicationUpdateToOneWithWhereWithoutDocumentsInput = {
+    where?: ApplicationWhereInput
+    data: XOR<ApplicationUpdateWithoutDocumentsInput, ApplicationUncheckedUpdateWithoutDocumentsInput>
+  }
+
+  export type ApplicationUpdateWithoutDocumentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    type?: EnumApplicationTypeFieldUpdateOperationsInput | $Enums.ApplicationType
+    status?: EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    details?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneWithoutApplicationsNestedInput
+    payments?: PaymentUpdateManyWithoutApplicationNestedInput
+  }
+
+  export type ApplicationUncheckedUpdateWithoutDocumentsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reference?: StringFieldUpdateOperationsInput | string
+    type?: EnumApplicationTypeFieldUpdateOperationsInput | $Enums.ApplicationType
+    status?: EnumRecordStatusFieldUpdateOperationsInput | $Enums.RecordStatus
+    fullName?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    details?: JsonNullValueInput | InputJsonValue
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    payments?: PaymentUncheckedUpdateManyWithoutApplicationNestedInput
   }
 
   export type EducationProgramCreateWithoutInstitutionInput = {
@@ -28064,6 +29710,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user?: UserCreateNestedOneWithoutApplicationsInput
+    documents?: ApplicationDocumentCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationUncheckedCreateWithoutPaymentsInput = {
@@ -28078,6 +29725,7 @@ export namespace Prisma {
     userId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    documents?: ApplicationDocumentUncheckedCreateNestedManyWithoutApplicationInput
   }
 
   export type ApplicationCreateOrConnectWithoutPaymentsInput = {
@@ -28180,6 +29828,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneWithoutApplicationsNestedInput
+    documents?: ApplicationDocumentUpdateManyWithoutApplicationNestedInput
   }
 
   export type ApplicationUncheckedUpdateWithoutPaymentsInput = {
@@ -28194,6 +29843,7 @@ export namespace Prisma {
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documents?: ApplicationDocumentUncheckedUpdateManyWithoutApplicationNestedInput
   }
 
   export type ReceiptUpsertWithoutPaymentInput = {
@@ -28512,6 +30162,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUpdateManyWithoutApplicationNestedInput
+    documents?: ApplicationDocumentUpdateManyWithoutApplicationNestedInput
   }
 
   export type ApplicationUncheckedUpdateWithoutUserInput = {
@@ -28526,6 +30177,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payments?: PaymentUncheckedUpdateManyWithoutApplicationNestedInput
+    documents?: ApplicationDocumentUncheckedUpdateManyWithoutApplicationNestedInput
   }
 
   export type ApplicationUncheckedUpdateManyWithoutUserInput = {
@@ -28629,6 +30281,15 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type ApplicationDocumentCreateManyApplicationInput = {
+    id?: string
+    name: string
+    mimeType: string
+    byteSize: number
+    data: Bytes
+    createdAt?: Date | string
+  }
+
   export type PaymentUpdateWithoutApplicationInput = {
     id?: StringFieldUpdateOperationsInput | string
     service?: StringFieldUpdateOperationsInput | string
@@ -28670,6 +30331,33 @@ export namespace Prisma {
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
     provider?: StringFieldUpdateOperationsInput | string
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApplicationDocumentUpdateWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    byteSize?: IntFieldUpdateOperationsInput | number
+    data?: BytesFieldUpdateOperationsInput | Bytes
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApplicationDocumentUncheckedUpdateWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    byteSize?: IntFieldUpdateOperationsInput | number
+    data?: BytesFieldUpdateOperationsInput | Bytes
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApplicationDocumentUncheckedUpdateManyWithoutApplicationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    mimeType?: StringFieldUpdateOperationsInput | string
+    byteSize?: IntFieldUpdateOperationsInput | number
+    data?: BytesFieldUpdateOperationsInput | Bytes
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

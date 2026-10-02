@@ -18,6 +18,7 @@ import {
   defaultUmrahContent,
 } from "../lib/division-content.js";
 import sharp from "sharp";
+import { documentSummary } from "../lib/documents.js";
 
 function rangeStart(period: string) {
   const now = new Date();
@@ -264,7 +265,11 @@ const admin: FastifyPluginAsync = async (app) => {
           table: prisma.application,
           args: {
             where: matching("reference", "fullName", "email", "phone"),
-            include: { user: person, _count: { select: { payments: true } } },
+            include: {
+              user: person,
+              _count: { select: { payments: true } },
+              documents: { select: documentSummary },
+            },
             orderBy: newest,
           },
         },

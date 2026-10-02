@@ -177,6 +177,16 @@ exports.Prisma.ApplicationScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ApplicationDocumentScalarFieldEnum = {
+  id: 'id',
+  applicationId: 'applicationId',
+  name: 'name',
+  mimeType: 'mimeType',
+  byteSize: 'byteSize',
+  data: 'data',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.OpportunityScalarFieldEnum = {
   id: 'id',
   slug: 'slug',
@@ -415,6 +425,7 @@ exports.Prisma.ModelName = {
   AuthCode: 'AuthCode',
   Enquiry: 'Enquiry',
   Application: 'Application',
+  ApplicationDocument: 'ApplicationDocument',
   Opportunity: 'Opportunity',
   Supplier: 'Supplier',
   Factory: 'Factory',

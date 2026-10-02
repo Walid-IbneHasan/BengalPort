@@ -24,6 +24,10 @@
       information, and emergency contacts.
     </li>
     <li>
+      <b>Documents</b> you choose to attach to an application, such as a passport copy, photograph, certificates or
+      medical reports.
+    </li>
+    <li>
       <b>Health information</b> in healthcare applications, such as your diagnosis, symptoms, medical history and
       current treatment.
     </li>

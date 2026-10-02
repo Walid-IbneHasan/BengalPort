@@ -118,8 +118,21 @@ model Application {
   userId String?
   user User? @relation(fields: [userId], references: [id])
   payments Payment[]
+  documents ApplicationDocument[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+model ApplicationDocument {
+  id String @id @default(cuid())
+  applicationId String
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  name String
+  mimeType String
+  byteSize Int
+  data Bytes
+  createdAt DateTime @default(now())
+
+  @@index([applicationId])
 }
 model Opportunity {
   id String @id @default(cuid())

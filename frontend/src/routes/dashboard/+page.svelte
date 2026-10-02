@@ -4,6 +4,7 @@
   import { api, ApiError } from "$lib/api";
   import { detailGroups } from "$lib/submission-details";
   import { enquiryTitle, statusInfo } from "$lib/member-activity";
+  import DocumentList from "$lib/components/DocumentList.svelte";
   import { ArrowRight, ChevronDown, ClipboardList, MessageSquare, WalletCards } from "lucide-svelte";
 
   type Activity = { enquiries: any[]; applications: any[]; payments: any[] };
@@ -82,6 +83,8 @@
                   <h3>{group.title}</h3>
                   <dl>{#each group.rows as answer}<div><dt>{answer.label}</dt><dd>{answer.value}</dd></div>{/each}</dl>
                 {/each}
+                <h3>Documents</h3>
+                <DocumentList applicationId={item.id} documents={item.documents ?? []} canAttach canDownload onchange={(list) => (item.documents = list)} />
               </div>
             {/if}
           </div>

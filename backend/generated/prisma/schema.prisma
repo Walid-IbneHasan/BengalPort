@@ -78,6 +78,8 @@ model User {
   avatarUrl        String?
   emailVerifiedAt  DateTime?
   twoFactorEnabled Boolean       @default(false)
+  // Raised when the password changes; sessions issued for an older value stop working.
+  tokenVersion     Int           @default(0)
   lastLoginAt      DateTime?
   role             Role          @default(USER)
   createdAt        DateTime      @default(now())
@@ -118,19 +120,33 @@ model Enquiry {
 }
 
 model Application {
-  id        String          @id @default(cuid())
-  reference String          @unique
+  id        String                @id @default(cuid())
+  reference String                @unique
   type      ApplicationType
-  status    RecordStatus    @default(SUBMITTED)
+  status    RecordStatus          @default(SUBMITTED)
   fullName  String
   email     String
   phone     String
   details   Json
   userId    String?
-  user      User?           @relation(fields: [userId], references: [id])
+  user      User?                 @relation(fields: [userId], references: [id])
   payments  Payment[]
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  documents ApplicationDocument[]
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+}
+
+model ApplicationDocument {
+  id            String      @id @default(cuid())
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  name          String
+  mimeType      String
+  byteSize      Int
+  data          Bytes
+  createdAt     DateTime    @default(now())
+
+  @@index([applicationId])
 }
 
 model Opportunity {

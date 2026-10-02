@@ -29,3 +29,19 @@ export const bearer = (app: FastifyInstance, user: Account) => ({
 
 export const deleteUsers = (...ids: string[]) =>
   prisma.user.deleteMany({ where: { id: { in: ids } } });
+
+// A multipart/form-data request body holding one file.
+export function fileUpload(name: string, type: string, content: Buffer) {
+  const boundary = "----test-boundary";
+  return {
+    headers: { "content-type": `multipart/form-data; boundary=${boundary}` },
+    payload: Buffer.concat([
+      Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${name}"\r\nContent-Type: ${type}\r\n\r\n`),
+      content,
+      Buffer.from(`\r\n--${boundary}--\r\n`),
+    ]),
+  };
+}
+
+export const pdfBytes = (size = 600) =>
+  Buffer.concat([Buffer.from("%PDF-1.4\n"), Buffer.alloc(Math.max(0, size - 9), 0x20)]);

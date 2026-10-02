@@ -16,6 +16,7 @@
   } from "lucide-svelte";
   import CmsImageField from "$lib/components/CmsImageField.svelte";
   import { detailGroups } from "$lib/submission-details";
+  import DocumentList from "$lib/components/DocumentList.svelte";
   import {
     blankProgram,
     blankRecord,
@@ -808,6 +809,14 @@
         {#if viewing.message}<section>
             <h3>Message</h3>
             <p class="message">{viewing.message}</p>
+          </section>{/if}
+        {#if section === "applications"}<section>
+            <h3>Documents</h3>
+            {#key viewing.id}<DocumentList
+                applicationId={viewing.id}
+                documents={viewing.documents ?? []}
+                canDownload
+              />{/key}
           </section>{/if}
         {#each viewingGroups as group}<section>
             <h3>{group.title}</h3>
