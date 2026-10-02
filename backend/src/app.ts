@@ -7,6 +7,7 @@ import multipart from "@fastify/multipart";
 import rateLimit from "@fastify/rate-limit";
 import authPlugin from "./plugins/auth.js";
 import publicRoutes from "./routes/public.js";
+import applicationRoutes from "./routes/applications.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import paymentRoutes from "./routes/payments.js";
@@ -46,6 +47,7 @@ export async function buildApp(options:{mailer?:Mailer;gateway?:Gateway}={}) {
   await app.register(adminRoutes,{prefix:"/api/admin"});
   await app.register(paymentRoutes,{prefix:"/api/payments"});
   await app.register(documentRoutes,{prefix:"/api/applications"});
+  await app.register(applicationRoutes,{prefix:"/api/applications"});
   app.setErrorHandler((e,req,reply)=>{req.log.error(e);const err=e as any;reply.code(err.statusCode||500).send({error:{code:"SERVER_ERROR",message:err.statusCode?err.message:"Unexpected server error"}})});
   return app;
 }

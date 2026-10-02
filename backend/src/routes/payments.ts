@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma.js";
 import { randomCode } from "../lib/reference.js";
 import { balance, paymentProblem, received } from "../lib/payment-rules.js";
 import { notifyPayment } from "../lib/notifications.js";
+import { findApplication } from "../lib/application-lookup.js";
 import type { GatewayStatus } from "../lib/bkash.js";
 
 const manualPaymentSchema = z
@@ -155,17 +156,8 @@ const routes: FastifyPluginAsync = async (app) => {
   // A guest finds their application with its reference and the phone number
   // or email they applied with, and gets a link to pay it.
   app.post("/lookup", { config: { rateLimit: { max: 10, timeWindow: "10 minutes" } } }, async (req, reply) => {
-    const parsed = z.object({ reference: z.string().trim().min(3).max(40), contact: z.string().trim().min(5).max(160) }).safeParse(req.body);
-    const notFound = () => reply.notFound("We could not find an application with that reference and contact detail.");
-    if (!parsed.success) return notFound();
-    const application = await prisma.application.findUnique({ where: { reference: parsed.data.reference.toUpperCase() } });
-    if (!application) return notFound();
-    const digits = (value: string) => value.replace(/\D/g, "").slice(-10);
-    const contact = parsed.data.contact;
-    const matches = contact.includes("@")
-      ? contact.toLowerCase() === application.email.toLowerCase()
-      : digits(contact).length >= 7 && digits(contact) === digits(application.phone);
-    if (!matches) return notFound();
+    const application = await findApplication(req.body);
+    if (!application) return reply.notFound("We could not find an application with that reference and contact detail.");
     return {
       data: {
         application: await summary(application.id),

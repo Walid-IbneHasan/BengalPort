@@ -6,6 +6,7 @@
   import { enquiryTitle, statusInfo } from "$lib/member-activity";
   import DocumentList from "$lib/components/DocumentList.svelte";
   import PaymentPanel from "$lib/components/PaymentPanel.svelte";
+  import ClaimApplication from "$lib/components/ClaimApplication.svelte";
   import { ArrowRight, ChevronDown, ClipboardList, MessageSquare, WalletCards } from "lucide-svelte";
 
   type Activity = { enquiries: any[]; applications: any[]; payments: any[] };
@@ -21,6 +22,11 @@
     new Date(value).toLocaleDateString("en-BD", { day: "numeric", month: "short", year: "numeric" });
   const division = (type: string) => type.charAt(0) + type.slice(1).toLowerCase();
   const toggle = (id: string) => (open = open === id ? "" : id);
+  // An application added with its reference number: show it, opened.
+  async function claimed(reference: string) {
+    activity = await api<Activity>("/auth/me/activity");
+    open = activity.applications.find((item) => item.reference === reference)?.id ?? open;
+  }
 
   onMount(async () => {
     if (!localStorage.getItem("bp_token")) return goto("/login?next=/dashboard");
@@ -96,6 +102,7 @@
             <a href="/apply">Start an application <ArrowRight size={15} /></a>
           </div>
         {/each}
+        <ClaimApplication onclaimed={claimed} />
       </article>
 
       <article id="enquiries">
