@@ -7,73 +7,57 @@
     Handshake,
     ArrowRight,
   } from "lucide-svelte";
-  const values: any[] = [
-    [
-      Target,
-      "Our Mission",
-      "Make trusted international opportunities easier to understand, access and complete.",
-    ],
-    [
-      Eye,
-      "Our Vision",
-      "A connected Bengal confidently participating in global business, education, healthcare and Umrah travel.",
-    ],
-    [
-      Globe2,
-      "Global Network",
-      "A growing network of suppliers, institutions, hospitals and service partners.",
-    ],
-  ];
+  import type { AboutContent } from "$lib/site-pages";
+
+  let { data }: { data: { content: AboutContent } } = $props();
+  let content = $derived(data.content);
+  // The wording is edited in the admin; the icons follow the order.
+  const valueIcons = [Target, Eye, Globe2];
+  const pointIcons = [ShieldCheck, Handshake, Globe2];
 </script>
 
 <svelte:head><title>About Us — Bengal Port</title></svelte:head>
 <section class="page-hero">
   <div class="wrap">
-    <span class="eyebrow">ABOUT BENGAL PORT</span>
-    <h1>Connection with purpose.</h1>
-    <p>
-      We help individuals and organisations move from ambition to a clear,
-      supported international pathway.
-    </p>
+    <span class="eyebrow">{content.hero.eyebrow}</span>
+    <h1>{content.hero.title}</h1>
+    <p>{content.hero.description}</p>
   </div>
 </section>
 <section class="section">
   <div class="wrap">
     <div class="section-head">
-      <span class="eyebrow">WHO WE ARE</span>
-      <h2>One port. Four trusted pathways.</h2>
-      <p>
-        Bengal Port is a multidisciplinary connection and coordination company
-        serving business, education, healthcare and Umrah travel needs with local
-        accountability.
-      </p>
+      <span class="eyebrow">{content.intro.eyebrow}</span>
+      <h2>{content.intro.title}</h2>
+      <p>{content.intro.description}</p>
     </div>
     <div class="grid-3">
-      {#each values as v}<article class="content-card">
-          <svelte:component this={v[0]} size={32} />
-          <h3>{v[1]}</h3>
-          <p>{v[2]}</p>
-        </article>{/each}
+      {#each content.values as value, index}
+        {@const Icon = valueIcons[index % valueIcons.length]}
+        <article class="content-card">
+          <Icon size={32} />
+          <h3>{value.title}</h3>
+          <p>{value.description}</p>
+        </article>
+      {/each}
     </div>
   </div>
 </section>
 <section class="section navy">
   <div class="wrap split">
     <div>
-      <span class="eyebrow">WHAT WE DO</span>
-      <h2>We coordinate the details that global opportunity demands.</h2>
-      <p>
-        From verification and introductions to applications, visits and patient
-        support, our team keeps every step visible and accountable.
-      </p>
+      <span class="eyebrow">{content.work.eyebrow}</span>
+      <h2>{content.work.title}</h2>
+      <p>{content.work.description}</p>
       <a class="btn" href="/services"
-        >EXPLORE SERVICES <ArrowRight size={17} /></a
+        >{content.work.button} <ArrowRight size={17} /></a
       >
     </div>
     <div class="points">
-      <p><ShieldCheck /> Verified partner direction</p>
-      <p><Handshake /> Human support from enquiry to completion</p>
-      <p><Globe2 /> Cross-border knowledge and coordination</p>
+      {#each content.work.points as point, index}
+        {@const Icon = pointIcons[index % pointIcons.length]}
+        <p><Icon /> {point}</p>
+      {/each}
     </div>
   </div>
 </section>

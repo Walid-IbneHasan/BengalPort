@@ -8,8 +8,11 @@ import {
   transactionSchema,
   pageContentUpdateSchema,
   businessContentUpdateSchema,
-  divisionContentUpdateSchema,
   feeSettingsSchema,
+  divisionContentSchema,
+  aboutContentSchema,
+  servicesContentSchema,
+  contactContentSchema,
   amountDueSchema,
   applicationEditSchema,
   categorySchema,
@@ -22,6 +25,12 @@ import {
   defaultHealthcareContent,
   defaultUmrahContent,
 } from "../lib/division-content.js";
+import {
+  defaultAboutContent,
+  defaultContactContent,
+  defaultServicesContent,
+} from "../lib/site-pages.js";
+import { z } from "zod";
 import sharp from "sharp";
 import { documentSummary } from "../lib/documents.js";
 import { balance } from "../lib/payment-rules.js";
@@ -760,13 +769,48 @@ const admin: FastifyPluginAsync = async (app) => {
     return { data: page };
   });
 
-  const divisionPages = {
-    education: { name: "Global Education", fallback: defaultEducationContent },
-    healthcare: { name: "Global Healthcare", fallback: defaultHealthcareContent },
-    umrah: { name: "Global Umrah", fallback: defaultUmrahContent },
+  // Pages edited as one document each: the division portals and the About,
+  // Services and Contact pages.
+  const editablePages = {
+    education: {
+      name: "Global Education",
+      fallback: defaultEducationContent,
+      schema: divisionContentSchema,
+    },
+    healthcare: {
+      name: "Global Healthcare",
+      fallback: defaultHealthcareContent,
+      schema: divisionContentSchema,
+    },
+    umrah: {
+      name: "Global Umrah",
+      fallback: defaultUmrahContent,
+      schema: divisionContentSchema,
+    },
+    about: {
+      name: "About Us",
+      fallback: defaultAboutContent,
+      schema: aboutContentSchema,
+    },
+    services: {
+      name: "Services",
+      fallback: defaultServicesContent,
+      schema: servicesContentSchema,
+    },
+    contact: {
+      name: "Contact",
+      fallback: defaultContactContent,
+      schema: contactContentSchema,
+    },
   };
-  for (const division of ["education", "healthcare", "umrah"] as const) {
-    const { name, fallback } = divisionPages[division];
+  for (const [division, { name, fallback, schema }] of Object.entries(
+    editablePages,
+  )) {
+    const updateSchema = z.object({
+      content: schema as z.ZodTypeAny,
+      published: z.boolean().default(true),
+      revision: z.number().int().nonnegative(),
+    });
     app.get(`/content/${division}`, async () => {
       const page = await prisma.pageContent.findUnique({
         where: { slug: division },
@@ -783,14 +827,14 @@ const admin: FastifyPluginAsync = async (app) => {
       };
     });
     app.put(`/content/${division}`, async (req, reply) => {
-      const parsed = divisionContentUpdateSchema.safeParse(req.body);
+      const parsed = updateSchema.safeParse(req.body);
       if (!parsed.success)
         return reply
           .code(400)
           .send({
             error: {
               code: "VALIDATION_ERROR",
-              message: `Please correct the ${name} content`,
+              message: `Please correct the ${name} content. Every field needs some text, and an image needs a path or a web address.`,
               details: parsed.error.flatten(),
             },
           });

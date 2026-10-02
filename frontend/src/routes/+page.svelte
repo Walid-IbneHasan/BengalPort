@@ -20,6 +20,7 @@
     Users,
   } from "lucide-svelte";
   import { cmsContent } from "$lib/cms";
+  import { whatsappNumber } from "$lib/config";
 
   const divisionIcons = {
     business: BriefcaseBusiness,
@@ -192,7 +193,7 @@
         {#if index < stats.length - 1}<em></em>{/if}{/each}
     </div>
     <div class="mobile-hero-actions">
-      <a class="mobile-whatsapp" href="https://wa.me/8801711991035" target="_blank" rel="noreferrer"><MessageCircle size={21}/><span><b>+8801711991035</b><small>Chat with us on WhatsApp</small></span></a>
+      <a class="mobile-whatsapp" href={`https://wa.me/${whatsappNumber()}`} target="_blank" rel="noreferrer"><MessageCircle size={21}/><span><b>+{whatsappNumber()}</b><small>Chat with us on WhatsApp</small></span></a>
       <a class="mobile-apply" href="/apply"><span>APPLY / ENQUIRY</span><ArrowRight size={18}/></a>
     </div>
   </div>

@@ -609,8 +609,39 @@ export const divisionContentSchema = z.object({
     secondary: text,
   }),
 });
-export const divisionContentUpdateSchema = z.object({
-  content: divisionContentSchema,
-  published: z.boolean().default(true),
-  revision: z.number().int().nonnegative(),
+// The About, Services and Contact pages.
+const heading = z.object({ eyebrow: text, title: text, description: paragraph });
+export const aboutContentSchema = z.object({
+  hero: heading,
+  intro: heading,
+  values: z
+    .array(z.object({ title: text, description: paragraph }))
+    .min(1)
+    .max(6),
+  work: z.object({
+    eyebrow: text,
+    title: text,
+    description: paragraph,
+    button: text,
+    points: z.array(text).min(1).max(6),
+  }),
+});
+const serviceGroup = z.object({
+  title: text,
+  image: link,
+  items: z.array(text).min(1).max(10),
+});
+export const servicesContentSchema = z.object({
+  hero: heading,
+  groups: z.object({
+    business: serviceGroup,
+    education: serviceGroup,
+    healthcare: serviceGroup,
+    umrah: serviceGroup,
+  }),
+});
+export const contactContentSchema = z.object({
+  hero: heading,
+  hours: text,
+  card: z.object({ title: text, description: paragraph, button: text }),
 });

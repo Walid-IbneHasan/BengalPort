@@ -88,6 +88,10 @@ The API and the website each run as a cPanel **Node.js App** (Node 20.12 or newe
 
 To update later, run `npm run package:cpanel` again, upload and extract the new zips over the old folders (your `.env` files are not in the zips), run `setup` for the API if there are new database changes, and restart both apps.
 
+## Editing the website
+
+Everything a visitor reads can be changed in the admin without touching code: **Website content** (homepage, header and footer, including the phone number, email, office address and social links used across the site), one editor per division page (Business, Education, Healthcare, Umrah), and the **About**, **Services** and **Contact** pages. Each save is a new revision; a page that is unpublished falls back to its built-in wording. The WhatsApp button uses `PUBLIC_WHATSAPP_NUMBER` from the website's settings.
+
 ## Key API groups
 
 `/api/auth`, `/api/enquiries`, `/api/applications`, `/api/opportunities`, `/api/suppliers`, `/api/factories`, `/api/education`, `/api/healthcare`, `/api/payments`, `/api/admin`, `/api/admin/accounts`.

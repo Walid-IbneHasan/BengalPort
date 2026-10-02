@@ -1,24 +1,26 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Check, Code2, Eye, LoaderCircle, Save } from "lucide-svelte";
+  import { Check, Code2, Eye, LoaderCircle, Plus, Save, Trash2 } from "lucide-svelte";
   import { api } from "$lib/api";
-  import type { DivisionContent } from "$lib/division-content";
+  import { addItem, contentRows, removeItem, setAt } from "$lib/content-fields";
   import CmsImageField from "./CmsImageField.svelte";
-  type Field = {
-    path: string;
-    label: string;
-    value: string;
-    long: boolean;
-    image: boolean;
-  };
+  // Edits one page of the public website: a division portal, or the About,
+  // Services or Contact page. `lists` lets items be added to and removed
+  // from the page's lists; `note` is shown above the fields.
+  type Content = Record<string, any>;
   let {
     division,
     fallback,
+    lists = false,
+    note = "",
   }: {
-    division: "education" | "healthcare" | "umrah";
-    fallback: DivisionContent;
+    division: "education" | "healthcare" | "umrah" | "about" | "services" | "contact";
+    fallback: Content;
+    lists?: boolean;
+    note?: string;
   } = $props();
-  let draft = $state<DivisionContent>(structuredClone(fallback)),
+  // svelte-ignore state_referenced_locally
+  let draft = $state<Content>(structuredClone(fallback)),
     revision = $state(0),
     published = $state(true),
     loading = $state(true),
@@ -27,46 +29,22 @@
     success = $state(""),
     advanced = $state(false),
     json = $state("");
-  let fields = $derived(flatten(draft));
+  let rows = $derived(contentRows(draft, { lists }));
   const name = $derived(
     {
       education: "Global Education",
       healthcare: "Global Healthcare",
       umrah: "Global Umrah",
+      about: "About Us",
+      services: "Services",
+      contact: "Contact",
     }[division],
   );
-  function title(path: string) {
-    return path
-      .replace(/\.(\d+)\./g, " $1 · ")
-      .replaceAll(".", " · ")
-      .replace(/([A-Z])/g, " $1")
-      .replace(/^./, (c) => c.toUpperCase());
-  }
-  function flatten(value: unknown, path = ""): Field[] {
-    if (typeof value === "string")
-      return [
-        {
-          path,
-          label: title(path),
-          value,
-          long: value.length > 75 || /description/i.test(path),
-          image: /(^|\.)image$/i.test(path),
-        },
-      ];
-    if (!value || typeof value !== "object") return [];
-    return Object.entries(value).flatMap(([key, item]) =>
-      flatten(item, path ? `${path}.${key}` : key),
-    );
-  }
-  function setPath(path: string, value: string) {
-    const copy: any = structuredClone(draft),
-      keys = path.split(".");
-    let target = copy;
-    for (let i = 0; i < keys.length - 1; i++) target = target[keys[i]];
-    target[keys.at(-1) as string] = value;
-    draft = copy;
+  function change(next: Content) {
+    draft = next;
     success = "";
   }
+  const setPath = (path: string, value: string) => change(setAt($state.snapshot(draft), path, value));
   function toggleAdvanced() {
     advanced = !advanced;
     if (advanced) json = JSON.stringify(draft, null, 2);
@@ -122,7 +100,7 @@
     <div>
       <span>PUBLIC WEBSITE</span>
       <h1>{name} page</h1>
-      <p>Edit the complete public portal without changing code.</p>
+      <p>Edit this page of the public website without changing code.</p>
     </div>
     <div class="actions">
       <label><input type="checkbox" bind:checked={published} /> Published</label
@@ -157,9 +135,21 @@
           onclick={applyJson}>Apply JSON</button
         >
       </section>
-    {:else}<section class="fields">
-        {#each fields as field}
-          {#if field.image}<CmsImageField
+    {:else}{#if note}<p class="note">{note}</p>{/if}<section class="fields">
+        {#each rows as field}
+          {#if field.kind === "add"}<button
+              type="button"
+              class="list-button"
+              onclick={() => change(addItem($state.snapshot(draft), field.list))}
+              ><Plus size={15} /> {field.label}</button
+            >
+          {:else if field.kind === "remove"}<button
+              type="button"
+              class="list-button remove"
+              onclick={() => change(removeItem($state.snapshot(draft), field.list, field.index))}
+              ><Trash2 size={15} /> {field.label}</button
+            >
+          {:else if field.image}<CmsImageField
               label={field.label}
               value={field.value}
               purpose={`${division} ${field.path}`}
@@ -167,7 +157,15 @@
               onchange={(value) => setPath(field.path, value)}
             />
           {:else}<label
-              ><span>{field.label}</span>{#if field.long}<textarea
+              ><span
+                >{field.label}{#if field.remove}{@const item = field.remove}<button
+                    type="button"
+                    class="inline-remove"
+                    aria-label={`Remove ${field.label}`}
+                    onclick={() => change(removeItem($state.snapshot(draft), item.list, item.index))}
+                    ><Trash2 size={13} /> Remove</button
+                  >{/if}</span
+              >{#if field.long}<textarea
                   rows="3"
                   value={field.value}
                   oninput={(e) => setPath(field.path, e.currentTarget.value)}
@@ -303,9 +301,54 @@
     gap: 0.35rem;
   }
   .fields label > span {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.7rem;
     font-weight: 750;
     color: #40546a;
+  }
+  .note {
+    margin: 0;
+    padding: 0.8rem 1rem;
+    background: #f6f8f9;
+    border: 1px solid #dfe5e8;
+    border-top: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #40546a;
+  }
+  .list-button {
+    grid-column: 1 / -1;
+    justify-self: start;
+    align-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2.6rem;
+    border: 1px dashed #c3ccd3;
+    background: #fff;
+    border-radius: 0.6rem;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--heading);
+  }
+  .list-button.remove,
+  .inline-remove {
+    color: #a84747;
+  }
+  .inline-remove {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border: 0;
+    background: none;
+    padding: 0;
+    min-height: 0;
+    font-size: 0.68rem;
+    font-weight: 700;
   }
   .fields input,
   .fields textarea,

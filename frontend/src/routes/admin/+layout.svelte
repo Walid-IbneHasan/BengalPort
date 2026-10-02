@@ -11,6 +11,9 @@
     FileCheck2,
     FileText,
     Images,
+    Info,
+    LayoutGrid,
+    Phone,
     GraduationCap,
     HeartPulse,
     LayoutDashboard,
@@ -62,6 +65,13 @@
       href: "/admin/division-content/umrah",
       icon: MoonStar,
     },
+    { label: "About page", href: "/admin/page-content/about", icon: Info },
+    {
+      label: "Services page",
+      href: "/admin/page-content/services",
+      icon: LayoutGrid,
+    },
+    { label: "Contact page", href: "/admin/page-content/contact", icon: Phone },
     { label: "Settings", href: "/admin/settings", icon: Settings },
   ];
   const active = (href: string) =>
