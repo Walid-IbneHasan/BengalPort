@@ -2,7 +2,8 @@
   import { onMount } from "svelte";
   import { afterNavigate } from "$app/navigation";
   import { page } from "$app/state";
-  import { api } from "$lib/api";
+  import { api, apiPage } from "$lib/api";
+  import { lastPage, pageSummary, type PageMeta } from "$lib/pagination";
   import {
     ArrowRight,
     Check,
@@ -185,6 +186,8 @@
     search = "",
     drawer = false,
     saving = false;
+  const PAGE_SIZE = 25;
+  let meta: PageMeta = { total: 0, page: 1, pageSize: PAGE_SIZE };
   // The enquiry or application whose full details are open.
   let viewing: any = null;
   $: viewable = ["enquiries", "applications"].includes(section);
@@ -218,7 +221,9 @@
     form = blankRecord(config.add);
     drawer = true;
     if (config.add === "payment")
-      api<any[]>("/admin/resources/applications", { headers: headers() })
+      api<any[]>("/admin/resources/applications?page=1&pageSize=100", {
+        headers: headers(),
+      })
         .then((list) => (applications = list))
         .catch(() => (applications = []));
   }
@@ -236,15 +241,26 @@
     loading = true;
     error = "";
     try {
-      rows = await api(
-        `/admin/resources/${section}${search ? `?search=${encodeURIComponent(search)}` : ""}`,
+      const result = await apiPage<any>(
+        `/admin/resources/${section}?page=${meta.page}&pageSize=${PAGE_SIZE}${search ? `&search=${encodeURIComponent(search)}` : ""}`,
         { headers: headers() },
       );
+      // Deleting the last row of the last page leaves it empty: step back.
+      if (!result.rows.length && result.meta.page > 1) {
+        meta = { ...meta, page: lastPage(result.meta) };
+        return load();
+      }
+      rows = result.rows;
+      meta = result.meta;
     } catch (e) {
       error = e instanceof Error ? e.message : "Unable to load records";
     } finally {
       loading = false;
     }
+  }
+  function goToPage(page: number) {
+    meta = { ...meta, page };
+    load();
   }
   function value(row: any, key: string) {
     if (key === "contact")
@@ -300,8 +316,8 @@
         method: "DELETE",
         headers: headers(),
       });
-      rows = rows.filter((row) => row.id !== id);
       success = "Record deleted";
+      await load();
       setTimeout(() => (success = ""), 1800);
     } catch (e) {
       error = e instanceof Error ? e.message : "Delete failed";
@@ -349,6 +365,7 @@
       section = next;
       config = configs[section];
       search = "";
+      meta = { total: 0, page: 1, pageSize: PAGE_SIZE };
       rows = [];
       drawer = false;
       viewing = null;
@@ -413,10 +430,11 @@
         <label
           ><Search size={17} /><input
             bind:value={search}
-            onkeydown={(e) => e.key === "Enter" && load()}
+            onkeydown={(e) => e.key === "Enter" && goToPage(1)}
             placeholder={`Search ${config.title.toLowerCase()}`}
           /></label
-        ><button onclick={load}>Search</button><span>{rows.length} records</span
+        ><button onclick={() => goToPage(1)}>Search</button><span
+          >{meta.total} {meta.total === 1 ? "record" : "records"}</span
         >
       </div>
       <section class="table-card" aria-busy={loading}>
@@ -499,6 +517,12 @@
               <p>Try another search or add the first record.</p>
             </div>{/if}
         </div>
+        {#if meta.total > meta.pageSize}<nav class="pager" aria-label="Pages">
+            <span>{pageSummary(meta)}</span>
+            <button disabled={meta.page <= 1 || loading} onclick={() => goToPage(meta.page - 1)}>Previous</button>
+            <span>Page {meta.page} of {lastPage(meta)}</span>
+            <button disabled={meta.page >= lastPage(meta) || loading} onclick={() => goToPage(meta.page + 1)}>Next</button>
+          </nav>{/if}
       </section>{/if}
   </div>{/if}
 {#if drawer}<div
@@ -1044,6 +1068,34 @@
     font-size: 0.72rem;
     font-weight: 700;
     cursor: pointer;
+  }
+  .pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.6rem 0.9rem;
+    padding: 0.8rem 1rem;
+    border-top: 1px solid #edf0f2;
+    font-size: 0.75rem;
+    color: #6d7b89;
+  }
+  .pager span:first-child {
+    margin-right: auto;
+  }
+  .pager button {
+    min-height: 2.2rem;
+    padding: 0 0.8rem;
+    border: 1px solid #d9dfe4;
+    border-radius: 0.55rem;
+    background: #fff;
+    color: var(--heading);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+  .pager button:disabled {
+    opacity: 0.45;
+    cursor: default;
   }
   .skeleton i {
     display: block;

@@ -171,3 +171,60 @@ describe("who may change the directory", () => {
     assert.equal(res.statusCode, 403);
   });
 });
+
+describe("browsing long lists a page at a time", () => {
+  const listed = (query: string) => call("GET", `/api/admin/resources/suppliers?search=${encodeURIComponent(stamp)}${query}`);
+  before(async () => {
+    await prisma.supplier.createMany({
+      data: ["Alpha", "Bravo", "Charlie"].map((name) => ({ name: `${stamp} paged ${name}`, country: "China", industry: "Textiles", product: "Fabric", description: "A supplier used by the paging tests.", image: "/images/global-business.webp" })),
+    });
+  });
+
+  test("a page holds the requested number of records and reports the total", async () => {
+    const body = (await listed("%20paged&page=1&pageSize=2")).json();
+    assert.equal(body.data.length, 2);
+    assert.deepEqual(body.meta, { total: 3, page: 1, pageSize: 2 });
+  });
+
+  test("the next page continues without repeating records", async () => {
+    const first = (await listed("%20paged&page=1&pageSize=2")).json().data.map((item: any) => item.id);
+    const second = (await listed("%20paged&page=2&pageSize=2")).json().data.map((item: any) => item.id);
+    assert.equal(second.length, 1);
+    assert.equal(first.includes(second[0]), false);
+  });
+
+  test("an oversized page is capped at 100 records", async () => {
+    assert.equal((await listed("%20paged&page=1&pageSize=5000")).json().meta.pageSize, 100);
+  });
+
+  test("a request without a page still returns the whole list", async () => {
+    const body = (await listed("%20paged")).json();
+    assert.equal(body.data.length, 3);
+    assert.equal(body.meta, undefined);
+  });
+});
+
+describe("searching payments and receipts", () => {
+  let receiptNumber = "";
+  before(async () => {
+    const payment = await prisma.payment.create({
+      data: { service: `${stamp} visa service`, amount: 500, totalDue: 500, method: "Cash", transactionId: `${stamp}-PAY`, status: "PAID", receipt: { create: { receiptNumber: `${stamp}-RCPT`, previousDue: 500, remainingDue: 0 } } },
+      include: { receipt: true },
+    });
+    receiptNumber = payment.receipt!.receiptNumber;
+  });
+  after(async () => {
+    await prisma.receipt.deleteMany({ where: { receiptNumber } });
+    await prisma.payment.deleteMany({ where: { transactionId: `${stamp}-PAY` } });
+  });
+
+  test("a payment is found by the service it was for", async () => {
+    const rows = (await call("GET", `/api/admin/resources/payments?search=${encodeURIComponent(`${stamp} visa`)}`)).json().data;
+    assert.deepEqual(rows.map((row: any) => row.transactionId), [`${stamp}-PAY`]);
+  });
+
+  test("a receipt is found by its number", async () => {
+    const rows = (await call("GET", `/api/admin/resources/receipts?search=${encodeURIComponent(receiptNumber)}`)).json().data;
+    assert.deepEqual(rows.map((row: any) => row.receiptNumber), [receiptNumber]);
+  });
+});

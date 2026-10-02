@@ -227,135 +227,88 @@ const admin: FastifyPluginAsync = async (app) => {
     }
   });
 
+  // Lists for the admin tables. With ?page= the response is one page plus the
+  // total; without it the whole list is returned.
   app.get("/resources/:resource", async (req, reply) => {
     const { resource } = req.params as { resource: string };
-    const search = String((req.query as any).search || "").trim();
-    const contains = search
-      ? { contains: search, mode: "insensitive" as const }
-      : undefined;
-    switch (resource) {
-      case "enquiries":
-        return {
-          data: await prisma.enquiry.findMany({
-            where: search
-              ? {
-                  OR: [
-                    { name: contains },
-                    { phone: contains },
-                    { email: contains },
-                    { message: contains },
-                  ],
-                }
-              : {},
-            include: { user: { select: { name: true, email: true } } },
-            orderBy: { createdAt: "desc" },
-          }),
-        };
-      case "applications":
-        return {
-          data: await prisma.application.findMany({
-            where: search
-              ? {
-                  OR: [
-                    { reference: contains },
-                    { fullName: contains },
-                    { email: contains },
-                    { phone: contains },
-                  ],
-                }
-              : {},
-            include: {
-              user: { select: { name: true, email: true } },
-              _count: { select: { payments: true } },
-            },
-            orderBy: { createdAt: "desc" },
-          }),
-        };
-      case "opportunities":
-        return {
-          data: await prisma.opportunity.findMany({
-            where: search
-              ? {
-                  OR: [
-                    { title: contains },
-                    { country: contains },
-                    { location: contains },
-                  ],
-                }
-              : {},
-            orderBy: { createdAt: "desc" },
-          }),
-        };
-      case "suppliers":
-        return {
-          data: await prisma.supplier.findMany({
-            where: search
-              ? {
-                  OR: [
-                    { name: contains },
-                    { country: contains },
-                    { industry: contains },
-                    { product: contains },
-                  ],
-                }
-              : {},
-            orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-          }),
-        };
-      case "factories":
-        return {
-          data: await prisma.factory.findMany({
-            where: search
-              ? {
-                  OR: [
-                    { name: contains },
-                    { country: contains },
-                    { industry: contains },
-                    { product: contains },
-                  ],
-                }
-              : {},
-            orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-          }),
-        };
-      case "education":
-        return {
-          data: await prisma.institution.findMany({
-            where: search
-              ? { OR: [{ name: contains }, { country: contains }] }
-              : {},
+    const query = req.query as {
+      search?: string;
+      page?: string;
+      pageSize?: string;
+    };
+    const search = String(query.search || "").trim();
+    const matching = (...fields: string[]) =>
+      search
+        ? {
+            OR: fields.map((field) => ({
+              [field]: { contains: search, mode: "insensitive" as const },
+            })),
+          }
+        : {};
+    const person = { select: { name: true, email: true } };
+    const application = { select: { reference: true, fullName: true } };
+    const newest = [{ createdAt: "desc" }, { id: "desc" }];
+    const featuredFirst = [{ featured: "desc" }, ...newest];
+    const byName = [{ name: "asc" }, { id: "asc" }];
+    const lists: Record<string, { table: any; args: Record<string, unknown> }> =
+      {
+        enquiries: {
+          table: prisma.enquiry,
+          args: {
+            where: matching("name", "phone", "email", "message"),
+            include: { user: person },
+            orderBy: newest,
+          },
+        },
+        applications: {
+          table: prisma.application,
+          args: {
+            where: matching("reference", "fullName", "email", "phone"),
+            include: { user: person, _count: { select: { payments: true } } },
+            orderBy: newest,
+          },
+        },
+        opportunities: {
+          table: prisma.opportunity,
+          args: {
+            where: matching("title", "country", "location"),
+            orderBy: newest,
+          },
+        },
+        suppliers: {
+          table: prisma.supplier,
+          args: {
+            where: matching("name", "country", "industry", "product"),
+            orderBy: featuredFirst,
+          },
+        },
+        factories: {
+          table: prisma.factory,
+          args: {
+            where: matching("name", "country", "industry", "product"),
+            orderBy: featuredFirst,
+          },
+        },
+        education: {
+          table: prisma.institution,
+          args: {
+            where: matching("name", "country"),
             include: { programs: true },
-            orderBy: { name: "asc" },
-          }),
-        };
-      case "healthcare":
-        return {
-          data: await prisma.hospital.findMany({
-            where: search
-              ? {
-                  OR: [
-                    { name: contains },
-                    { country: contains },
-                    { city: contains },
-                  ],
-                }
-              : {},
+            orderBy: byName,
+          },
+        },
+        healthcare: {
+          table: prisma.hospital,
+          args: {
+            where: matching("name", "country", "city"),
             include: { services: true },
-            orderBy: { name: "asc" },
-          }),
-        };
-      case "users":
-        return {
-          data: await prisma.user.findMany({
-            where: search
-              ? {
-                  OR: [
-                    { name: contains },
-                    { email: contains },
-                    { phone: contains },
-                  ],
-                }
-              : {},
+            orderBy: byName,
+          },
+        },
+        users: {
+          table: prisma.user,
+          args: {
+            where: matching("name", "email", "phone"),
             select: {
               id: true,
               name: true,
@@ -367,37 +320,41 @@ const admin: FastifyPluginAsync = async (app) => {
                 select: { enquiries: true, applications: true, payments: true },
               },
             },
-            orderBy: { createdAt: "desc" },
-          }),
-        };
-      case "payments":
-        return {
-          data: await prisma.payment.findMany({
-            include: {
-              user: { select: { name: true, email: true } },
-              application: { select: { reference: true, fullName: true } },
-              receipt: true,
-            },
-            orderBy: { createdAt: "desc" },
-          }),
-        };
-      case "receipts":
-        return {
-          data: await prisma.receipt.findMany({
-            include: {
-              payment: {
-                include: {
-                  user: { select: { name: true, email: true } },
-                  application: { select: { reference: true, fullName: true } },
-                },
-              },
-            },
-            orderBy: { createdAt: "desc" },
-          }),
-        };
-      default:
-        return reply.notFound("Admin resource not found");
-    }
+            orderBy: newest,
+          },
+        },
+        payments: {
+          table: prisma.payment,
+          args: {
+            where: matching("service", "transactionId", "method"),
+            include: { user: person, application, receipt: true },
+            orderBy: newest,
+          },
+        },
+        receipts: {
+          table: prisma.receipt,
+          args: {
+            where: matching("receiptNumber"),
+            include: { payment: { include: { user: person, application } } },
+            orderBy: newest,
+          },
+        },
+      };
+    const list = lists[resource];
+    if (!list) return reply.notFound("Admin resource not found");
+    if (query.page === undefined)
+      return { data: await list.table.findMany(list.args) };
+    const pageSize = Math.min(100, Math.max(1, Number(query.pageSize) || 25));
+    const page = Math.max(1, Number(query.page) || 1);
+    const [data, total] = await Promise.all([
+      list.table.findMany({
+        ...list.args,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      list.table.count({ where: list.args.where }),
+    ]);
+    return { data, meta: { total, page, pageSize } };
   });
 
   app.patch("/resources/:resource/:id", async (req, reply) => {
