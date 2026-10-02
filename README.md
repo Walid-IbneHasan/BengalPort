@@ -1,6 +1,6 @@
 # Bengal Port
 
-Full-stack Bengal Port platform with a high-fidelity SvelteKit public site, Fastify REST API, PostgreSQL/Prisma data layer, user and admin areas, enquiries, applications, mock payments, receipts, opportunities and accounts.
+Full-stack Bengal Port platform with a high-fidelity SvelteKit public site, Fastify REST API, PostgreSQL/Prisma data layer, user and admin areas, enquiries, applications, payments, receipts, opportunities and accounts.
 
 ## Requirements
 
@@ -72,7 +72,7 @@ To update later, run `npm run package:cpanel` again, upload and extract the new 
 
 `/api/auth`, `/api/enquiries`, `/api/applications`, `/api/opportunities`, `/api/suppliers`, `/api/factories`, `/api/education`, `/api/healthcare`, `/api/payments`, `/api/admin`, `/api/admin/accounts`.
 
-The payment route uses a mock provider-compatible flow and creates a receipt atomically. Only administrators can record a payment, and a receipt can be opened only by an administrator or the customer it belongs to. Replace the payment service with a real provider adapter without changing receipt or application relationships.
+Payments are recorded by an administrator after the money is received (Admin → Payments → Record payment), and each one creates its receipt atomically. There is no online payment provider yet. A receipt can be opened only by an administrator or the customer it belongs to; payments recorded against a member's application appear on their dashboard.
 
 The public enquiry and application endpoints accept 10 submissions per client every 10 minutes, and JSON request bodies are limited to 1 MB.
 
