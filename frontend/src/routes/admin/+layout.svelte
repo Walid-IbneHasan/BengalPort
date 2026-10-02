@@ -223,10 +223,21 @@
     height: 2.5rem;
     border-radius: 0.65rem;
   }
+  /* The list is longer than most screens. It scrolls inside the sidebar, and
+     a soft edge appears at the top or bottom while more items lie beyond it. */
   .admin-shell nav {
+    flex: 1;
+    min-height: 0;
     padding-top: 0.9rem;
     overflow-y: auto;
-    scrollbar-width: none;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #ffffff38 transparent;
+    background:
+      linear-gradient(#102640 40%, #10264000) top / 100% 2.6rem no-repeat local,
+      linear-gradient(#10264000, #102640 60%) bottom / 100% 2.6rem no-repeat local,
+      linear-gradient(#ffffff2e, #ffffff00) top / 100% 1.1rem no-repeat scroll,
+      linear-gradient(#ffffff00, #ffffff2e) bottom / 100% 1.1rem no-repeat scroll;
   }
   .admin-shell nav a {
     position: relative;
@@ -263,6 +274,7 @@
     transform: scale(0.98);
   }
   .account {
+    flex: none;
     margin-top: auto;
     border-top: 1px solid #ffffff14;
     padding: 1rem 0.7rem 0.25rem;
@@ -314,15 +326,52 @@
     .admin-shell {
       grid-template-columns: 1fr;
     }
+    /* Closed, the menu is off-screen, casts no shadow onto the page and
+       cannot be reached with the keyboard. */
     .admin-shell > aside {
       position: fixed;
       left: 0;
       transform: translateX(-100%);
       width: min(18rem, 86vw);
-      transition: transform 240ms var(--ease-drawer);
+      height: 100dvh;
+      padding-left: max(0.85rem, env(safe-area-inset-left));
+      padding-bottom: max(1.15rem, env(safe-area-inset-bottom));
+      visibility: hidden;
+      box-shadow: none;
+      transition:
+        transform 240ms var(--ease-drawer),
+        visibility 0s 240ms;
     }
     .admin-shell > aside.open {
       transform: none;
+      visibility: visible;
+      box-shadow: 0.5rem 0 2rem #07182f66;
+      transition:
+        transform 240ms var(--ease-drawer),
+        visibility 0s;
+    }
+    .admin-shell nav a {
+      min-height: 2.75rem;
+    }
+    .account {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem 1rem;
+      padding-top: 0.8rem;
+    }
+    .account span,
+    .account b {
+      display: none;
+    }
+    .account a {
+      padding: 0.5rem 0;
+    }
+    .account button {
+      margin-top: 0;
+      min-height: 2.5rem;
+      padding: 0.45rem 0.9rem;
     }
     .brand button {
       display: grid;
@@ -339,7 +388,8 @@
     }
     .mobile-bar {
       height: 3.75rem;
-      padding: 0 1rem;
+      padding: 0 max(1rem, env(safe-area-inset-right)) 0
+        max(1rem, env(safe-area-inset-left));
       background: #102640;
       color: #fff;
       display: flex;
@@ -359,10 +409,36 @@
       display: grid;
       place-items: center;
     }
+    .mobile-bar b {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .mobile-bar a {
       margin-left: auto;
+      padding: 0.75rem 0.2rem;
       color: #e6c36d;
       font-size: 0.78rem;
+    }
+  }
+  /* A phone held sideways: less room for the heading, more for the list. */
+  @media (max-height: 30rem) {
+    .admin-shell > aside {
+      padding-top: 0.6rem;
+    }
+    .brand {
+      padding-bottom: 0.6rem;
+    }
+    .brand img {
+      width: 2.2rem;
+      height: 2.2rem;
+    }
+    .admin-shell nav {
+      padding-top: 0.4rem;
+    }
+    .account {
+      padding-top: 0.5rem;
     }
   }
   @media (prefers-reduced-motion: reduce) {

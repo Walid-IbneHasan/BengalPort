@@ -106,7 +106,7 @@
   li>div{flex:1;min-width:0}
   li b{display:block;font-size:13px;color:#12213a}
   li span,li.none,.hint{font-size:11px;color:#7a8593}
-  li button{width:32px;height:32px;border:1px solid #dfe5ea;border-radius:8px;background:#fff;color:#35495d;display:inline-grid;place-items:center;cursor:pointer;flex:none}
+  li button{width:36px;height:36px;border:1px solid #dfe5ea;border-radius:8px;background:#fff;color:#35495d;display:inline-grid;place-items:center;cursor:pointer;flex:none}
   li button.danger{color:#a84747;border-color:#eadada}
   li button:disabled{opacity:.4;cursor:default}
   .rename{flex:1;display:flex;gap:8px}

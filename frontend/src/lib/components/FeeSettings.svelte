@@ -59,9 +59,9 @@
       {#each fees as fee}
         <div class="line">
           <b>{names[fee.division] ?? fee.division}</b>
-          <input bind:value={fee.label} aria-label={`${names[fee.division]} fee name`} maxlength="80" required />
-          <input type="number" min="0" step="0.01" bind:value={fee.amount} aria-label={`${names[fee.division]} fee`} required />
-          <input type="number" min="0" step="0.01" bind:value={fee.minimumPayment} aria-label={`${names[fee.division]} smallest part payment`} required />
+          <label><span>Shown to customers as</span><input bind:value={fee.label} aria-label={`${names[fee.division]} fee name`} maxlength="80" required /></label>
+          <label><span>Fee (৳)</span><input type="number" min="0" step="0.01" bind:value={fee.amount} aria-label={`${names[fee.division]} fee`} required /></label>
+          <label><span>Smallest part payment (৳)</span><input type="number" min="0" step="0.01" bind:value={fee.minimumPayment} aria-label={`${names[fee.division]} smallest part payment`} required /></label>
         </div>
       {/each}
     </div>
@@ -83,6 +83,8 @@
   .head,.line{display:grid;grid-template-columns:1.1fr 1.6fr 1fr 1fr;gap:.6rem;align-items:center}
   .head{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:#738191}
   .line b{font-size:.84rem;color:var(--heading)}
+  .line label{display:grid;gap:.25rem;min-width:0}
+  .line label span{display:none;font-size:.68rem;color:#738191}
   input{width:100%;min-height:2.6rem;border:1px solid #d6dde2;border-radius:.6rem;padding:.55rem .7rem;outline:none}
   input:focus{border-color:var(--gold);box-shadow:0 0 0 3px #c7983620}
   footer{display:flex;justify-content:flex-end;align-items:center;gap:.9rem}
@@ -90,5 +92,5 @@
   button:disabled{opacity:.6}
   .ok{display:inline-flex;align-items:center;gap:.3rem;color:#276541;font-size:.8rem}
   .problem{margin:0;padding:.6rem .8rem;border-radius:.6rem;background:#fff0f0;color:#922f2f;font-size:.8rem}
-  @media(max-width:46rem){.head{display:none}.line{grid-template-columns:1fr 1fr;padding-bottom:.6rem;border-bottom:1px solid #edf0f2}.line b{grid-column:1/-1}.line input:first-of-type{grid-column:1/-1}header{flex-direction:column}}
+  @media(max-width:46rem){.head{display:none}.line{grid-template-columns:1fr 1fr;align-items:end;padding-bottom:.6rem;border-bottom:1px solid #edf0f2}.line b{grid-column:1/-1}.line label:first-of-type{grid-column:1/-1}.line label span{display:block}header{flex-direction:column}}
 </style>

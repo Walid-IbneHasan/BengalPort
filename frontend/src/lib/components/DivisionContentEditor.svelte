@@ -209,6 +209,7 @@
   .actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-start;
     gap: 0.5rem;
   }
   .actions > * {
@@ -345,9 +346,10 @@
     gap: 0.25rem;
     border: 0;
     background: none;
-    padding: 0;
+    padding: 0.6rem 0 0.6rem 0.6rem;
+    margin: -0.6rem 0;
     min-height: 0;
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     font-weight: 700;
   }
   .fields input,

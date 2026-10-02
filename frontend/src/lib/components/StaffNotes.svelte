@@ -95,7 +95,9 @@
   li p{margin:0;font-size:.82rem;line-height:1.55;color:#23384f;white-space:pre-wrap;overflow-wrap:anywhere}
   li footer{display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin-top:.45rem}
   li footer span{font-size:.7rem;color:#6d7b89}
-  li footer button{display:inline-grid;place-items:center;width:1.9rem;height:1.9rem;border:0;border-radius:.45rem;background:none;color:#a84747;cursor:pointer}
+  li footer button{display:inline-grid;place-items:center;width:2.25rem;height:2.25rem;border:0;border-radius:.45rem;background:none;color:#a84747;cursor:pointer}
   .problem{margin:0;padding:.55rem .75rem;border-radius:.55rem;background:#fff0f0;color:#922f2f;font-size:.78rem}
+  /* On phones and tablets fields use 16px text: iPhones zoom the page when a smaller field is focused. */
+  @media(max-width:58rem){textarea{font-size:1rem}}
   @media(hover:hover) and (pointer:fine){li footer button:hover{background:#fdeaea}}
 </style>

@@ -168,5 +168,7 @@
   .failed{background:#fdeaea;color:#922f2f}
   li p{margin:.35rem 0 .25rem;font-size:.8rem;line-height:1.5;color:#40546a;overflow-wrap:anywhere}
   li small{font-size:.7rem;color:#6d7b89}
-  @media(max-width:30rem){.grid{grid-template-columns:1fr}}
+  /* On phones and tablets fields use 16px text: iPhones zoom the page when a smaller field is focused. */
+  @media(max-width:58rem){input,select,textarea{font-size:1rem}}
+  @media(max-width:30rem){.grid{grid-template-columns:1fr}.body{padding:1.1rem}header{padding:1.1rem}}
 </style>

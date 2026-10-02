@@ -94,5 +94,7 @@
   .cancel{border:1px solid #d7dde2;background:#fff;border-radius:.7rem;padding:.6rem 1rem;cursor:pointer}
   .save{border:0;background:var(--gold);color:var(--heading);border-radius:.7rem;padding:.6rem 1.1rem;font-weight:750;cursor:pointer}
   .save:disabled{opacity:.55}
-  @media(max-width:43rem){.fields,.choices{grid-template-columns:1fr}}
+  /* On phones and tablets fields use 16px text: iPhones zoom the page when a smaller field is focused. */
+  @media(max-width:58rem){input:not([type="checkbox"]),select,textarea{font-size:1rem}}
+  @media(max-width:43rem){.fields,.choices{grid-template-columns:1fr}footer{bottom:-1.1rem;margin:0 -1.1rem -1.1rem;padding:.8rem 1.1rem}fieldset{padding:.9rem}}
 </style>

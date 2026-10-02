@@ -556,6 +556,7 @@
                     >{#each config.columns as _}<td><i></i></td>{/each}</tr
                   >{/each}{:else}{#each rows as row}<tr
                     >{#each config.columns as column}<td
+                        data-label={column[1]}
                         >{#if column[0] === "status" && ["enquiries", "applications"].includes(section)}<select
                             class="status"
                             value={row.status}
@@ -1090,6 +1091,7 @@
   }
   .toolbar {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.6rem;
     margin-bottom: 0.8rem;
@@ -1102,7 +1104,12 @@
     border: 1px solid #dce2e6;
     border-radius: 0.7rem;
     padding: 0 0.8rem;
-    min-width: min(25rem, 55vw);
+    flex: 0 1 25rem;
+    min-width: min(14rem, 100%);
+  }
+  .toolbar button,
+  .toolbar > span {
+    white-space: nowrap;
   }
   .toolbar input {
     border: 0;
@@ -1152,6 +1159,7 @@
   }
   .drawer header .edit-answers {
     width: auto;
+    white-space: nowrap;
     padding: 0 0.9rem;
     font-size: 0.75rem;
     font-weight: 700;
@@ -1168,13 +1176,103 @@
     overflow: hidden;
     box-shadow: 0 0.5rem 1.8rem #1026400a;
   }
+  /* Nothing here scrolls any more, so no room is kept for a scrollbar. */
   .table-wrap {
     overflow: auto;
+    scrollbar-gutter: auto;
+  }
+  /* The table needs about 52rem. Where its card is narrower than that
+     (phones, tablets, and laptops with the sidebar open) each record is shown
+     as a card instead, so nothing has to be scrolled sideways. */
+  .table-card {
+    container-type: inline-size;
   }
   table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 58rem;
+  }
+  @container (max-width: 52rem) {
+    table,
+    tbody {
+      display: block;
+    }
+    thead {
+      display: none;
+    }
+    tbody {
+      display: grid;
+      gap: 0.6rem;
+      padding: 0.6rem;
+    }
+    tbody tr {
+      display: block;
+      padding: 0.85rem 0.95rem;
+      border: 1px solid #e6eaed;
+      border-radius: 0.8rem;
+      min-width: 0;
+    }
+    tbody td {
+      display: grid;
+      grid-template-columns: 6.25rem minmax(0, 1fr);
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.32rem 0;
+      border: 0;
+      max-width: none;
+      font-size: 0.8rem;
+      overflow-wrap: anywhere;
+    }
+    tbody td::before {
+      content: attr(data-label);
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #738191;
+    }
+    /* The first column names the record: shown as the card's heading. */
+    tbody td:first-child {
+      display: block;
+      padding: 0 0 0.45rem;
+      font-size: 0.92rem;
+    }
+    tbody td:first-child > span {
+      color: #23384f;
+      font-weight: 750;
+    }
+    tbody td:first-child::before,
+    tbody td.actions::before,
+    tbody td[data-label=""]::before {
+      content: none;
+    }
+    tbody td[data-label=""] {
+      display: block;
+    }
+    tbody td > span {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      overflow: hidden;
+    }
+    tbody td.actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      width: auto;
+      padding: 0.6rem 0.6rem 0 0;
+      text-align: left;
+    }
+    tbody td.actions:empty {
+      display: none;
+    }
+    .skeleton td::before {
+      visibility: hidden;
+    }
+  }
+  @container (min-width: 38rem) and (max-width: 52rem) {
+    tbody {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
   th {
     text-align: left;
@@ -1213,6 +1311,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
+    min-height: 2.25rem;
     border: 0;
     background: none;
     color: #276541;
@@ -1279,6 +1378,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
+    min-height: 2.25rem;
     color: var(--gold-deep);
     font-weight: 750;
   }
@@ -1391,8 +1491,19 @@
     justify-content: space-between;
     align-items: center;
   }
+  .drawer > header {
+    gap: 0.8rem;
+  }
+  .drawer > header > div:first-child {
+    min-width: 0;
+  }
   .drawer h2 {
     margin: 0.3rem 0 0;
+    font-size: clamp(1.15rem, 5.2vw, 1.5rem);
+    overflow-wrap: anywhere;
+  }
+  .drawer header button {
+    flex: none;
   }
   .drawer header button {
     width: 2.5rem;
@@ -1608,6 +1719,14 @@
       opacity: 0.45;
     }
   }
+  /* On phones and tablets fields use 16px text: iPhones zoom the page when a smaller field is focused. */
+  @media (max-width: 58rem) {
+    .status {
+      font-size: 1rem;
+      padding: 0.4rem 0.5rem;
+      max-width: 100%;
+    }
+  }
   @media (max-width: 43rem) {
     .resource > header {
       align-items: flex-start;
@@ -1631,6 +1750,35 @@
     .details-body dl > div {
       grid-template-columns: 1fr;
       gap: 0.2rem;
+    }
+    /* A programme or service: its fields one under another, the remove
+       button beside the first. */
+    .item {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .item input,
+    .item .wide {
+      grid-column: 1;
+    }
+    .item .delete {
+      grid-column: 2;
+    }
+    .drawer form,
+    .details-body {
+      padding: 1.1rem;
+    }
+    .drawer > header {
+      padding: 1.1rem;
+    }
+    .drawer footer {
+      flex-wrap: wrap;
+    }
+    .drawer footer > * {
+      flex: 1;
+      justify-content: center;
+    }
+    .amount-due {
+      flex-wrap: wrap;
     }
   }
   @media (prefers-reduced-motion: reduce) {
