@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { fade } from "svelte/transition";
   import {
     ArrowRight,
     Award,
@@ -55,12 +56,14 @@
       icon: fieldIcons[key],
       title: content.fields[key].title,
       tagline: content.fields[key].tagline,
+      image: content.fields[key].image,
     })),
     {
       id: "reviews",
       icon: Star,
       title: content.reviews.title,
       tagline: content.reviews.tagline,
+      image: content.reviews.image,
     },
   ]);
   let fields = $derived(
@@ -99,14 +102,25 @@
     query = "";
   }
   const count = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
-  // The hero names the study destinations one after another.
+  const flagCodes = ["no", "uz", "ru", "us", "gb", "ca", "fr", "fi", "se", "ch", "jp", "au", "my"];
+  let flagStates = $state(["gb", "fi", "ca", "fr"]);
   let place = $state(0);
+  let heroCountries = $derived(places.length ? places.map(x => x.country) : ["UK", "USA", "Canada", "Australia", "Malaysia"]);
+
   onMount(() => {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = setInterval(() => {
-      if (places.length > 1) place = (place + 1) % places.length;
+      if (heroCountries.length > 1) place = (place + 1) % heroCountries.length;
     }, 2400);
-    return () => clearInterval(timer);
+
+    const flagTimer = setInterval(() => {
+      flagStates = flagStates.map(() => flagCodes[Math.floor(Math.random() * flagCodes.length)]);
+    }, 3500);
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(flagTimer);
+    };
   });
   function reveal(node: HTMLElement) {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return {};
@@ -133,35 +147,45 @@
 
 <main class="edu">
   <section class="hero">
-    <img class="hero-bg" src={content.hero.image} alt="" fetchpriority="high" decoding="async" />
+    {#each flagStates as code, i}
+      <div class={`flag-ball flag-ball-${i}`}>
+        {#key code}
+          <img src={`https://flagcdn.com/w160/${code}.png`} alt="" aria-hidden="true" transition:fade={{ duration: 600 }} />
+        {/key}
+      </div>
+    {/each}
     <span class="eyebrow">{content.hero.eyebrow}</span>
-    <h1>{content.hero.title}</h1>
+    <h1>Study Abroad</h1>
+    <p class="places">
+      <span class="sr">Study in {heroCountries.join(", ")}</span>
+      <span aria-hidden="true" class="places-inner">
+        {#key place}<b>{heroCountries[place % heroCountries.length]}</b>{/key}
+      </span>
+    </p>
     <p class="tagline">{content.hero.tagline}</p>
-    {#if places.length}<p class="places">
-        <span class="sr">Study in {places.map((x) => x.country).join(", ")}</span>
-        <span aria-hidden="true"
-          >Study in {#key place}<b>{places[place % places.length].country}</b>{/key}</span
+    <nav class="options" aria-label="Education options">
+      {#each options as option}{@const Icon = option.icon}<a
+          class="option"
+          data-option={option.id}
+          href={`#${option.id}`}
         >
-      </p>{/if}
-  </section>
-  <nav class="options" aria-label="Education options">
-    {#each options as option}{@const Icon = option.icon}<a
-        class="option"
-        data-option={option.id}
-        href={`#${option.id}`}
-        ><span class="option-art"><i><Icon /></i></span><span class="option-label"
-          ><b>{option.title}</b><small>{option.tagline}</small></span
-        ></a
-      >{/each}
-  </nav>
-  <div class="lede">
-    <p>{content.hero.description}</p>
-    <div>
-      <a class="primary" href={applyHref("EDUCATION")}
-        >{content.hero.primary}<ArrowRight size={18} /></a
-      ><a class="ghost" href="#directory">{content.hero.secondary}</a>
+          <span class="option-art">
+            {#if option.image}<img src={option.image} alt="" role="presentation" />{/if}
+          </span>
+          <span class="option-label">
+            <b>{option.title}</b><small>{option.tagline}</small>
+          </span>
+        </a>{/each}
+    </nav>
+    <div class="lede">
+      <p>{content.hero.description}</p>
+      <div>
+        <a class="primary" href={applyHref("EDUCATION")}
+          >{content.hero.primary}<ArrowRight size={18} /></a
+        ><a class="ghost" href="#directory">{content.hero.secondary}</a>
+      </div>
     </div>
-  </div>
+  </section>
 
   {#each fields as item, i}{@const Icon = item.icon}
     <section class="field" class:flip={i % 2 === 1} id={item.key} use:reveal>
@@ -371,11 +395,11 @@
 
 <style>
   .edu {
-    --accent: #5d477c;
-    --accent-soft: #f3eff7;
-    --accent-deep: #44305f;
-    background: #fbfcfd;
-    color: #415367;
+    --accent: #e61a24;
+    --accent-soft: #f1f5f9;
+    --accent-deep: #0f0a59;
+    background: #f8f9fa;
+    color: #475569;
     padding: 0.75rem 1rem 5rem;
     overflow: clip;
   }
@@ -411,64 +435,96 @@
     font-size: 0.72rem;
     letter-spacing: 0.14em;
     font-weight: 800;
-    color: #8f6410;
+    color: #e61a24;
   }
 
   /* Hero: a centred title, then the four options straight below it. */
   .hero {
     position: relative;
     isolation: isolate;
-    overflow: hidden;
     border-radius: 1.25rem;
-    background: #0b2442;
-    color: #fff;
+    background: #fdfdfd;
+    background-image: radial-gradient(#d8e1e9 2px, transparent 2px);
+    background-size: 32px 32px;
+    background-position: center;
+    color: #0e1133;
     text-align: center;
-    padding: 1.35rem 1rem 4.2rem;
+    padding: 3rem 1rem 4rem;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 100px 80px #fdfdfd;
   }
   .hero-bg {
+    display: none;
+  }
+  .hero::after {
+    display: none;
+  }
+  @keyframes float-1 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(15px, -20px); }
+  }
+  @keyframes float-2 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-20px, 15px); }
+  }
+  .flag-ball {
     position: absolute;
-    inset: 0;
-    z-index: -2;
+    width: clamp(2.5rem, 6vw, 4rem);
+    height: clamp(2.5rem, 6vw, 4rem);
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+    z-index: 10;
+    border: 3px solid #fff;
+    pointer-events: none;
+  }
+  .flag-ball img {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.26;
   }
-  .hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background:
-      radial-gradient(90% 70% at 50% 0%, #1d477533, transparent 70%),
-      linear-gradient(180deg, #0b244266, #0b2442 96%);
-  }
+  .flag-ball-0 { top: 12%; left: 18%; animation: float-1 8s ease-in-out infinite; }
+  .flag-ball-1 { top: 8%; right: 15%; animation: float-2 9s ease-in-out infinite; }
+  .flag-ball-2 { top: 28%; left: 12%; animation: float-2 7s ease-in-out infinite; }
+  .flag-ball-3 { top: 32%; right: 12%; animation: float-1 8.5s ease-in-out infinite; }
+  
   .hero .eyebrow {
-    color: #e2b758;
+    color: #415367;
   }
   .hero h1 {
-    font-size: clamp(1.9rem, 8.2vw, 4.4rem);
-    line-height: 1.04;
-    letter-spacing: -0.045em;
-    margin: 0.45rem 0 0.5rem;
+    font-size: clamp(2.2rem, 8vw, 4.8rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    margin: 0.8rem 0 0.5rem;
     text-wrap: balance;
+    color: #0e1133;
+    font-weight: 800;
   }
   .tagline {
-    margin: 0;
-    font-size: clamp(0.95rem, 3.7vw, 1.3rem);
+    margin: 1.5rem 0 0;
+    font-size: clamp(1rem, 3.7vw, 1.4rem);
     font-weight: 600;
-    color: #d8e1e9;
+    color: #5d6e80;
   }
   .places {
-    margin: 0.35rem 0 0;
-    font-size: clamp(0.95rem, 3.7vw, 1.25rem);
-    font-weight: 600;
-    color: #b9c7d5;
+    margin: 0.2rem 0 0;
+    font-size: clamp(2rem, 8vw, 4.8rem);
+    font-weight: 900;
+    color: #e61a24;
+    position: relative;
+    z-index: 2;
   }
   .places b {
     display: inline-block;
-    color: #e4bc60;
-    font-weight: 800;
+    color: #e61a24;
+    font-weight: 900;
     animation: place-in 420ms var(--ease-out);
   }
   @keyframes place-in {
@@ -485,31 +541,51 @@
     position: relative;
     z-index: 2;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.65rem;
-    max-width: 68rem;
-    margin: -3.2rem auto 0;
-    padding-inline: 0.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    max-width: 76rem;
+    margin: 3rem auto 0;
+    padding-inline: 1rem;
   }
   .option {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border: 1px solid #dfe5ea;
-    border-radius: 1rem;
+    border: 1px solid #e2e8f0;
+    border-bottom: 5px solid #0f0a59;
+    border-radius: 1.25rem;
     background: #fff;
-    box-shadow: 0 0.9rem 2rem #0b244226;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
     color: inherit;
     text-decoration: none;
-    transition:
-      transform 200ms var(--ease-out),
-      box-shadow 200ms ease;
+    transition: all 250ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .option:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 28px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.06);
+    border-bottom-color: #e61a24;
   }
   .option-art {
     display: grid;
     place-items: center;
-    height: clamp(3.7rem, 12.5svh, 6rem);
+    height: clamp(5rem, 15svh, 8rem);
     background: var(--tint, var(--accent-soft));
+    position: relative;
+    border-bottom: 3px solid #e61a24;
+  }
+  .option-art img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    opacity: 1;
+    transition: transform 500ms ease;
+  }
+  .option:hover .option-art img {
+    transform: scale(1.05);
   }
   .option[data-option="engineering"] {
     --tint: #eaf1f8;
@@ -520,46 +596,33 @@
   .option[data-option="reviews"] {
     --tint: #edf7f6;
   }
-  .option-art i {
-    width: clamp(2.5rem, 8svh, 3.7rem);
-    height: clamp(2.5rem, 8svh, 3.7rem);
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background: #102947;
-    color: #e4bc60;
-    box-shadow: 0 0 0 0.35rem #ffffffb8;
-    transition: transform 240ms var(--ease-out);
-  }
-  .option-art i :global(svg) {
-    width: 48%;
-    height: 48%;
-  }
   .option-label {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 0.15rem;
-    padding: 0.6rem 0.5rem 0.65rem;
-    background: #102947;
+    gap: 0.25rem;
+    padding: 1.2rem 1rem;
+    background: #0f0a59;
     color: #fff;
     text-align: center;
   }
   .option-label b {
-    font-size: 0.98rem;
+    font-size: 1.1rem;
     line-height: 1.2;
     letter-spacing: -0.01em;
   }
   .option-label small {
-    font-size: 0.69rem;
+    font-size: 0.85rem;
     line-height: 1.35;
-    color: #c4d0dc;
+    color: #cbd5e1;
   }
   .lede {
+    width: 100%;
     max-width: 46rem;
     text-align: center;
-    padding: 1.6rem 0.25rem 0.5rem;
+    margin: 0 auto;
+    padding: 2.5rem 0.25rem 0.5rem;
   }
   .lede p {
     margin: 0;
@@ -571,7 +634,14 @@
     display: flex;
     flex-direction: column;
     gap: 0.65rem;
-    margin-top: 1.2rem;
+    margin-top: 1.5rem;
+  }
+  @media (min-width: 48rem) {
+    .lede > div,
+    .closing > div:last-child {
+      flex-direction: row;
+      justify-content: center;
+    }
   }
   .primary,
   .ghost,
@@ -593,9 +663,9 @@
       box-shadow 180ms ease;
   }
   .primary {
-    background: #ddb04a;
-    color: #102945;
-    box-shadow: 0 0.6rem 1.4rem #040d1b26;
+    background: #e61a24;
+    color: #fff;
+    box-shadow: 0 0.6rem 1.4rem #e61a2440;
   }
   .ghost {
     border: 1px solid #cfd8df;
@@ -623,26 +693,27 @@
   .field-copy h2,
   .feature-copy h2,
   .closing h2 {
-    font-size: clamp(1.8rem, 6.4vw, 3rem);
-    line-height: 1.1;
-    letter-spacing: -0.04em;
-    color: #17304f;
+    font-size: clamp(1.8rem, 6.4vw, 3.2rem);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #0f0a59;
     margin: 0.5rem 0 0;
     text-wrap: balance;
+    font-weight: 800;
   }
   .heading h2::after {
     content: "";
     display: block;
-    width: 4rem;
-    height: 3px;
-    margin: 0.9rem auto 0;
-    border-radius: 2px;
-    background: #ddb04a;
+    width: 4.5rem;
+    height: 4px;
+    margin: 1.2rem auto 0;
+    border-radius: 4px;
+    background: #e61a24;
   }
   .heading p {
-    margin: 1rem 0 0;
+    margin: 1.2rem 0 0;
     line-height: 1.7;
-    color: #6a7989;
+    color: #4a5568;
   }
   .section {
     padding-block: 4rem;
@@ -662,20 +733,14 @@
     position: relative;
     overflow: hidden;
     border-radius: 1.25rem;
-    background: #102947;
-    color: #fff;
-    padding: 1.4rem;
+    background: #fff;
+    color: #0e1133;
+    padding: 1.8rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
   }
   .field-card::after {
-    content: "";
-    position: absolute;
-    right: -4rem;
-    top: -4rem;
-    width: 13rem;
-    height: 13rem;
-    border-radius: 50%;
-    background: #ffffff0a;
-    pointer-events: none;
+    display: none;
   }
   .field-mark {
     display: flex;
@@ -689,8 +754,10 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    background: #e4bc60;
-    color: #102947;
+    background: #fdfdfd;
+    color: #e61a24;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   }
   .field-mark i :global(svg) {
     width: 48%;
@@ -701,14 +768,14 @@
     font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 1;
-    color: #ffffff24;
+    color: #f1f5f9;
   }
   .field-card small {
     display: block;
     font-size: 0.68rem;
     letter-spacing: 0.13em;
     font-weight: 800;
-    color: #e2b758;
+    color: #e61a24;
   }
   .subjects {
     display: flex;
@@ -720,16 +787,17 @@
   }
   .subjects li {
     padding: 0.45rem 0.75rem;
-    border: 1px solid #ffffff2e;
+    border: 1px solid #e2e8f0;
     border-radius: 99rem;
-    background: #ffffff0f;
+    background: #f8f9fa;
     font-size: 0.8rem;
     font-weight: 600;
+    color: #334155;
   }
   .listed {
     margin-top: 1.3rem;
     padding-top: 1.2rem;
-    border-top: 1px solid #ffffff22;
+    border-top: 1px solid #e2e8f0;
   }
   .listed ul {
     display: grid;
@@ -748,14 +816,14 @@
   .listed li span {
     margin-top: 0.1rem;
     font-size: 0.76rem;
-    color: #c4d0dc;
+    color: #64748b;
   }
   .listed a {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
     min-height: 2.75rem;
-    color: #e4bc60;
+    color: #e61a24;
     font-size: 0.8rem;
     font-weight: 800;
     text-decoration: none;
@@ -763,7 +831,7 @@
   .field-copy p {
     margin: 0.9rem 0 0;
     line-height: 1.75;
-    color: #5d6e80;
+    color: #4a5568;
   }
   .points {
     display: grid;
@@ -935,17 +1003,18 @@
   .stats {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    background: #102947;
+    background: #0f0a59;
     color: #fff;
-    border-radius: 1rem;
-    padding: 0.8rem;
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(15,10,89,0.1);
   }
   .stats article {
     text-align: center;
     padding: 1rem 0.4rem;
   }
   .stats :global(svg) {
-    color: #dfb24d;
+    color: #e61a24;
   }
   .stats b,
   .stats span {
@@ -986,8 +1055,9 @@
     font-style: normal;
   }
   .feature-points h3 {
-    color: #17304f;
+    color: #0f0a59;
     margin: 0 0 0.35rem;
+    font-weight: 800;
   }
   .feature-points p {
     margin: 0;
@@ -1023,8 +1093,8 @@
       transform 150ms var(--ease-out);
   }
   .field-filter button.on {
-    border-color: #102947;
-    background: #102947;
+    border-color: #0f0a59;
+    background: #0f0a59;
     color: #fff;
   }
   .filters {
@@ -1052,8 +1122,8 @@
   }
   .filters label:focus-within,
   .filters select:focus-visible {
-    border-color: #ddb04a;
-    box-shadow: 0 0 0 3px #c9952d24;
+    border-color: #e61a24;
+    box-shadow: 0 0 0 3px #e61a2424;
   }
   .filters > select {
     border: 1px solid #d9e0e4;
@@ -1154,10 +1224,11 @@
     gap: 0.8rem;
   }
   .steps article {
-    border-top: 2px solid var(--accent);
+    border-top: 3px solid var(--accent);
     background: #fff;
-    padding: 1.4rem;
-    box-shadow: 0 0.5rem 1.4rem #10264008;
+    border-radius: 0.75rem;
+    padding: 1.6rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
   }
   .steps i {
     font-size: 0.72rem;
@@ -1165,27 +1236,29 @@
     font-style: normal;
   }
   .steps h3 {
-    color: #17304f;
+    color: #0f0a59;
     margin: 0.8rem 0 0.4rem;
+    font-weight: 800;
   }
   .steps p {
     margin: 0;
     font-size: 0.86rem;
     line-height: 1.6;
-    color: #6a7989;
+    color: #475569;
   }
   .closing {
     margin-top: 2rem;
-    background: #102947;
+    background: #0f0a59;
     color: #fff;
-    border-radius: 1rem;
-    padding: 1.5rem;
+    border-radius: 1.25rem;
+    padding: 2.5rem;
+    box-shadow: 0 10px 30px rgba(15,10,89,0.15);
   }
   .closing h2 {
     color: #fff;
   }
   .closing p {
-    color: #c5d1dc;
+    color: #cbd5e1;
   }
   .primary:active,
   .ghost:active,
@@ -1261,11 +1334,11 @@
       padding-inline: 2rem;
     }
     .hero {
-      padding: 3.2rem 2rem 7.2rem;
+      padding: 4rem 2rem 5rem;
     }
     .options {
       gap: 1rem;
-      margin-top: -5.2rem;
+      margin-top: 3.5rem;
       padding-inline: 1.5rem;
     }
     .option-art {
