@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { addItem, contentRows, removeItem, setAt } from "./content-fields.js";
+import { addItem, contentRows, fillMissing, removeItem, setAt } from "./content-fields.js";
 
 const content = {
   hero: { title: "Connection with purpose.", description: "Short", image: "/images/hero.webp" },
@@ -79,5 +79,62 @@ describe("changing page content", () => {
     assert.deepEqual(removeItem(content, "values", 0).values, [{ title: "Vision", description: "Second" }]);
     assert.deepEqual(removeItem(content, "work.points", 1).work.points, ["Verified"]);
     assert.equal(content.values.length, 2);
+  });
+});
+
+describe("lists that may be left empty", () => {
+  const page = { reviews: { title: "Student Reviews", items: [{ name: "A student", quote: "Helpful" }] } };
+
+  test("their only item can be removed", () => {
+    const rows = contentRows(page, { lists: true, optional: ["reviews.items"] });
+    assert.ok(rows.some((row) => row.kind === "remove" && row.list === "reviews.items" && row.index === 0));
+  });
+
+  test("when empty they show just the add button", () => {
+    const rows = contentRows({ reviews: { items: [] } }, { lists: true, optional: ["reviews.items"] });
+    assert.deepEqual(rows, [{ kind: "add", list: "reviews.items", label: "Add to reviews · items" }]);
+  });
+
+  test("adding to an empty list makes a blank item shaped like the example given", () => {
+    const added = addItem({ reviews: { items: [] as unknown[] } }, "reviews.items", { name: "Name", quote: "Words" });
+    assert.deepEqual(added.reviews.items, [{ name: "", quote: "" }]);
+  });
+});
+
+describe("opening a page that was saved before a section was added", () => {
+  const builtIn = {
+    hero: { title: "Study beyond borders.", tagline: "Choose clearly." },
+    fields: { medical: { title: "Medical", points: ["Eligibility"] } },
+    reviews: { items: [] as unknown[] },
+  };
+
+  test("the missing section and the missing text get the built-in wording", () => {
+    assert.deepEqual(fillMissing(builtIn, { hero: { title: "Study abroad." } }), {
+      hero: { title: "Study abroad.", tagline: "Choose clearly." },
+      fields: { medical: { title: "Medical", points: ["Eligibility"] } },
+      reviews: { items: [] },
+    });
+  });
+
+  test("sections the page no longer has are left out", () => {
+    const filled = fillMissing(builtIn, { hero: { title: "Saved", tagline: "Saved too" }, shortcuts: [{ title: "Old" }] });
+    assert.deepEqual(Object.keys(filled), ["hero", "fields", "reviews"]);
+  });
+
+  test("saved lists are kept as they are", () => {
+    const saved = { fields: { medical: { points: ["One", "Two", "Three"] } }, reviews: { items: [{ name: "A student" }] } };
+    const filled = fillMissing(builtIn, saved);
+    assert.deepEqual(filled.fields.medical.points, ["One", "Two", "Three"]);
+    assert.deepEqual(filled.reviews.items, [{ name: "A student" }]);
+  });
+
+  test("something saved in the wrong shape is replaced by the built-in wording", () => {
+    assert.deepEqual(fillMissing(builtIn, { hero: "broken", reviews: { items: "none" } }), builtIn);
+  });
+
+  test("nothing saved gives a copy of the built-in wording", () => {
+    const filled = fillMissing(builtIn, undefined);
+    assert.deepEqual(filled, builtIn);
+    assert.notEqual(filled.hero, builtIn.hero);
   });
 });

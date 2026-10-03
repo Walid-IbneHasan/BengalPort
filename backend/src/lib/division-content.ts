@@ -21,19 +21,19 @@ const educationServices = [
     "stethoscope",
     "MBBS opportunities",
     "Review international medical programs, eligibility and application pathways.",
-    "#directory",
+    "#medical",
   ],
   [
     "briefcase",
     "Business programs",
     "Discover undergraduate and postgraduate business pathways worldwide.",
-    "#directory",
+    "#general",
   ],
   [
     "settings",
     "Engineering programs",
     "Explore relevant technical and engineering programs at partner institutions.",
-    "#directory",
+    "#engineering",
   ],
 ].map(([icon, title, description, href]) => ({
   icon,
@@ -95,38 +95,75 @@ export const defaultEducationContent = {
     primary: "Start education enquiry",
     secondary: "Explore programs",
   },
-  shortcuts: [
-    {
-      icon: "map",
-      title: "Study Destinations",
-      subtitle: "Compare countries",
-      href: "#directory",
+  fields: {
+    medical: {
+      title: "Medical",
+      tagline: "MBBS, dentistry, nursing, pharmacy",
+      heading: "Study medicine abroad",
+      description:
+        "For students who want to become doctors, dentists, nurses or pharmacists. We explain entry requirements, total cost and how each degree is recognised before you choose where to apply.",
+      points: [
+        "Your results checked against each university's entry requirements",
+        "Tuition, living cost and course length compared side by side",
+        "Help with the application, documents and admission interview",
+      ],
+      subjects: ["MBBS", "Dentistry (BDS)", "Nursing", "Pharmacy", "Public Health"],
+      cta: "Apply for medical admission",
     },
-    {
-      icon: "building",
-      title: "Universities",
-      subtitle: "Trusted institutions",
-      href: "#directory",
+    engineering: {
+      title: "Engineering",
+      tagline: "Engineering, computing, technology",
+      heading: "Study engineering and technology abroad",
+      description:
+        "For students aiming at engineering, computing or applied technology. We help you match your results and budget to programs at bachelor's and master's level.",
+      points: [
+        "Programs shortlisted by subject, country and budget",
+        "Entry requirements and language tests explained early",
+        "Scholarship options and intake dates set out clearly",
+      ],
+      subjects: ["Civil", "Mechanical", "Electrical and Electronic", "Computer Science", "Software Engineering"],
+      cta: "Apply for engineering admission",
     },
-    {
-      icon: "book",
-      title: "Programs",
-      subtitle: "Find the right course",
-      href: "#services",
+    general: {
+      title: "General Subjects",
+      tagline: "Business, arts, science and more",
+      heading: "Business, arts and science degrees",
+      description:
+        "For every other subject, from business and economics to the sciences, humanities and language courses. Tell us what you want to study and we will find suitable programs.",
+      points: [
+        "Foundation, bachelor's and master's routes",
+        "Subject and university choices explained in plain terms",
+        "Support from application to pre-departure",
+      ],
+      subjects: [
+        "Business and Management",
+        "Economics and Finance",
+        "Natural Sciences",
+        "Arts and Humanities",
+        "Social Sciences",
+        "Language and Foundation",
+      ],
+      cta: "Apply for admission",
     },
-    {
-      icon: "stethoscope",
-      title: "MBBS Pathways",
-      subtitle: "Medical education",
-      href: "#directory",
-    },
-    {
-      icon: "award",
-      title: "Scholarships",
-      subtitle: "Funding opportunities",
-      href: "/opportunities",
-    },
-  ],
+  },
+  reviews: {
+    title: "Student Reviews",
+    tagline: "What our students say",
+    eyebrow: "STUDENT REVIEWS",
+    heading: "Students' experience with Bengal Port",
+    description:
+      "What students say about choosing a program, applying and preparing to travel with our team.",
+    invite:
+      "Studied abroad with Bengal Port? Tell us how it went. With your permission, your review will appear here.",
+    cta: "Share your experience",
+    items: [],
+  },
+  destinations: {
+    eyebrow: "STUDY DESTINATIONS",
+    title: "Where you can study",
+    description:
+      "Countries where Bengal Port currently lists institutions. Choose one to see what is on offer there.",
+  },
   services: {
     eyebrow: "EDUCATION SUPPORT",
     title: "A clearer international study pathway",

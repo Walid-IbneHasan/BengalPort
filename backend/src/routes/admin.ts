@@ -10,6 +10,7 @@ import {
   businessContentUpdateSchema,
   feeSettingsSchema,
   divisionContentSchema,
+  educationContentSchema,
   aboutContentSchema,
   servicesContentSchema,
   contactContentSchema,
@@ -809,7 +810,7 @@ const admin: FastifyPluginAsync = async (app) => {
     education: {
       name: "Global Education",
       fallback: defaultEducationContent,
-      schema: divisionContentSchema,
+      schema: educationContentSchema,
     },
     healthcare: {
       name: "Global Healthcare",

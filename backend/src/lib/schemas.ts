@@ -609,8 +609,41 @@ export const divisionContentSchema = z.object({
     secondary: text,
   }),
 });
-// The About, Services and Contact pages.
 const heading = z.object({ eyebrow: text, title: text, description: paragraph });
+// The Education page: four options (three fields of study and the student
+// reviews) in place of the shortcuts row. It may have no reviews yet.
+const studyField = z.object({
+  title: text,
+  tagline: text,
+  heading: text,
+  description: paragraph,
+  points: z.array(text).min(1).max(8),
+  subjects: z.array(text).min(1).max(12),
+  cta: text,
+});
+export const educationContentSchema = divisionContentSchema
+  .omit({ shortcuts: true })
+  .extend({
+    fields: z.object({
+      medical: studyField,
+      engineering: studyField,
+      general: studyField,
+    }),
+    reviews: z.object({
+      title: text,
+      tagline: text,
+      eyebrow: text,
+      heading: text,
+      description: paragraph,
+      invite: paragraph,
+      cta: text,
+      items: z
+        .array(z.object({ name: text, detail: text, quote: paragraph }))
+        .max(30),
+    }),
+    destinations: heading,
+  });
+// The About, Services and Contact pages.
 export const aboutContentSchema = z.object({
   hero: heading,
   intro: heading,

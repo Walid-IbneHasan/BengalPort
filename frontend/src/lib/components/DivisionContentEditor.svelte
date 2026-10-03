@@ -2,22 +2,26 @@
   import { onMount } from "svelte";
   import { Check, Code2, Eye, LoaderCircle, Plus, Save, Trash2 } from "lucide-svelte";
   import { api } from "$lib/api";
-  import { addItem, contentRows, removeItem, setAt } from "$lib/content-fields";
+  import { addItem, contentRows, fillMissing, removeItem, setAt } from "$lib/content-fields";
   import CmsImageField from "./CmsImageField.svelte";
   // Edits one page of the public website: a division portal, or the About,
   // Services or Contact page. `lists` lets items be added to and removed
-  // from the page's lists; `note` is shown above the fields.
+  // from the page's lists; `note` is shown above the fields. `examples`
+  // names the lists that may be left empty, each with an item to shape its
+  // first entry.
   type Content = Record<string, any>;
   let {
     division,
     fallback,
     lists = false,
     note = "",
+    examples = {},
   }: {
     division: "education" | "healthcare" | "umrah" | "about" | "services" | "contact";
     fallback: Content;
     lists?: boolean;
     note?: string;
+    examples?: Record<string, unknown>;
   } = $props();
   // svelte-ignore state_referenced_locally
   let draft = $state<Content>(structuredClone(fallback)),
@@ -29,7 +33,7 @@
     success = $state(""),
     advanced = $state(false),
     json = $state("");
-  let rows = $derived(contentRows(draft, { lists }));
+  let rows = $derived(contentRows(draft, { lists, optional: Object.keys(examples) }));
   const name = $derived(
     {
       education: "Global Education",
@@ -64,7 +68,8 @@
       const page = await api<any>(`/admin/content/${division}`, {
         headers: { authorization: `Bearer ${token}` },
       });
-      draft = page.content;
+      // A page saved before a section was added still gets that section.
+      draft = fillMissing(fallback, page.content);
       revision = page.revision;
       published = page.published;
     } catch (e) {
@@ -140,7 +145,7 @@
           {#if field.kind === "add"}<button
               type="button"
               class="list-button"
-              onclick={() => change(addItem($state.snapshot(draft), field.list))}
+              onclick={() => change(addItem($state.snapshot(draft), field.list, examples[field.list]))}
               ><Plus size={15} /> {field.label}</button
             >
           {:else if field.kind === "remove"}<button
