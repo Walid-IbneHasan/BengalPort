@@ -1,13 +1,15 @@
 import { apiUrl } from '$lib/config';
 import { fetchData } from '$lib/fetch-data';
 import { defaultBusinessContent, type BusinessContent } from '$lib/business-content';
+import type { PublicReview } from '$lib/reviews';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch }) => {
-  const [page, suppliers, factories] = await Promise.all([
+  const [page, suppliers, factories, reviews] = await Promise.all([
     fetchData<{ content: BusinessContent }>(fetch, `${apiUrl()}/content/business`),
     fetchData<any[]>(fetch, `${apiUrl()}/suppliers`),
     fetchData<any[]>(fetch, `${apiUrl()}/factories`),
+    fetchData<PublicReview[]>(fetch, `${apiUrl()}/reviews?division=business`),
   ]);
   return {
     content: page?.content ?? defaultBusinessContent,
@@ -19,5 +21,6 @@ export const load: PageLoad = async ({ fetch }) => {
       .sort((a, b) => Number(b.featured) - Number(a.featured))
       .slice(0, 6),
     partnersUnavailable: !suppliers || !factories,
+    reviews: reviews ?? [],
   };
 };

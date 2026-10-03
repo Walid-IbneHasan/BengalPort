@@ -20,7 +20,6 @@ const save = (content: unknown, revision = 0) =>
   app.inject({ method: "PUT", url: "/api/admin/content/education", headers: bearer(app, adminUser), payload: { content, revision } });
 const clear = () => prisma.pageContent.deleteMany({ where: { slug: "education" } });
 const draft = () => structuredClone(defaultEducationContent) as any;
-const review = { name: "A student", detail: "MBBS · Malaysia", quote: "Clear guidance from the first call." };
 
 before(async () => {
   app = await buildApp();
@@ -48,33 +47,27 @@ describe("the Global Education page before anyone edits it", () => {
     assert.equal(content.reviews.title, "Student Reviews");
   });
 
-  test("has no student reviews of its own", async () => {
-    assert.deepEqual((await live()).reviews.items, []);
-  });
-
   test("no longer has the row of shortcuts", async () => {
     assert.equal("shortcuts" in (await live()), false);
   });
 });
 
 describe("editing the Global Education page", () => {
-  test("a student review an admin adds is shown to visitors", async () => {
+  test("an admin can reword the reviews section", async () => {
     await clear();
     const content = draft();
-    content.reviews.items = [review];
+    content.reviews.heading = "What our students say";
     const res = await save(content);
     assert.equal(res.statusCode, 200);
-    assert.deepEqual((await live()).reviews.items, [review]);
+    assert.equal((await live()).reviews.heading, "What our students say");
   });
 
-  test("the reviews can be taken away again", async () => {
+  test("reviews are not part of the page: they come from customers", async () => {
     await clear();
     const content = draft();
-    content.reviews.items = [review];
-    await save(content);
-    content.reviews.items = [];
-    assert.equal((await save(content, 1)).statusCode, 200);
-    assert.deepEqual((await live()).reviews.items, []);
+    content.reviews.items = [{ name: "A student", detail: "MBBS, Malaysia", quote: "Typed into the page." }];
+    assert.equal((await save(content)).statusCode, 200);
+    assert.equal("items" in (await live()).reviews, false);
   });
 
   test("a page without its fields of study is refused", async () => {
@@ -84,13 +77,6 @@ describe("editing the Global Education page", () => {
     const res = await save(content);
     assert.equal(res.statusCode, 400);
     assert.equal(res.json().error.code, "VALIDATION_ERROR");
-  });
-
-  test("a review needs the student's own words", async () => {
-    await clear();
-    const content = draft();
-    content.reviews.items = [{ ...review, quote: " " }];
-    assert.equal((await save(content)).statusCode, 400);
   });
 
   test("the other division pages still need their shortcuts", () => {

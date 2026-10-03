@@ -8,4 +8,4 @@
   <meta name="description" content={data.content.hero.description}/>
 </svelte:head>
 
-<DivisionPortal content={data.content} records={[]} kind="umrah"/>
+<DivisionPortal content={data.content} records={[]} reviews={data.reviews} kind="umrah"/>

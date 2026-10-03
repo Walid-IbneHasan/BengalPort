@@ -1,6 +1,8 @@
 <script lang="ts">
   import { applyHref } from "$lib/apply-route";
   import type { BusinessContent } from "$lib/business-content";
+  import type { PublicReview } from "$lib/reviews";
+  import ReviewSection from "$lib/components/ReviewSection.svelte";
   import {
     ArrowRight,
     BriefcaseBusiness,
@@ -36,6 +38,7 @@
     content: BusinessContent;
     partners: any[];
     partnersUnavailable: boolean;
+    reviews: PublicReview[];
   };
   const loading = false;
   $: content = data.content;
@@ -242,6 +245,7 @@
       </form>
     </div>
   </section>
+  <div class="business-wrap"><ReviewSection reviews={data.reviews} /></div>
   <section class="closing business-wrap" use:reveal>
     <div>
       <span>BUSINESS SUPPORT</span>

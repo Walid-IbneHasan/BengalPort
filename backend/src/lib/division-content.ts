@@ -154,9 +154,8 @@ export const defaultEducationContent = {
     description:
       "What students say about choosing a program, applying and preparing to travel with our team.",
     invite:
-      "Studied abroad with Bengal Port? Tell us how it went. With your permission, your review will appear here.",
-    cta: "Share your experience",
-    items: [],
+      "Used our service? Sign in, open your application in your dashboard and write a review. It appears here once our team has approved it.",
+    cta: "Write a review",
   },
   destinations: {
     eyebrow: "STUDY DESTINATIONS",

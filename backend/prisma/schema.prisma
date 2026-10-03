@@ -54,6 +54,11 @@ enum RefundStatus {
   COMPLETED
   FAILED
 }
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  HIDDEN
+}
 enum TransactionType {
   INCOME
   EXPENSE
@@ -78,6 +83,7 @@ model User {
   lastLoginAt DateTime?
   role Role @default(USER)
   staffNotes StaffNote[]
+  reviews Review[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   enquiries Enquiry[]
@@ -130,6 +136,7 @@ model Application {
   payments Payment[]
   documents ApplicationDocument[]
   notes StaffNote[]
+  review Review?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -150,6 +157,26 @@ model StaffNote {
 
   @@index([applicationId])
   @@index([enquiryId])
+}
+// What a customer says about a service they paid for, one per application.
+// The website shows it once an administrator has approved it. A review the
+// team adds by hand (received outside the website) has no application.
+model Review {
+  id String @id @default(cuid())
+  division ApplicationType
+  name String
+  detail String?
+  rating Int
+  body String
+  status ReviewStatus @default(PENDING)
+  applicationId String? @unique
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  userId String?
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([division, status])
 }
 model ApplicationDocument {
   id String @id @default(cuid())

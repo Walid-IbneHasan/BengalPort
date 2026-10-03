@@ -12,13 +12,14 @@
     FileText,
     Globe2,
     MapPin,
-    Quote,
     Search,
     Settings,
     Star,
     Stethoscope,
   } from "lucide-svelte";
   import type { EducationContent } from "$lib/division-content";
+  import type { PublicReview } from "$lib/reviews";
+  import ReviewCards from "./ReviewCards.svelte";
   import { applyHref } from "$lib/apply-route";
   import {
     destinations,
@@ -27,8 +28,12 @@
     institutionFields,
     type FieldKey,
   } from "$lib/education";
-  let { content, records }: { content: EducationContent; records: any[] } =
-    $props();
+  // `reviews` are the approved reviews of education customers.
+  let {
+    content,
+    records,
+    reviews = [],
+  }: { content: EducationContent; records: any[]; reviews?: PublicReview[] } = $props();
   const icons: Record<string, any> = {
     map: MapPin,
     building: Building2,
@@ -199,7 +204,7 @@
       </div>
     </section>{/each}
 
-  <section class="reviews" class:empty={!content.reviews.items.length} id="reviews" use:reveal>
+  <section class="reviews" class:empty={!reviews.length} id="reviews" use:reveal>
     <header class="heading">
       <span class="eyebrow">{content.reviews.eyebrow}</span>
       <h2>{content.reviews.heading}</h2>
@@ -208,17 +213,11 @@
       <div class="reviews-panel">
         <p>{content.reviews.description}</p>
         <p class="invite">{content.reviews.invite}</p>
-        <a class="primary" href="/contact"
+        <a class="primary" href="/dashboard"
           >{content.reviews.cta}<ArrowRight size={17} /></a
         >
       </div>
-      {#if content.reviews.items.length}<div class="review-list">
-          {#each content.reviews.items as item}<figure class="review">
-              <Quote size={22} />
-              <blockquote>{item.quote}</blockquote>
-              <figcaption><b>{item.name}</b><span>{item.detail}</span></figcaption>
-            </figure>{/each}
-        </div>{/if}
+      {#if reviews.length}<ReviewCards {reviews} />{/if}
     </div>
   </section>
 
@@ -842,50 +841,6 @@
     margin-inline: auto;
     text-align: center;
   }
-  .review-list {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: min(86%, 21rem);
-    gap: 0.9rem;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    overscroll-behavior-inline: contain;
-    padding: 0.2rem 0.2rem 0.8rem;
-  }
-  .review {
-    scroll-snap-align: start;
-    display: flex;
-    flex-direction: column;
-    margin: 0;
-    padding: 1.3rem;
-    border: 1px solid #dfe5e8;
-    border-top: 3px solid #ddb04a;
-    border-radius: 1rem;
-    background: #fff;
-    color: #b48528;
-    box-shadow: 0 0.5rem 1.4rem #10264008;
-  }
-  .review blockquote {
-    margin: 0.8rem 0 1.2rem;
-    line-height: 1.7;
-    color: #33465a;
-    font-size: 0.93rem;
-  }
-  .review figcaption {
-    margin-top: auto;
-  }
-  .review b,
-  .review figcaption span {
-    display: block;
-  }
-  .review b {
-    color: #17304f;
-  }
-  .review figcaption span {
-    margin-top: 0.15rem;
-    font-size: 0.78rem;
-    color: #6a7989;
-  }
 
   /* Destinations: photo cards with the country on a strip along the bottom. */
   .place-grid {
@@ -1413,13 +1368,6 @@
     .reviews:not(.empty) .reviews-body {
       grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr);
       align-items: start;
-    }
-    .review-list {
-      grid-auto-flow: row;
-      grid-auto-columns: auto;
-      grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-      overflow: visible;
-      padding: 0;
     }
   }
   @media (min-width: 64rem) {

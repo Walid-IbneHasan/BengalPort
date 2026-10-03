@@ -82,25 +82,6 @@ describe("changing page content", () => {
   });
 });
 
-describe("lists that may be left empty", () => {
-  const page = { reviews: { title: "Student Reviews", items: [{ name: "A student", quote: "Helpful" }] } };
-
-  test("their only item can be removed", () => {
-    const rows = contentRows(page, { lists: true, optional: ["reviews.items"] });
-    assert.ok(rows.some((row) => row.kind === "remove" && row.list === "reviews.items" && row.index === 0));
-  });
-
-  test("when empty they show just the add button", () => {
-    const rows = contentRows({ reviews: { items: [] } }, { lists: true, optional: ["reviews.items"] });
-    assert.deepEqual(rows, [{ kind: "add", list: "reviews.items", label: "Add to reviews · items" }]);
-  });
-
-  test("adding to an empty list makes a blank item shaped like the example given", () => {
-    const added = addItem({ reviews: { items: [] as unknown[] } }, "reviews.items", { name: "Name", quote: "Words" });
-    assert.deepEqual(added.reviews.items, [{ name: "", quote: "" }]);
-  });
-});
-
 describe("opening a page that was saved before a section was added", () => {
   const builtIn = {
     hero: { title: "Study beyond borders.", tagline: "Choose clearly." },

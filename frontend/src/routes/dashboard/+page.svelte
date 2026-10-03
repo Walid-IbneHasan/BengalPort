@@ -7,14 +7,31 @@
   import DocumentList from "$lib/components/DocumentList.svelte";
   import PaymentPanel from "$lib/components/PaymentPanel.svelte";
   import ClaimApplication from "$lib/components/ClaimApplication.svelte";
-  import { ArrowRight, ChevronDown, ClipboardList, MessageSquare, WalletCards } from "lucide-svelte";
+  import ReviewForm from "$lib/components/ReviewForm.svelte";
+  import type { OwnReview } from "$lib/reviews";
+  import { tick } from "svelte";
+  import { ArrowRight, ChevronDown, ClipboardList, MessageSquare, Star, WalletCards } from "lucide-svelte";
 
   type Activity = { enquiries: any[]; applications: any[]; payments: any[] };
+  // The applications that have been paid for, which the member may review.
+  type Reviewable = { applicationId: string; reference: string; division: string; review: OwnReview | null };
   let user = $state<any>(null),
     activity = $state<Activity | null>(null),
     loading = $state(true),
     error = $state(""),
-    open = $state("");
+    open = $state(""),
+    reviewable = $state<Reviewable[]>([]);
+  let unreviewed = $derived(reviewable.filter((item) => !item.review));
+  const reviewOf = (applicationId: string) => reviewable.find((item) => item.applicationId === applicationId);
+  // The review list is an extra: the dashboard still opens without it.
+  const loadReviews = async () => {
+    reviewable = await api<Reviewable[]>("/reviews/mine").catch(() => []);
+  };
+  async function writeReview(applicationId: string) {
+    open = applicationId;
+    await tick();
+    document.getElementById(`review-${applicationId}`)?.scrollIntoView({ block: "center" });
+  }
 
   const money = (value: unknown) =>
     `৳${new Intl.NumberFormat("en-BD", { maximumFractionDigits: 2 }).format(Number(value) || 0)}`;
@@ -27,13 +44,14 @@
   async function claimed(reference: string) {
     activity = await api<Activity>("/auth/me/activity");
     open = activity.applications.find((item) => item.reference === reference)?.id ?? open;
+    await loadReviews();
   }
 
   onMount(async () => {
     if (!localStorage.getItem("bp_token")) return goto("/login?next=/dashboard");
     try {
       user = JSON.parse(localStorage.getItem("bp_user") || "null");
-      activity = await api<Activity>("/auth/me/activity");
+      [activity] = await Promise.all([api<Activity>("/auth/me/activity"), loadReviews()]);
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         localStorage.removeItem("bp_token");
@@ -77,6 +95,13 @@
 
       <article id="applications">
         <header><h2>My applications</h2><p>Each application keeps the reference number you were given.</p></header>
+        {#if unreviewed.length}
+          <div class="review-prompt">
+            <Star size={18} />
+            <p>{unreviewed.length === 1 ? `You can review the service you paid for (${unreviewed[0].reference}).` : `You can review ${unreviewed.length} services you paid for.`}</p>
+            <button type="button" onclick={() => writeReview(unreviewed[0].applicationId)}>Write a review <ArrowRight size={15} /></button>
+          </div>
+        {/if}
         {#each activity.applications as item}
           {@const status = statusInfo(item.status)}
           <div class="row">
@@ -94,6 +119,11 @@
                 {/each}
                 <h3>Documents</h3>
                 <DocumentList applicationId={item.id} documents={item.documents ?? []} canAttach canDownload onchange={(list) => (item.documents = list)} />
+                {#if reviewOf(item.id)}
+                  {@const mine = reviewOf(item.id)!}
+                  <h3 id={`review-${item.id}`}>Your review</h3>
+                  <ReviewForm applicationId={item.id} review={mine.review} name={user?.name ?? ""} onsaved={(saved) => (mine.review = saved)} />
+                {/if}
               </div>
             {/if}
           </div>
@@ -156,6 +186,7 @@
   .chevron{flex:none;display:grid;color:#7a8893;transition:transform 180ms cubic-bezier(.23,1,.32,1)}.chevron.turned{transform:rotate(180deg)}
   .detail{padding:.2rem .2rem 1.2rem}.money{margin:.4rem 0 .6rem;padding:1rem;border:1px solid #e1e7e9;border-radius:.8rem;background:#f8faf9}.money:empty{display:none}.detail h3{margin:1rem 0 .4rem;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:#a87618}.detail dl{margin:0}.detail dl>div{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:1rem;padding:.5rem 0;border-top:1px solid #f0f2f4}.detail dt{font-size:.76rem;color:#6d7b89;line-height:1.45}.detail dd{margin:0;font-size:.82rem;font-weight:650;color:#23384f;line-height:1.45;overflow-wrap:anywhere}.message{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88rem;line-height:1.65;color:#33465a}
   .row.payment{display:flex;flex-wrap:wrap;align-items:center;gap:.9rem;padding:.95rem .2rem}.amounts{display:grid;gap:.2rem;text-align:right}.amounts b{color:#1c3b57;font-size:.9rem}.receipt{display:inline-flex;align-items:center;gap:.35rem;color:#a87618;font-weight:750;font-size:.82rem;text-decoration:none}
+  .review-prompt{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem;margin:.2rem 0 .9rem;padding:.8rem 1rem;border-radius:.8rem;background:#fbf5e8;color:#8f6410}.review-prompt p{flex:1;min-width:12rem;margin:0;font-size:.86rem;line-height:1.5;color:#5b4a22}.review-prompt button{display:inline-flex;align-items:center;gap:.35rem;min-height:2.75rem;border:0;border-radius:1.6rem;background:#d0a03d;color:#17304f;padding:.5rem 1.05rem;font-weight:800;font-size:.84rem;cursor:pointer}.detail h3[id]{scroll-margin-top:11rem}
   .empty{border-top:1px solid #edf0f2;padding:1.4rem .2rem .4rem;color:#748391;font-size:.86rem}.empty p{margin:0 0 .6rem}.empty a{display:inline-flex;align-items:center;gap:.35rem;color:#a87618;font-weight:750;text-decoration:none}
   @media(hover:hover) and (pointer:fine){.hero-actions .primary:hover{background:#dfb757}.hero-actions .ghost:hover{background:#ffffff14}.summary:hover .main b{color:#a87618}.tiles a:hover{border-color:#d4bd83}}
   @media(max-width:40rem){.tiles{grid-template-columns:1fr}.tiles a{grid-template-columns:auto 1fr;align-items:center;column-gap:.8rem}.tiles b{margin:0;grid-row:span 2}.detail dl>div{grid-template-columns:1fr;gap:.15rem}.amounts{text-align:left;flex-basis:100%}.summary{flex-wrap:wrap}}

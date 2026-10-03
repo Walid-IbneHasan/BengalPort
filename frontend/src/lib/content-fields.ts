@@ -15,13 +15,12 @@ const words = (path: string) =>
     .toLowerCase();
 const capital = (value: string) => value.replace(/^./, (c) => c.toUpperCase());
 
-// With `lists`, items can be added to and removed from every list. A list
-// keeps at least one item unless it is named in `optional`.
-export function contentRows(value: unknown, options: { lists?: boolean; optional?: string[] } = {}, path = "", remove?: { list: string; index: number }): ContentRow[] {
+// With `lists`, items can be added to and removed from every list.
+export function contentRows(value: unknown, options: { lists?: boolean } = {}, path = "", remove?: { list: string; index: number }): ContentRow[] {
   if (typeof value === "string")
     return [{ kind: "field", path, label: capital(words(path)), value, long: value.length > 75 || /description/i.test(path), image: /(^|\.)image$/i.test(path), ...(remove ? { remove } : {}) }];
   if (Array.isArray(value)) {
-    const removable = Boolean(options.lists) && (value.length > 1 || Boolean(options.optional?.includes(path)));
+    const removable = Boolean(options.lists) && value.length > 1;
     const rows = value.flatMap((item, index): ContentRow[] => {
       const at = { list: path, index };
       const itemPath = `${path}.${index}`;
@@ -56,11 +55,10 @@ const blank = (example: unknown): unknown =>
         ? Object.fromEntries(Object.entries(example).map(([key, item]) => [key, blank(item)]))
         : example;
 
-// `example` shapes the first item of a list that is empty.
-export function addItem<T>(content: T, list: string, example: unknown = ""): T {
+export function addItem<T>(content: T, list: string): T {
   const copy = structuredClone(content);
   const items = at(copy, list) as unknown[];
-  items.push(blank(items.at(-1) ?? example));
+  items.push(blank(items.at(-1) ?? ""));
   return copy;
 }
 

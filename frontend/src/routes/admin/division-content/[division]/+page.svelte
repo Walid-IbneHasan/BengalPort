@@ -3,18 +3,16 @@
   import DivisionContentEditor from '$lib/components/DivisionContentEditor.svelte';
   import { defaultEducationContent, defaultHealthcareContent, defaultUmrahContent } from '$lib/division-content';
 
-  // The Education page's lists can grow and shrink, and its student reviews
-  // start empty.
+  // The Education page's lists can grow and shrink.
   const pages = {
     education: {
       title: 'Education',
       fallback: defaultEducationContent,
       lists: true,
-      examples: { 'reviews.items': { name: '', detail: '', quote: '' } },
-      note: 'The four options at the top of the page are Fields · medical, Fields · engineering, Fields · general and Reviews. Reviews · items are the student reviews: add each student\'s name, a detail such as their programme and country, and their own words.',
+      note: 'The four options at the top of the page are Fields · medical, Fields · engineering, Fields · general and Reviews. The reviews themselves are written by customers and approved under Reviews in the menu; here you edit only the wording around them.',
     },
-    healthcare: { title: 'Healthcare', fallback: defaultHealthcareContent, lists: false, examples: {}, note: '' },
-    umrah: { title: 'Umrah', fallback: defaultUmrahContent, lists: false, examples: {}, note: '' },
+    healthcare: { title: 'Healthcare', fallback: defaultHealthcareContent, lists: false, note: '' },
+    umrah: { title: 'Umrah', fallback: defaultUmrahContent, lists: false, note: '' },
   };
   const division = $derived(
     ((page.params.division ?? '') in pages ? page.params.division : 'education') as keyof typeof pages,
@@ -27,6 +25,5 @@
     {division}
     fallback={pages[division].fallback}
     lists={pages[division].lists}
-    examples={pages[division].examples}
     note={pages[division].note}
   />{/key}

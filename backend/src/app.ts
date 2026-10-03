@@ -9,6 +9,7 @@ import authPlugin from "./plugins/auth.js";
 import publicRoutes from "./routes/public.js";
 import { createSpamCheck, type SpamCheck } from "./lib/spam-check.js";
 import applicationRoutes from "./routes/applications.js";
+import reviewRoutes from "./routes/reviews.js";
 import backupRoutes from "./routes/backup.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
@@ -51,6 +52,7 @@ export async function buildApp(options:{mailer?:Mailer;gateway?:Gateway;spamChec
   await app.register(paymentRoutes,{prefix:"/api/payments"});
   await app.register(documentRoutes,{prefix:"/api/applications"});
   await app.register(applicationRoutes,{prefix:"/api/applications"});
+  await app.register(reviewRoutes,{prefix:"/api/reviews"});
   await app.register(backupRoutes,{prefix:"/api/backup"});
   app.setErrorHandler((e,req,reply)=>{req.log.error(e);const err=e as any;reply.code(err.statusCode||500).send({error:{code:"SERVER_ERROR",message:err.statusCode?err.message:"Unexpected server error"}})});
   return app;

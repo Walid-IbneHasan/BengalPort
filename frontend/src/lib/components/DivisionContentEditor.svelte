@@ -6,22 +6,18 @@
   import CmsImageField from "./CmsImageField.svelte";
   // Edits one page of the public website: a division portal, or the About,
   // Services or Contact page. `lists` lets items be added to and removed
-  // from the page's lists; `note` is shown above the fields. `examples`
-  // names the lists that may be left empty, each with an item to shape its
-  // first entry.
+  // from the page's lists; `note` is shown above the fields.
   type Content = Record<string, any>;
   let {
     division,
     fallback,
     lists = false,
     note = "",
-    examples = {},
   }: {
     division: "education" | "healthcare" | "umrah" | "about" | "services" | "contact";
     fallback: Content;
     lists?: boolean;
     note?: string;
-    examples?: Record<string, unknown>;
   } = $props();
   // svelte-ignore state_referenced_locally
   let draft = $state<Content>(structuredClone(fallback)),
@@ -33,7 +29,7 @@
     success = $state(""),
     advanced = $state(false),
     json = $state("");
-  let rows = $derived(contentRows(draft, { lists, optional: Object.keys(examples) }));
+  let rows = $derived(contentRows(draft, { lists }));
   const name = $derived(
     {
       education: "Global Education",
@@ -145,7 +141,7 @@
           {#if field.kind === "add"}<button
               type="button"
               class="list-button"
-              onclick={() => change(addItem($state.snapshot(draft), field.list, examples[field.list]))}
+              onclick={() => change(addItem($state.snapshot(draft), field.list))}
               ><Plus size={15} /> {field.label}</button
             >
           {:else if field.kind === "remove"}<button

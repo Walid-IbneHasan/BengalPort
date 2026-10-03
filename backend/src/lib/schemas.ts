@@ -234,6 +234,31 @@ export const applicationEditSchema = z.object({
   details: z.record(z.unknown()),
 });
 export const noteSchema = z.object({ body: z.string().trim().min(1).max(2000) });
+// A customer's review: a rating, the name to show, an optional line about
+// the service ("MBBS, Malaysia") and their own words.
+const reviewDivision = z.enum(["BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH"]);
+export const reviewSchema = z.object({
+  rating: z.number().int().min(1).max(5),
+  name: z.string().trim().min(2).max(80),
+  detail: z
+    .string()
+    .trim()
+    .max(80)
+    .nullish()
+    .transform((value) => value || null),
+  body: z.string().trim().min(10).max(1500),
+});
+export const adminReviewSchema = reviewSchema.extend({ division: reviewDivision });
+export const reviewStatusSchema = z.object({
+  status: z.enum(["PENDING", "APPROVED", "HIDDEN"]),
+});
+// ?division=education, in either case; none means every service.
+export const reviewDivisionSchema = z.object({
+  division: z.preprocess(
+    (value) => (typeof value === "string" ? value.toUpperCase() : value),
+    reviewDivision.optional(),
+  ),
+});
 export const categorySchema = z.object({
   name: z.string().trim().min(2).max(60),
   type: z.enum(["INCOME", "EXPENSE"]),
@@ -611,7 +636,8 @@ export const divisionContentSchema = z.object({
 });
 const heading = z.object({ eyebrow: text, title: text, description: paragraph });
 // The Education page: four options (three fields of study and the student
-// reviews) in place of the shortcuts row. It may have no reviews yet.
+// reviews) in place of the shortcuts row. The reviews themselves are written
+// by customers; the page holds only the section's wording.
 const studyField = z.object({
   title: text,
   tagline: text,
@@ -637,9 +663,6 @@ export const educationContentSchema = divisionContentSchema
       description: paragraph,
       invite: paragraph,
       cta: text,
-      items: z
-        .array(z.object({ name: text, detail: text, quote: paragraph }))
-        .max(30),
     }),
     destinations: heading,
   });
