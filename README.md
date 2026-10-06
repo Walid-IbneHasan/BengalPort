@@ -141,6 +141,6 @@ Applicants can attach documents to an application (PDF, JPEG, PNG or WebP; 10 MB
 
 ## CMS media storage
 
-Authenticated administrators can upload images directly from the Homepage, Global Business, Global Education, Global Healthcare, opportunity, supplier and factory editors. Uploads are streamed through Sharp, auto-rotated using their embedded orientation, resized only when larger than the 2400×2400 delivery envelope, converted to WebP, and stored as PostgreSQL `BYTEA` records with dimensions, orientation and byte-size metadata. The raw source file is not retained.
+Authenticated administrators can upload images directly from the Homepage, Global Business, Global Education, Global Healthcare, Global Umrah, opportunity, supplier and factory editors. Uploads are streamed through Sharp, auto-rotated using their embedded orientation, resized only when larger than the 2400×2400 delivery envelope, converted to WebP, and stored as PostgreSQL `BYTEA` records with dimensions, orientation and byte-size metadata. The raw source file is not retained.
 
 Set `API_PUBLIC_URL` to the externally reachable API origin (without `/api`) so saved CMS image URLs work in production. Media is delivered from `/api/media/:id.webp` with an ETag and immutable one-year browser caching. The application does not impose a small upload-size limit; real deployment limits may still be imposed by the reverse proxy, available memory, PostgreSQL or hosting provider and should be configured for the server's capacity.
