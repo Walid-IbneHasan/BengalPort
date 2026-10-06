@@ -80,7 +80,7 @@
     <span class="eyebrow">{content.hero.eyebrow}</span>
     <h1>{content.hero.lead}</h1>
     <p class="market">
-      <RotatingWord words={content.hero.markets} prefix="Sourcing from " onchange={(index) => (market = index)} />
+      <RotatingWord words={content.hero.markets} prefix={`${content.hero.lead} `} onchange={(index) => (market = index)} />
     </p>
     <p class="tagline">{content.hero.tagline}</p>
     <div class="lede">
@@ -180,7 +180,7 @@
               {group.country}<small>{group.items.length}</small>
             </h3>
             <ul>
-              {#each group.items as partner (partner.name + partner.kind)}
+              {#each group.items as partner (partner.id)}
                 <li>
                   <span class="thumb">
                     {#if partner.image}<img src={partner.image} alt="" loading="lazy" decoding="async" />{:else if partner.kind === "Factory"}<Factory size={20} />{:else}<Store size={20} />{/if}
@@ -198,7 +198,7 @@
           <div class="none"><p>No partners match these filters.</p></div>
         {/each}
       </div>
-    {:else}
+    {:else if !partnersUnavailable}
       <div class="none">
         <p>{content.partners.empty}</p>
         <a class="pill" href={applyHref("BUSINESS", "enquiry", content.partners.title)}>Ask about sourcing<ArrowRight size={17} /></a>
@@ -404,7 +404,7 @@
   }
   .market {
     margin: 0;
-    font-size: clamp(2.2rem, 9vw, 5.2rem);
+    font-size: clamp(2.2rem, 8vw, 4.6rem);
     line-height: 1.1;
     font-weight: 900;
     letter-spacing: -0.02em;
@@ -567,6 +567,7 @@
   }
   .tile p {
     margin: 0;
+    overflow-wrap: anywhere;
     font-size: 0.84rem;
     line-height: 1.5;
     color: var(--on-ink);
@@ -1121,10 +1122,12 @@
     .biz {
       padding-inline: 2rem;
     }
+    /* The hero fills what is left of the first screen below the fixed header,
+       never more, so the first scroll always reveals the tiles. */
     .hero {
       justify-content: center;
-      min-height: 86svh;
-      padding: 3rem 2rem 3.25rem;
+      min-height: min(calc(100svh - 11rem), 46rem);
+      padding: 2.6rem 2rem 2.8rem;
     }
     .map-wrap :global(svg) {
       width: 100%;

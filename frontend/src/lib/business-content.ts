@@ -50,8 +50,8 @@ export type BusinessContent = {
 export const defaultBusinessContent: BusinessContent = {
   hero: {
     eyebrow: "GLOBAL BUSINESS",
-    lead: "Sourcing from",
-    markets: ["China", "Turkey", "Vietnam", "UAE", "India", "Malaysia"],
+    lead: "Trade with",
+    markets: ["Bangladesh", "China", "Turkey", "Vietnam", "UAE", "India", "Malaysia"],
     categories: ["Textiles", "Machinery", "Electronics", "Packaging", "Agro products"],
     tagline: "Trade. Source. Explore. Grow.",
     description:

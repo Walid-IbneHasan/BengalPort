@@ -4,6 +4,7 @@
 export type Market = { name: string; lat: number; lon: number };
 
 const places: Record<string, [number, number]> = {
+  bangladesh: [23.8, 90.4],
   china: [23.1, 113.3],
   turkey: [41.0, 28.9],
   türkiye: [41.0, 28.9],
@@ -30,6 +31,9 @@ const places: Record<string, [number, number]> = {
 };
 
 export const DHAKA: Market = { name: "Bangladesh", lat: 23.8, lon: 90.4 };
+
+// The home market: Bangladesh itself, where every route starts.
+export const isHome = (market: Market) => Math.hypot(market.lat - DHAKA.lat, market.lon - DHAKA.lon) < 1;
 
 export function marketPlace(name: string): Market | null {
   const hit = places[name.trim().toLowerCase().replace(/\./g, "")];

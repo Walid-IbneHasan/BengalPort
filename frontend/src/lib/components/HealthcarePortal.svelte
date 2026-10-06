@@ -111,7 +111,7 @@
     </div>
     <span class="eyebrow">{content.hero.eyebrow}</span>
     <h1>{content.hero.title}</h1>
-    <p class="specialty"><RotatingWord words={content.hero.specialties} prefix="Treatment abroad for " interval={2600} /></p>
+    <p class="specialty"><RotatingWord words={content.hero.specialties} prefix={`${content.hero.title} `} interval={2600} /></p>
     <p class="tagline">{content.hero.tagline}</p>
     <ol class="pathway" aria-label="How treatment abroad is arranged">
       {#each content.hero.pathway as node, i}{@const Icon = icons[node.icon] || Check}
@@ -691,6 +691,7 @@
   .panel-copy p {
     margin: 0;
     line-height: 1.7;
+    overflow-wrap: anywhere;
   }
   .panel-copy small {
     margin-top: 0.4rem;
@@ -841,6 +842,7 @@
   }
   .hospital-copy p {
     margin: 0;
+    overflow-wrap: anywhere;
     font-size: 0.86rem;
     line-height: 1.6;
     color: var(--muted);
@@ -1134,10 +1136,11 @@
     .care {
       padding-inline: 2rem;
     }
+    /* The hero fills what is left of the first screen below the fixed header, never more. */
     .hero {
       justify-content: center;
-      min-height: 86svh;
-      padding: 3rem 2rem 3.25rem;
+      min-height: min(calc(100svh - 11rem), 46rem);
+      padding: 2.6rem 2rem 2.8rem;
     }
     .place {
       --drift: 14px;

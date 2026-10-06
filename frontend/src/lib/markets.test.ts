@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { DHAKA, arcPath, marketPlace, project } from "./markets.js";
+import { DHAKA, arcPath, isHome, marketPlace, project } from "./markets.js";
 
 describe("placing a market on the map", () => {
   test("knows the markets the business page names, in any case", () => {
@@ -22,5 +22,14 @@ describe("placing a market on the map", () => {
     assert.match(d, /^M270\.4 66\.2 Q/);
     const control = Number(d.split(" ")[3]);
     assert.ok(control < 66.2, "control point sits above both ends");
+  });
+});
+
+describe("Bangladesh as a market", () => {
+  test("is known, and recognised as home so no route is drawn to itself", () => {
+    const home = marketPlace("Bangladesh");
+    assert.ok(home);
+    assert.equal(isHome(home!), true);
+    assert.equal(isHome(marketPlace("China")!), false);
   });
 });

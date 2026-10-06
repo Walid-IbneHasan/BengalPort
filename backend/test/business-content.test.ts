@@ -58,7 +58,7 @@ after(async () => {
 describe("the Global Business page before anyone edits it", () => {
   test("names the markets it sources from and six things it does", async () => {
     const content = await live();
-    assert.deepEqual(content.hero.markets.slice(0, 3), ["China", "Turkey", "Vietnam"]);
+    assert.deepEqual(content.hero.markets.slice(0, 3), ["Bangladesh", "China", "Turkey"]);
     assert.equal(content.services.items.length, 6);
     assert.ok(content.services.items.every((item: any) => item.image.startsWith("/images/")));
     assert.equal("shortcuts" in content, false);

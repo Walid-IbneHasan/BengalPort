@@ -53,7 +53,7 @@
     </div>
     <span class="eyebrow">{content.hero.eyebrow}</span>
     <h1>{content.hero.title}</h1>
-    <p class="journey"><RotatingWord words={content.hero.journeys} prefix="Your Umrah " interval={2600} /></p>
+    <p class="journey"><RotatingWord words={content.hero.journeys} prefix={`${content.hero.title} `} interval={2600} /></p>
     <p class="tagline">{content.hero.tagline}</p>
     {#if departures.length}
       <div class="departures">
@@ -300,7 +300,7 @@
   .mosque {
     position: absolute;
     bottom: 0;
-    width: clamp(9rem, 30vw, 18rem);
+    width: clamp(8rem, 24vw, 15rem);
     height: auto;
     fill: none;
     stroke: var(--on-ink-gold);
@@ -318,9 +318,9 @@
   .route {
     position: absolute;
     left: 50%;
-    bottom: 2.2rem;
+    bottom: 1.6rem;
     width: min(92%, 70rem);
-    height: 11rem;
+    height: 9rem;
     transform: translateX(-50%);
     overflow: visible;
   }
@@ -624,6 +624,7 @@
     grid-template-columns: 1.4rem 1fr;
     gap: 0.55rem;
     align-items: start;
+    overflow-wrap: anywhere;
     font-size: 0.88rem;
     line-height: 1.5;
     color: #26384b;
@@ -719,6 +720,7 @@
   .stages ul {
     display: grid;
     gap: 0.35rem;
+    overflow-wrap: anywhere;
     margin: 0.5rem 0 0;
     padding: 0 0 0 1.1rem;
     font-size: 0.88rem;
@@ -981,10 +983,11 @@
     .umrah {
       padding-inline: 2rem;
     }
+    /* The hero fills what is left of the first screen below the fixed header, never more. */
     .hero {
       justify-content: center;
-      min-height: 86svh;
-      padding: 3rem 2rem 12rem;
+      min-height: min(calc(100svh - 11rem), 46rem);
+      padding: 2.6rem 2rem 9rem;
     }
     .hero h1 {
       margin-top: 0.8rem;

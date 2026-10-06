@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import dots from "$lib/world-dots.json";
-  import { DHAKA, arcPath, marketPlace, project } from "$lib/markets";
+  import { DHAKA, arcPath, isHome, marketPlace, project } from "$lib/markets";
 
   // The Business hero's backdrop: the world as a field of dots, with a gold
   // route drawn from Dhaka to the market the title currently names. Routes
@@ -11,16 +12,26 @@
   const land = (dots as [number, number][]).map(([x, y]) => `M${x} ${y}h0.01`).join("");
   const home = project(DHAKA.lat, DHAKA.lon);
 
+  // Bangladesh itself gets no route: when it is the market named, the home
+  // beacon lights up instead.
   let routes = $derived(
     markets.map((name) => {
       const place = marketPlace(name);
-      return place ? { name, d: arcPath(DHAKA, place), end: project(place.lat, place.lon) } : null;
+      if (!place) return null;
+      if (isHome(place)) return { name, home: true as const, d: "", end: project(place.lat, place.lon) };
+      return { name, home: false as const, d: arcPath(DHAKA, place), end: project(place.lat, place.lon) };
     }),
   );
-  // Which routes have had their turn since the page opened.
+  let homeLit = $derived(Boolean(routes[active]?.home));
+  // Which routes have had their turn since the page opened. The effect reads
+  // `seen` untracked: tracking what it writes would reschedule it forever.
   let seen = $state(new Set<number>());
   $effect(() => {
-    if (routes[active]) seen = new Set([...seen, active]);
+    const index = active;
+    const route = routes[index];
+    if (!route || route.home) return;
+    const current = untrack(() => seen);
+    if (!current.has(index)) seen = new Set([...current, index]);
   });
 </script>
 
@@ -29,7 +40,7 @@
 <svg class="map" viewBox="170 30 190 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
   <path class="land" d={land} />
   {#each routes as route, i}
-    {#if route}
+    {#if route && !route.home}
       <path class="arc" class:active={i === active} class:seen={i !== active && seen.has(i)} d={route.d} pathLength="1" />
       <circle class="port" class:lit={i === active} cx={route.end.x} cy={route.end.y} r="1.1" />
       {#if i === active}
@@ -40,8 +51,8 @@
       {/if}
     {/if}
   {/each}
-  <circle class="home-ring" cx={home.x} cy={home.y} r="2.4" />
-  <circle class="home" cx={home.x} cy={home.y} r="1.5" />
+  <circle class="home-ring" class:lit={homeLit} cx={home.x} cy={home.y} r="2.4" />
+  <circle class="home" class:lit={homeLit} cx={home.x} cy={home.y} r="1.5" />
 </svg>
 
 <style>
@@ -132,6 +143,14 @@
   .home {
     fill: #efc45e;
     filter: drop-shadow(0 0 2px rgba(239, 196, 94, 0.9));
+    transition: filter 400ms ease;
+  }
+  .home.lit {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 1)) drop-shadow(0 0 7px rgba(239, 196, 94, 0.9));
+  }
+  .home-ring.lit {
+    animation-duration: 1300ms;
+    stroke-width: 0.9;
   }
   .home-ring {
     fill: none;
