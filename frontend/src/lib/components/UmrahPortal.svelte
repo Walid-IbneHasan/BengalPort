@@ -246,12 +246,12 @@
     max-width: 88rem;
     margin-inline: auto;
   }
-  /* The quick links sit across the hero's lower edge, over the skyline. */
+  /* The quick links: a full-width list under the hero on phones; from 48rem
+     they sit across the hero's lower edge, over the skyline. */
   .jump {
     position: relative;
     z-index: 2;
-    padding-inline: 0.75rem;
-    margin-top: -2.4rem;
+    margin-top: 0.9rem;
   }
   .section,
   .band,
@@ -277,7 +277,7 @@
     background: radial-gradient(ellipse at 50% 115%, #1d3a60 0%, #102640 52%, #0b1b31 100%);
     color: #fff;
     text-align: center;
-    padding: 2.4rem 1rem 9.5rem;
+    padding: 1.8rem 1rem 8rem;
     box-shadow: 0 1rem 2.6rem #17304f30;
   }
   .hero > :not(.sky, .skyline) {
@@ -310,7 +310,7 @@
   }
   .mosque {
     position: absolute;
-    bottom: 2.4rem;
+    bottom: 0;
     width: clamp(8rem, 24vw, 15rem);
     height: auto;
     fill: none;
@@ -329,7 +329,7 @@
   .route {
     position: absolute;
     left: 50%;
-    bottom: 4rem;
+    bottom: 1.6rem;
     width: min(92%, 70rem);
     height: 9rem;
     transform: translateX(-50%);

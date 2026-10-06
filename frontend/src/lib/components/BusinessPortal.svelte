@@ -314,12 +314,12 @@
     max-width: 88rem;
     margin-inline: auto;
   }
-  /* The quick links sit across the hero's lower edge. */
+  /* The quick links: a full-width list under the hero on phones; from 48rem
+     they sit across the hero's lower edge. */
   .jump {
     position: relative;
     z-index: 2;
-    padding-inline: 0.75rem;
-    margin-top: -2.4rem;
+    margin-top: 0.9rem;
   }
   .section,
   .band,
@@ -345,7 +345,7 @@
     background: var(--ink-panel);
     color: #fff;
     text-align: center;
-    padding: 2.4rem 1rem 4.4rem;
+    padding: 1.8rem 1rem 2rem;
     box-shadow: 0 1rem 2.6rem #17304f30;
   }
   .hero > :not(.map-wrap, .chips) {
@@ -396,8 +396,8 @@
     white-space: nowrap;
     backdrop-filter: blur(2px);
   }
-  .chip-0 { top: 1.2rem; left: 4%; animation: float-a 8s ease-in-out infinite; }
-  .chip-1 { top: 1.2rem; right: 4%; animation: float-b 9s ease-in-out infinite; }
+  .chip-0 { top: 3.4rem; left: 4%; animation: float-a 8s ease-in-out infinite; }
+  .chip-1 { top: 3.4rem; right: 4%; animation: float-b 9s ease-in-out infinite; }
   .chip-2 { bottom: 7.5rem; left: 5%; animation: float-b 7s ease-in-out infinite; }
   .chip-2,
   .chip-3,
@@ -415,7 +415,7 @@
     font-size: clamp(2rem, 7vw, 4.2rem);
     line-height: 1.05;
     letter-spacing: -0.04em;
-    margin: 0.5rem 0 0;
+    margin: 3.6rem 0 0;
     font-weight: 800;
     text-wrap: balance;
   }
@@ -1150,6 +1150,9 @@
       padding-inline: 2.5rem;
       margin-top: -2.9rem;
     }
+    .hero h1 {
+      margin-top: 0.8rem;
+    }
     .map-wrap :global(svg) {
       width: 100%;
       margin-left: 0;
@@ -1165,9 +1168,6 @@
     .chip-2 { display: inline-block; top: 34%; bottom: auto; left: 6%; }
     .chip-3 { display: inline-block; top: 36%; right: 7%; animation: float-a 8.5s ease-in-out infinite; }
     .chip-4 { display: inline-block; top: auto; bottom: 24%; left: 14%; animation: float-b 9.5s ease-in-out infinite; }
-    .hero h1 {
-      margin-top: 0.8rem;
-    }
     .tagline {
       margin-top: 1rem;
     }

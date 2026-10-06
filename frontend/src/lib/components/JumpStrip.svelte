@@ -24,7 +24,7 @@
     --s-line: var(--line, #e2e6e8);
     --s-muted: var(--muted, #607083);
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     border: 1px solid var(--s-line);
     border-radius: 1rem;
     background: #fff;
@@ -33,19 +33,16 @@
   }
   a {
     display: grid;
-    grid-template-columns: 2.5rem 1fr;
-    gap: 0.6rem;
+    grid-template-columns: 2.5rem 1fr auto;
+    gap: 0.8rem;
     align-items: center;
-    min-height: 4.6rem;
-    padding: 0.85rem 0.9rem;
+    min-height: 4.4rem;
+    padding: 0.8rem 1rem;
     color: var(--s-ink);
     text-decoration: none;
     transition: background-color 160ms ease;
   }
-  a:nth-child(even) {
-    border-left: 1px solid var(--s-line);
-  }
-  a:nth-child(n + 3) {
+  a:nth-child(n + 2) {
     border-top: 1px solid var(--s-line);
   }
   i {
@@ -63,16 +60,15 @@
     min-width: 0;
   }
   b {
-    font-size: 0.86rem;
+    font-size: 0.92rem;
     line-height: 1.2;
   }
   small {
-    font-size: 0.72rem;
+    font-size: 0.76rem;
     line-height: 1.35;
     color: var(--s-muted);
   }
   a :global(.go) {
-    display: none;
     color: var(--s-muted);
     transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), color 160ms ease;
   }
@@ -85,13 +81,26 @@
       color: var(--s-ink);
     }
   }
+  @media (min-width: 40rem) {
+    .strip {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    a:nth-child(n + 2) {
+      border-top: 0;
+    }
+    a:nth-child(even) {
+      border-left: 1px solid var(--s-line);
+    }
+    a:nth-child(n + 3) {
+      border-top: 1px solid var(--s-line);
+    }
+  }
   @media (min-width: 48rem) {
     .strip {
       grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
     }
     a {
       grid-template-columns: 2.75rem 1fr auto;
-      gap: 0.8rem;
       min-height: 5.4rem;
       padding: 1rem 1.2rem;
     }
@@ -105,12 +114,6 @@
     }
     b {
       font-size: 0.95rem;
-    }
-    small {
-      font-size: 0.76rem;
-    }
-    a :global(.go) {
-      display: block;
     }
   }
   @media (prefers-reduced-motion: reduce) {
