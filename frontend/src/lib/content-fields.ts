@@ -18,7 +18,7 @@ const capital = (value: string) => value.replace(/^./, (c) => c.toUpperCase());
 // With `lists`, items can be added to and removed from every list.
 export function contentRows(value: unknown, options: { lists?: boolean } = {}, path = "", remove?: { list: string; index: number }): ContentRow[] {
   if (typeof value === "string")
-    return [{ kind: "field", path, label: capital(words(path)), value, long: value.length > 75 || /description/i.test(path), image: /(^|\.)image$/i.test(path), ...(remove ? { remove } : {}) }];
+    return [{ kind: "field", path, label: capital(words(path)), value, long: value.length > 75 || /description/i.test(path), image: /(^|\.)(image|photo)$/i.test(path), ...(remove ? { remove } : {}) }];
   if (Array.isArray(value)) {
     const removable = Boolean(options.lists) && value.length > 1;
     const rows = value.flatMap((item, index): ContentRow[] => {

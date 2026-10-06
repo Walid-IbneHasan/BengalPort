@@ -55,7 +55,10 @@ export type StudyFieldContent = {
   points: string[];
   subjects: string[];
   cta: string;
+  // The picture on the option at the top of the page, and the photo in the
+  // section it leads to.
   image: string;
+  photo: string;
 };
 // The Education page has its own layout: four options (three fields of study
 // and the student reviews) in place of the shortcuts row. The reviews
@@ -71,6 +74,7 @@ export type EducationContent = Omit<DivisionContent, "shortcuts"> & {
     invite: string;
     cta: string;
     image: string;
+    photo: string;
   };
   destinations: { eyebrow: string; title: string; description: string };
 };
@@ -81,7 +85,7 @@ export const defaultEducationContent: EducationContent = {
     tagline: "Choose clearly. Apply confidently.",
     description:
       "Explore trusted institutions, relevant programs and international study destinations with practical guidance from shortlist to admission.",
-      image: "/images/edu-hero.jpg",
+      image: "/images/edu-hero.webp",
     primary: "Start education enquiry",
     secondary: "Explore programs",
   },
@@ -99,7 +103,8 @@ export const defaultEducationContent: EducationContent = {
       ],
       subjects: ["MBBS", "Dentistry (BDS)", "Nursing", "Pharmacy", "Public Health"],
       cta: "Apply for medical admission",
-      image: "/images/icon-medical.jpg",
+      image: "/images/icon-medical.webp",
+      photo: "/images/edu-card-medical.webp",
     },
     engineering: {
       title: "Engineering",
@@ -114,7 +119,8 @@ export const defaultEducationContent: EducationContent = {
       ],
       subjects: ["Civil", "Mechanical", "Electrical and Electronic", "Computer Science", "Software Engineering"],
       cta: "Apply for engineering admission",
-      image: "/images/icon-engineering.jpg",
+      image: "/images/icon-engineering.webp",
+      photo: "/images/edu-card-engineering.webp",
     },
     general: {
       title: "General Subjects",
@@ -136,7 +142,8 @@ export const defaultEducationContent: EducationContent = {
         "Language and Foundation",
       ],
       cta: "Apply for admission",
-      image: "/images/icon-general.jpg",
+      image: "/images/icon-general.webp",
+      photo: "/images/edu-card-general.webp",
     },
   },
   reviews: {
@@ -149,7 +156,8 @@ export const defaultEducationContent: EducationContent = {
     invite:
       "Used our service? Sign in, open your application in your dashboard and write a review. It appears here once our team has approved it.",
     cta: "Write a review",
-    image: "/images/icon-reviews.jpg",
+    image: "/images/icon-reviews.webp",
+    photo: "/images/edu-card-reviews.webp",
   },
   destinations: {
     eyebrow: "STUDY DESTINATIONS",

@@ -38,7 +38,6 @@
     margin: 0;
     padding: 1.3rem;
     border: 1px solid #dfe5e8;
-    border-top: 3px solid #ddb04a;
     border-radius: 1rem;
     background: #fff;
     box-shadow: 0 0.5rem 1.4rem #10264008;

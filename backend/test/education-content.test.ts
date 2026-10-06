@@ -62,6 +62,26 @@ describe("editing the Global Education page", () => {
     assert.equal((await live()).reviews.heading, "What our students say");
   });
 
+  test("an admin can change the picture of an option and the photo of its section", async () => {
+    await clear();
+    const content = draft();
+    content.fields.medical.image = "/images/new-medical-tile.webp";
+    content.fields.medical.photo = "/images/new-medical-photo.webp";
+    content.reviews.photo = "/images/new-students.webp";
+    assert.equal((await save(content)).statusCode, 200);
+    const shown = await live();
+    assert.equal(shown.fields.medical.image, "/images/new-medical-tile.webp");
+    assert.equal(shown.fields.medical.photo, "/images/new-medical-photo.webp");
+    assert.equal(shown.reviews.photo, "/images/new-students.webp");
+  });
+
+  test("a picture needs a path or a web address", async () => {
+    await clear();
+    const content = draft();
+    content.fields.engineering.photo = "not a path";
+    assert.equal((await save(content)).statusCode, 400);
+  });
+
   test("reviews are not part of the page: they come from customers", async () => {
     await clear();
     const content = draft();

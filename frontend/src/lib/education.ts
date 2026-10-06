@@ -54,3 +54,23 @@ export function destinations(institutions: Institution[]) {
   }
   return [...byCountry.values()].sort((a, b) => b.institutions - a.institutions || a.country.localeCompare(b.country));
 }
+
+// Two-letter flag codes of the countries students usually ask about, by the
+// names an administrator is likely to type.
+const flags: Record<string, string> = {
+  uk: "gb", "united kingdom": "gb", england: "gb", "great britain": "gb",
+  usa: "us", us: "us", "united states": "us", "united states of america": "us",
+  canada: "ca", australia: "au", "new zealand": "nz", ireland: "ie",
+  malaysia: "my", china: "cn", india: "in", japan: "jp", "south korea": "kr", singapore: "sg", thailand: "th",
+  germany: "de", france: "fr", italy: "it", spain: "es", netherlands: "nl", switzerland: "ch", austria: "at",
+  finland: "fi", sweden: "se", norway: "no", denmark: "dk", poland: "pl", hungary: "hu", romania: "ro", cyprus: "cy",
+  turkey: "tr", russia: "ru", georgia: "ge", uzbekistan: "uz", kazakhstan: "kz", kyrgyzstan: "kg",
+  "saudi arabia": "sa", uae: "ae", "united arab emirates": "ae", egypt: "eg", bangladesh: "bd",
+};
+
+// The flags to show for a list of destinations: one per country, in the
+// order given. A country whose flag is not known is left out.
+export function flagCodes(countries: string[]): string[] {
+  const codes = countries.map((name) => flags[name.trim().toLowerCase().replace(/\./g, "")]).filter(Boolean);
+  return [...new Set(codes)];
+}

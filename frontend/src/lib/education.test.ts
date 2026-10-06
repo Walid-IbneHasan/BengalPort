@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { destinations, fieldPrograms, institutionFields, studyField } from "./education.js";
+import { destinations, fieldPrograms, flagCodes, institutionFields, studyField } from "./education.js";
 
 const records = [
   {
@@ -104,5 +104,23 @@ describe("study destinations", () => {
 
   test("no institutions means no destinations", () => {
     assert.deepEqual(destinations([]), []);
+  });
+});
+
+describe("the flags shown for study destinations", () => {
+  test("each known country gives its flag code, in the order given", () => {
+    assert.deepEqual(flagCodes(["UK", "USA", "Canada", "Australia", "Malaysia"]), ["gb", "us", "ca", "au", "my"]);
+  });
+
+  test("a country is recognised however it is written", () => {
+    assert.deepEqual(flagCodes(["united kingdom", " China ", "U.S.A."]), ["gb", "cn", "us"]);
+  });
+
+  test("a country written twice gives one flag", () => {
+    assert.deepEqual(flagCodes(["UK", "United Kingdom", "Malaysia"]), ["gb", "my"]);
+  });
+
+  test("a country without a known flag is left out", () => {
+    assert.deepEqual(flagCodes(["Atlantis", "Malaysia"]), ["my"]);
   });
 });

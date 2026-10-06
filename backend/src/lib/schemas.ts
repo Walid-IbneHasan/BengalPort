@@ -638,9 +638,13 @@ const heading = z.object({ eyebrow: text, title: text, description: paragraph })
 // The Education page: four options (three fields of study and the student
 // reviews) in place of the shortcuts row. The reviews themselves are written
 // by customers; the page holds only the section's wording.
+// `image` is the picture on the option at the top of the page, `photo` the
+// one in the section it leads to.
 const studyField = z.object({
   title: text,
   tagline: text,
+  image: link,
+  photo: link,
   heading: text,
   description: paragraph,
   points: z.array(text).min(1).max(8),
@@ -658,6 +662,8 @@ export const educationContentSchema = divisionContentSchema
     reviews: z.object({
       title: text,
       tagline: text,
+      image: link,
+      photo: link,
       eyebrow: text,
       heading: text,
       description: paragraph,

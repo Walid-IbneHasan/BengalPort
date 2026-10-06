@@ -114,7 +114,7 @@ async function seedDemoData(
       "Applications are open for selected international medical institutions.",
       "Malaysia",
       "Kuala Lumpur",
-      "/images/edu-medical.jpg",
+      "/images/edu-medical.webp",
     ],
     [
       "executive-health-check",
@@ -211,7 +211,7 @@ async function seedDemoData(
         country: "Malaysia",
         description:
           "Internationally focused medical education with a structured admissions pathway.",
-        image: "/images/edu-medical.jpg",
+        image: "/images/edu-medical.webp",
         programs: {
           create: [
             {
@@ -230,7 +230,7 @@ async function seedDemoData(
         country: "China",
         description:
           "English-medium engineering and technology programs for international students.",
-        image: "/images/edu-engineering.jpg",
+        image: "/images/edu-engineering.webp",
         programs: {
           create: [
             {

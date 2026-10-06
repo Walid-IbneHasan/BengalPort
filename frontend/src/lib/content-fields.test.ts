@@ -34,6 +34,12 @@ describe("turning page content into editor rows", () => {
     assert.equal(rows["hero.image"].image, true);
   });
 
+  test("a photo gets an image picker too", () => {
+    const rows = Object.fromEntries(fields(contentRows({ fields: { medical: { photo: "/images/medical.webp", title: "Medical" } } })).map((row) => [row.path, row]));
+    assert.equal(rows["fields.medical.photo"].image, true);
+    assert.equal(rows["fields.medical.title"].image, false);
+  });
+
   test("lists cannot be changed unless the page allows it", () => {
     assert.ok(contentRows(content).every((row) => row.kind === "field" && !row.remove));
   });
