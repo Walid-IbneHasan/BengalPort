@@ -21,6 +21,7 @@
   import type { PublicReview } from "$lib/reviews";
   import Testimonials from "./Testimonials.svelte";
   import { applyHref } from "$lib/apply-route";
+  import { reveal } from "$lib/reveal";
   import {
     destinations,
     fieldKeys,
@@ -133,27 +134,6 @@
       clearInterval(flagTimer);
     };
   });
-  function reveal(node: HTMLElement) {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return {};
-    node.style.opacity = "0";
-    node.style.transform = "translateY(24px)";
-    node.style.transition =
-      "opacity 620ms cubic-bezier(.23,1,.32,1),transform 620ms cubic-bezier(.23,1,.32,1)";
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          requestAnimationFrame(() => {
-            node.style.opacity = "1";
-            node.style.transform = "none";
-          });
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.12 },
-    );
-    observer.observe(node);
-    return { destroy: () => observer.disconnect() };
-  }
 </script>
 
 <main class="edu">
