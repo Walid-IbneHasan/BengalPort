@@ -1,6 +1,7 @@
 // The Business page's partner list: suppliers and factories from the live
 // records, shown grouped by country.
 export type Partner = {
+  id: string;
   name: string;
   country: string;
   industry: string;

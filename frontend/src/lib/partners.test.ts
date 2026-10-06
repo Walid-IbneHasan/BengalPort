@@ -2,7 +2,9 @@ import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { groupPartners, industries, type Partner } from "./partners.js";
 
+let next = 0;
 const partner = (over: Partial<Partner>): Partner => ({
+  id: `p${++next}`,
   name: "A partner", country: "China", industry: "Textiles", product: "Fabric", description: "", image: "", featured: false, kind: "Supplier", ...over,
 });
 const partners = [

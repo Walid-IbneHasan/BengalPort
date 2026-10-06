@@ -41,49 +41,6 @@ const educationServices = [
   description,
   href,
 }));
-const healthcareServices = [
-  [
-    "heart",
-    "Health checkups",
-    "Compare comprehensive and executive screening options at partner hospitals.",
-    "#directory",
-  ],
-  [
-    "stethoscope",
-    "Specialist treatment",
-    "Identify appropriate hospitals and clinical specialties for your needs.",
-    "#directory",
-  ],
-  [
-    "activity",
-    "Surgery coordination",
-    "Support for medical review, appointments, scheduling and preparation.",
-    "/apply?tab=healthcare",
-  ],
-  [
-    "file",
-    "Medical records",
-    "Organize reports and relevant information for hospital review.",
-    "/apply?tab=healthcare",
-  ],
-  [
-    "plane",
-    "Travel planning",
-    "Practical international patient guidance around appointments and travel.",
-    "#process",
-  ],
-  [
-    "headset",
-    "Patient support",
-    "A clear point of contact throughout the coordination journey.",
-    "/contact",
-  ],
-].map(([icon, title, description, href]) => ({
-  icon,
-  title,
-  description,
-  href,
-}));
 export const defaultEducationContent = {
   hero: {
     eyebrow: "GLOBAL EDUCATION",
