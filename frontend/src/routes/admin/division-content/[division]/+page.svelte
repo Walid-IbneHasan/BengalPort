@@ -11,7 +11,12 @@
       lists: true,
       note: 'The four options at the top of the page are Fields · medical, Fields · engineering, Fields · general and Reviews. The reviews themselves are written by customers and approved under Reviews in the menu; here you edit only the wording around them.',
     },
-    healthcare: { title: 'Healthcare', fallback: defaultHealthcareContent, lists: false, note: '' },
+    healthcare: {
+      title: 'Healthcare',
+      fallback: defaultHealthcareContent,
+      lists: true,
+      note: 'Hero · specialties are the words that take turns in the title; Hero · pathway is the three-step line under it and keeps exactly three steps. Hero · cities are the destination chips shown when the hospital directory is empty.',
+    },
     umrah: { title: 'Umrah', fallback: defaultUmrahContent, lists: false, note: '' },
   };
   const division = $derived(

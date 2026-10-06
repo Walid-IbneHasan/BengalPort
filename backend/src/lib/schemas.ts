@@ -692,6 +692,25 @@ export const educationContentSchema = divisionContentSchema
     }),
     destinations: heading,
   });
+// The Healthcare page: a hero that names the specialties and the three-step
+// pathway, the treatments index with photos, the live hospital directory's
+// wording, the process, the clarity points with the stats, the reviews and
+// the closing panel. The destination chips come from the live hospitals and
+// fall back to `hero.cities`.
+export const healthcareContentSchema = divisionContentSchema
+  .omit({ shortcuts: true, services: true })
+  .extend({
+    hero: divisionContentSchema.shape.hero.extend({
+      specialties: stringList(8),
+      pathway: z.array(z.object({ icon: text, title: text, description: text })).length(3),
+      cities: stringList(8),
+    }),
+    treatments: z
+      .array(z.object({ title: text, image: link, description: paragraph, procedures: stringList(8), cta: text }))
+      .min(1)
+      .max(8),
+    reviews: reviewsSection,
+  });
 // The About, Services and Contact pages.
 export const aboutContentSchema = z.object({
   hero: heading,

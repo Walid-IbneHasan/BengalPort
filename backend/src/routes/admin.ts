@@ -11,6 +11,7 @@ import {
   feeSettingsSchema,
   divisionContentSchema,
   educationContentSchema,
+  healthcareContentSchema,
   aboutContentSchema,
   servicesContentSchema,
   contactContentSchema,
@@ -817,7 +818,7 @@ const admin: FastifyPluginAsync = async (app) => {
     healthcare: {
       name: "Global Healthcare",
       fallback: defaultHealthcareContent,
-      schema: divisionContentSchema,
+      schema: healthcareContentSchema,
     },
     umrah: {
       name: "Global Umrah",

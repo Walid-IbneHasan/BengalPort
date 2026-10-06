@@ -80,6 +80,19 @@ export type EducationContent = Omit<DivisionContent, "shortcuts"> & {
   };
   destinations: { eyebrow: string; title: string; description: string };
 };
+// The Healthcare page: the hero names the specialties and shows a three-step
+// pathway, the treatments index replaces the service cards, and the chips
+// around the title are destinations from the live hospitals, topped up from
+// `hero.cities`.
+export type HealthcareContent = Omit<DivisionContent, "shortcuts" | "services"> & {
+  hero: DivisionContent["hero"] & {
+    specialties: string[];
+    pathway: Array<{ icon: string; title: string; description: string }>;
+    cities: string[];
+  };
+  treatments: Array<{ title: string; image: string; description: string; procedures: string[]; cta: string }>;
+  reviews: { eyebrow: string; heading: string; description: string; invite: string; cta: string; photo: string };
+};
 export const defaultEducationContent: EducationContent = {
   hero: {
     eyebrow: "GLOBAL EDUCATION",
@@ -293,133 +306,167 @@ export const defaultEducationContent: EducationContent = {
     secondary: "Speak with an adviser",
   },
 };
-export const defaultHealthcareContent: DivisionContent = {
+export const defaultHealthcareContent: HealthcareContent = {
   hero: {
     eyebrow: "GLOBAL HEALTHCARE",
-    title: "Care, connected globally.",
+    title: "Treatment abroad for",
+    specialties: [
+      "Cardiology",
+      "Oncology",
+      "Orthopaedics",
+      "Fertility",
+      "Dental care",
+      "Health check-ups"
+    ],
     tagline: "Trusted direction. Human support.",
-    description:
-      "Connect with international hospitals, specialists and treatment pathways while Bengal Port coordinates the practical details around your care.",
-      image: "/images/global-healthcare.webp",
+    description: "Connect with international hospitals, specialists and treatment pathways while Bengal Port coordinates the practical details around your care.",
+    image: "/images/global-healthcare.webp",
     primary: "Request healthcare support",
-    secondary: "Explore hospitals",
-  },
-  shortcuts: [
-    {
-      icon: "hospital",
-      title: "Partner Hospitals",
-      subtitle: "Trusted facilities",
-      href: "#directory",
-    },
-    {
-      icon: "heart",
-      title: "Health Checkups",
-      subtitle: "Preventive screening",
-      href: "#services",
-    },
-    {
-      icon: "stethoscope",
-      title: "Specialists",
-      subtitle: "Clinical direction",
-      href: "#directory",
-    },
-    {
-      icon: "activity",
-      title: "Surgery Support",
-      subtitle: "Coordinated treatment",
-      href: "#services",
-    },
-    {
-      icon: "plane",
-      title: "Patient Assistance",
-      subtitle: "Travel-ready support",
-      href: "#process",
-    },
-  ],
-  services: {
-    eyebrow: "PATIENT SERVICES",
-    title: "International care with local coordination",
-    description:
-      "A supportive pathway before, during and after international treatment.",
-    items: [
-      {
-        icon: "heart",
-        title: "Health checkups",
-        description:
-          "Compare comprehensive and executive screening options at partner hospitals.",
-        href: "#directory",
-      },
-      {
-        icon: "stethoscope",
-        title: "Specialist treatment",
-        description:
-          "Identify appropriate hospitals and clinical specialties for your needs.",
-        href: "#directory",
-      },
-      {
-        icon: "activity",
-        title: "Surgery coordination",
-        description:
-          "Support for medical review, appointments, scheduling and preparation.",
-        href: "/apply?tab=healthcare",
-      },
+    secondary: "See partner hospitals",
+    pathway: [
       {
         icon: "file",
-        title: "Medical records",
-        description:
-          "Organize reports and relevant information for hospital review.",
-        href: "/apply?tab=healthcare",
+        title: "Diagnosis review",
+        description: "Your reports read and your options explained."
+      },
+      {
+        icon: "hospital",
+        title: "Hospital match",
+        description: "Suitable hospitals and specialists, with costs."
       },
       {
         icon: "plane",
-        title: "Travel planning",
-        description:
-          "Practical international patient guidance around appointments and travel.",
-        href: "#process",
-      },
-      {
-        icon: "headset",
-        title: "Patient support",
-        description:
-          "A clear point of contact throughout the coordination journey.",
-        href: "/contact",
-      },
+        title: "Travel and care",
+        description: "Appointments, travel and a coordinator throughout."
+      }
     ],
+    cities: [
+      "Bangkok, Thailand",
+      "Kuala Lumpur, Malaysia",
+      "Chennai, India",
+      "Istanbul, Turkey",
+      "Singapore"
+    ]
   },
+  treatments: [
+    {
+      title: "Cardiology",
+      image: "/images/divisions/care-cardiology.webp",
+      description: "Heart care at hospitals with dedicated international patient teams. We help you compare procedures, surgeons and costs before you decide where to go.",
+      procedures: [
+        "Angiography",
+        "Bypass surgery",
+        "Valve repair",
+        "Pacemaker"
+      ],
+      cta: "Ask about cardiology"
+    },
+    {
+      title: "Oncology",
+      image: "/images/divisions/care-oncology.webp",
+      description: "Cancer diagnosis, second opinions and treatment plans from oncology centres abroad, with the practical details handled around you and your family.",
+      procedures: [
+        "Second opinion",
+        "Chemotherapy",
+        "Radiotherapy",
+        "Cancer surgery"
+      ],
+      cta: "Ask about oncology"
+    },
+    {
+      title: "Orthopaedics",
+      image: "/images/divisions/care-orthopaedics.webp",
+      description: "Joint replacement, spine care and sports injuries, with rehabilitation planned before you travel.",
+      procedures: [
+        "Knee replacement",
+        "Hip replacement",
+        "Spine surgery",
+        "Rehabilitation"
+      ],
+      cta: "Ask about orthopaedics"
+    },
+    {
+      title: "Fertility",
+      image: "/images/divisions/care-fertility.webp",
+      description: "Fertility assessment and treatment at clinics with clear success data, timed around your cycle and your travel.",
+      procedures: [
+        "IVF",
+        "ICSI",
+        "Fertility assessment",
+        "Egg freezing"
+      ],
+      cta: "Ask about fertility care"
+    },
+    {
+      title: "Dental care",
+      image: "/images/divisions/care-dental.webp",
+      description: "Implants, crowns and full-mouth treatment at modern dental clinics, often completed within a single trip.",
+      procedures: [
+        "Implants",
+        "Crowns and veneers",
+        "Orthodontics",
+        "Full-mouth restoration"
+      ],
+      cta: "Ask about dental care"
+    },
+    {
+      title: "Health check-ups",
+      image: "/images/divisions/care-checkups.webp",
+      description: "Comprehensive and executive screening packages at partner hospitals, with the results explained in plain language.",
+      procedures: [
+        "Executive screening",
+        "Cardiac screening",
+        "Cancer screening",
+        "Women's health"
+      ],
+      cta: "Ask about check-ups"
+    }
+  ],
   stats: [
-    { value: "8+", label: "Healthcare destinations", icon: "map" },
-    { value: "30+", label: "Partner hospitals", icon: "hospital" },
-    { value: "20+", label: "Treatment categories", icon: "heart" },
-    { value: "24/7", label: "Patient coordination", icon: "headset" },
+    {
+      value: "8+",
+      label: "Healthcare destinations",
+      icon: "map"
+    },
+    {
+      value: "30+",
+      label: "Partner hospitals",
+      icon: "hospital"
+    },
+    {
+      value: "20+",
+      label: "Treatment categories",
+      icon: "heart"
+    },
+    {
+      value: "24/7",
+      label: "Patient coordination",
+      icon: "headset"
+    }
   ],
   feature: {
     eyebrow: "CARE WITH CLARITY",
     title: "Important health decisions deserve a calm, accountable process.",
-    description:
-      "Bengal Port does not replace medical advice. We help patients reach suitable providers and understand the coordination pathway.",
+    description: "Bengal Port does not replace medical advice. We help patients reach suitable providers and understand the coordination pathway.",
     points: [
       {
         title: "Needs-led hospital direction",
-        description:
-          "Options considered around specialty, destination and patient preference.",
+        description: "Options considered around specialty, destination and patient preference."
       },
       {
         title: "Clear pre-arrival coordination",
-        description:
-          "Appointments and information organized before international travel.",
+        description: "Appointments and information organized before international travel."
       },
       {
         title: "Family-aware support",
-        description:
-          "Practical communication for patients and accompanying family members.",
-      },
-    ],
+        description: "Practical communication for patients and accompanying family members."
+      }
+    ]
   },
   directory: {
     eyebrow: "LIVE HEALTHCARE NETWORK",
     title: "Partner hospitals and services",
-    description:
-      "Browse hospital and service records maintained by Bengal Port.",
+    description: "Browse hospital and service records maintained by Bengal Port."
   },
   process: {
     eyebrow: "PATIENT JOURNEY",
@@ -429,36 +476,39 @@ export const defaultHealthcareContent: DivisionContent = {
       {
         number: "01",
         title: "Share the care need",
-        description:
-          "Provide contact details, treatment category and available medical information.",
+        description: "Provide contact details, treatment category and available medical information."
       },
       {
         number: "02",
         title: "Review suitable options",
-        description:
-          "Receive hospital or service directions aligned with the stated need.",
+        description: "Receive hospital or service directions aligned with the stated need."
       },
       {
         number: "03",
         title: "Coordinate appointments",
-        description:
-          "Confirm provider review, estimated timing and appointment arrangements.",
+        description: "Confirm provider review, estimated timing and appointment arrangements."
       },
       {
         number: "04",
         title: "Prepare for treatment",
-        description:
-          "Organize practical pre-arrival information and ongoing support.",
-      },
-    ],
+        description: "Organize practical pre-arrival information and ongoing support."
+      }
+    ]
+  },
+  reviews: {
+    eyebrow: "PATIENT STORIES",
+    heading: "What our patients say",
+    description: "What patients and their families say about treatment abroad with our coordination.",
+    invite: "Used our service? Sign in, open your application in your dashboard and write a review. It appears here once our team has approved it.",
+    cta: "Write a review",
+    photo: "/images/divisions/care-reviews.webp"
   },
   closing: {
-    title: "Need help finding the right care pathway?",
-    description:
-      "Tell us what support you need and our healthcare coordination team will respond.",
+    title: "Ready to plan treatment abroad?",
+    description: "Tell us what support you need and our healthcare coordination team will respond.",
     primary: "Request healthcare support",
-    secondary: "Contact patient support",
-  },
+    secondary: "Contact patient support"
+  }
 };
 export const defaultUmrahContent: DivisionContent = {
   hero: {
