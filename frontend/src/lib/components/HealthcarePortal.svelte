@@ -368,14 +368,17 @@
     z-index: 1;
   }
   .chips {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-bottom: 1.1rem;
     pointer-events: none;
   }
   .place {
     --drift: 5px;
-    position: absolute;
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
@@ -398,8 +401,8 @@
     border-radius: 0.15rem;
     object-fit: cover;
   }
-  .place-0 { top: 2.9rem; left: 3%; animation: float-a 8s ease-in-out infinite; }
-  .place-1 { top: 2.9rem; right: 3%; animation: float-b 9s ease-in-out infinite; }
+  .place-0 { animation: float-a 8s ease-in-out infinite; }
+  .place-1 { animation: float-b 9s ease-in-out infinite; }
   .place-2,
   .place-3 { display: none; }
   @keyframes float-a {
@@ -412,7 +415,7 @@
     font-size: clamp(1.9rem, 7vw, 4rem);
     line-height: 1.05;
     letter-spacing: -0.04em;
-    margin: 3.9rem 0 0;
+    margin: 0.5rem 0 0;
     font-weight: 800;
     text-wrap: balance;
   }
@@ -1142,8 +1145,16 @@
       min-height: min(calc(100svh - 11rem), 46rem);
       padding: 2.6rem 2rem 2.8rem;
     }
+    .chips {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      display: block;
+      margin: 0;
+    }
     .place {
       --drift: 14px;
+      position: absolute;
       font-size: 0.8rem;
       padding: 0.5rem 0.9rem;
     }
