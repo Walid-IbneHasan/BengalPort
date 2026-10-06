@@ -296,6 +296,11 @@ export const defaultHealthcareContent = {
       "Singapore"
     ]
   },
+  treatmentsHeading: {
+    eyebrow: "TREATMENTS",
+    title: "Treatments we coordinate",
+    description: "Choose a specialty to see what we arrange, the usual procedures and the partner hospitals that offer it."
+  },
   treatments: [
     {
       title: "Cardiology",

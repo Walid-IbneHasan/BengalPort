@@ -1,3 +1,5 @@
+import { fillMissing } from "./content-fields.js";
+
 export type DivisionContent = {
   hero: {
     eyebrow: string;
@@ -90,6 +92,7 @@ export type HealthcareContent = Omit<DivisionContent, "shortcuts" | "services"> 
     pathway: Array<{ icon: string; title: string; description: string }>;
     cities: string[];
   };
+  treatmentsHeading: { eyebrow: string; title: string; description: string };
   treatments: Array<{ title: string; image: string; description: string; procedures: string[]; cta: string }>;
   reviews: { eyebrow: string; heading: string; description: string; invite: string; cta: string; photo: string };
 };
@@ -347,6 +350,11 @@ export const defaultHealthcareContent: HealthcareContent = {
       "Istanbul, Turkey",
       "Singapore"
     ]
+  },
+  treatmentsHeading: {
+    eyebrow: "TREATMENTS",
+    title: "Treatments we coordinate",
+    description: "Choose a specialty to see what we arrange, the usual procedures and the partner hospitals that offer it."
   },
   treatments: [
     {
@@ -657,3 +665,13 @@ export const defaultUmrahContent: DivisionContent = {
     secondary: "Speak to our team",
   },
 };
+
+// The Healthcare page as it should be shown or edited, from whatever was
+// saved: what is missing gets the built-in wording. A page saved before the
+// redesign (its hero has no specialties) was written for the old layout, so
+// the built-in page replaces it whole and the team edits on from there.
+export function healthcareContentFrom(saved: unknown): HealthcareContent {
+  const hero = (saved as { hero?: { specialties?: unknown } } | null | undefined)?.hero;
+  if (!Array.isArray(hero?.specialties)) return structuredClone(defaultHealthcareContent);
+  return fillMissing(defaultHealthcareContent, saved);
+}

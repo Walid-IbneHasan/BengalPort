@@ -705,6 +705,7 @@ export const healthcareContentSchema = divisionContentSchema
       pathway: z.array(z.object({ icon: text, title: text, description: text })).length(3),
       cities: stringList(8),
     }),
+    treatmentsHeading: heading,
     treatments: z
       .array(z.object({ title: text, image: link, description: paragraph, procedures: stringList(8), cta: text }))
       .min(1)
