@@ -1,10 +1,13 @@
+import { fillMissing } from "./content-fields.js";
+
 // The Global Business page's wording and pictures, as the admin edits them.
 // `hero.markets` are the places the hero's map draws trade routes to, and
 // `hero.categories` the product chips that drift around the title.
 export type BusinessContent = {
   hero: {
     eyebrow: string;
-    title: string;
+    // The words before the rotating market name.
+    lead: string;
     markets: string[];
     categories: string[];
     tagline: string;
@@ -47,7 +50,7 @@ export type BusinessContent = {
 export const defaultBusinessContent: BusinessContent = {
   hero: {
     eyebrow: "GLOBAL BUSINESS",
-    title: "Sourcing from",
+    lead: "Sourcing from",
     markets: ["China", "Turkey", "Vietnam", "UAE", "India", "Malaysia"],
     categories: ["Textiles", "Machinery", "Electronics", "Packaging", "Agro products"],
     tagline: "Trade. Source. Explore. Grow.",
@@ -168,3 +171,14 @@ export const defaultBusinessContent: BusinessContent = {
     secondaryHref: "/contact",
   },
 };
+
+// The page as it should be shown or edited, from whatever was saved: what
+// is missing gets the built-in wording. A page saved before the redesign (its
+// hero has no markets) was written for the old layout, headings, breadcrumb
+// eyebrow and all, so the built-in page replaces it whole and the team edits
+// on from there.
+export function businessContentFrom(saved: unknown): BusinessContent {
+  const hero = (saved as { hero?: { markets?: unknown } } | undefined)?.hero;
+  if (!Array.isArray(hero?.markets)) return structuredClone(defaultBusinessContent);
+  return fillMissing(defaultBusinessContent, saved);
+}

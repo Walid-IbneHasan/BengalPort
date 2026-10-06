@@ -1,7 +1,6 @@
 import { apiUrl } from '$lib/config';
 import { fetchData } from '$lib/fetch-data';
-import { fillMissing } from '$lib/content-fields';
-import { defaultBusinessContent } from '$lib/business-content';
+import { businessContentFrom } from '$lib/business-content';
 import type { Partner } from '$lib/partners';
 import type { PublicReview } from '$lib/reviews';
 import type { PageLoad } from './$types';
@@ -19,7 +18,7 @@ export const load: PageLoad = async ({ fetch }) => {
   ];
   return {
     // A page saved before the redesign still gets every section.
-    content: fillMissing(defaultBusinessContent, page?.content),
+    content: businessContentFrom(page?.content),
     partners,
     partnersUnavailable: !suppliers || !factories,
     reviews: reviews ?? [],

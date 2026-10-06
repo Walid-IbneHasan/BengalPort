@@ -24,7 +24,9 @@
   });
 </script>
 
-<svg class="map" viewBox="12 18 348 128" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+<!-- The view is the band from the Atlantic to the Pacific, 60°N to 40°S: every
+     market the page names sits in it, and Dhaka is near the middle. -->
+<svg class="map" viewBox="170 30 190 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
   <path class="land" d={land} />
   {#each routes as route, i}
     {#if route}
@@ -52,14 +54,14 @@
   .land {
     fill: none;
     stroke: #e9eef4;
-    stroke-width: 1.15;
+    stroke-width: 0.95;
     stroke-linecap: round;
-    opacity: 0.26;
+    opacity: 0.22;
   }
   .arc {
     fill: none;
     stroke: #efc45e;
-    stroke-width: 0.9;
+    stroke-width: 0.75;
     stroke-linecap: round;
     stroke-dasharray: 1;
     stroke-dashoffset: 1;

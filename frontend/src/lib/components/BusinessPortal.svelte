@@ -78,7 +78,7 @@
       {#each content.hero.categories.slice(0, 5) as chip, i}<span class={`chip chip-${i}`}>{chip}</span>{/each}
     </div>
     <span class="eyebrow">{content.hero.eyebrow}</span>
-    <h1>{content.hero.title}</h1>
+    <h1>{content.hero.lead}</h1>
     <p class="market">
       <RotatingWord words={content.hero.markets} prefix="Sourcing from " onchange={(index) => (market = index)} />
     </p>
@@ -344,16 +344,19 @@
     opacity: 0.9;
     pointer-events: none;
   }
+  /* On a phone the map is wider than the panel, placed so Dhaka sits mid-screen
+     and above the title, so the routes fan out over the top of the panel. */
   .map-wrap :global(svg) {
     width: 190%;
-    margin-left: -75%;
+    margin-left: -50%;
+    transform: translateY(-22%);
   }
   .hero::after {
     content: "";
     position: absolute;
     inset: 0;
     z-index: 0;
-    background: radial-gradient(ellipse at 50% 40%, rgba(16, 38, 64, 0.55) 0%, rgba(16, 38, 64, 0.2) 45%, transparent 70%);
+    background: radial-gradient(ellipse at 50% 55%, rgba(16, 38, 64, 0.7) 0%, rgba(16, 38, 64, 0.3) 45%, transparent 72%);
     pointer-events: none;
   }
   .chips {
@@ -379,6 +382,7 @@
   .chip-0 { top: 1.2rem; left: 4%; animation: float-a 8s ease-in-out infinite; }
   .chip-1 { top: 1.2rem; right: 4%; animation: float-b 9s ease-in-out infinite; }
   .chip-2 { bottom: 7.5rem; left: 5%; animation: float-b 7s ease-in-out infinite; }
+  .chip-2,
   .chip-3,
   .chip-4 { display: none; }
   @keyframes float-a {
@@ -951,7 +955,7 @@
   }
   .stats {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.8rem;
     margin: 0;
     padding: 1.2rem 0 0;
@@ -1100,6 +1104,9 @@
       grid-template-columns: 1fr 14rem;
       align-items: center;
     }
+    .stats {
+      grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    }
     .kinds {
       justify-content: flex-start;
     }
@@ -1108,9 +1115,6 @@
     }
     .country li a {
       grid-column: auto;
-    }
-    .stats {
-      grid-template-columns: repeat(4, 1fr);
     }
   }
   @media (min-width: 48rem) {
@@ -1125,6 +1129,7 @@
     .map-wrap :global(svg) {
       width: 100%;
       margin-left: 0;
+      transform: translateY(-20%);
     }
     .chip {
       --drift: 14px;
@@ -1133,9 +1138,9 @@
     }
     .chip-0 { top: 14%; left: 9%; }
     .chip-1 { top: 10%; right: 10%; }
-    .chip-2 { top: 34%; left: 6%; }
+    .chip-2 { display: inline-block; top: 34%; bottom: auto; left: 6%; }
     .chip-3 { display: inline-block; top: 36%; right: 7%; animation: float-a 8.5s ease-in-out infinite; }
-    .chip-4 { display: inline-block; bottom: 14%; left: 14%; animation: float-b 9.5s ease-in-out infinite; }
+    .chip-4 { display: inline-block; top: auto; bottom: 14%; left: 14%; animation: float-b 9.5s ease-in-out infinite; }
     .hero h1 {
       margin-top: 0.8rem;
     }

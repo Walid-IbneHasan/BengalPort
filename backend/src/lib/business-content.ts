@@ -3,7 +3,7 @@
 export const defaultBusinessContent = {
   hero: {
     eyebrow: "GLOBAL BUSINESS",
-    title: "Sourcing from",
+    lead: "Sourcing from",
     markets: ["China", "Turkey", "Vietnam", "UAE", "India", "Malaysia"],
     categories: ["Textiles", "Machinery", "Electronics", "Packaging", "Agro products"],
     tagline: "Trade. Source. Explore. Grow.",

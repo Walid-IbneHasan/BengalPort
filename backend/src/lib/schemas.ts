@@ -536,7 +536,8 @@ const processSection = z.object({
 export const businessContentSchema = z.object({
   hero: z.object({
     eyebrow: text,
-    title: text,
+    // The words before the rotating market name.
+    lead: text,
     markets: stringList(8),
     categories: stringList(6),
     tagline: text,
