@@ -14,7 +14,7 @@
     lists = false,
     note = "",
   }: {
-    division: "education" | "healthcare" | "umrah" | "about" | "services" | "contact";
+    division: "business" | "education" | "healthcare" | "umrah" | "about" | "services" | "contact";
     fallback: Content;
     lists?: boolean;
     note?: string;
@@ -32,6 +32,7 @@
   let rows = $derived(contentRows(draft, { lists }));
   const name = $derived(
     {
+      business: "Global Business",
       education: "Global Education",
       healthcare: "Global Healthcare",
       umrah: "Global Umrah",

@@ -511,56 +511,59 @@ export const homeContentSchema = z.object({
   }),
   footer: z.object({ description: paragraph, address: text, copyright: text }),
 });
+// A list of short texts, such as the markets a hero names.
+const stringList = (max: number) => z.array(text).min(1).max(max);
+// The reviews section of a division page: the wording around the customer
+// reviews, which are written by customers and approved by the team.
+const reviewsSection = z.object({
+  eyebrow: text,
+  heading: text,
+  description: paragraph,
+  invite: paragraph,
+  cta: text,
+  photo: link,
+});
+const processSection = z.object({
+  eyebrow: text,
+  title: text,
+  description: paragraph,
+  steps: z.array(z.object({ number: text, title: text, description: paragraph })).min(1).max(8),
+});
+// The Global Business page: a hero that names the markets it sources from,
+// six photo tiles, the engagement steps, the landed-cost calculator's
+// wording, the partner list's wording, the trust points with the stats, the
+// reviews and the closing panel.
 export const businessContentSchema = z.object({
   hero: z.object({
     eyebrow: text,
     title: text,
+    markets: stringList(8),
+    categories: stringList(6),
     tagline: text,
     description: paragraph,
-    image: link,
+    primary: text,
+    secondary: text,
   }),
-  shortcuts: z
-    .array(
-      z.object({
-        icon: text,
-        title: text,
-        subtitle: text,
-        href: z.string().trim().min(1),
-      }),
-    )
-    .min(1)
-    .max(8),
   services: z.object({
     eyebrow: text,
     title: text,
     description: paragraph,
     items: z
-      .array(
-        z.object({
-          icon: text,
-          title: text,
-          description: paragraph,
-          cta: text,
-          href: z.string().trim().min(1),
-        }),
-      )
+      .array(z.object({ image: link, title: text, description: paragraph, cta: text, href: z.string().trim().min(1) }))
       .min(1)
-      .max(10),
+      .max(6),
   }),
-  stats: z
-    .array(z.object({ value: text, label: text, icon: text }))
-    .min(1)
-    .max(8),
+  process: processSection,
+  calculator: z.object({ eyebrow: text, title: text, description: paragraph, note: text, cta: text }),
+  partners: z.object({ eyebrow: text, title: text, description: paragraph, empty: paragraph }),
   trust: z.object({
     eyebrow: text,
     title: text,
     description: paragraph,
-    items: z
-      .array(z.object({ icon: text, title: text, description: paragraph }))
-      .min(1)
-      .max(8),
+    items: z.array(z.object({ icon: text, title: text, description: paragraph })).min(1).max(8),
   }),
-  partners: z.object({ eyebrow: text, title: text, description: paragraph }),
+  stats: z.array(z.object({ value: text, label: text, icon: text })).min(1).max(8),
+  reviews: reviewsSection,
   closing: z.object({
     title: text,
     description: paragraph,

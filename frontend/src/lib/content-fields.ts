@@ -73,9 +73,17 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 
 // A page saved before a section or a text was added to it: what was saved is
 // kept, and whatever it lacks gets the built-in wording. The result has
-// exactly the shape of `builtIn`; saved lists are kept whole.
+// exactly the shape of `builtIn`. A saved list is kept whole, unless its
+// items lack something the built-in items now carry (a list written for an
+// older layout, such as service cards saved before they had pictures): then
+// the built-in list stands in, and the team edits that.
 export function fillMissing<T>(builtIn: T, saved: unknown): T {
-  if (Array.isArray(builtIn)) return structuredClone(Array.isArray(saved) ? saved : builtIn) as T;
+  if (Array.isArray(builtIn)) {
+    if (!Array.isArray(saved)) return structuredClone(builtIn) as T;
+    const template = builtIn.find(isObject);
+    const complete = !template || saved.every((item) => isObject(item) && Object.keys(template).every((key) => key in item));
+    return structuredClone(complete ? saved : builtIn) as T;
+  }
   if (isObject(builtIn)) {
     const from = isObject(saved) ? saved : {};
     return Object.fromEntries(Object.entries(builtIn).map(([key, value]) => [key, fillMissing(value, from[key])])) as T;
