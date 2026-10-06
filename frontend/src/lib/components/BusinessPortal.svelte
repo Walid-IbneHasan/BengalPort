@@ -4,10 +4,13 @@
     BriefcaseBusiness,
     Calculator,
     Factory,
+    FileText,
     Globe2,
+    Handshake,
     Headphones,
     Network,
     Package,
+    Search,
     ShieldCheck,
     Smile,
     Store,
@@ -22,6 +25,7 @@
   import RotatingWord from "./RotatingWord.svelte";
   import TradeRoutesMap from "./TradeRoutesMap.svelte";
   import Testimonials from "./Testimonials.svelte";
+  import JumpStrip from "./JumpStrip.svelte";
 
   // The Global Business page: a hero that draws trade routes to the markets
   // it sources from, six photo tiles, the engagement steps, the landed-cost
@@ -44,7 +48,11 @@
     headset: Headphones,
     shield: ShieldCheck,
     calculator: Calculator,
+    search: Search,
+    handshake: Handshake,
+    file: FileText,
   };
+  let quickLinks = $derived(content.shortcuts.map((item) => ({ ...item, icon: icons[item.icon] || ArrowRight })));
 
   // The market the title names right now; the map draws its route.
   let market = $state(0);
@@ -91,6 +99,7 @@
       </div>
     </div>
   </section>
+  <div class="jump"><JumpStrip items={quickLinks} label="Business quick links" /></div>
 
   <section class="section offer" id="services" use:reveal>
     <header class="heading">
@@ -297,12 +306,20 @@
     outline-color: #ffffffc7;
   }
   .hero,
+  .jump,
   .section,
   .reviews,
   .closing {
     width: 100%;
     max-width: 88rem;
     margin-inline: auto;
+  }
+  /* The quick links sit across the hero's lower edge. */
+  .jump {
+    position: relative;
+    z-index: 2;
+    padding-inline: 0.75rem;
+    margin-top: -2.4rem;
   }
   .section,
   .band,
@@ -328,7 +345,7 @@
     background: var(--ink-panel);
     color: #fff;
     text-align: center;
-    padding: 2.4rem 1rem 2rem;
+    padding: 2.4rem 1rem 4.4rem;
     box-shadow: 0 1rem 2.6rem #17304f30;
   }
   .hero > :not(.map-wrap, .chips) {
@@ -1126,8 +1143,12 @@
        never more, so the first scroll always reveals the tiles. */
     .hero {
       justify-content: center;
-      min-height: min(calc(100svh - 11rem), 46rem);
-      padding: 2.6rem 2rem 2.8rem;
+      min-height: min(calc(100svh - 17rem), 38rem);
+      padding: 2.4rem 2rem 5.6rem;
+    }
+    .jump {
+      padding-inline: 2.5rem;
+      margin-top: -2.9rem;
     }
     .map-wrap :global(svg) {
       width: 100%;
@@ -1143,7 +1164,7 @@
     .chip-1 { top: 10%; right: 10%; }
     .chip-2 { display: inline-block; top: 34%; bottom: auto; left: 6%; }
     .chip-3 { display: inline-block; top: 36%; right: 7%; animation: float-a 8.5s ease-in-out infinite; }
-    .chip-4 { display: inline-block; top: auto; bottom: 14%; left: 14%; animation: float-b 9.5s ease-in-out infinite; }
+    .chip-4 { display: inline-block; top: auto; bottom: 24%; left: 14%; animation: float-b 9.5s ease-in-out infinite; }
     .hero h1 {
       margin-top: 0.8rem;
     }

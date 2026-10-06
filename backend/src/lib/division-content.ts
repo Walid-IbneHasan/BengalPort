@@ -450,6 +450,12 @@ export const defaultUmrahContent = {
       }
     ]
   },
+  shortcuts: [
+    { icon: "hotel", title: "Packages", subtitle: "Economy to Premium", href: "#packages" },
+    { icon: "calendar", title: "Group departures", subtitle: "Dates, seats and booking", href: "/apply?tab=umrah" },
+    { icon: "route", title: "The journey", subtitle: "Before you fly to Ziyarat", href: "#journey" },
+    { icon: "headset", title: "Speak to our team", subtitle: "Questions answered", href: "/contact" },
+  ],
   packagesHeading: {
     eyebrow: "PACKAGES",
     title: "Packages for every pilgrim",

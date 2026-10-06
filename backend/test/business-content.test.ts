@@ -61,7 +61,14 @@ describe("the Global Business page before anyone edits it", () => {
     assert.deepEqual(content.hero.markets.slice(0, 3), ["Bangladesh", "China", "Turkey"]);
     assert.equal(content.services.items.length, 6);
     assert.ok(content.services.items.every((item: any) => item.image.startsWith("/images/")));
-    assert.equal("shortcuts" in content, false);
+  });
+});
+
+describe("the quick links under the Business hero", () => {
+  test("there are four, each pointing somewhere on the site", async () => {
+    const content = await live();
+    assert.equal(content.shortcuts.length, 4);
+    assert.ok(content.shortcuts.every((item: any) => item.title && item.subtitle && (item.href.startsWith("#") || item.href.startsWith("/"))));
   });
 });
 
@@ -77,17 +84,20 @@ describe("editing the Global Business page", () => {
     assert.equal(shown.process.steps.length, 6);
   });
 
-  test("a page saved before this redesign still saves after the editor fills it", async () => {
+  test("a page saved after the redesign that lacks a section gets the built-in one when the editor fills it", async () => {
     await clear();
-    const old = draft();
-    delete old.process;
-    delete old.calculator;
-    delete old.reviews;
-    old.shortcuts = [{ icon: "globe", title: "Import", subtitle: "Global trade", href: "#" }];
-    old.services.items = old.services.items.map(({ image, ...rest }: any) => ({ ...rest, icon: "globe" }));
-    const filled = fillMissing(defaultBusinessContent, old);
+    const partial = draft();
+    delete partial.calculator;
+    delete partial.reviews;
+    const filled = fillMissing(defaultBusinessContent, partial);
     assert.equal((await save(filled)).statusCode, 200);
     assert.equal((await live()).calculator.title, defaultBusinessContent.calculator.title);
+  });
+
+  test("the built-in page, which replaces a page saved before the redesign, saves as it is", async () => {
+    await clear();
+    assert.equal((await save(draft())).statusCode, 200);
+    assert.equal((await live()).hero.lead, defaultBusinessContent.hero.lead);
   });
 
   test("a tile needs a picture", async () => {

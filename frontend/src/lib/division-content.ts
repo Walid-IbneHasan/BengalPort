@@ -99,7 +99,7 @@ export type HealthcareContent = Omit<DivisionContent, "shortcuts" | "services"> 
 // The Umrah page: the hero names the kind of journey and lists the next
 // group departures; packages and the four stages of the journey replace the
 // service cards. A package with a tag is the highlighted one.
-export type UmrahContent = Omit<DivisionContent, "shortcuts" | "services" | "directory"> & {
+export type UmrahContent = Omit<DivisionContent, "services" | "directory"> & {
   hero: DivisionContent["hero"] & { journeys: string[]; departures: Array<{ date: string; label: string }> };
   packagesHeading: { eyebrow: string; title: string; description: string };
   packages: Array<{
@@ -569,6 +569,12 @@ export const defaultUmrahContent: UmrahContent = {
       }
     ]
   },
+  shortcuts: [
+    { icon: "hotel", title: "Packages", subtitle: "Economy to Premium", href: "#packages" },
+    { icon: "calendar", title: "Group departures", subtitle: "Dates, seats and booking", href: "/apply?tab=umrah" },
+    { icon: "route", title: "The journey", subtitle: "Before you fly to Ziyarat", href: "#journey" },
+    { icon: "headset", title: "Speak to our team", subtitle: "Questions answered", href: "/contact" },
+  ],
   packagesHeading: {
     eyebrow: "PACKAGES",
     title: "Packages for every pilgrim",

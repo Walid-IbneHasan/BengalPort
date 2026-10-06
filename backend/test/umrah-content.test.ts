@@ -45,8 +45,15 @@ describe("the Global Umrah page before anyone edits it", () => {
     assert.equal(content.stages.length, 4);
     assert.ok(content.hero.departures.length >= 1);
     assert.ok(content.hero.journeys.includes("in Ramadan"));
-    assert.equal("shortcuts" in content, false);
     assert.equal("directory" in content, false);
+  });
+});
+
+describe("the quick links under the Umrah hero", () => {
+  test("there are four, each pointing somewhere on the site", async () => {
+    const content = await live();
+    assert.equal(content.shortcuts.length, 4);
+    assert.ok(content.shortcuts.every((item: any) => item.title && item.subtitle && (item.href.startsWith("#") || item.href.startsWith("/"))));
   });
 });
 

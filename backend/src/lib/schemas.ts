@@ -529,6 +529,12 @@ const processSection = z.object({
   description: paragraph,
   steps: z.array(z.object({ number: text, title: text, description: paragraph })).min(1).max(8),
 });
+// The quick links across the lower edge of a hero: an icon name, a title,
+// a line under it and where it leads.
+const shortcuts = z
+  .array(z.object({ icon: text, title: text, subtitle: text, href: z.string().trim().min(1) }))
+  .min(2)
+  .max(4);
 // The Global Business page: a hero that names the markets it sources from,
 // six photo tiles, the engagement steps, the landed-cost calculator's
 // wording, the partner list's wording, the trust points with the stats, the
@@ -545,6 +551,7 @@ export const businessContentSchema = z.object({
     primary: text,
     secondary: text,
   }),
+  shortcuts,
   services: z.object({
     eyebrow: text,
     title: text,
@@ -725,6 +732,7 @@ export const umrahContentSchema = divisionContentSchema
         .array(z.object({ date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Write the date as year-month-day"), label: text }))
         .max(3),
     }),
+    shortcuts,
     packagesHeading: heading,
     packages: z
       .array(

@@ -15,6 +15,8 @@ export type BusinessContent = {
     primary: string;
     secondary: string;
   };
+  // The quick links across the lower edge of the hero.
+  shortcuts: Array<{ icon: string; title: string; subtitle: string; href: string }>;
   services: {
     eyebrow: string;
     title: string;
@@ -59,6 +61,12 @@ export const defaultBusinessContent: BusinessContent = {
     primary: "Start an enquiry",
     secondary: "Plan a business visit",
   },
+  shortcuts: [
+    { icon: "search", title: "Find suppliers", subtitle: "Verified factories and exporters", href: "#partners" },
+    { icon: "briefcase", title: "Plan a business visit", subtitle: "Factories, markets and trade fairs", href: "/apply?tab=business&form=enquiry&about=Business+tour" },
+    { icon: "calculator", title: "Estimate landed cost", subtitle: "Product, shipping and duty", href: "#calculator" },
+    { icon: "handshake", title: "Trade opportunities", subtitle: "Buy, sell, partner", href: "/opportunities" },
+  ],
   services: {
     eyebrow: "WHAT WE DO",
     title: "From the first product search to goods cleared at port",

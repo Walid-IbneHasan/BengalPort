@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowRight, Bus, Check, Globe2, Headphones, Hotel, ShieldCheck } from "lucide-svelte";
+  import { ArrowRight, Bus, CalendarDays, Check, Globe2, Headphones, Hotel, Route, ShieldCheck } from "lucide-svelte";
   import type { UmrahContent } from "$lib/division-content";
   import type { PublicReview } from "$lib/reviews";
   import { applyHref } from "$lib/apply-route";
@@ -7,6 +7,7 @@
   import { isHighlighted, upcomingDepartures } from "$lib/umrah";
   import RotatingWord from "./RotatingWord.svelte";
   import Testimonials from "./Testimonials.svelte";
+  import JumpStrip from "./JumpStrip.svelte";
 
   // The Global Umrah page: a night-sky hero with the two holy mosques and the
   // route between them, the next group departures, the packages, the four
@@ -14,8 +15,9 @@
   // reviews, how to begin, and the closing panel.
   let { content, reviews = [] }: { content: UmrahContent; reviews?: PublicReview[] } = $props();
 
-  const icons: Record<string, any> = { shield: ShieldCheck, headset: Headphones, building: Hotel, hotel: Hotel, bus: Bus, globe: Globe2 };
+  const icons: Record<string, any> = { shield: ShieldCheck, headset: Headphones, building: Hotel, hotel: Hotel, bus: Bus, globe: Globe2, calendar: CalendarDays, route: Route };
   let departures = $derived(upcomingDepartures(content.hero.departures));
+  let quickLinks = $derived(content.shortcuts.map((item) => ({ ...item, icon: icons[item.icon] || ArrowRight })));
 </script>
 
 {#snippet haram(cls: string)}
@@ -73,6 +75,7 @@
       </div>
     </div>
   </section>
+  <div class="jump"><JumpStrip items={quickLinks} label="Umrah quick links" /></div>
 
   <section class="section tiers-wrap" id="packages" use:reveal>
     <header class="heading">
@@ -235,12 +238,20 @@
     outline-color: #ffffffc7;
   }
   .hero,
+  .jump,
   .section,
   .reviews,
   .closing {
     width: 100%;
     max-width: 88rem;
     margin-inline: auto;
+  }
+  /* The quick links sit across the hero's lower edge, over the skyline. */
+  .jump {
+    position: relative;
+    z-index: 2;
+    padding-inline: 0.75rem;
+    margin-top: -2.4rem;
   }
   .section,
   .band,
@@ -266,7 +277,7 @@
     background: radial-gradient(ellipse at 50% 115%, #1d3a60 0%, #102640 52%, #0b1b31 100%);
     color: #fff;
     text-align: center;
-    padding: 2.4rem 1rem 9rem;
+    padding: 2.4rem 1rem 9.5rem;
     box-shadow: 0 1rem 2.6rem #17304f30;
   }
   .hero > :not(.sky, .skyline) {
@@ -299,7 +310,7 @@
   }
   .mosque {
     position: absolute;
-    bottom: 0;
+    bottom: 2.4rem;
     width: clamp(8rem, 24vw, 15rem);
     height: auto;
     fill: none;
@@ -318,7 +329,7 @@
   .route {
     position: absolute;
     left: 50%;
-    bottom: 1.6rem;
+    bottom: 4rem;
     width: min(92%, 70rem);
     height: 9rem;
     transform: translateX(-50%);
@@ -986,8 +997,18 @@
     /* The hero fills what is left of the first screen below the fixed header, never more. */
     .hero {
       justify-content: center;
-      min-height: min(calc(100svh - 11rem), 46rem);
-      padding: 2.6rem 2rem 9rem;
+      min-height: min(calc(100svh - 17rem), 40rem);
+      padding: 2.4rem 2rem 10rem;
+    }
+    .jump {
+      padding-inline: 2.5rem;
+      margin-top: -2.9rem;
+    }
+    .mosque {
+      bottom: 2.9rem;
+    }
+    .route {
+      bottom: 4.6rem;
     }
     .hero h1 {
       margin-top: 0.8rem;
