@@ -511,56 +511,67 @@ export const homeContentSchema = z.object({
   }),
   footer: z.object({ description: paragraph, address: text, copyright: text }),
 });
+// A list of short texts, such as the markets a hero names.
+const stringList = (max: number) => z.array(text).min(1).max(max);
+// The reviews section of a division page: the wording around the customer
+// reviews, which are written by customers and approved by the team.
+const reviewsSection = z.object({
+  eyebrow: text,
+  heading: text,
+  description: paragraph,
+  invite: paragraph,
+  cta: text,
+  photo: link,
+});
+const processSection = z.object({
+  eyebrow: text,
+  title: text,
+  description: paragraph,
+  steps: z.array(z.object({ number: text, title: text, description: paragraph })).min(1).max(8),
+});
+// The quick links across the lower edge of a hero: an icon name, a title,
+// a line under it and where it leads.
+const shortcuts = z
+  .array(z.object({ icon: text, title: text, subtitle: text, href: z.string().trim().min(1) }))
+  .min(2)
+  .max(4);
+// The Global Business page: a hero that names the markets it sources from,
+// six photo tiles, the engagement steps, the landed-cost calculator's
+// wording, the partner list's wording, the trust points with the stats, the
+// reviews and the closing panel.
 export const businessContentSchema = z.object({
   hero: z.object({
     eyebrow: text,
-    title: text,
+    // The words before the rotating market name.
+    lead: text,
+    markets: stringList(8),
+    categories: stringList(6),
     tagline: text,
     description: paragraph,
-    image: link,
+    primary: text,
+    secondary: text,
   }),
-  shortcuts: z
-    .array(
-      z.object({
-        icon: text,
-        title: text,
-        subtitle: text,
-        href: z.string().trim().min(1),
-      }),
-    )
-    .min(1)
-    .max(8),
+  shortcuts,
   services: z.object({
     eyebrow: text,
     title: text,
     description: paragraph,
     items: z
-      .array(
-        z.object({
-          icon: text,
-          title: text,
-          description: paragraph,
-          cta: text,
-          href: z.string().trim().min(1),
-        }),
-      )
+      .array(z.object({ image: link, title: text, description: paragraph, cta: text, href: z.string().trim().min(1) }))
       .min(1)
-      .max(10),
+      .max(6),
   }),
-  stats: z
-    .array(z.object({ value: text, label: text, icon: text }))
-    .min(1)
-    .max(8),
+  process: processSection,
+  calculator: z.object({ eyebrow: text, title: text, description: paragraph, note: text, cta: text }),
+  partners: z.object({ eyebrow: text, title: text, description: paragraph, empty: paragraph }),
   trust: z.object({
     eyebrow: text,
     title: text,
     description: paragraph,
-    items: z
-      .array(z.object({ icon: text, title: text, description: paragraph }))
-      .min(1)
-      .max(8),
+    items: z.array(z.object({ icon: text, title: text, description: paragraph })).min(1).max(8),
   }),
-  partners: z.object({ eyebrow: text, title: text, description: paragraph }),
+  stats: z.array(z.object({ value: text, label: text, icon: text })).min(1).max(8),
+  reviews: reviewsSection,
   closing: z.object({
     title: text,
     description: paragraph,
@@ -687,6 +698,61 @@ export const educationContentSchema = divisionContentSchema
       cta: text,
     }),
     destinations: heading,
+  });
+// The Healthcare page: a hero that names the specialties and the three-step
+// pathway, the treatments index with photos, the live hospital directory's
+// wording, the process, the clarity points with the stats, the reviews and
+// the closing panel. The destination chips come from the live hospitals and
+// fall back to `hero.cities`.
+export const healthcareContentSchema = divisionContentSchema
+  .omit({ shortcuts: true, services: true })
+  .extend({
+    hero: divisionContentSchema.shape.hero.extend({
+      specialties: stringList(8),
+      pathway: z.array(z.object({ icon: text, title: text, description: text })).length(3),
+      cities: stringList(8),
+    }),
+    treatmentsHeading: heading,
+    treatments: z
+      .array(z.object({ title: text, image: link, description: paragraph, procedures: stringList(8), cta: text }))
+      .min(1)
+      .max(8),
+    reviews: reviewsSection,
+  });
+// The Umrah page: a hero that names the kind of journey and the next group
+// departures, the packages, the four stages of the journey with photos, the
+// points for families and groups with the stats, the process, the reviews
+// and the closing panel. A package with a tag is the highlighted one.
+export const umrahContentSchema = divisionContentSchema
+  .omit({ shortcuts: true, services: true, directory: true })
+  .extend({
+    hero: divisionContentSchema.shape.hero.extend({
+      journeys: stringList(6),
+      departures: z
+        .array(z.object({ date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Write the date as year-month-day"), label: text }))
+        .max(3),
+    }),
+    shortcuts,
+    packagesHeading: heading,
+    packages: z
+      .array(
+        z.object({
+          name: text,
+          tag: z.string().trim().max(40),
+          nights: text,
+          makkahHotel: text,
+          madinahHotel: text,
+          distance: text,
+          price: text,
+          inclusions: stringList(10),
+          cta: text,
+        }),
+      )
+      .min(1)
+      .max(3),
+    stagesHeading: heading,
+    stages: z.array(z.object({ title: text, subtitle: text, image: link, points: stringList(5) })).length(4),
+    reviews: reviewsSection,
   });
 // The About, Services and Contact pages.
 export const aboutContentSchema = z.object({

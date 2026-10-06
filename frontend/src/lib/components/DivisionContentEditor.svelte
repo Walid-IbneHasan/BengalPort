@@ -13,11 +13,14 @@
     fallback,
     lists = false,
     note = "",
+    prepare,
   }: {
-    division: "education" | "healthcare" | "umrah" | "about" | "services" | "contact";
+    division: "business" | "education" | "healthcare" | "umrah" | "about" | "services" | "contact";
     fallback: Content;
     lists?: boolean;
     note?: string;
+    // How the saved page becomes the draft; the default fills in whatever it lacks.
+    prepare?: (saved: unknown) => Content;
   } = $props();
   // svelte-ignore state_referenced_locally
   let draft = $state<Content>(structuredClone(fallback)),
@@ -32,6 +35,7 @@
   let rows = $derived(contentRows(draft, { lists }));
   const name = $derived(
     {
+      business: "Global Business",
       education: "Global Education",
       healthcare: "Global Healthcare",
       umrah: "Global Umrah",
@@ -65,7 +69,7 @@
         headers: { authorization: `Bearer ${token}` },
       });
       // A page saved before a section was added still gets that section.
-      draft = fillMissing(fallback, page.content);
+      draft = prepare ? prepare(page.content) : fillMissing(fallback, page.content);
       revision = page.revision;
       published = page.published;
     } catch (e) {

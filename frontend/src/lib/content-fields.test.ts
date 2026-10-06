@@ -125,3 +125,17 @@ describe("opening a page that was saved before a section was added", () => {
     assert.notEqual(filled.hero, builtIn.hero);
   });
 });
+
+describe("lists saved for an older layout", () => {
+  const tiles = { services: { items: [{ image: "/images/a.webp", title: "A" }, { image: "/images/b.webp", title: "B" }] } };
+
+  test("a saved list whose items lack what the built-in items now have is replaced", () => {
+    const saved = { services: { items: [{ icon: "globe", title: "Old" }] } };
+    assert.deepEqual(fillMissing(tiles, saved), tiles);
+  });
+
+  test("a saved list whose items have everything the built-in items have is kept", () => {
+    const saved = { services: { items: [{ image: "/images/x.webp", title: "X", extra: "kept too" }, { image: "/images/y.webp", title: "Y" }] } };
+    assert.deepEqual(fillMissing(tiles, saved).services.items, saved.services.items);
+  });
+});

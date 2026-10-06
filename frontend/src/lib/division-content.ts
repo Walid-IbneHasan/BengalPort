@@ -1,3 +1,5 @@
+import { fillMissing } from "./content-fields.js";
+
 export type DivisionContent = {
   hero: {
     eyebrow: string;
@@ -79,6 +81,41 @@ export type EducationContent = Omit<DivisionContent, "shortcuts"> & {
     photo: string;
   };
   destinations: { eyebrow: string; title: string; description: string };
+};
+// The Healthcare page: the hero names the specialties and shows a three-step
+// pathway, the treatments index replaces the service cards, and the chips
+// around the title are destinations from the live hospitals, topped up from
+// `hero.cities`.
+export type HealthcareContent = Omit<DivisionContent, "shortcuts" | "services"> & {
+  hero: DivisionContent["hero"] & {
+    specialties: string[];
+    pathway: Array<{ icon: string; title: string; description: string }>;
+    cities: string[];
+  };
+  treatmentsHeading: { eyebrow: string; title: string; description: string };
+  treatments: Array<{ title: string; image: string; description: string; procedures: string[]; cta: string }>;
+  reviews: { eyebrow: string; heading: string; description: string; invite: string; cta: string; photo: string };
+};
+// The Umrah page: the hero names the kind of journey and lists the next
+// group departures; packages and the four stages of the journey replace the
+// service cards. A package with a tag is the highlighted one.
+export type UmrahContent = Omit<DivisionContent, "services" | "directory"> & {
+  hero: DivisionContent["hero"] & { journeys: string[]; departures: Array<{ date: string; label: string }> };
+  packagesHeading: { eyebrow: string; title: string; description: string };
+  packages: Array<{
+    name: string;
+    tag: string;
+    nights: string;
+    makkahHotel: string;
+    madinahHotel: string;
+    distance: string;
+    price: string;
+    inclusions: string[];
+    cta: string;
+  }>;
+  stagesHeading: { eyebrow: string; title: string; description: string };
+  stages: Array<{ title: string; subtitle: string; image: string; points: string[] }>;
+  reviews: { eyebrow: string; heading: string; description: string; invite: string; cta: string; photo: string };
 };
 export const defaultEducationContent: EducationContent = {
   hero: {
@@ -293,133 +330,172 @@ export const defaultEducationContent: EducationContent = {
     secondary: "Speak with an adviser",
   },
 };
-export const defaultHealthcareContent: DivisionContent = {
+export const defaultHealthcareContent: HealthcareContent = {
   hero: {
     eyebrow: "GLOBAL HEALTHCARE",
-    title: "Care, connected globally.",
+    title: "Treatment abroad for",
+    specialties: [
+      "Cardiology",
+      "Oncology",
+      "Orthopaedics",
+      "Fertility",
+      "Dental care",
+      "Health check-ups"
+    ],
     tagline: "Trusted direction. Human support.",
-    description:
-      "Connect with international hospitals, specialists and treatment pathways while Bengal Port coordinates the practical details around your care.",
-      image: "/images/global-healthcare.webp",
+    description: "Connect with international hospitals, specialists and treatment pathways while Bengal Port coordinates the practical details around your care.",
+    image: "/images/global-healthcare.webp",
     primary: "Request healthcare support",
-    secondary: "Explore hospitals",
-  },
-  shortcuts: [
-    {
-      icon: "hospital",
-      title: "Partner Hospitals",
-      subtitle: "Trusted facilities",
-      href: "#directory",
-    },
-    {
-      icon: "heart",
-      title: "Health Checkups",
-      subtitle: "Preventive screening",
-      href: "#services",
-    },
-    {
-      icon: "stethoscope",
-      title: "Specialists",
-      subtitle: "Clinical direction",
-      href: "#directory",
-    },
-    {
-      icon: "activity",
-      title: "Surgery Support",
-      subtitle: "Coordinated treatment",
-      href: "#services",
-    },
-    {
-      icon: "plane",
-      title: "Patient Assistance",
-      subtitle: "Travel-ready support",
-      href: "#process",
-    },
-  ],
-  services: {
-    eyebrow: "PATIENT SERVICES",
-    title: "International care with local coordination",
-    description:
-      "A supportive pathway before, during and after international treatment.",
-    items: [
-      {
-        icon: "heart",
-        title: "Health checkups",
-        description:
-          "Compare comprehensive and executive screening options at partner hospitals.",
-        href: "#directory",
-      },
-      {
-        icon: "stethoscope",
-        title: "Specialist treatment",
-        description:
-          "Identify appropriate hospitals and clinical specialties for your needs.",
-        href: "#directory",
-      },
-      {
-        icon: "activity",
-        title: "Surgery coordination",
-        description:
-          "Support for medical review, appointments, scheduling and preparation.",
-        href: "/apply?tab=healthcare",
-      },
+    secondary: "See partner hospitals",
+    pathway: [
       {
         icon: "file",
-        title: "Medical records",
-        description:
-          "Organize reports and relevant information for hospital review.",
-        href: "/apply?tab=healthcare",
+        title: "Diagnosis review",
+        description: "Your reports read and your options explained."
+      },
+      {
+        icon: "hospital",
+        title: "Hospital match",
+        description: "Suitable hospitals and specialists, with costs."
       },
       {
         icon: "plane",
-        title: "Travel planning",
-        description:
-          "Practical international patient guidance around appointments and travel.",
-        href: "#process",
-      },
-      {
-        icon: "headset",
-        title: "Patient support",
-        description:
-          "A clear point of contact throughout the coordination journey.",
-        href: "/contact",
-      },
+        title: "Travel and care",
+        description: "Appointments, travel and a coordinator throughout."
+      }
     ],
+    cities: [
+      "Bangkok, Thailand",
+      "Kuala Lumpur, Malaysia",
+      "Chennai, India",
+      "Istanbul, Turkey",
+      "Singapore"
+    ]
   },
+  treatmentsHeading: {
+    eyebrow: "TREATMENTS",
+    title: "Treatments we coordinate",
+    description: "Choose a specialty to see what we arrange, the usual procedures and the partner hospitals that offer it."
+  },
+  treatments: [
+    {
+      title: "Cardiology",
+      image: "/images/divisions/care-cardiology.webp",
+      description: "Heart care at hospitals with dedicated international patient teams. We help you compare procedures, surgeons and costs before you decide where to go.",
+      procedures: [
+        "Angiography",
+        "Bypass surgery",
+        "Valve repair",
+        "Pacemaker"
+      ],
+      cta: "Ask about cardiology"
+    },
+    {
+      title: "Oncology",
+      image: "/images/divisions/care-oncology.webp",
+      description: "Cancer diagnosis, second opinions and treatment plans from oncology centres abroad, with the practical details handled around you and your family.",
+      procedures: [
+        "Second opinion",
+        "Chemotherapy",
+        "Radiotherapy",
+        "Cancer surgery"
+      ],
+      cta: "Ask about oncology"
+    },
+    {
+      title: "Orthopaedics",
+      image: "/images/divisions/care-orthopaedics.webp",
+      description: "Joint replacement, spine care and sports injuries, with rehabilitation planned before you travel.",
+      procedures: [
+        "Knee replacement",
+        "Hip replacement",
+        "Spine surgery",
+        "Rehabilitation"
+      ],
+      cta: "Ask about orthopaedics"
+    },
+    {
+      title: "Fertility",
+      image: "/images/divisions/care-fertility.webp",
+      description: "Fertility assessment and treatment at clinics with clear success data, timed around your cycle and your travel.",
+      procedures: [
+        "IVF",
+        "ICSI",
+        "Fertility assessment",
+        "Egg freezing"
+      ],
+      cta: "Ask about fertility care"
+    },
+    {
+      title: "Dental care",
+      image: "/images/divisions/care-dental.webp",
+      description: "Implants, crowns and full-mouth treatment at modern dental clinics, often completed within a single trip.",
+      procedures: [
+        "Implants",
+        "Crowns and veneers",
+        "Orthodontics",
+        "Full-mouth restoration"
+      ],
+      cta: "Ask about dental care"
+    },
+    {
+      title: "Health check-ups",
+      image: "/images/divisions/care-checkups.webp",
+      description: "Comprehensive and executive screening packages at partner hospitals, with the results explained in plain language.",
+      procedures: [
+        "Executive screening",
+        "Cardiac screening",
+        "Cancer screening",
+        "Women's health"
+      ],
+      cta: "Ask about check-ups"
+    }
+  ],
   stats: [
-    { value: "8+", label: "Healthcare destinations", icon: "map" },
-    { value: "30+", label: "Partner hospitals", icon: "hospital" },
-    { value: "20+", label: "Treatment categories", icon: "heart" },
-    { value: "24/7", label: "Patient coordination", icon: "headset" },
+    {
+      value: "8+",
+      label: "Healthcare destinations",
+      icon: "map"
+    },
+    {
+      value: "30+",
+      label: "Partner hospitals",
+      icon: "hospital"
+    },
+    {
+      value: "20+",
+      label: "Treatment categories",
+      icon: "heart"
+    },
+    {
+      value: "24/7",
+      label: "Patient coordination",
+      icon: "headset"
+    }
   ],
   feature: {
     eyebrow: "CARE WITH CLARITY",
     title: "Important health decisions deserve a calm, accountable process.",
-    description:
-      "Bengal Port does not replace medical advice. We help patients reach suitable providers and understand the coordination pathway.",
+    description: "Bengal Port does not replace medical advice. We help patients reach suitable providers and understand the coordination pathway.",
     points: [
       {
         title: "Needs-led hospital direction",
-        description:
-          "Options considered around specialty, destination and patient preference.",
+        description: "Options considered around specialty, destination and patient preference."
       },
       {
         title: "Clear pre-arrival coordination",
-        description:
-          "Appointments and information organized before international travel.",
+        description: "Appointments and information organized before international travel."
       },
       {
         title: "Family-aware support",
-        description:
-          "Practical communication for patients and accompanying family members.",
-      },
-    ],
+        description: "Practical communication for patients and accompanying family members."
+      }
+    ]
   },
   directory: {
     eyebrow: "LIVE HEALTHCARE NETWORK",
     title: "Partner hospitals and services",
-    description:
-      "Browse hospital and service records maintained by Bengal Port.",
+    description: "Browse hospital and service records maintained by Bengal Port."
   },
   process: {
     eyebrow: "PATIENT JOURNEY",
@@ -429,144 +505,223 @@ export const defaultHealthcareContent: DivisionContent = {
       {
         number: "01",
         title: "Share the care need",
-        description:
-          "Provide contact details, treatment category and available medical information.",
+        description: "Provide contact details, treatment category and available medical information."
       },
       {
         number: "02",
         title: "Review suitable options",
-        description:
-          "Receive hospital or service directions aligned with the stated need.",
+        description: "Receive hospital or service directions aligned with the stated need."
       },
       {
         number: "03",
         title: "Coordinate appointments",
-        description:
-          "Confirm provider review, estimated timing and appointment arrangements.",
+        description: "Confirm provider review, estimated timing and appointment arrangements."
       },
       {
         number: "04",
         title: "Prepare for treatment",
-        description:
-          "Organize practical pre-arrival information and ongoing support.",
-      },
-    ],
+        description: "Organize practical pre-arrival information and ongoing support."
+      }
+    ]
+  },
+  reviews: {
+    eyebrow: "PATIENT STORIES",
+    heading: "What our patients say",
+    description: "What patients and their families say about treatment abroad with our coordination.",
+    invite: "Used our service? Sign in, open your application in your dashboard and write a review. It appears here once our team has approved it.",
+    cta: "Write a review",
+    photo: "/images/divisions/care-reviews.webp"
   },
   closing: {
-    title: "Need help finding the right care pathway?",
-    description:
-      "Tell us what support you need and our healthcare coordination team will respond.",
+    title: "Ready to plan treatment abroad?",
+    description: "Tell us what support you need and our healthcare coordination team will respond.",
     primary: "Request healthcare support",
-    secondary: "Contact patient support",
-  },
+    secondary: "Contact patient support"
+  }
 };
-export const defaultUmrahContent: DivisionContent = {
+export const defaultUmrahContent: UmrahContent = {
   hero: {
     eyebrow: "GLOBAL UMRAH",
-    title: "A peaceful journey, carefully coordinated.",
+    title: "Your Umrah,",
+    journeys: [
+      "in Ramadan",
+      "with family",
+      "in a group",
+      "with Ziyarat"
+    ],
     tagline: "Transparent guidance. Human support.",
-    description:
-      "Thoughtful visa, flight, accommodation and on-ground support for your sacred journey to Makkah and Madinah.",
-      image: "/images/global-umrah.webp",
+    description: "Thoughtful visa, flight, accommodation and on-ground support for your sacred journey to Makkah and Madinah.",
+    image: "/images/global-umrah.webp",
     primary: "Plan your Umrah",
-    secondary: "Speak to our team",
+    secondary: "See packages",
+    departures: [
+      {
+        date: "2026-11-14",
+        label: "November group · 20 seats"
+      },
+      {
+        date: "2026-12-19",
+        label: "Winter family group"
+      },
+      {
+        date: "2027-02-20",
+        label: "Ramadan group · early booking"
+      }
+    ]
   },
   shortcuts: [
-    {
-      icon: "file",
-      title: "Visa Assistance",
-      subtitle: "Application coordination",
-      href: "#services",
-    },
-    {
-      icon: "plane",
-      title: "Flight Planning",
-      subtitle: "Itinerary options",
-      href: "#services",
-    },
-    {
-      icon: "building",
-      title: "Accommodation",
-      subtitle: "Makkah and Madinah",
-      href: "#services",
-    },
-    {
-      icon: "bus",
-      title: "Ground Support",
-      subtitle: "Transfers and Ziyarat",
-      href: "#services",
-    },
+    { icon: "hotel", title: "Packages", subtitle: "Economy to Premium", href: "#packages" },
+    { icon: "calendar", title: "Group departures", subtitle: "Dates, seats and booking", href: "/apply?tab=umrah" },
+    { icon: "route", title: "The journey", subtitle: "Before you fly to Ziyarat", href: "#journey" },
+    { icon: "headset", title: "Speak to our team", subtitle: "Questions answered", href: "/contact" },
   ],
-  services: {
-    eyebrow: "END-TO-END SUPPORT",
-    title: "Every essential, handled with care",
-    description:
-      "One accountable team coordinates the practical details so you can focus on the purpose of your journey.",
-    items: [
-      {
-        icon: "file-check",
-        title: "Visa assistance",
-        description:
-          "Clear document guidance and careful application coordination.",
-        href: "/apply?tab=umrah",
-      },
-      {
-        icon: "plane",
-        title: "Flight planning",
-        description:
-          "Practical itinerary options shaped around your preferred dates.",
-        href: "/apply?tab=umrah",
-      },
-      {
-        icon: "hotel",
-        title: "Trusted accommodation",
-        description:
-          "Makkah and Madinah stays selected for comfort and accessibility.",
-        href: "/apply?tab=umrah",
-      },
-      {
-        icon: "bus",
-        title: "Ground support",
-        description:
-          "Airport transfers, intercity transport and guided Ziyarat coordination.",
-        href: "/apply?tab=umrah",
-      },
-    ],
+  packagesHeading: {
+    eyebrow: "PACKAGES",
+    title: "Packages for every pilgrim",
+    description: "Three ways to travel. Every package can be shaped around your dates, your room and your budget."
   },
+  packages: [
+    {
+      name: "Economy",
+      tag: "",
+      nights: "7 nights · 4 in Makkah, 3 in Madinah",
+      makkahHotel: "3-star hotel, Ibrahim Al Khalil area",
+      madinahHotel: "3-star hotel near the Markaziya",
+      distance: "Hotels 800 to 1,200 m from the Haram",
+      price: "From ৳ 1,45,000",
+      inclusions: [
+        "Umrah visa and insurance",
+        "Return flights from Dhaka",
+        "Shared room for four",
+        "Airport and intercity transfers",
+        "Group guide throughout"
+      ],
+      cta: "Enquire about Economy"
+    },
+    {
+      name: "Standard",
+      tag: "Most chosen",
+      nights: "10 nights · 6 in Makkah, 4 in Madinah",
+      makkahHotel: "4-star hotel, Ajyad area",
+      madinahHotel: "4-star hotel by the Haram courtyard",
+      distance: "Hotels 300 to 600 m from the Haram",
+      price: "From ৳ 1,95,000",
+      inclusions: [
+        "Umrah visa and insurance",
+        "Return flights from Dhaka",
+        "Shared room for three",
+        "Private transfers",
+        "Guided Ziyarat in both cities",
+        "Daily breakfast"
+      ],
+      cta: "Enquire about Standard"
+    },
+    {
+      name: "Premium",
+      tag: "",
+      nights: "12 nights · 7 in Makkah, 5 in Madinah",
+      makkahHotel: "5-star hotel with a Haram view",
+      madinahHotel: "5-star hotel facing the Prophet's Mosque",
+      distance: "Hotels within 150 m of the Haram",
+      price: "From ৳ 3,20,000",
+      inclusions: [
+        "Umrah visa and insurance",
+        "Return flights, business class on request",
+        "Private room",
+        "Private car and driver",
+        "Dedicated coordinator",
+        "Half board"
+      ],
+      cta: "Enquire about Premium"
+    }
+  ],
+  stagesHeading: {
+    eyebrow: "THE JOURNEY",
+    title: "The journey, stage by stage",
+    description: "What we handle before you fly, on arrival, in Makkah and in Madinah."
+  },
+  stages: [
+    {
+      title: "Before you fly",
+      subtitle: "Visa, flights and preparation",
+      image: "/images/divisions/umrah-before.webp",
+      points: [
+        "Umrah visa and travel insurance arranged",
+        "Flights chosen around your dates",
+        "A briefing on the rites, packing and health"
+      ]
+    },
+    {
+      title: "On arrival",
+      subtitle: "Jeddah or Madinah airport",
+      image: "/images/divisions/umrah-ziyarat.webp",
+      points: [
+        "Met at the airport by our ground team",
+        "Transfer to your hotel with your group",
+        "A local SIM and guidance on the first day"
+      ]
+    },
+    {
+      title: "In Makkah",
+      subtitle: "Steps from the Haram",
+      image: "/images/divisions/umrah-makkah.webp",
+      points: [
+        "A hotel chosen for its distance to the Haram",
+        "Guided Umrah for first-time pilgrims",
+        "Help with prayer times, meals and rest"
+      ]
+    },
+    {
+      title: "In Madinah and Ziyarat",
+      subtitle: "The Prophet's Mosque and the holy sites",
+      image: "/images/divisions/umrah-madinah.webp",
+      points: [
+        "Transfer by train or coach",
+        "Guided visits to Quba, Uhud and Qiblatain",
+        "Support until your flight home"
+      ]
+    }
+  ],
   stats: [
-    { value: "100%", label: "Guided assistance", icon: "shield" },
-    { value: "24/7", label: "On-ground support", icon: "headset" },
-    { value: "5+", label: "Trusted hotel partners", icon: "building" },
-    { value: "3+", label: "Transport options", icon: "bus" },
+    {
+      value: "100%",
+      label: "Guided assistance",
+      icon: "shield"
+    },
+    {
+      value: "24/7",
+      label: "On-ground support",
+      icon: "headset"
+    },
+    {
+      value: "5+",
+      label: "Trusted hotel partners",
+      icon: "building"
+    },
+    {
+      value: "3+",
+      label: "Transport options",
+      icon: "bus"
+    }
   ],
   feature: {
     eyebrow: "FLEXIBLE PLANNING",
     title: "For individuals, families and groups",
-    description:
-      "Tell us your preferred dates, number of travellers and accommodation priorities. Our team will prepare a clear, relevant plan without overwhelming you with unnecessary choices.",
+    description: "Tell us your preferred dates, number of travellers and accommodation priorities. Our team will prepare a clear, relevant plan without overwhelming you with unnecessary choices.",
     points: [
       {
         title: "Flexible departure planning",
-        description:
-          "Travel on dates that work for you and your family.",
+        description: "Travel on dates that work for you and your family."
       },
       {
         title: "Room and proximity preferences",
-        description:
-          "Accommodations selected based on your comfort and distance requirements.",
+        description: "Accommodations selected based on your comfort and distance requirements."
       },
       {
         title: "Coordinated local movement",
-        description:
-          "Reliable transport for seamless travel between holy sites.",
-      },
-    ],
-  },
-  directory: {
-    eyebrow: "LIVE UMRAH NETWORK",
-    title: "Partner Hotels and Transport",
-    description:
-      "Browse trusted accommodation and transport services.",
+        description: "Reliable transport for seamless travel between holy sites."
+      }
+    ]
   },
   process: {
     eyebrow: "YOUR JOURNEY",
@@ -576,34 +731,57 @@ export const defaultUmrahContent: DivisionContent = {
       {
         number: "01",
         title: "Share your preferences",
-        description:
-          "Provide travel dates, number of pilgrims, and basic requirements.",
+        description: "Provide travel dates, number of pilgrims, and basic requirements."
       },
       {
         number: "02",
         title: "Review your plan",
-        description:
-          "Receive a coordinated itinerary covering flights, hotels, and transport.",
+        description: "Receive a coordinated itinerary covering flights, hotels, and transport."
       },
       {
         number: "03",
         title: "Confirm and prepare",
-        description:
-          "Finalize details while we process your visa and bookings.",
+        description: "Finalize details while we process your visa and bookings."
       },
       {
         number: "04",
         title: "Travel with peace of mind",
-        description:
-          "Focus on your pilgrimage with our on-ground support ready.",
-      },
-    ],
+        description: "Focus on your pilgrimage with our on-ground support ready."
+      }
+    ]
+  },
+  reviews: {
+    eyebrow: "PILGRIM REVIEWS",
+    heading: "What our pilgrims say",
+    description: "What pilgrims and their families say about travelling with our team.",
+    invite: "Used our service? Sign in, open your application in your dashboard and write a review. It appears here once our team has approved it.",
+    cta: "Write a review",
+    photo: "/images/divisions/umrah-reviews.webp"
   },
   closing: {
     title: "Ready to plan your sacred journey?",
-    description:
-      "Start with a simple enquiry. Our coordinators will handle the rest.",
+    description: "Start with a simple enquiry. Our coordinators will handle the rest.",
     primary: "Start Umrah Enquiry",
-    secondary: "Speak to our team",
-  },
+    secondary: "Speak to our team"
+  }
 };
+
+// The Healthcare page as it should be shown or edited, from whatever was
+// saved: what is missing gets the built-in wording. A page saved before the
+// redesign (its hero has no specialties) was written for the old layout, so
+// the built-in page replaces it whole and the team edits on from there.
+export function healthcareContentFrom(saved: unknown): HealthcareContent {
+  const hero = (saved as { hero?: { specialties?: unknown } } | null | undefined)?.hero;
+  if (!Array.isArray(hero?.specialties)) return structuredClone(defaultHealthcareContent);
+  return fillMissing(defaultHealthcareContent, saved);
+}
+
+// The Umrah page as it should be shown or edited, from whatever was saved:
+// what is missing gets the built-in wording. A page saved before the redesign
+// (its hero has no journeys) was written for the old layout, so the built-in
+// page replaces it whole and the team edits on from there.
+export function umrahContentFrom(saved: unknown): UmrahContent {
+  const hero = (saved as { hero?: { journeys?: unknown } } | null | undefined)?.hero;
+  if (!Array.isArray(hero?.journeys)) return structuredClone(defaultUmrahContent);
+  return fillMissing(defaultUmrahContent, saved);
+}
