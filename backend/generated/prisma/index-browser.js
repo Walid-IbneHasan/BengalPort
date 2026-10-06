@@ -188,6 +188,21 @@ exports.Prisma.StaffNoteScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.ReviewScalarFieldEnum = {
+  id: 'id',
+  division: 'division',
+  name: 'name',
+  detail: 'detail',
+  rating: 'rating',
+  body: 'body',
+  photoUrl: 'photoUrl',
+  status: 'status',
+  applicationId: 'applicationId',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ApplicationDocumentScalarFieldEnum = {
   id: 'id',
   applicationId: 'applicationId',
@@ -439,6 +454,12 @@ exports.ApplicationType = exports.$Enums.ApplicationType = {
   UMRAH: 'UMRAH'
 };
 
+exports.ReviewStatus = exports.$Enums.ReviewStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  HIDDEN: 'HIDDEN'
+};
+
 exports.OpportunityCategory = exports.$Enums.OpportunityCategory = {
   BUSINESS: 'BUSINESS',
   EDUCATION: 'EDUCATION',
@@ -476,6 +497,7 @@ exports.Prisma.ModelName = {
   Enquiry: 'Enquiry',
   Application: 'Application',
   StaffNote: 'StaffNote',
+  Review: 'Review',
   ApplicationDocument: 'ApplicationDocument',
   Opportunity: 'Opportunity',
   Supplier: 'Supplier',

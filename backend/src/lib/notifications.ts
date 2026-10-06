@@ -153,3 +153,15 @@ export function notifyNewApplication(app: FastifyInstance, application: Applicat
   ]));
   deliver(app, mails);
 }
+
+type ReviewRecord = { division: string; name: string; rating: number; body: string; reference: string; customer: string };
+
+// A review waits for approval, so the team is told it has arrived.
+export function notifyNewReview(app: FastifyInstance, review: ReviewRecord) {
+  deliver(app, teamAddresses().map((to) => mail(to, `New ${review.division.toLowerCase()} review from ${oneLine(review.customer)}`, [
+    "A customer wrote a review on the Bengal Port website. It is not shown until you approve it.",
+    [`Application: ${review.reference}`, `Customer: ${review.customer}`, `Name to show: ${review.name}`, `Rating: ${review.rating} out of 5`].join("\n"),
+    `Review:\n${review.body}`,
+    `Approve or hide it in the admin: ${adminUrl("reviews")}`,
+  ])));
+}

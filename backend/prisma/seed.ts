@@ -7,6 +7,7 @@ import {
   defaultHealthcareContent,
 } from "../src/lib/division-content.js";
 import { seedPlan } from "./seed-config.js";
+import { seedEducationReviews } from "./seed-reviews.js";
 
 const prisma = new PrismaClient();
 const at = (daysAgo: number, hour: number, minute = 0) => {
@@ -89,7 +90,10 @@ async function main() {
   );
   const category = Object.fromEntries(categories.map((c) => [c.name, c.id]));
 
-  if (plan.demoData) await seedDemoData(admin.id, category);
+  if (plan.demoData) {
+    await seedDemoData(admin.id, category);
+    await seedEducationReviews(prisma);
+  }
 }
 
 // Sample partners, records and ledger entries for local development.
@@ -114,7 +118,7 @@ async function seedDemoData(
       "Applications are open for selected international medical institutions.",
       "Malaysia",
       "Kuala Lumpur",
-      "/images/global-education.webp",
+      "/images/edu-medical.webp",
     ],
     [
       "executive-health-check",
@@ -211,7 +215,7 @@ async function seedDemoData(
         country: "Malaysia",
         description:
           "Internationally focused medical education with a structured admissions pathway.",
-        image: "/images/global-education.webp",
+        image: "/images/edu-medical.webp",
         programs: {
           create: [
             {
@@ -230,7 +234,7 @@ async function seedDemoData(
         country: "China",
         description:
           "English-medium engineering and technology programs for international students.",
-        image: "/images/global-education.webp",
+        image: "/images/edu-engineering.webp",
         programs: {
           create: [
             {

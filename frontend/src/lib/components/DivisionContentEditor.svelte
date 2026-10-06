@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { Check, Code2, Eye, LoaderCircle, Plus, Save, Trash2 } from "lucide-svelte";
   import { api } from "$lib/api";
-  import { addItem, contentRows, removeItem, setAt } from "$lib/content-fields";
+  import { addItem, contentRows, fillMissing, removeItem, setAt } from "$lib/content-fields";
   import CmsImageField from "./CmsImageField.svelte";
   // Edits one page of the public website: a division portal, or the About,
   // Services or Contact page. `lists` lets items be added to and removed
@@ -64,7 +64,8 @@
       const page = await api<any>(`/admin/content/${division}`, {
         headers: { authorization: `Bearer ${token}` },
       });
-      draft = page.content;
+      // A page saved before a section was added still gets that section.
+      draft = fillMissing(fallback, page.content);
       revision = page.revision;
       published = page.published;
     } catch (e) {

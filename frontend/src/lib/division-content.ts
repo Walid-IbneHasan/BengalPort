@@ -46,49 +46,125 @@ export type DivisionContent = {
     secondary: string;
   };
 };
-export const defaultEducationContent: DivisionContent = {
+// One of the Education page's three fields of study.
+export type StudyFieldContent = {
+  title: string;
+  tagline: string;
+  heading: string;
+  description: string;
+  points: string[];
+  subjects: string[];
+  cta: string;
+  // The picture on the option at the top of the page, and the photo in the
+  // section it leads to.
+  image: string;
+  photo: string;
+};
+// The Education page has its own layout: four options (three fields of study
+// and the student reviews) in place of the shortcuts row. The reviews
+// themselves are written by customers; this is the section's wording.
+export type EducationContent = Omit<DivisionContent, "shortcuts"> & {
+  fields: Record<"medical" | "engineering" | "general", StudyFieldContent>;
+  reviews: {
+    title: string;
+    tagline: string;
+    eyebrow: string;
+    heading: string;
+    description: string;
+    invite: string;
+    cta: string;
+    image: string;
+    photo: string;
+  };
+  destinations: { eyebrow: string; title: string; description: string };
+};
+export const defaultEducationContent: EducationContent = {
   hero: {
     eyebrow: "GLOBAL EDUCATION",
     title: "Study beyond borders.",
     tagline: "Choose clearly. Apply confidently.",
     description:
       "Explore trusted institutions, relevant programs and international study destinations with practical guidance from shortlist to admission.",
-      image: "/images/global-education.webp",
+      image: "/images/edu-hero.webp",
     primary: "Start education enquiry",
     secondary: "Explore programs",
   },
-  shortcuts: [
-    {
-      icon: "map",
-      title: "Study Destinations",
-      subtitle: "Compare countries",
-      href: "#directory",
+  fields: {
+    medical: {
+      title: "Medical",
+      tagline: "MBBS, dentistry, nursing, pharmacy",
+      heading: "Study medicine abroad",
+      description:
+        "For students who want to become doctors, dentists, nurses or pharmacists. We explain entry requirements, total cost and how each degree is recognised before you choose where to apply.",
+      points: [
+        "Your results checked against each university's entry requirements",
+        "Tuition, living cost and course length compared side by side",
+        "Help with the application, documents and admission interview",
+      ],
+      subjects: ["MBBS", "Dentistry (BDS)", "Nursing", "Pharmacy", "Public Health"],
+      cta: "Apply for medical admission",
+      image: "/images/icon-medical.webp",
+      photo: "/images/edu-card-medical.webp",
     },
-    {
-      icon: "building",
-      title: "Universities",
-      subtitle: "Trusted institutions",
-      href: "#directory",
+    engineering: {
+      title: "Engineering",
+      tagline: "Engineering, computing, technology",
+      heading: "Study engineering and technology abroad",
+      description:
+        "For students aiming at engineering, computing or applied technology. We help you match your results and budget to programs at bachelor's and master's level.",
+      points: [
+        "Programs shortlisted by subject, country and budget",
+        "Entry requirements and language tests explained early",
+        "Scholarship options and intake dates set out clearly",
+      ],
+      subjects: ["Civil", "Mechanical", "Electrical and Electronic", "Computer Science", "Software Engineering"],
+      cta: "Apply for engineering admission",
+      image: "/images/icon-engineering.webp",
+      photo: "/images/edu-card-engineering.webp",
     },
-    {
-      icon: "book",
-      title: "Programs",
-      subtitle: "Find the right course",
-      href: "#services",
+    general: {
+      title: "General Subjects",
+      tagline: "Business, arts, science and more",
+      heading: "Business, arts and science degrees",
+      description:
+        "For every other subject, from business and economics to the sciences, humanities and language courses. Tell us what you want to study and we will find suitable programs.",
+      points: [
+        "Foundation, bachelor's and master's routes",
+        "Subject and university choices explained in plain terms",
+        "Support from application to pre-departure",
+      ],
+      subjects: [
+        "Business and Management",
+        "Economics and Finance",
+        "Natural Sciences",
+        "Arts and Humanities",
+        "Social Sciences",
+        "Language and Foundation",
+      ],
+      cta: "Apply for admission",
+      image: "/images/icon-general.webp",
+      photo: "/images/edu-card-general.webp",
     },
-    {
-      icon: "stethoscope",
-      title: "MBBS Pathways",
-      subtitle: "Medical education",
-      href: "#directory",
-    },
-    {
-      icon: "award",
-      title: "Scholarships",
-      subtitle: "Funding opportunities",
-      href: "/opportunities",
-    },
-  ],
+  },
+  reviews: {
+    title: "Student Reviews",
+    tagline: "What our students say",
+    eyebrow: "STUDENT REVIEWS",
+    heading: "Students' experience with Bengal Port",
+    description:
+      "What students say about choosing a program, applying and preparing to travel with our team.",
+    invite:
+      "Used our service? Sign in, open your application in your dashboard and write a review. It appears here once our team has approved it.",
+    cta: "Write a review",
+    image: "/images/icon-reviews.webp",
+    photo: "/images/edu-card-reviews.webp",
+  },
+  destinations: {
+    eyebrow: "STUDY DESTINATIONS",
+    title: "Where you can study",
+    description:
+      "Countries where Bengal Port currently lists institutions. Choose one to see what is on offer there.",
+  },
   services: {
     eyebrow: "EDUCATION SUPPORT",
     title: "A clearer international study pathway",
@@ -121,21 +197,21 @@ export const defaultEducationContent: DivisionContent = {
         title: "MBBS opportunities",
         description:
           "Review international medical programs, eligibility and application pathways.",
-        href: "#directory",
+        href: "#medical",
       },
       {
         icon: "briefcase",
         title: "Business programs",
         description:
           "Discover undergraduate and postgraduate business pathways worldwide.",
-        href: "#directory",
+        href: "#general",
       },
       {
         icon: "settings",
         title: "Engineering programs",
         description:
           "Explore relevant technical and engineering programs at partner institutions.",
-        href: "#directory",
+        href: "#engineering",
       },
     ],
   },

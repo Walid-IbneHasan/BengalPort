@@ -21,16 +21,21 @@
   } from "lucide-svelte";
   import type { DivisionContent } from "$lib/division-content";
   import { applyHref, type ApplyTab } from "$lib/apply-route";
+  import type { PublicReview } from "$lib/reviews";
+  import ReviewSection from "./ReviewSection.svelte";
   let {
     content,
     records,
     kind,
     loading = false,
+    reviews = [],
   }: {
     content: DivisionContent;
     records: any[];
     kind: "education" | "healthcare" | "umrah";
     loading?: boolean;
+    // The approved reviews of this service's customers.
+    reviews?: PublicReview[];
   } = $props();
   const icons: Record<string, any> = {
     map: MapPin,
@@ -233,6 +238,7 @@
         </article>{/each}
     </div>
   </section>
+  <ReviewSection {reviews} eyebrow={kind === "umrah" ? "PILGRIM REVIEWS" : "PATIENT REVIEWS"} title={kind === "umrah" ? "What our pilgrims say" : "What our patients say"} />
   <section class="closing" use:reveal>
     <div>
       <h2>{content.closing.title}</h2>

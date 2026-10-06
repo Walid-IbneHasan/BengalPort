@@ -123,9 +123,15 @@ To update later, run `npm run package:cpanel` again, upload and extract the new 
 
 Everything a visitor reads can be changed in the admin without touching code: **Website content** (homepage, header and footer, including the phone number, email, office address and social links used across the site), one editor per division page (Business, Education, Healthcare, Umrah), and the **About**, **Services** and **Contact** pages. Each save is a new revision; a page that is unpublished falls back to its built-in wording. The WhatsApp button uses `PUBLIC_WHATSAPP_NUMBER` from the website's settings.
 
+## Customer reviews
+
+A member can review a service once a payment for it has been received, whether paid through bKash or recorded by an administrator, in full or in part (a payment refunded in full no longer counts). They write it from their dashboard, inside the application: a rating from 1 to 5, the name to show, and their own words. There is one review per application, and the member can change it until the team has checked it.
+
+A review is not shown until an administrator approves it under **Admin → Reviews**; the team is emailed when one arrives. Approved reviews appear on the page of the service they are about (Business, Education, Healthcare or Umrah). The same screen hides or deletes a review, and adds one received outside the website.
+
 ## Key API groups
 
-`/api/auth`, `/api/enquiries`, `/api/applications`, `/api/opportunities`, `/api/suppliers`, `/api/factories`, `/api/education`, `/api/healthcare`, `/api/payments`, `/api/admin`, `/api/admin/accounts`.
+`/api/auth`, `/api/enquiries`, `/api/applications`, `/api/opportunities`, `/api/suppliers`, `/api/factories`, `/api/education`, `/api/healthcare`, `/api/payments`, `/api/reviews`, `/api/admin`, `/api/admin/accounts`.
 
 Payments are either made online through bKash (see [Online payment](#online-payment-bkash)) or recorded by an administrator after money is received another way (Admin → Payments → Record payment). Each one creates its receipt atomically. A receipt can be opened by an administrator, by the member it belongs to, or through the receipt link sent to the payer.
 

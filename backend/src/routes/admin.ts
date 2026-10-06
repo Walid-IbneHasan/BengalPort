@@ -10,6 +10,7 @@ import {
   businessContentUpdateSchema,
   feeSettingsSchema,
   divisionContentSchema,
+  educationContentSchema,
   aboutContentSchema,
   servicesContentSchema,
   contactContentSchema,
@@ -17,6 +18,8 @@ import {
   applicationEditSchema,
   categorySchema,
   noteSchema,
+  adminReviewSchema,
+  reviewChangeSchema,
 } from "../lib/schemas.js";
 import { defaultHomeContent } from "../lib/home-content.js";
 import { defaultBusinessContent } from "../lib/business-content.js";
@@ -809,7 +812,7 @@ const admin: FastifyPluginAsync = async (app) => {
     education: {
       name: "Global Education",
       fallback: defaultEducationContent,
-      schema: divisionContentSchema,
+      schema: educationContentSchema,
     },
     healthcare: {
       name: "Global Healthcare",
@@ -1006,6 +1009,74 @@ const admin: FastifyPluginAsync = async (app) => {
       where: { id: (req.params as { id: string }).id },
     });
     return count ? reply.code(204).send() : reply.notFound("Note not found");
+  });
+
+  // Customer reviews: the ones waiting for approval first, each with the
+  // application and the account it came from.
+  const reviewFields = {
+    id: true,
+    division: true,
+    name: true,
+    detail: true,
+    rating: true,
+    body: true,
+    photoUrl: true,
+    status: true,
+    createdAt: true,
+    application: { select: { reference: true } },
+    user: { select: { name: true, email: true } },
+  };
+  app.get("/reviews", async () => {
+    const reviews = await prisma.review.findMany({
+      select: reviewFields,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: 300,
+    });
+    return {
+      data: [
+        ...reviews.filter((review) => review.status === "PENDING"),
+        ...reviews.filter((review) => review.status !== "PENDING"),
+      ],
+    };
+  });
+
+  // A review the team received outside the website. It is shown at once.
+  app.post("/reviews", async (req, reply) => {
+    const parsed = adminReviewSchema.safeParse(req.body);
+    if (!parsed.success)
+      return reply.badRequest(
+        "Choose the service and a rating from 1 to 5, give the name to show, and write at least a sentence.",
+      );
+    return reply.code(201).send({
+      data: await prisma.review.create({
+        data: { ...parsed.data, status: "APPROVED" },
+        select: reviewFields,
+      }),
+    });
+  });
+
+  // The team approves or hides a review, and sets or removes its photo.
+  app.patch("/reviews/:id", async (req, reply) => {
+    const parsed = reviewChangeSchema.safeParse(req.body);
+    if (!parsed.success)
+      return reply.badRequest("Give a new status, a photo to show (a local path or an HTTP(S) address), or null to remove the photo");
+    const { id } = req.params as { id: string };
+    if (!(await prisma.review.count({ where: { id } })))
+      return reply.notFound("Review not found");
+    return {
+      data: await prisma.review.update({
+        where: { id },
+        data: parsed.data,
+        select: reviewFields,
+      }),
+    };
+  });
+
+  app.delete("/reviews/:id", async (req, reply) => {
+    const { count } = await prisma.review.deleteMany({
+      where: { id: (req.params as { id: string }).id },
+    });
+    return count ? reply.code(204).send() : reply.notFound("Review not found");
   });
 
   // What the settings page shows about the running system.
