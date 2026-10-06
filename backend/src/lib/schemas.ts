@@ -712,6 +712,40 @@ export const healthcareContentSchema = divisionContentSchema
       .max(8),
     reviews: reviewsSection,
   });
+// The Umrah page: a hero that names the kind of journey and the next group
+// departures, the packages, the four stages of the journey with photos, the
+// points for families and groups with the stats, the process, the reviews
+// and the closing panel. A package with a tag is the highlighted one.
+export const umrahContentSchema = divisionContentSchema
+  .omit({ shortcuts: true, services: true, directory: true })
+  .extend({
+    hero: divisionContentSchema.shape.hero.extend({
+      journeys: stringList(6),
+      departures: z
+        .array(z.object({ date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Write the date as year-month-day"), label: text }))
+        .max(3),
+    }),
+    packagesHeading: heading,
+    packages: z
+      .array(
+        z.object({
+          name: text,
+          tag: z.string().trim().max(40),
+          nights: text,
+          makkahHotel: text,
+          madinahHotel: text,
+          distance: text,
+          price: text,
+          inclusions: stringList(10),
+          cta: text,
+        }),
+      )
+      .min(1)
+      .max(3),
+    stagesHeading: heading,
+    stages: z.array(z.object({ title: text, subtitle: text, image: link, points: stringList(5) })).length(4),
+    reviews: reviewsSection,
+  });
 // The About, Services and Contact pages.
 export const aboutContentSchema = z.object({
   hero: heading,

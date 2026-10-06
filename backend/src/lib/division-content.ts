@@ -466,110 +466,180 @@ export const defaultHealthcareContent = {
 export const defaultUmrahContent = {
   hero: {
     eyebrow: "GLOBAL UMRAH",
-    title: "A peaceful journey, carefully coordinated.",
-    tagline: "Transparent guidance. Human support.",
-    description:
-      "Thoughtful visa, flight, accommodation and on-ground support for your sacred journey to Makkah and Madinah.",
-      image: "/images/global-umrah.webp",
-    primary: "Plan your Umrah",
-    secondary: "Speak to our team",
-  },
-  shortcuts: [
-    {
-      icon: "file",
-      title: "Visa Assistance",
-      subtitle: "Application coordination",
-      href: "#services",
-    },
-    {
-      icon: "plane",
-      title: "Flight Planning",
-      subtitle: "Itinerary options",
-      href: "#services",
-    },
-    {
-      icon: "building",
-      title: "Accommodation",
-      subtitle: "Makkah and Madinah",
-      href: "#services",
-    },
-    {
-      icon: "bus",
-      title: "Ground Support",
-      subtitle: "Transfers and Ziyarat",
-      href: "#services",
-    },
-  ],
-  services: {
-    eyebrow: "END-TO-END SUPPORT",
-    title: "Every essential, handled with care",
-    description:
-      "One accountable team coordinates the practical details so you can focus on the purpose of your journey.",
-    items: [
-      {
-        icon: "file-check",
-        title: "Visa assistance",
-        description:
-          "Clear document guidance and careful application coordination.",
-        href: "/apply?tab=umrah",
-      },
-      {
-        icon: "plane",
-        title: "Flight planning",
-        description:
-          "Practical itinerary options shaped around your preferred dates.",
-        href: "/apply?tab=umrah",
-      },
-      {
-        icon: "hotel",
-        title: "Trusted accommodation",
-        description:
-          "Makkah and Madinah stays selected for comfort and accessibility.",
-        href: "/apply?tab=umrah",
-      },
-      {
-        icon: "bus",
-        title: "Ground support",
-        description:
-          "Airport transfers, intercity transport and guided Ziyarat coordination.",
-        href: "/apply?tab=umrah",
-      },
+    title: "Your Umrah,",
+    journeys: [
+      "in Ramadan",
+      "with family",
+      "in a group",
+      "with Ziyarat"
     ],
+    tagline: "Transparent guidance. Human support.",
+    description: "Thoughtful visa, flight, accommodation and on-ground support for your sacred journey to Makkah and Madinah.",
+    image: "/images/global-umrah.webp",
+    primary: "Plan your Umrah",
+    secondary: "See packages",
+    departures: [
+      {
+        date: "2026-11-14",
+        label: "November group · 20 seats"
+      },
+      {
+        date: "2026-12-19",
+        label: "Winter family group"
+      },
+      {
+        date: "2027-02-20",
+        label: "Ramadan group · early booking"
+      }
+    ]
   },
+  packagesHeading: {
+    eyebrow: "PACKAGES",
+    title: "Packages for every pilgrim",
+    description: "Three ways to travel. Every package can be shaped around your dates, your room and your budget."
+  },
+  packages: [
+    {
+      name: "Economy",
+      tag: "",
+      nights: "7 nights · 4 in Makkah, 3 in Madinah",
+      makkahHotel: "3-star hotel, Ibrahim Al Khalil area",
+      madinahHotel: "3-star hotel near the Markaziya",
+      distance: "Hotels 800 to 1,200 m from the Haram",
+      price: "From ৳ 1,45,000",
+      inclusions: [
+        "Umrah visa and insurance",
+        "Return flights from Dhaka",
+        "Shared room for four",
+        "Airport and intercity transfers",
+        "Group guide throughout"
+      ],
+      cta: "Enquire about Economy"
+    },
+    {
+      name: "Standard",
+      tag: "Most chosen",
+      nights: "10 nights · 6 in Makkah, 4 in Madinah",
+      makkahHotel: "4-star hotel, Ajyad area",
+      madinahHotel: "4-star hotel by the Haram courtyard",
+      distance: "Hotels 300 to 600 m from the Haram",
+      price: "From ৳ 1,95,000",
+      inclusions: [
+        "Umrah visa and insurance",
+        "Return flights from Dhaka",
+        "Shared room for three",
+        "Private transfers",
+        "Guided Ziyarat in both cities",
+        "Daily breakfast"
+      ],
+      cta: "Enquire about Standard"
+    },
+    {
+      name: "Premium",
+      tag: "",
+      nights: "12 nights · 7 in Makkah, 5 in Madinah",
+      makkahHotel: "5-star hotel with a Haram view",
+      madinahHotel: "5-star hotel facing the Prophet's Mosque",
+      distance: "Hotels within 150 m of the Haram",
+      price: "From ৳ 3,20,000",
+      inclusions: [
+        "Umrah visa and insurance",
+        "Return flights, business class on request",
+        "Private room",
+        "Private car and driver",
+        "Dedicated coordinator",
+        "Half board"
+      ],
+      cta: "Enquire about Premium"
+    }
+  ],
+  stagesHeading: {
+    eyebrow: "THE JOURNEY",
+    title: "The journey, stage by stage",
+    description: "What we handle before you fly, on arrival, in Makkah and in Madinah."
+  },
+  stages: [
+    {
+      title: "Before you fly",
+      subtitle: "Visa, flights and preparation",
+      image: "/images/divisions/umrah-before.webp",
+      points: [
+        "Umrah visa and travel insurance arranged",
+        "Flights chosen around your dates",
+        "A briefing on the rites, packing and health"
+      ]
+    },
+    {
+      title: "On arrival",
+      subtitle: "Jeddah or Madinah airport",
+      image: "/images/divisions/umrah-ziyarat.webp",
+      points: [
+        "Met at the airport by our ground team",
+        "Transfer to your hotel with your group",
+        "A local SIM and guidance on the first day"
+      ]
+    },
+    {
+      title: "In Makkah",
+      subtitle: "Steps from the Haram",
+      image: "/images/divisions/umrah-makkah.webp",
+      points: [
+        "A hotel chosen for its distance to the Haram",
+        "Guided Umrah for first-time pilgrims",
+        "Help with prayer times, meals and rest"
+      ]
+    },
+    {
+      title: "In Madinah and Ziyarat",
+      subtitle: "The Prophet's Mosque and the holy sites",
+      image: "/images/divisions/umrah-madinah.webp",
+      points: [
+        "Transfer by train or coach",
+        "Guided visits to Quba, Uhud and Qiblatain",
+        "Support until your flight home"
+      ]
+    }
+  ],
   stats: [
-    { value: "100%", label: "Guided assistance", icon: "shield" },
-    { value: "24/7", label: "On-ground support", icon: "headset" },
-    { value: "5+", label: "Trusted hotel partners", icon: "building" },
-    { value: "3+", label: "Transport options", icon: "bus" },
+    {
+      value: "100%",
+      label: "Guided assistance",
+      icon: "shield"
+    },
+    {
+      value: "24/7",
+      label: "On-ground support",
+      icon: "headset"
+    },
+    {
+      value: "5+",
+      label: "Trusted hotel partners",
+      icon: "building"
+    },
+    {
+      value: "3+",
+      label: "Transport options",
+      icon: "bus"
+    }
   ],
   feature: {
     eyebrow: "FLEXIBLE PLANNING",
     title: "For individuals, families and groups",
-    description:
-      "Tell us your preferred dates, number of travellers and accommodation priorities. Our team will prepare a clear, relevant plan without overwhelming you with unnecessary choices.",
+    description: "Tell us your preferred dates, number of travellers and accommodation priorities. Our team will prepare a clear, relevant plan without overwhelming you with unnecessary choices.",
     points: [
       {
         title: "Flexible departure planning",
-        description:
-          "Travel on dates that work for you and your family.",
+        description: "Travel on dates that work for you and your family."
       },
       {
         title: "Room and proximity preferences",
-        description:
-          "Accommodations selected based on your comfort and distance requirements.",
+        description: "Accommodations selected based on your comfort and distance requirements."
       },
       {
         title: "Coordinated local movement",
-        description:
-          "Reliable transport for seamless travel between holy sites.",
-      },
-    ],
-  },
-  directory: {
-    eyebrow: "LIVE UMRAH NETWORK",
-    title: "Partner Hotels and Transport",
-    description:
-      "Browse trusted accommodation and transport services.",
+        description: "Reliable transport for seamless travel between holy sites."
+      }
+    ]
   },
   process: {
     eyebrow: "YOUR JOURNEY",
@@ -579,34 +649,37 @@ export const defaultUmrahContent = {
       {
         number: "01",
         title: "Share your preferences",
-        description:
-          "Provide travel dates, number of pilgrims, and basic requirements.",
+        description: "Provide travel dates, number of pilgrims, and basic requirements."
       },
       {
         number: "02",
         title: "Review your plan",
-        description:
-          "Receive a coordinated itinerary covering flights, hotels, and transport.",
+        description: "Receive a coordinated itinerary covering flights, hotels, and transport."
       },
       {
         number: "03",
         title: "Confirm and prepare",
-        description:
-          "Finalize details while we process your visa and bookings.",
+        description: "Finalize details while we process your visa and bookings."
       },
       {
         number: "04",
         title: "Travel with peace of mind",
-        description:
-          "Focus on your pilgrimage with our on-ground support ready.",
-      },
-    ],
+        description: "Focus on your pilgrimage with our on-ground support ready."
+      }
+    ]
+  },
+  reviews: {
+    eyebrow: "PILGRIM REVIEWS",
+    heading: "What our pilgrims say",
+    description: "What pilgrims and their families say about travelling with our team.",
+    invite: "Used our service? Sign in, open your application in your dashboard and write a review. It appears here once our team has approved it.",
+    cta: "Write a review",
+    photo: "/images/divisions/umrah-reviews.webp"
   },
   closing: {
     title: "Ready to plan your sacred journey?",
-    description:
-      "Start with a simple enquiry. Our coordinators will handle the rest.",
+    description: "Start with a simple enquiry. Our coordinators will handle the rest.",
     primary: "Start Umrah Enquiry",
-    secondary: "Speak to our team",
-  },
+    secondary: "Speak to our team"
+  }
 };

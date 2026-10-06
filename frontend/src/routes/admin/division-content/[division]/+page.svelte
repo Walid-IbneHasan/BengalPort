@@ -17,7 +17,12 @@
       lists: true,
       note: 'Hero · specialties are the words that take turns in the title; Hero · pathway is the three-step line under it and keeps exactly three steps. Hero · cities are the destination chips shown when the hospital directory is empty.',
     },
-    umrah: { title: 'Umrah', fallback: defaultUmrahContent, lists: false, note: '' },
+    umrah: {
+      title: 'Umrah',
+      fallback: defaultUmrahContent,
+      lists: true,
+      note: 'Hero · journeys are the words that take turns in the title. Hero · departures are the next group dates (year-month-day, three at most; past dates are hidden on the page). The package with a tag, such as Most chosen, is shown highlighted; leave the others blank. The journey keeps exactly four stages.',
+    },
   };
   const division = $derived(
     ((page.params.division ?? '') in pages ? page.params.division : 'education') as keyof typeof pages,
