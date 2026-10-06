@@ -229,11 +229,82 @@ describe("what visitors see", () => {
   test("only the words, the rating and the name to show are given out", async () => {
     const { id } = await approved();
     const shown = (await published("education")).find((x) => x.id === id);
-    assert.deepEqual(Object.keys(shown).sort(), ["body", "createdAt", "detail", "division", "id", "name", "rating"]);
+    assert.deepEqual(Object.keys(shown).sort(), ["body", "createdAt", "detail", "division", "id", "name", "photoUrl", "rating"]);
+  });
+
+  test("a review's photo is given out with it", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/admin/reviews",
+      headers: bearer(app, admin),
+      payload: { division: "EDUCATION", ...words, photoUrl: "/images/reviews/rahim.webp" },
+    });
+    added.push(res.json().data.id);
+    const shown = (await published("education")).find((x) => x.id === res.json().data.id);
+    assert.equal(shown.photoUrl, "/images/reviews/rahim.webp");
   });
 
   test("an unknown service is refused", async () => {
     assert.equal((await app.inject({ method: "GET", url: "/api/reviews?division=shipping" })).statusCode, 400);
+  });
+});
+
+describe("a review's photo", () => {
+  const avatar = "https://lh3.example.test/photo.jpg";
+  let pictured: Account;
+  before(async () => {
+    pictured = await createUser("USER");
+    await prisma.user.update({ where: { id: pictured.id }, data: { avatarUrl: avatar } });
+  });
+  after(async () => {
+    await prisma.review.deleteMany({ where: { userId: pictured.id } });
+    await prisma.payment.deleteMany({ where: { userId: pictured.id } });
+    await prisma.application.deleteMany({ where: { userId: pictured.id } });
+    await deleteUsers(pictured.id);
+  });
+
+  test("a member can show their account photo with their review, and take it off again", async () => {
+    const row = await paidApplication("EDUCATION", pictured);
+    const withPhoto = await write(row.id, { ...words, showPhoto: true }, pictured);
+    assert.equal(withPhoto.statusCode, 201);
+    assert.equal(withPhoto.json().data.photoUrl, avatar);
+    const without = await write(row.id, { ...words, showPhoto: false }, pictured);
+    assert.equal(without.statusCode, 200);
+    assert.equal(without.json().data.photoUrl, null);
+  });
+
+  test("without the tick, the account photo stays private", async () => {
+    const row = await paidApplication("EDUCATION", pictured);
+    assert.equal((await write(row.id, words, pictured)).json().data.photoUrl, null);
+  });
+
+  test("a member without an account photo gets none, even when they tick the box", async () => {
+    const row = await paidApplication();
+    assert.equal((await write(row.id, { ...words, showPhoto: true })).json().data.photoUrl, null);
+  });
+
+  test("the team can set and remove the photo of any review", async () => {
+    const { id } = await approved();
+    const set = await app.inject({ method: "PATCH", url: `/api/admin/reviews/${id}`, headers: bearer(app, admin), payload: { photoUrl: "/images/reviews/rahim.webp" } });
+    assert.equal(set.statusCode, 200);
+    assert.equal(set.json().data.photoUrl, "/images/reviews/rahim.webp");
+    assert.equal(set.json().data.status, "APPROVED");
+    const removed = await app.inject({ method: "PATCH", url: `/api/admin/reviews/${id}`, headers: bearer(app, admin), payload: { photoUrl: null } });
+    assert.equal(removed.statusCode, 200);
+    assert.equal(removed.json().data.photoUrl, null);
+  });
+
+  test("a photo has to be a local path or an HTTP(S) address", async () => {
+    const { id } = await approved();
+    const patched = await app.inject({ method: "PATCH", url: `/api/admin/reviews/${id}`, headers: bearer(app, admin), payload: { photoUrl: "javascript:alert(1)" } });
+    assert.equal(patched.statusCode, 400);
+    const posted = await app.inject({ method: "POST", url: "/api/admin/reviews", headers: bearer(app, admin), payload: { division: "EDUCATION", ...words, photoUrl: "data:image/png;base64,AAAA" } });
+    assert.equal(posted.statusCode, 400);
+  });
+
+  test("a change with nothing in it is refused", async () => {
+    const { id } = await approved();
+    assert.equal((await app.inject({ method: "PATCH", url: `/api/admin/reviews/${id}`, headers: bearer(app, admin), payload: {} })).statusCode, 400);
   });
 });
 

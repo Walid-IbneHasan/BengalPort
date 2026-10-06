@@ -195,6 +195,7 @@ exports.Prisma.ReviewScalarFieldEnum = {
   detail: 'detail',
   rating: 'rating',
   body: 'body',
+  photoUrl: 'photoUrl',
   status: 'status',
   applicationId: 'applicationId',
   userId: 'userId',

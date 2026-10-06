@@ -9453,6 +9453,7 @@ export namespace Prisma {
     detail: string | null
     rating: number | null
     body: string | null
+    photoUrl: string | null
     status: $Enums.ReviewStatus | null
     applicationId: string | null
     userId: string | null
@@ -9467,6 +9468,7 @@ export namespace Prisma {
     detail: string | null
     rating: number | null
     body: string | null
+    photoUrl: string | null
     status: $Enums.ReviewStatus | null
     applicationId: string | null
     userId: string | null
@@ -9481,6 +9483,7 @@ export namespace Prisma {
     detail: number
     rating: number
     body: number
+    photoUrl: number
     status: number
     applicationId: number
     userId: number
@@ -9505,6 +9508,7 @@ export namespace Prisma {
     detail?: true
     rating?: true
     body?: true
+    photoUrl?: true
     status?: true
     applicationId?: true
     userId?: true
@@ -9519,6 +9523,7 @@ export namespace Prisma {
     detail?: true
     rating?: true
     body?: true
+    photoUrl?: true
     status?: true
     applicationId?: true
     userId?: true
@@ -9533,6 +9538,7 @@ export namespace Prisma {
     detail?: true
     rating?: true
     body?: true
+    photoUrl?: true
     status?: true
     applicationId?: true
     userId?: true
@@ -9634,6 +9640,7 @@ export namespace Prisma {
     detail: string | null
     rating: number
     body: string
+    photoUrl: string | null
     status: $Enums.ReviewStatus
     applicationId: string | null
     userId: string | null
@@ -9667,6 +9674,7 @@ export namespace Prisma {
     detail?: boolean
     rating?: boolean
     body?: boolean
+    photoUrl?: boolean
     status?: boolean
     applicationId?: boolean
     userId?: boolean
@@ -9683,6 +9691,7 @@ export namespace Prisma {
     detail?: boolean
     rating?: boolean
     body?: boolean
+    photoUrl?: boolean
     status?: boolean
     applicationId?: boolean
     userId?: boolean
@@ -9699,6 +9708,7 @@ export namespace Prisma {
     detail?: boolean
     rating?: boolean
     body?: boolean
+    photoUrl?: boolean
     status?: boolean
     applicationId?: boolean
     userId?: boolean
@@ -9715,6 +9725,7 @@ export namespace Prisma {
     detail?: boolean
     rating?: boolean
     body?: boolean
+    photoUrl?: boolean
     status?: boolean
     applicationId?: boolean
     userId?: boolean
@@ -9722,7 +9733,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ReviewOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "division" | "name" | "detail" | "rating" | "body" | "status" | "applicationId" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["review"]>
+  export type ReviewOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "division" | "name" | "detail" | "rating" | "body" | "photoUrl" | "status" | "applicationId" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["review"]>
   export type ReviewInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     application?: boolean | Review$applicationArgs<ExtArgs>
     user?: boolean | Review$userArgs<ExtArgs>
@@ -9749,6 +9760,7 @@ export namespace Prisma {
       detail: string | null
       rating: number
       body: string
+      photoUrl: string | null
       status: $Enums.ReviewStatus
       applicationId: string | null
       userId: string | null
@@ -10185,6 +10197,7 @@ export namespace Prisma {
     readonly detail: FieldRef<"Review", 'String'>
     readonly rating: FieldRef<"Review", 'Int'>
     readonly body: FieldRef<"Review", 'String'>
+    readonly photoUrl: FieldRef<"Review", 'String'>
     readonly status: FieldRef<"Review", 'ReviewStatus'>
     readonly applicationId: FieldRef<"Review", 'String'>
     readonly userId: FieldRef<"Review", 'String'>
@@ -29403,6 +29416,7 @@ export namespace Prisma {
     detail: 'detail',
     rating: 'rating',
     body: 'body',
+    photoUrl: 'photoUrl',
     status: 'status',
     applicationId: 'applicationId',
     userId: 'userId',
@@ -30414,6 +30428,7 @@ export namespace Prisma {
     detail?: StringNullableFilter<"Review"> | string | null
     rating?: IntFilter<"Review"> | number
     body?: StringFilter<"Review"> | string
+    photoUrl?: StringNullableFilter<"Review"> | string | null
     status?: EnumReviewStatusFilter<"Review"> | $Enums.ReviewStatus
     applicationId?: StringNullableFilter<"Review"> | string | null
     userId?: StringNullableFilter<"Review"> | string | null
@@ -30430,6 +30445,7 @@ export namespace Prisma {
     detail?: SortOrderInput | SortOrder
     rating?: SortOrder
     body?: SortOrder
+    photoUrl?: SortOrderInput | SortOrder
     status?: SortOrder
     applicationId?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
@@ -30450,6 +30466,7 @@ export namespace Prisma {
     detail?: StringNullableFilter<"Review"> | string | null
     rating?: IntFilter<"Review"> | number
     body?: StringFilter<"Review"> | string
+    photoUrl?: StringNullableFilter<"Review"> | string | null
     status?: EnumReviewStatusFilter<"Review"> | $Enums.ReviewStatus
     userId?: StringNullableFilter<"Review"> | string | null
     createdAt?: DateTimeFilter<"Review"> | Date | string
@@ -30465,6 +30482,7 @@ export namespace Prisma {
     detail?: SortOrderInput | SortOrder
     rating?: SortOrder
     body?: SortOrder
+    photoUrl?: SortOrderInput | SortOrder
     status?: SortOrder
     applicationId?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
@@ -30487,6 +30505,7 @@ export namespace Prisma {
     detail?: StringNullableWithAggregatesFilter<"Review"> | string | null
     rating?: IntWithAggregatesFilter<"Review"> | number
     body?: StringWithAggregatesFilter<"Review"> | string
+    photoUrl?: StringNullableWithAggregatesFilter<"Review"> | string | null
     status?: EnumReviewStatusWithAggregatesFilter<"Review"> | $Enums.ReviewStatus
     applicationId?: StringNullableWithAggregatesFilter<"Review"> | string | null
     userId?: StringNullableWithAggregatesFilter<"Review"> | string | null
@@ -32202,6 +32221,7 @@ export namespace Prisma {
     detail?: string | null
     rating: number
     body: string
+    photoUrl?: string | null
     status?: $Enums.ReviewStatus
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -32216,6 +32236,7 @@ export namespace Prisma {
     detail?: string | null
     rating: number
     body: string
+    photoUrl?: string | null
     status?: $Enums.ReviewStatus
     applicationId?: string | null
     userId?: string | null
@@ -32230,6 +32251,7 @@ export namespace Prisma {
     detail?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: IntFieldUpdateOperationsInput | number
     body?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReviewStatusFieldUpdateOperationsInput | $Enums.ReviewStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -32244,6 +32266,7 @@ export namespace Prisma {
     detail?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: IntFieldUpdateOperationsInput | number
     body?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReviewStatusFieldUpdateOperationsInput | $Enums.ReviewStatus
     applicationId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -32258,6 +32281,7 @@ export namespace Prisma {
     detail?: string | null
     rating: number
     body: string
+    photoUrl?: string | null
     status?: $Enums.ReviewStatus
     applicationId?: string | null
     userId?: string | null
@@ -32272,6 +32296,7 @@ export namespace Prisma {
     detail?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: IntFieldUpdateOperationsInput | number
     body?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReviewStatusFieldUpdateOperationsInput | $Enums.ReviewStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -32284,6 +32309,7 @@ export namespace Prisma {
     detail?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: IntFieldUpdateOperationsInput | number
     body?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReviewStatusFieldUpdateOperationsInput | $Enums.ReviewStatus
     applicationId?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34313,6 +34339,7 @@ export namespace Prisma {
     detail?: SortOrder
     rating?: SortOrder
     body?: SortOrder
+    photoUrl?: SortOrder
     status?: SortOrder
     applicationId?: SortOrder
     userId?: SortOrder
@@ -34331,6 +34358,7 @@ export namespace Prisma {
     detail?: SortOrder
     rating?: SortOrder
     body?: SortOrder
+    photoUrl?: SortOrder
     status?: SortOrder
     applicationId?: SortOrder
     userId?: SortOrder
@@ -34345,6 +34373,7 @@ export namespace Prisma {
     detail?: SortOrder
     rating?: SortOrder
     body?: SortOrder
+    photoUrl?: SortOrder
     status?: SortOrder
     applicationId?: SortOrder
     userId?: SortOrder
@@ -36703,6 +36732,7 @@ export namespace Prisma {
     detail?: string | null
     rating: number
     body: string
+    photoUrl?: string | null
     status?: $Enums.ReviewStatus
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -36716,6 +36746,7 @@ export namespace Prisma {
     detail?: string | null
     rating: number
     body: string
+    photoUrl?: string | null
     status?: $Enums.ReviewStatus
     applicationId?: string | null
     createdAt?: Date | string
@@ -36953,6 +36984,7 @@ export namespace Prisma {
     detail?: StringNullableFilter<"Review"> | string | null
     rating?: IntFilter<"Review"> | number
     body?: StringFilter<"Review"> | string
+    photoUrl?: StringNullableFilter<"Review"> | string | null
     status?: EnumReviewStatusFilter<"Review"> | $Enums.ReviewStatus
     applicationId?: StringNullableFilter<"Review"> | string | null
     userId?: StringNullableFilter<"Review"> | string | null
@@ -37512,6 +37544,7 @@ export namespace Prisma {
     detail?: string | null
     rating: number
     body: string
+    photoUrl?: string | null
     status?: $Enums.ReviewStatus
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -37525,6 +37558,7 @@ export namespace Prisma {
     detail?: string | null
     rating: number
     body: string
+    photoUrl?: string | null
     status?: $Enums.ReviewStatus
     userId?: string | null
     createdAt?: Date | string
@@ -37670,6 +37704,7 @@ export namespace Prisma {
     detail?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: IntFieldUpdateOperationsInput | number
     body?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReviewStatusFieldUpdateOperationsInput | $Enums.ReviewStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -37683,6 +37718,7 @@ export namespace Prisma {
     detail?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: IntFieldUpdateOperationsInput | number
     body?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReviewStatusFieldUpdateOperationsInput | $Enums.ReviewStatus
     userId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39069,6 +39105,7 @@ export namespace Prisma {
     detail?: string | null
     rating: number
     body: string
+    photoUrl?: string | null
     status?: $Enums.ReviewStatus
     applicationId?: string | null
     createdAt?: Date | string
@@ -39165,6 +39202,7 @@ export namespace Prisma {
     detail?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: IntFieldUpdateOperationsInput | number
     body?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReviewStatusFieldUpdateOperationsInput | $Enums.ReviewStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39178,6 +39216,7 @@ export namespace Prisma {
     detail?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: IntFieldUpdateOperationsInput | number
     body?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReviewStatusFieldUpdateOperationsInput | $Enums.ReviewStatus
     applicationId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39191,6 +39230,7 @@ export namespace Prisma {
     detail?: NullableStringFieldUpdateOperationsInput | string | null
     rating?: IntFieldUpdateOperationsInput | number
     body?: StringFieldUpdateOperationsInput | string
+    photoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumReviewStatusFieldUpdateOperationsInput | $Enums.ReviewStatus
     applicationId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

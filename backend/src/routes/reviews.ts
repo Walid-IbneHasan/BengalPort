@@ -6,7 +6,7 @@ import { reviewDivisionSchema, reviewSchema } from "../lib/schemas.js";
 
 // What the website shows of a review: nothing that says who the customer is
 // beyond the name they chose.
-const shown = { id: true, division: true, name: true, detail: true, rating: true, body: true, createdAt: true };
+const shown = { id: true, division: true, name: true, detail: true, rating: true, body: true, photoUrl: true, createdAt: true };
 const own = { ...shown, status: true };
 const paidFor = { select: { amount: true, status: true, refunds: { select: { amount: true, status: true } } } };
 // A service can be reviewed once money for it has been received and not all
@@ -74,10 +74,21 @@ const routes: FastifyPluginAsync = async (app) => {
         return reply.code(403).send({
           error: { code: "NOT_PAID", message: "You can review a service once a payment for it has been received." },
         });
+      // The member's account photo goes with the review only when they ask
+      // for it; the request has to say so each time it is sent.
+      const { showPhoto, ...words } = parsed.data;
+      const photo =
+        showPhoto === undefined
+          ? {}
+          : {
+              photoUrl: showPhoto
+                ? ((await prisma.user.findUnique({ where: { id: userId }, select: { avatarUrl: true } }))?.avatarUrl ?? null)
+                : null,
+            };
       if (application.review)
-        return { data: await prisma.review.update({ where: { id: application.review.id }, data: parsed.data, select: own }) };
+        return { data: await prisma.review.update({ where: { id: application.review.id }, data: { ...words, ...photo }, select: own }) };
       const review = await prisma.review.create({
-        data: { ...parsed.data, division: application.type, applicationId: application.id, userId },
+        data: { ...words, ...photo, division: application.type, applicationId: application.id, userId },
         select: own,
       });
       notifyNewReview(app, { ...review, reference: application.reference, customer: application.fullName });

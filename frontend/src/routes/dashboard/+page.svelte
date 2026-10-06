@@ -122,7 +122,7 @@
                 {#if reviewOf(item.id)}
                   {@const mine = reviewOf(item.id)!}
                   <h3 id={`review-${item.id}`}>Your review</h3>
-                  <ReviewForm applicationId={item.id} review={mine.review} name={user?.name ?? ""} onsaved={(saved) => (mine.review = saved)} />
+                  <ReviewForm applicationId={item.id} review={mine.review} name={user?.name ?? ""} avatarUrl={user?.avatarUrl ?? null} onsaved={(saved) => (mine.review = saved)} />
                 {/if}
               </div>
             {/if}

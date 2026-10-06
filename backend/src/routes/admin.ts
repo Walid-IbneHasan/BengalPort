@@ -19,7 +19,7 @@ import {
   categorySchema,
   noteSchema,
   adminReviewSchema,
-  reviewStatusSchema,
+  reviewChangeSchema,
 } from "../lib/schemas.js";
 import { defaultHomeContent } from "../lib/home-content.js";
 import { defaultBusinessContent } from "../lib/business-content.js";
@@ -1020,6 +1020,7 @@ const admin: FastifyPluginAsync = async (app) => {
     detail: true,
     rating: true,
     body: true,
+    photoUrl: true,
     status: true,
     createdAt: true,
     application: { select: { reference: true } },
@@ -1054,9 +1055,11 @@ const admin: FastifyPluginAsync = async (app) => {
     });
   });
 
+  // The team approves or hides a review, and sets or removes its photo.
   app.patch("/reviews/:id", async (req, reply) => {
-    const parsed = reviewStatusSchema.safeParse(req.body);
-    if (!parsed.success) return reply.badRequest("Unknown review status");
+    const parsed = reviewChangeSchema.safeParse(req.body);
+    if (!parsed.success)
+      return reply.badRequest("Give a new status, a photo to show (a local path or an HTTP(S) address), or null to remove the photo");
     const { id } = req.params as { id: string };
     if (!(await prisma.review.count({ where: { id } })))
       return reply.notFound("Review not found");

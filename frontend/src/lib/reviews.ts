@@ -9,6 +9,8 @@ export type PublicReview = {
   detail: string | null;
   rating: number;
   body: string;
+  // The picture shown with the review, or null for an initials disc.
+  photoUrl: string | null;
   createdAt: string;
 };
 export type ReviewStatus = "PENDING" | "APPROVED" | "HIDDEN";
@@ -31,6 +33,27 @@ const states: Record<ReviewStatus, { label: string; tone: StatusTone; editable: 
   HIDDEN: { label: "Not published", tone: "neutral", editable: false },
 };
 export const reviewState = (status: ReviewStatus) => states[status];
+
+// The part of a review the testimonial strip shows: whole when it is short,
+// otherwise cut back to the last full sentence that fits, or failing that to
+// a whole word with an ellipsis.
+export function excerpt(body: string, max = 220): string {
+  const text = body.trim().replace(/\s+/g, " ");
+  if (text.length <= max) return text;
+  const head = text.slice(0, max + 1);
+  const sentenceEnd = Math.max(head.lastIndexOf(". "), head.lastIndexOf("! "), head.lastIndexOf("? "));
+  if (sentenceEnd >= max / 3) return head.slice(0, sentenceEnd + 1);
+  const wordEnd = head.lastIndexOf(" ");
+  return `${head.slice(0, wordEnd > 0 ? wordEnd : max).trimEnd()}…`;
+}
+
+// Up to two initials for a reviewer without a photo: first and last name.
+export function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "";
+  const letters = parts.length === 1 ? [parts[0]] : [parts[0], parts[parts.length - 1]];
+  return letters.map((part) => part.charAt(0).toUpperCase()).join("");
+}
 
 // Five stars, filled up to the rating.
 export function stars(rating: number): boolean[] {

@@ -237,6 +237,14 @@ export const noteSchema = z.object({ body: z.string().trim().min(1).max(2000) })
 // A customer's review: a rating, the name to show, an optional line about
 // the service ("MBBS, Malaysia") and their own words.
 const reviewDivision = z.enum(["BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH"]);
+// The picture shown with a review: a local path or an HTTP(S) address, and
+// null to show none. Left out, it is not changed.
+const reviewPhoto = z
+  .union([
+    z.string().trim().max(500).regex(/^(\/|https?:\/\/)/, "Use a local path or an HTTP(S) address"),
+    z.null(),
+  ])
+  .optional();
 export const reviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   name: z.string().trim().min(2).max(80),
@@ -247,11 +255,16 @@ export const reviewSchema = z.object({
     .nullish()
     .transform((value) => value || null),
   body: z.string().trim().min(10).max(1500),
+  // Whether the member wants their account photo shown with the review.
+  showPhoto: z.boolean().optional(),
 });
-export const adminReviewSchema = reviewSchema.extend({ division: reviewDivision });
-export const reviewStatusSchema = z.object({
-  status: z.enum(["PENDING", "APPROVED", "HIDDEN"]),
-});
+export const adminReviewSchema = reviewSchema
+  .omit({ showPhoto: true })
+  .extend({ division: reviewDivision, photoUrl: reviewPhoto });
+// The team changes a review's status, its photo, or both.
+export const reviewChangeSchema = z
+  .object({ status: z.enum(["PENDING", "APPROVED", "HIDDEN"]).optional(), photoUrl: reviewPhoto })
+  .refine((change) => change.status !== undefined || change.photoUrl !== undefined, "Nothing to change");
 // ?division=education, in either case; none means every service.
 export const reviewDivisionSchema = z.object({
   division: z.preprocess(

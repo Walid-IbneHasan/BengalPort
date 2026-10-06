@@ -66,6 +66,7 @@
     <div
       class="preview"
       class:portrait={recommendation.toLowerCase().includes("portrait")}
+      class:square={recommendation.toLowerCase().includes("square")}
     >
       {#if value || localPreview}<img
           src={localPreview || value}
@@ -146,6 +147,11 @@
   }
   .preview.portrait {
     aspect-ratio: 4/5;
+  }
+  .preview.square {
+    aspect-ratio: 1;
+    max-width: 12rem;
+    border-radius: 50%;
   }
   .preview img {
     width: 100%;

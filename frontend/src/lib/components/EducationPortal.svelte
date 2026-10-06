@@ -15,17 +15,17 @@
     MapPin,
     Search,
     Settings,
-    Star,
     Stethoscope,
   } from "lucide-svelte";
   import type { EducationContent } from "$lib/division-content";
   import type { PublicReview } from "$lib/reviews";
-  import ReviewCards from "./ReviewCards.svelte";
+  import Testimonials from "./Testimonials.svelte";
   import { applyHref } from "$lib/apply-route";
   import {
     destinations,
     fieldKeys,
     fieldPrograms,
+    flagCodes,
     institutionFields,
     type FieldKey,
   } from "$lib/education";
@@ -53,14 +53,12 @@
   let options = $derived([
     ...fieldKeys.map((key) => ({
       id: key as string,
-      icon: fieldIcons[key],
       title: content.fields[key].title,
       tagline: content.fields[key].tagline,
       image: content.fields[key].image,
     })),
     {
       id: "reviews",
-      icon: Star,
       title: content.reviews.title,
       tagline: content.reviews.tagline,
       image: content.reviews.image,
@@ -102,21 +100,34 @@
     query = "";
   }
   const count = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
-  const flagCodes = ["no", "uz", "ru", "us", "gb", "ca", "fr", "fi", "se", "ch", "jp", "au", "my"];
-  let flagStates = $state(["gb", "fi", "ca", "fr"]);
+
+  // The hero names the destinations one after another: the countries in the
+  // directory, or the usual ones while it is empty.
+  const usualCountries = ["UK", "USA", "Canada", "Australia", "Malaysia"];
+  let heroCountries = $derived(places.length ? places.map((x) => x.country) : usualCountries);
   let place = $state(0);
-  let heroCountries = $derived(places.length ? places.map(x => x.country) : ["UK", "USA", "Canada", "Australia", "Malaysia"]);
+  // Four flags float around the title. They are the flags of those same
+  // destinations, topped up from the usual ones so that four differ.
+  let flagPool = $derived(flagCodes([...heroCountries, ...usualCountries]));
+  let changedFlags = $state<string[] | null>(null);
+  let flagsShown = $derived(changedFlags ?? flagPool.slice(0, 4));
 
   onMount(() => {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = setInterval(() => {
       if (heroCountries.length > 1) place = (place + 1) % heroCountries.length;
     }, 2400);
-
+    // One flag at a time gives way to the next destination not on show.
+    let turn = 0;
+    let next = 4;
     const flagTimer = setInterval(() => {
-      flagStates = flagStates.map(() => flagCodes[Math.floor(Math.random() * flagCodes.length)]);
-    }, 3500);
-
+      if (flagPool.length <= flagsShown.length) return;
+      const shown = [...flagsShown];
+      let code = flagPool[next++ % flagPool.length];
+      while (shown.includes(code)) code = flagPool[next++ % flagPool.length];
+      shown[turn++ % shown.length] = code;
+      changedFlags = shown;
+    }, 3200);
     return () => {
       clearInterval(timer);
       clearInterval(flagTimer);
@@ -147,13 +158,23 @@
 
 <main class="edu">
   <section class="hero">
-    {#each flagStates as code, i}
-      <div class={`flag-ball flag-ball-${i}`}>
-        {#key code}
-          <img src={`https://flagcdn.com/w160/${code}.png`} alt="" aria-hidden="true" transition:fade={{ duration: 600 }} />
-        {/key}
-      </div>
-    {/each}
+    <div class="flags" aria-hidden="true">
+      {#each flagsShown as code, i}
+        <div class={`flag-ball flag-ball-${i}`}>
+          {#key code}
+            <img
+              src={`https://flagcdn.com/w160/${code}.png`}
+              alt=""
+              width="160"
+              height="107"
+              decoding="async"
+              referrerpolicy="no-referrer"
+              transition:fade={{ duration: 600 }}
+            />
+          {/key}
+        </div>
+      {/each}
+    </div>
     <span class="eyebrow">{content.hero.eyebrow}</span>
     <h1>Study Abroad</h1>
     <p class="places">
@@ -164,13 +185,9 @@
     </p>
     <p class="tagline">{content.hero.tagline}</p>
     <nav class="options" aria-label="Education options">
-      {#each options as option}{@const Icon = option.icon}<a
-          class="option"
-          data-option={option.id}
-          href={`#${option.id}`}
-        >
+      {#each options as option}<a class="option" data-option={option.id} href={`#${option.id}`}>
           <span class="option-art">
-            {#if option.image}<img src={option.image} alt="" role="presentation" />{/if}
+            {#if option.image}<img src={option.image} alt="" width="640" height="320" decoding="async" />{/if}
           </span>
           <span class="option-label">
             <b>{option.title}</b><small>{option.tagline}</small>
@@ -204,27 +221,30 @@
           >
         </div>
       </div>
-      <div class="field-card">
-        <div class="field-mark">
-          <i><Icon /></i><span>0{i + 1}</span>
-        </div>
-        <small>POPULAR SUBJECTS</small>
-        <ul class="subjects">
-          {#each item.subjects as subject}<li>{subject}</li>{/each}
-        </ul>
-        {#if item.programs.length}<div class="listed">
-            <small>IN OUR DIRECTORY</small>
-            <ul>
-              {#each item.programs.slice(0, 3) as program}<li>
-                  <b>{program.title}</b><span
-                    >{program.institution}, {program.country}</span
-                  >
-                </li>{/each}
-            </ul>
-            <a href="#directory" onclick={() => showField(item.key)}
-              >See {item.title.toLowerCase()} institutions <ArrowRight size={15} /></a
-            >
+      <div class="field-card" class:pictured={Boolean(item.photo)}>
+        {#if item.photo}<div class="field-photo">
+            <img src={item.photo} alt="" width="1200" height="670" loading="lazy" decoding="async" />
           </div>{/if}
+        <div class="field-body">
+          <i class="field-mark"><Icon /></i>
+          <small>POPULAR SUBJECTS</small>
+          <ul class="subjects">
+            {#each item.subjects as subject}<li>{subject}</li>{/each}
+          </ul>
+          {#if item.programs.length}<div class="listed">
+              <small>IN OUR DIRECTORY</small>
+              <ul>
+                {#each item.programs.slice(0, 3) as program}<li>
+                    <b>{program.title}</b><span
+                      >{program.institution}, {program.country}</span
+                    >
+                  </li>{/each}
+              </ul>
+              <a href="#directory" onclick={() => showField(item.key)}
+                >See {item.title.toLowerCase()} institutions <ArrowRight size={15} /></a
+              >
+            </div>{/if}
+        </div>
       </div>
     </section>{/each}
 
@@ -235,13 +255,24 @@
     </header>
     <div class="reviews-body">
       <div class="reviews-panel">
-        <p>{content.reviews.description}</p>
-        <p class="invite">{content.reviews.invite}</p>
-        <a class="primary" href="/dashboard"
-          >{content.reviews.cta}<ArrowRight size={17} /></a
-        >
+        {#if content.reviews.photo}<img
+            class="reviews-photo"
+            src={content.reviews.photo}
+            alt=""
+            width="1200"
+            height="670"
+            loading="lazy"
+            decoding="async"
+          />{/if}
+        <div class="reviews-copy">
+          <p>{content.reviews.description}</p>
+          <p class="invite">{content.reviews.invite}</p>
+          <a class="primary" href="/dashboard"
+            >{content.reviews.cta}<ArrowRight size={17} /></a
+          >
+        </div>
       </div>
-      {#if reviews.length}<ReviewCards {reviews} />{/if}
+      {#if reviews.length}<Testimonials {reviews} />{/if}
     </div>
   </section>
 
@@ -394,17 +425,42 @@
 </main>
 
 <style>
+  /* The site's palette: navy for headings and dark surfaces, gold for
+     actions and accents. Small gold text uses the deeper gold, which stays
+     readable on the page's light backgrounds; the lighter gold is for fills
+     and for text on navy. */
   .edu {
-    --accent: #e61a24;
-    --accent-soft: #f1f5f9;
-    --accent-deep: #0f0a59;
-    background: #f8f9fa;
-    color: #475569;
+    --ink: #17304f;
+    --ink-deep: #102640;
+    --ink-soft: #e9eef4;
+    --ink-panel: linear-gradient(145deg, #1d3a60, #102640);
+    --accent: #c79836;
+    --accent-hover: #ddb85d;
+    --accent-text: #8a6a2b;
+    --accent-deep: #a87618;
+    --accent-soft: #fbf5e8;
+    --on-ink: #c9d5e2;
+    --on-ink-gold: #efc45e;
+    --text: #33465a;
+    --muted: #607083;
+    --line: #e2e6e8;
+    background: #fafaf7;
+    color: var(--text);
     padding: 0.75rem 1rem 5rem;
     overflow: clip;
   }
+  .edu :global(::selection) {
+    background: var(--ink);
+    color: #fff;
+  }
+  .edu :is(a, button, input, select):focus-visible {
+    outline: 3px solid rgba(199, 152, 54, 0.55);
+    outline-offset: 3px;
+  }
+  .edu :is(.closing, .reviews-panel) a:focus-visible {
+    outline-color: #ffffffc7;
+  }
   .hero,
-  .lede,
   .field,
   .reviews,
   .section,
@@ -435,95 +491,108 @@
     font-size: 0.72rem;
     letter-spacing: 0.14em;
     font-weight: 800;
-    color: #e61a24;
+    color: var(--accent-text);
   }
 
-  /* Hero: a centred title, then the four options straight below it. */
+  /* Hero: a centred title with the destination below it, then the four
+     options. On a phone the options are two by two and fit the first screen. */
   .hero {
     position: relative;
     isolation: isolate;
-    border-radius: 1.25rem;
-    background: #fdfdfd;
-    background-image: radial-gradient(#d8e1e9 2px, transparent 2px);
-    background-size: 32px 32px;
-    background-position: center;
-    color: #0e1133;
-    text-align: center;
-    padding: 3rem 1rem 4rem;
-    min-height: 90vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    box-shadow: inset 0 0 100px 80px #fdfdfd;
+    border-radius: 1.25rem;
+    background: #fdfdfb;
+    background-image: radial-gradient(#d8dfe6 2px, transparent 2px);
+    background-size: 32px 32px;
+    background-position: center;
+    box-shadow: inset 0 0 100px 80px #fdfdfb;
+    color: var(--ink);
+    text-align: center;
+    padding: 1.25rem 0.75rem 1.75rem;
   }
-  .hero-bg {
-    display: none;
+  .hero > :not(.flags) {
+    position: relative;
+    z-index: 1;
   }
-  .hero::after {
-    display: none;
-  }
-  @keyframes float-1 {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(15px, -20px); }
-  }
-  @keyframes float-2 {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(-20px, 15px); }
+  /* The flags drift behind the title, never over the text or the options. */
+  .flags {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
   }
   .flag-ball {
+    --drift: 5px;
     position: absolute;
-    width: clamp(2.5rem, 6vw, 4rem);
-    height: clamp(2.5rem, 6vw, 4rem);
-    border-radius: 50%;
+    width: 2.2rem;
+    height: 2.2rem;
     overflow: hidden;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
-    z-index: 10;
-    border: 3px solid #fff;
-    pointer-events: none;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: var(--ink-soft);
+    box-shadow: 0 6px 14px #17304f24;
   }
   .flag-ball img {
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-  .flag-ball-0 { top: 12%; left: 18%; animation: float-1 8s ease-in-out infinite; }
-  .flag-ball-1 { top: 8%; right: 15%; animation: float-2 9s ease-in-out infinite; }
-  .flag-ball-2 { top: 28%; left: 12%; animation: float-2 7s ease-in-out infinite; }
-  .flag-ball-3 { top: 32%; right: 12%; animation: float-1 8.5s ease-in-out infinite; }
-  
+  .flag-ball-0 {
+    top: 1.3rem;
+    left: 5%;
+    animation: float-a 8s ease-in-out infinite;
+  }
+  .flag-ball-1 {
+    top: 0.9rem;
+    right: 6%;
+    animation: float-b 9s ease-in-out infinite;
+  }
+  .flag-ball-2 {
+    top: 5.5rem;
+    left: 8%;
+    animation: float-b 7s ease-in-out infinite;
+  }
+  .flag-ball-3 {
+    top: 5.9rem;
+    right: 7%;
+    animation: float-a 8.5s ease-in-out infinite;
+  }
+  @keyframes float-a {
+    50% {
+      transform: translate(var(--drift), calc(var(--drift) * -1.3));
+    }
+  }
+  @keyframes float-b {
+    50% {
+      transform: translate(calc(var(--drift) * -1.3), var(--drift));
+    }
+  }
   .hero .eyebrow {
-    color: #415367;
+    color: var(--accent-text);
   }
   .hero h1 {
     font-size: clamp(2.2rem, 8vw, 4.8rem);
     line-height: 1.05;
     letter-spacing: -0.04em;
-    margin: 0.8rem 0 0.5rem;
+    margin: 0.45rem 0 0.15rem;
     text-wrap: balance;
-    color: #0e1133;
+    color: var(--ink);
     font-weight: 800;
   }
-  .tagline {
-    margin: 1.5rem 0 0;
-    font-size: clamp(1rem, 3.7vw, 1.4rem);
-    font-weight: 600;
-    color: #5d6e80;
-  }
   .places {
-    margin: 0.2rem 0 0;
+    margin: 0;
     font-size: clamp(2rem, 8vw, 4.8rem);
+    line-height: 1.15;
     font-weight: 900;
-    color: #e61a24;
-    position: relative;
-    z-index: 2;
+    letter-spacing: -0.02em;
+    color: var(--accent-deep);
   }
   .places b {
     display: inline-block;
-    color: #e61a24;
     font-weight: 900;
     animation: place-in 420ms var(--ease-out);
   }
@@ -533,46 +602,44 @@
       transform: translateY(0.45em);
     }
   }
-
-  /* The four options. On a phone they are two by two and sit in the first
-     screen; their height follows the screen's so a short screen still shows
-     all four. */
+  .tagline {
+    margin: 0.55rem 0 0;
+    font-size: clamp(1rem, 3.7vw, 1.4rem);
+    font-weight: 600;
+    color: var(--muted);
+  }
   .options {
-    position: relative;
-    z-index: 2;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
     width: 100%;
     max-width: 76rem;
-    margin: 3rem auto 0;
-    padding-inline: 1rem;
+    margin: 1.1rem auto 0;
   }
   .option {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border: 1px solid #e2e8f0;
-    border-bottom: 5px solid #0f0a59;
-    border-radius: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 1.1rem;
     background: #fff;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
+    box-shadow:
+      0 6px 16px #17304f0f,
+      0 2px 4px #17304f0a;
     color: inherit;
     text-decoration: none;
-    transition: all 250ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition:
+      transform 250ms var(--ease-out),
+      box-shadow 250ms ease;
   }
-  .option:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 14px 28px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.06);
-    border-bottom-color: #e61a24;
-  }
+  /* The pictures are framed two to one around their object, so the whole
+     object shows at every size. */
   .option-art {
-    display: grid;
-    place-items: center;
-    height: clamp(5rem, 15svh, 8rem);
-    background: var(--tint, var(--accent-soft));
     position: relative;
-    border-bottom: 3px solid #e61a24;
+    aspect-ratio: 2 / 1;
+    overflow: hidden;
+    border-bottom: 3px solid var(--accent);
+    background: var(--ink-soft);
   }
   .option-art img {
     position: absolute;
@@ -580,68 +647,46 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: 0;
-    opacity: 1;
-    transition: transform 500ms ease;
-  }
-  .option:hover .option-art img {
-    transform: scale(1.05);
-  }
-  .option[data-option="engineering"] {
-    --tint: #eaf1f8;
-  }
-  .option[data-option="general"] {
-    --tint: #fbf5e8;
-  }
-  .option[data-option="reviews"] {
-    --tint: #edf7f6;
+    transition: transform 500ms var(--ease-out);
   }
   .option-label {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 0.25rem;
-    padding: 1.2rem 1rem;
-    background: #0f0a59;
+    gap: 0.15rem;
+    padding: 0.6rem 0.45rem 0.65rem;
+    background: var(--ink);
     color: #fff;
     text-align: center;
   }
   .option-label b {
-    font-size: 1.1rem;
+    font-size: 0.98rem;
     line-height: 1.2;
     letter-spacing: -0.01em;
   }
   .option-label small {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     line-height: 1.35;
-    color: #cbd5e1;
+    color: var(--on-ink);
   }
   .lede {
     width: 100%;
-    max-width: 46rem;
-    text-align: center;
+    max-width: 40rem;
     margin: 0 auto;
-    padding: 2.5rem 0.25rem 0.5rem;
+    padding: 1.5rem 0.25rem 0;
   }
   .lede p {
     margin: 0;
     line-height: 1.7;
-    color: #5d6e80;
+    color: var(--muted);
   }
   .lede > div,
   .closing > div:last-child {
     display: flex;
     flex-direction: column;
     gap: 0.65rem;
-    margin-top: 1.5rem;
-  }
-  @media (min-width: 48rem) {
-    .lede > div,
-    .closing > div:last-child {
-      flex-direction: row;
-      justify-content: center;
-    }
+    margin-top: 1.3rem;
   }
   .primary,
   .ghost,
@@ -663,13 +708,13 @@
       box-shadow 180ms ease;
   }
   .primary {
-    background: #e61a24;
-    color: #fff;
-    box-shadow: 0 0.6rem 1.4rem #e61a2440;
+    background: var(--accent);
+    color: var(--ink);
+    box-shadow: 0 0.6rem 1.4rem rgba(167, 117, 23, 0.22);
   }
   .ghost {
-    border: 1px solid #cfd8df;
-    color: #17304f;
+    border: 1px solid #d7dce3;
+    color: var(--ink);
     background: #fff;
   }
   .outline {
@@ -679,7 +724,7 @@
   .pill {
     border-radius: 99rem;
     padding-inline: 1.4rem;
-    background: #102947;
+    background: var(--ink);
     color: #fff;
   }
 
@@ -696,10 +741,15 @@
     font-size: clamp(1.8rem, 6.4vw, 3.2rem);
     line-height: 1.15;
     letter-spacing: -0.02em;
-    color: #0f0a59;
+    color: var(--ink);
     margin: 0.5rem 0 0;
     text-wrap: balance;
     font-weight: 800;
+  }
+  .field-copy h2,
+  .feature-copy h2,
+  .closing h2 {
+    font-size: clamp(1.7rem, 5.6vw, 2.75rem);
   }
   .heading h2::after {
     content: "";
@@ -708,74 +758,123 @@
     height: 4px;
     margin: 1.2rem auto 0;
     border-radius: 4px;
-    background: #e61a24;
+    background: var(--accent);
   }
   .heading p {
-    margin: 1.2rem 0 0;
+    max-width: 40rem;
+    margin: 1.2rem auto 0;
     line-height: 1.7;
-    color: #4a5568;
   }
   .section {
     padding-block: 4rem;
   }
 
-  /* A field of study: a navy card of subjects beside the explanation. */
+  /* A field of study: the explanation beside a card that pairs a photo with
+     the field's subjects and its programs in the directory. */
   .field {
     display: grid;
-    gap: 1.4rem;
+    gap: 1.6rem;
     align-items: center;
-    padding-block: 2.2rem;
+    padding-block: 2.4rem;
   }
   .field:first-of-type {
-    padding-top: 3rem;
+    padding-top: 3.2rem;
   }
-  .field-card {
-    position: relative;
-    overflow: hidden;
-    border-radius: 1.25rem;
-    background: #fff;
-    color: #0e1133;
-    padding: 1.8rem;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-    border: 1px solid #e2e8f0;
+  .field-copy p {
+    max-width: 38rem;
+    margin: 0.9rem 0 0;
+    line-height: 1.75;
   }
-  .field-card::after {
-    display: none;
+  .points {
+    display: grid;
+    gap: 0.65rem;
+    margin: 1.2rem 0 0;
+    padding: 0;
+    list-style: none;
   }
-  .field-mark {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.3rem;
+  .points li {
+    display: grid;
+    grid-template-columns: 1.5rem 1fr;
+    gap: 0.6rem;
+    align-items: start;
+    line-height: 1.5;
+    color: #26384b;
+    font-weight: 600;
+    font-size: 0.93rem;
   }
-  .field-mark i {
-    width: 3.6rem;
-    height: 3.6rem;
+  .points i {
+    width: 1.5rem;
+    height: 1.5rem;
     display: grid;
     place-items: center;
     border-radius: 50%;
-    background: #fdfdfd;
-    color: #e61a24;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    background: var(--ink-soft);
+    color: var(--ink);
   }
-  .field-mark i :global(svg) {
-    width: 48%;
-    height: 48%;
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 1.2rem;
+    margin-top: 1.5rem;
   }
-  .field-mark span {
-    font-size: 2.6rem;
+  .text-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--accent-text);
+    font-size: 0.85rem;
     font-weight: 800;
-    letter-spacing: -0.04em;
-    line-height: 1;
-    color: #f1f5f9;
+    text-underline-offset: 0.25em;
+  }
+  .field-card {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 1.25rem;
+    background: #fff;
+    color: var(--ink);
+    box-shadow: 0 0.8rem 2rem #17304f14;
+  }
+  .field-photo {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--accent-soft);
+  }
+  .field-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .field-body {
+    position: relative;
+    padding: 1.4rem;
+  }
+  /* The field's sign sits across the photo's lower edge. */
+  .field-mark {
+    width: 3.4rem;
+    height: 3.4rem;
+    display: grid;
+    place-items: center;
+    margin-bottom: 1rem;
+    border: 4px solid #fff;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--on-ink-gold);
+    box-shadow: 0 0.4rem 1rem #17304f40;
+  }
+  .pictured .field-mark {
+    margin-top: -3.2rem;
+  }
+  .field-mark :global(svg) {
+    width: 46%;
+    height: 46%;
   }
   .field-card small {
     display: block;
     font-size: 0.68rem;
     letter-spacing: 0.13em;
     font-weight: 800;
-    color: #e61a24;
+    color: var(--accent-text);
   }
   .subjects {
     display: flex;
@@ -787,17 +886,17 @@
   }
   .subjects li {
     padding: 0.45rem 0.75rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--line);
     border-radius: 99rem;
-    background: #f8f9fa;
+    background: #f6f7f6;
     font-size: 0.8rem;
     font-weight: 600;
-    color: #334155;
+    color: var(--text);
   }
   .listed {
     margin-top: 1.3rem;
     padding-top: 1.2rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--line);
   }
   .listed ul {
     display: grid;
@@ -816,68 +915,21 @@
   .listed li span {
     margin-top: 0.1rem;
     font-size: 0.76rem;
-    color: #64748b;
+    color: var(--muted);
   }
   .listed a {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
     min-height: 2.75rem;
-    color: #e61a24;
+    color: var(--accent-text);
     font-size: 0.8rem;
     font-weight: 800;
     text-decoration: none;
   }
-  .field-copy p {
-    margin: 0.9rem 0 0;
-    line-height: 1.75;
-    color: #4a5568;
-  }
-  .points {
-    display: grid;
-    gap: 0.65rem;
-    margin: 1.2rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
-  .points li {
-    display: grid;
-    grid-template-columns: 1.5rem 1fr;
-    gap: 0.6rem;
-    align-items: start;
-    line-height: 1.5;
-    color: #33465a;
-    font-weight: 600;
-    font-size: 0.93rem;
-  }
-  .points i {
-    width: 1.5rem;
-    height: 1.5rem;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background: #fbf1d9;
-    color: #8f6410;
-  }
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem 1.2rem;
-    margin-top: 1.5rem;
-  }
-  .text-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.75rem;
-    color: var(--accent);
-    font-size: 0.85rem;
-    font-weight: 800;
-    text-underline-offset: 0.25em;
-  }
 
-  /* Student reviews: a navy panel, with the reviews beside it once there
-     are some. */
+  /* Student reviews: a navy panel under a photo of students, with the
+     reviews beside it as a slideshow once there are some. */
   .reviews {
     padding-block: 3.2rem 1rem;
   }
@@ -886,28 +938,38 @@
     gap: 1rem;
   }
   .reviews-panel {
+    display: grid;
+    overflow: hidden;
     border-radius: 1.25rem;
-    padding: 1.5rem;
-    background: linear-gradient(145deg, #0b2442, #1b3d68);
+    background: var(--ink-panel);
     color: #fff;
+    box-shadow: 0 1rem 2.4rem #17304f30;
   }
-  .reviews-panel p {
+  .reviews-photo {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+  .reviews-copy {
+    padding: 1.5rem;
+  }
+  .reviews-copy p {
     margin: 0;
     line-height: 1.75;
-    color: #e3eaf1;
+    color: #e6edf5;
   }
-  .reviews-panel .invite {
+  .reviews-copy .invite {
     margin-top: 0.9rem;
-    color: #b9c7d5;
+    color: var(--on-ink);
     font-size: 0.9rem;
   }
-  .reviews-panel a {
+  .reviews-copy a {
     margin-top: 1.3rem;
   }
   .reviews.empty .reviews-panel {
-    max-width: 44rem;
+    max-width: 34rem;
     margin-inline: auto;
-    text-align: center;
   }
 
   /* Destinations: photo cards with the country on a strip along the bottom. */
@@ -921,10 +983,10 @@
     overflow: hidden;
     aspect-ratio: 3 / 2.3;
     border-radius: 0.8rem;
-    background: #102947;
+    background: var(--ink);
     color: #fff;
     text-decoration: none;
-    box-shadow: 0 0.6rem 1.5rem #10264014;
+    box-shadow: 0 0.6rem 1.5rem #17304f14;
   }
   .place-card img {
     width: 100%;
@@ -936,9 +998,8 @@
     position: absolute;
     inset: auto 0 0;
     padding: 0.6rem 0.5rem 0.65rem;
-    background: #0b2442d1;
+    background: #17304fd9;
     text-align: center;
-    backdrop-filter: blur(0.25rem);
   }
   .place-card b,
   .place-card small {
@@ -950,7 +1011,7 @@
   .place-card small {
     margin-top: 0.1rem;
     font-size: 0.68rem;
-    color: #c4d0dc;
+    color: var(--on-ink);
   }
 
   .service-grid {
@@ -958,11 +1019,10 @@
     gap: 0.8rem;
   }
   .service-grid > a {
-    border: 1px solid #e1e7ea;
+    border: 1px solid var(--line);
     background: #fff;
     border-radius: 1rem;
     padding: 1.35rem;
-    min-height: 14rem;
     color: inherit;
     text-decoration: none;
     display: flex;
@@ -978,43 +1038,45 @@
     border-radius: 50%;
     display: grid;
     place-items: center;
+    border: 1px solid #e9d9b0;
     background: var(--accent-soft);
-    color: var(--accent);
+    color: var(--accent-deep);
   }
   .service-grid h3 {
     font-size: 1rem;
-    color: #17304f;
+    color: var(--ink);
     margin: 1rem 0 0.45rem;
     text-transform: uppercase;
   }
   .service-grid p {
+    margin: 0 0 1.1rem;
     font-size: 0.88rem;
     line-height: 1.6;
-    color: #687989;
+    color: var(--muted);
   }
   .service-grid strong {
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    color: var(--accent);
+    color: var(--accent-text);
     font-size: 0.78rem;
     margin-top: auto;
   }
   .stats {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    background: #0f0a59;
+    background: var(--ink);
     color: #fff;
     border-radius: 1.25rem;
     padding: 1.5rem;
-    box-shadow: 0 10px 30px rgba(15,10,89,0.1);
+    box-shadow: 0 10px 30px #17304f1a;
   }
   .stats article {
     text-align: center;
     padding: 1rem 0.4rem;
   }
   .stats :global(svg) {
-    color: #e61a24;
+    color: var(--on-ink-gold);
   }
   .stats b,
   .stats span {
@@ -1022,11 +1084,12 @@
   }
   .stats b {
     font-size: 1.45rem;
+    font-variant-numeric: tabular-nums;
     margin: 0.35rem 0 0.12rem;
   }
   .stats span {
     font-size: 0.72rem;
-    color: #c4d0dc;
+    color: var(--on-ink);
   }
   .feature {
     display: grid;
@@ -1035,27 +1098,28 @@
   }
   .feature-copy p,
   .closing p {
+    max-width: 38rem;
     margin: 0.8rem 0 0;
     line-height: 1.7;
-    color: #6a7989;
   }
   .feature-points {
-    border-top: 1px solid #dfe5e8;
+    border-top: 1px solid var(--line);
   }
   .feature-points article {
     display: grid;
     grid-template-columns: 2.5rem 1fr;
     gap: 1rem;
     padding: 1.3rem 0;
-    border-bottom: 1px solid #dfe5e8;
+    border-bottom: 1px solid var(--line);
   }
   .feature-points i {
-    color: var(--accent);
+    color: var(--accent-text);
     font-size: 0.72rem;
     font-style: normal;
+    font-variant-numeric: tabular-nums;
   }
   .feature-points h3 {
-    color: #0f0a59;
+    color: var(--ink);
     margin: 0 0 0.35rem;
     font-weight: 800;
   }
@@ -1079,10 +1143,10 @@
   .field-filter button {
     min-height: 2.75rem;
     padding: 0.5rem 1.05rem;
-    border: 1px solid #cfc4dc;
+    border: 1px solid #d7dce3;
     border-radius: 99rem;
     background: #fff;
-    color: #44305f;
+    color: var(--ink);
     font: inherit;
     font-size: 0.8rem;
     font-weight: 750;
@@ -1093,8 +1157,8 @@
       transform 150ms var(--ease-out);
   }
   .field-filter button.on {
-    border-color: #0f0a59;
-    background: #0f0a59;
+    border-color: var(--ink);
+    background: var(--ink);
     color: #fff;
   }
   .filters {
@@ -1107,9 +1171,10 @@
     align-items: center;
     gap: 0.55rem;
     background: #fff;
-    border: 1px solid #d9e0e4;
+    border: 1px solid #d7dce3;
     border-radius: 0.7rem;
     padding: 0 0.8rem;
+    color: var(--muted);
   }
   .filters input,
   .filters select {
@@ -1119,14 +1184,16 @@
     outline: 0;
     width: 100%;
     font-size: 1rem;
+    color: var(--ink);
+    caret-color: var(--accent);
   }
   .filters label:focus-within,
   .filters select:focus-visible {
-    border-color: #e61a24;
-    box-shadow: 0 0 0 3px #e61a2424;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(199, 152, 54, 0.2);
   }
   .filters > select {
-    border: 1px solid #d9e0e4;
+    border: 1px solid #d7dce3;
     background: #fff;
     border-radius: 0.7rem;
     padding: 0 0.8rem;
@@ -1137,14 +1204,15 @@
   }
   .record {
     background: #fff;
-    border: 1px solid #dfe5e8;
+    border: 1px solid var(--line);
     border-radius: 1rem;
     overflow: hidden;
     text-decoration: none;
     color: inherit;
     transition:
       transform 220ms var(--ease-out),
-      box-shadow 220ms ease;
+      box-shadow 220ms ease,
+      border-color 180ms ease;
   }
   .record-image {
     height: 13rem;
@@ -1164,7 +1232,7 @@
     display: flex;
     align-items: center;
     gap: 0.3rem;
-    background: #0b2442df;
+    background: #17304fe0;
     color: #fff;
     border-radius: 0.45rem;
     padding: 0.4rem 0.55rem;
@@ -1177,17 +1245,17 @@
     font-size: 0.67rem;
     letter-spacing: 0.1em;
     font-weight: 800;
-    color: var(--accent);
+    color: var(--accent-text);
   }
   .record-copy h3 {
     font-size: 1.2rem;
-    color: #17304f;
+    color: var(--ink);
     margin: 0.35rem 0;
   }
   .record-copy p {
     font-size: 0.85rem;
     line-height: 1.6;
-    color: #687989;
+    color: var(--muted);
   }
   .tags {
     display: flex;
@@ -1198,21 +1266,20 @@
     font-size: 0.68rem;
     padding: 0.35rem 0.5rem;
     border-radius: 0.4rem;
-    background: var(--accent-soft);
-    color: var(--accent-deep);
+    background: var(--ink-soft);
+    color: var(--ink);
   }
   .record-copy strong {
     display: flex;
     gap: 0.4rem;
     align-items: center;
-    color: var(--accent);
+    color: var(--accent-text);
     font-size: 0.76rem;
     margin-top: 1rem;
   }
   .none {
     text-align: center;
     padding: 2rem;
-    color: #687989;
   }
   .none p {
     max-width: 34rem;
@@ -1226,17 +1293,19 @@
   .steps article {
     border-top: 3px solid var(--accent);
     background: #fff;
-    border-radius: 0.75rem;
+    border-radius: 0 0 0.75rem 0.75rem;
     padding: 1.6rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    box-shadow: 0 4px 12px #17304f0a;
   }
   .steps i {
     font-size: 0.72rem;
-    color: var(--accent);
+    font-weight: 800;
+    color: var(--accent-text);
     font-style: normal;
+    font-variant-numeric: tabular-nums;
   }
   .steps h3 {
-    color: #0f0a59;
+    color: var(--ink);
     margin: 0.8rem 0 0.4rem;
     font-weight: 800;
   }
@@ -1244,21 +1313,20 @@
     margin: 0;
     font-size: 0.86rem;
     line-height: 1.6;
-    color: #475569;
   }
   .closing {
     margin-top: 2rem;
-    background: #0f0a59;
+    background: var(--ink-panel);
     color: #fff;
     border-radius: 1.25rem;
-    padding: 2.5rem;
-    box-shadow: 0 10px 30px rgba(15,10,89,0.15);
+    padding: 1.75rem 1.5rem;
+    box-shadow: 0 10px 30px #17304f26;
   }
   .closing h2 {
     color: #fff;
   }
   .closing p {
-    color: #cbd5e1;
+    color: var(--on-ink);
   }
   .primary:active,
   .ghost:active,
@@ -1274,32 +1342,39 @@
   @media (hover: hover) and (pointer: fine) {
     .option:hover {
       transform: translateY(-0.35rem);
-      box-shadow: 0 1.4rem 2.6rem #0b244233;
+      box-shadow:
+        0 1.2rem 2.4rem #17304f26,
+        0 4px 8px #17304f0f;
     }
-    .option:hover .option-art i {
-      transform: scale(1.08);
+    .option:hover .option-art img {
+      transform: scale(1.05);
     }
-    .primary:hover,
+    .primary:hover {
+      transform: translateY(-2px);
+      background: var(--accent-hover);
+      box-shadow: 0 0.9rem 1.7rem rgba(167, 117, 23, 0.3);
+    }
     .pill:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0.9rem 1.7rem #050e1c33;
+      background: #203d5d;
+      box-shadow: 0 0.9rem 1.7rem #17304f33;
     }
     .ghost:hover {
-      background: #f3f6f8;
+      background: var(--accent-soft);
       transform: translateY(-2px);
     }
     .outline:hover {
-      background: #ffffff10;
+      background: #ffffff14;
       transform: translateY(-2px);
     }
     .field-filter button:not(.on):hover {
-      background: #f3eff7;
+      background: var(--ink-soft);
     }
     .service-grid > a:hover,
     .record:hover {
       transform: translateY(-0.4rem);
-      box-shadow: 0 1.2rem 2.5rem #10264015;
-      border-color: #cfbadb;
+      box-shadow: 0 1.2rem 2.5rem #17304f1a;
+      border-color: rgba(199, 152, 54, 0.38);
     }
     .record:hover img,
     .place-card:hover img {
@@ -1334,42 +1409,82 @@
       padding-inline: 2rem;
     }
     .hero {
-      padding: 4rem 2rem 5rem;
+      justify-content: center;
+      min-height: 86svh;
+      padding: 3rem 2rem 3.25rem;
+    }
+    .flag-ball {
+      --drift: 15px;
+      width: clamp(2.8rem, 5vw, 4rem);
+      height: clamp(2.8rem, 5vw, 4rem);
+      border-width: 3px;
+    }
+    .flag-ball-0 {
+      top: 12%;
+      left: 18%;
+    }
+    .flag-ball-1 {
+      top: 8%;
+      right: 15%;
+    }
+    .flag-ball-2 {
+      top: 28%;
+      left: 12%;
+    }
+    .flag-ball-3 {
+      top: 32%;
+      right: 12%;
+    }
+    .hero h1 {
+      margin: 0.8rem 0 0.2rem;
+    }
+    .tagline {
+      margin-top: 1rem;
     }
     .options {
       gap: 1rem;
-      margin-top: 3.5rem;
+      margin-top: 2.5rem;
       padding-inline: 1.5rem;
     }
-    .option-art {
-      height: clamp(5.5rem, 13svh, 7.5rem);
-    }
-    .option-art i {
-      width: 4rem;
-      height: 4rem;
+    .option {
+      border-radius: 1.25rem;
     }
     .option-label {
-      padding: 0.85rem 0.7rem 0.95rem;
+      gap: 0.25rem;
+      padding: 0.9rem 0.7rem 1rem;
     }
     .option-label b {
-      font-size: 1.08rem;
+      font-size: 1.1rem;
     }
     .option-label small {
-      font-size: 0.74rem;
+      font-size: 0.78rem;
     }
     .lede {
-      padding-top: 2.2rem;
+      padding-top: 2rem;
     }
     .lede > div,
     .closing > div:last-child {
       flex-direction: row;
       justify-content: center;
     }
-    .field-card {
+    .field-body {
+      padding: 1.8rem;
+    }
+    .pictured .field-mark {
+      margin-top: -3.6rem;
+    }
+    .reviews-copy {
       padding: 2rem;
     }
-    .reviews-panel {
-      padding: 2rem;
+    /* With no reviews yet the panel stands alone: photo beside the words. */
+    .reviews.empty .reviews-panel {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+      max-width: 62rem;
+    }
+    .reviews.empty .reviews-photo {
+      aspect-ratio: auto;
+      min-height: 19rem;
     }
     .place-grid {
       grid-template-columns: repeat(auto-fit, minmax(14rem, 24rem));
@@ -1408,7 +1523,7 @@
       grid-template-columns: repeat(2, 1fr);
     }
     .closing {
-      padding: 2rem;
+      padding: 2.25rem 2rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1442,6 +1557,10 @@
       grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr);
       align-items: start;
     }
+    /* Beside the reviews the panel stays as short as they are. */
+    .reviews:not(.empty) .reviews-photo {
+      display: none;
+    }
   }
   @media (min-width: 64rem) {
     .edu {
@@ -1465,27 +1584,33 @@
      title and the options shrink to share what is left. */
   @media (min-width: 40rem) and (max-height: 30rem) {
     .hero {
-      padding: 0.7rem 1rem 2.9rem;
+      min-height: 0;
+      padding: 0.6rem 1rem 1.2rem;
     }
     .hero h1 {
-      font-size: 1.7rem;
-      margin: 0.2rem 0 0.25rem;
+      font-size: 1.6rem;
+      margin: 0.15rem 0 0;
+    }
+    .places {
+      font-size: 1.5rem;
     }
     .tagline,
     .option-label small {
       display: none;
     }
+    .flag-ball {
+      --drift: 5px;
+      width: 2rem;
+      height: 2rem;
+      border-width: 2px;
+    }
     .options {
       gap: 0.65rem;
-      margin-top: -2.3rem;
+      margin-top: 0.6rem;
     }
     .option-art {
+      aspect-ratio: auto;
       height: 3rem;
-    }
-    .option-art i {
-      width: 2.1rem;
-      height: 2.1rem;
-      box-shadow: 0 0 0 0.2rem #ffffffb8;
     }
     .option-label {
       padding: 0.4rem 0.4rem 0.45rem;
@@ -1495,11 +1620,12 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .places b {
+    .places b,
+    .flag-ball {
       animation: none;
     }
     .option,
-    .option-art i,
+    .option-art img,
     .record,
     .record-image img,
     .place-card img,

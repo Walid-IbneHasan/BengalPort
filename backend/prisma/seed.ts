@@ -7,6 +7,7 @@ import {
   defaultHealthcareContent,
 } from "../src/lib/division-content.js";
 import { seedPlan } from "./seed-config.js";
+import { seedEducationReviews } from "./seed-reviews.js";
 
 const prisma = new PrismaClient();
 const at = (daysAgo: number, hour: number, minute = 0) => {
@@ -89,7 +90,10 @@ async function main() {
   );
   const category = Object.fromEntries(categories.map((c) => [c.name, c.id]));
 
-  if (plan.demoData) await seedDemoData(admin.id, category);
+  if (plan.demoData) {
+    await seedDemoData(admin.id, category);
+    await seedEducationReviews(prisma);
+  }
 }
 
 // Sample partners, records and ledger entries for local development.

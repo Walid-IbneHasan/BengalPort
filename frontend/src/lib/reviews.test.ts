@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { reviewProblem, reviewState, serviceName, stars } from "./reviews.js";
+import { excerpt, initials, reviewProblem, reviewState, serviceName, stars } from "./reviews.js";
 
 const review = { rating: 5, name: "Rahim U.", body: "Clear guidance from the first call." };
 
@@ -60,5 +60,34 @@ describe("naming a service", () => {
 
   test("an unknown service is shown as written", () => {
     assert.equal(serviceName("LOGISTICS"), "Logistics");
+  });
+});
+
+describe("the testimonial strip", () => {
+  test("a short review is shown whole", () => {
+    assert.equal(excerpt("Clear guidance from the first call."), "Clear guidance from the first call.");
+  });
+
+  test("a long review stops at the last full sentence that fits", () => {
+    const long = "First sentence here. Second sentence follows it! Third one asks a question? " + "x".repeat(300);
+    assert.equal(excerpt(long, 80), "First sentence here. Second sentence follows it! Third one asks a question?");
+  });
+
+  test("a long review with no sentence break stops at a word", () => {
+    const words = "word ".repeat(100).trim();
+    const shown = excerpt(words, 60);
+    assert.ok(shown.endsWith("…"));
+    assert.ok(shown.length <= 61);
+    assert.ok(!shown.includes("wor…"));
+  });
+
+  test("initials come from the first and last name", () => {
+    assert.equal(initials("Tanvir Ahmed"), "TA");
+    assert.equal(initials("Nusrat Jahan Chowdhury"), "NC");
+  });
+
+  test("a single name gives one initial, and a blank name none", () => {
+    assert.equal(initials("Rahim"), "R");
+    assert.equal(initials("  "), "");
   });
 });

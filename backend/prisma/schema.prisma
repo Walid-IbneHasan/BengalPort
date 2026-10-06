@@ -168,6 +168,9 @@ model Review {
   detail String?
   rating Int
   body String
+  // The picture shown with the review: the member's account photo when they
+  // chose to show it, or one the team uploaded.
+  photoUrl String?
   status ReviewStatus @default(PENDING)
   applicationId String? @unique
   application Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)

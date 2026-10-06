@@ -8,20 +8,23 @@
   // Member dashboard: the review of one application that has been paid for.
   // A member writes it, may change it while it waits for approval, and sees
   // whether it has been published.
+  // `avatarUrl` is the account's photo, which the member may choose to show.
   let {
     applicationId,
     review,
     name: accountName = "",
+    avatarUrl = null,
     onsaved,
   }: {
     applicationId: string;
     review: OwnReview | null;
     name?: string;
+    avatarUrl?: string | null;
     onsaved: (review: OwnReview) => void;
   } = $props();
 
   let writing = $state(false), sending = $state(false), error = $state("");
-  let rating = $state(0), name = $state(""), detail = $state(""), body = $state("");
+  let rating = $state(0), name = $state(""), detail = $state(""), body = $state(""), showPhoto = $state(false);
   let shown = $derived(review ? reviewState(review.status) : null);
 
   // A message about what is missing goes away once the member changes something.
@@ -35,6 +38,7 @@
     name = review?.name ?? accountName;
     detail = review?.detail ?? "";
     body = review?.body ?? "";
+    showPhoto = Boolean(review?.photoUrl);
     error = "";
     writing = true;
   }
@@ -46,7 +50,7 @@
     try {
       const saved = await api<OwnReview>(`/reviews/application/${applicationId}`, {
         method: "PUT",
-        body: JSON.stringify({ rating, name, detail, body }),
+        body: JSON.stringify({ rating, name, detail, body, showPhoto: Boolean(avatarUrl) && showPhoto }),
       });
       toasts.show(review ? "Review updated" : "Review sent", { detail: "It will appear on the website once our team has approved it." });
       onsaved(saved);
@@ -72,6 +76,13 @@
         <textarea bind:value={body} required minlength="10" maxlength={REVIEW_LENGTH} rows="5" placeholder="Tell others how it went."></textarea>
         <small>{body.length} / {REVIEW_LENGTH}</small>
       </label>
+      {#if avatarUrl}
+        <label class="photo-choice">
+          <input type="checkbox" bind:checked={showPhoto} />
+          <img src={avatarUrl} alt="" width="36" height="36" referrerpolicy="no-referrer" />
+          <span>Show my account photo with the review</span>
+        </label>
+      {/if}
       {#if error}<p class="problem" role="alert">{error}</p>{/if}
       <div class="actions">
         <button class="send" disabled={sending}>{sending ? "Sending…" : review ? "Save changes" : "Send review"}</button>
@@ -88,7 +99,7 @@
         <i class={shown.tone}>{shown.label}</i>
       </div>
       <p class="words">{review.body}</p>
-      <p class="by">{review.name}{review.detail ? ` · ${review.detail}` : ""}</p>
+      <p class="by">{#if review.photoUrl}<img class="shown-photo" src={review.photoUrl} alt="" width="28" height="28" referrerpolicy="no-referrer" />{/if}{review.name}{review.detail ? ` · ${review.detail}` : ""}</p>
       {#if shown.editable}
         <button type="button" class="plain" onclick={start}>Edit review</button>
       {:else}
@@ -135,7 +146,11 @@
   i.progress{background:#faf1da;color:#7a5a12}
   i.good{background:#e9f7ee;color:#267145}
   .words{font-size:.9rem;line-height:1.65;color:#33465a;white-space:pre-line;overflow-wrap:anywhere}
-  .by{font-size:.8rem;font-weight:700;color:#23384f}
+  .by{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:700;color:#23384f}
+  .shown-photo{width:1.75rem;height:1.75rem;border-radius:50%;object-fit:cover;border:1px solid #d6dfe2}
+  .photo-choice{display:flex;align-items:center;gap:.6rem;font-size:.86rem;font-weight:650;color:#29465f;cursor:pointer}
+  .photo-choice input{width:1.1rem;height:1.1rem;margin:0;accent-color:#c79836}
+  .photo-choice img{width:2.25rem;height:2.25rem;border-radius:50%;object-fit:cover;border:1px solid #d6dfe2}
   @media(hover:hover) and (pointer:fine){.send:hover:not(:disabled){background:#dfb757}}
   @media(max-width:40rem){.fields{grid-template-columns:1fr}}
   @media(prefers-reduced-motion:reduce){.send{transition:none}}

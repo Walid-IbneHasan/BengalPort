@@ -1,12 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Check, EyeOff, LoaderCircle, Plus, Star, Trash2, X } from "lucide-svelte";
+  import { Check, EyeOff, ImageUp, LoaderCircle, Plus, Star, Trash2, X } from "lucide-svelte";
   import { api } from "$lib/api";
-  import { REVIEW_LENGTH, reviewProblem, serviceName, stars, type ReviewStatus } from "$lib/reviews";
+  import { REVIEW_LENGTH, initials, reviewProblem, serviceName, stars, type ReviewStatus } from "$lib/reviews";
   import StarInput from "$lib/components/StarInput.svelte";
+  import CmsImageField from "$lib/components/CmsImageField.svelte";
 
   // Customer reviews: the team approves a review before the website shows
-  // it, can hide or delete one, and can add one received outside the website.
+  // it, can hide or delete one, can add one received outside the website,
+  // and can give any review the photo shown with it.
   type Row = {
     id: string;
     division: string;
@@ -14,6 +16,7 @@
     detail: string | null;
     rating: number;
     body: string;
+    photoUrl: string | null;
     status: ReviewStatus;
     createdAt: string;
     application: { reference: string } | null;
@@ -36,7 +39,30 @@
     filter = $state<Filter>("PENDING"),
     busy = $state("");
   let adding = $state(false), saving = $state(false), formError = $state("");
-  let division = $state("EDUCATION"), rating = $state(0), name = $state(""), detail = $state(""), body = $state("");
+  let division = $state("EDUCATION"), rating = $state(0), name = $state(""), detail = $state(""), body = $state(""), photoUrl = $state("");
+  // The review whose photo is being changed, and the picture chosen for it.
+  let photoRow = $state(""), photoDraft = $state("");
+  const photoHint = "A square portrait works best; it is shown in a circle.";
+
+  function editPhoto(row: Row) {
+    photoRow = photoRow === row.id ? "" : row.id;
+    photoDraft = row.photoUrl ?? "";
+  }
+
+  async function setPhoto(row: Row, url: string | null) {
+    busy = row.id;
+    error = notice = "";
+    try {
+      const saved = await api<Row>(`/admin/reviews/${row.id}`, { method: "PATCH", body: JSON.stringify({ photoUrl: url }) });
+      rows = rows.map((item) => (item.id === row.id ? saved : item));
+      photoRow = "";
+      notice = url ? `The review by ${row.name} now shows this photo.` : `The review by ${row.name} shows initials instead of a photo.`;
+    } catch (e) {
+      error = e instanceof Error ? e.message : "The photo could not be changed.";
+    } finally {
+      busy = "";
+    }
+  }
 
   const count = (key: Filter) => (key === "ALL" ? rows.length : rows.filter((row) => row.status === key).length);
   let shown = $derived(filter === "ALL" ? rows : rows.filter((row) => row.status === filter));
@@ -87,10 +113,13 @@
     if (formError) return;
     saving = true;
     try {
-      const saved = await api<Row>("/admin/reviews", { method: "POST", body: JSON.stringify({ division, rating, name, detail, body }) });
+      const saved = await api<Row>("/admin/reviews", {
+        method: "POST",
+        body: JSON.stringify({ division, rating, name, detail, body, photoUrl: photoUrl.trim() || null }),
+      });
       rows = [saved, ...rows];
       rating = 0;
-      name = detail = body = "";
+      name = detail = body = photoUrl = "";
       adding = false;
       filter = "APPROVED";
       notice = `The review by ${saved.name} was added and is on the website.`;
@@ -127,6 +156,7 @@
       </div>
       <StarInput bind:value={rating} name="new-rating" label="Rating" />
       <label><span>Review</span><textarea bind:value={body} required minlength="10" maxlength={REVIEW_LENGTH} rows="4"></textarea></label>
+      <CmsImageField label="Profile photo (optional)" value={photoUrl} recommendation={photoHint} purpose="review photo" onchange={(value) => (photoUrl = value)} />
       {#if formError}<p class="notice bad" role="alert">{formError}</p>{/if}
       <div><button class="primary" disabled={saving}>{saving ? "Adding…" : "Add review"}</button></div>
     </form>
@@ -155,15 +185,29 @@
           {#each stars(row.rating) as filled}<span class:filled><Star size={17} /></span>{/each}
         </div>
         <p class="words">{row.body}</p>
-        <p class="by"><b>{row.name}</b>{row.detail ? ` · ${row.detail}` : ""}</p>
+        <p class="by">
+          <span class="avatar">{#if row.photoUrl}<img src={row.photoUrl} alt="" width="40" height="40" referrerpolicy="no-referrer" />{:else}{initials(row.name)}{/if}</span>
+          <span><b>{row.name}</b>{row.detail ? ` · ${row.detail}` : ""}</span>
+        </p>
         <p class="from">
           {#if row.application}Application {row.application.reference}{row.user ? ` · ${row.user.name} (${row.user.email})` : ""}{:else if row.user}{row.user.name} ({row.user.email}){:else}Added by the team{/if}
         </p>
         <div class="actions">
           {#if row.status !== "APPROVED"}<button type="button" class="primary" disabled={busy === row.id} onclick={() => decide(row, "APPROVED")}><Check size={16} /> Approve</button>{/if}
           {#if row.status !== "HIDDEN"}<button type="button" disabled={busy === row.id} onclick={() => decide(row, "HIDDEN")}><EyeOff size={16} /> {row.status === "APPROVED" ? "Hide" : "Do not publish"}</button>{/if}
+          <button type="button" disabled={busy === row.id} aria-expanded={photoRow === row.id} onclick={() => editPhoto(row)}><ImageUp size={16} /> {row.photoUrl ? "Change photo" : "Add photo"}</button>
           <button type="button" class="danger" disabled={busy === row.id} onclick={() => remove(row)}><Trash2 size={16} /> Delete</button>
         </div>
+        {#if photoRow === row.id}
+          <div class="photo-editor">
+            <CmsImageField label="Profile photo" value={photoDraft} recommendation={photoHint} purpose="review photo" onchange={(value) => (photoDraft = value)} />
+            <div class="actions">
+              <button type="button" class="primary" disabled={busy === row.id || !photoDraft.trim()} onclick={() => setPhoto(row, photoDraft.trim())}><Check size={16} /> Save photo</button>
+              {#if row.photoUrl}<button type="button" disabled={busy === row.id} onclick={() => setPhoto(row, null)}><X size={16} /> Remove photo</button>{/if}
+              <button type="button" disabled={busy === row.id} onclick={() => (photoRow = "")}>Cancel</button>
+            </div>
+          </div>
+        {/if}
       </article>
     {:else}
       <div class="state">{rows.length ? "No reviews here." : "No reviews yet. They appear here as customers write them."}</div>
@@ -410,8 +454,37 @@
     overflow-wrap: anywhere;
   }
   .by {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
     font-size: 0.86rem;
     color: #23384f;
+  }
+  .avatar {
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--heading);
+    color: #efc45e;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    overflow: hidden;
+  }
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .photo-editor {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 0.4rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid #e5eaed;
   }
   .from {
     font-size: 0.78rem;
