@@ -53,6 +53,14 @@ describe("the Global Education page before anyone edits it", () => {
 });
 
 describe("editing the Global Education page", () => {
+  test("an admin can reword the shorter lede phones show", async () => {
+    await clear();
+    const content = draft();
+    content.hero.shortDescription = "Programs abroad, from shortlist to admission.";
+    assert.equal((await save(content)).statusCode, 200);
+    assert.equal((await live()).hero.shortDescription, "Programs abroad, from shortlist to admission.");
+  });
+
   test("an admin can reword the reviews section", async () => {
     await clear();
     const content = draft();

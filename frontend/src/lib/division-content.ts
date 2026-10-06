@@ -64,6 +64,8 @@ export type StudyFieldContent = {
 // and the student reviews) in place of the shortcuts row. The reviews
 // themselves are written by customers; this is the section's wording.
 export type EducationContent = Omit<DivisionContent, "shortcuts"> & {
+  // `shortDescription` is the lede phones show in place of the description.
+  hero: DivisionContent["hero"] & { shortDescription: string };
   fields: Record<"medical" | "engineering" | "general", StudyFieldContent>;
   reviews: {
     title: string;
@@ -85,7 +87,8 @@ export const defaultEducationContent: EducationContent = {
     tagline: "Choose clearly. Apply confidently.",
     description:
       "Explore trusted institutions, relevant programs and international study destinations with practical guidance from shortlist to admission.",
-      image: "/images/edu-hero.webp",
+    shortDescription: "Trusted institutions and programs abroad, with guidance from shortlist to admission.",
+    image: "/images/edu-hero.webp",
     primary: "Start education enquiry",
     secondary: "Explore programs",
   },

@@ -1,5 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
+import { defaultEducationContent } from "./division-content.js";
 import { destinations, fieldPrograms, flagCodes, institutionFields, studyField } from "./education.js";
 
 const records = [
@@ -122,5 +123,14 @@ describe("the flags shown for study destinations", () => {
 
   test("a country without a known flag is left out", () => {
     assert.deepEqual(flagCodes(["Atlantis", "Malaysia"]), ["my"]);
+  });
+});
+
+describe("the lede under the options", () => {
+  test("phones get a shorter version that keeps the promise of the full one", () => {
+    const { description, shortDescription } = defaultEducationContent.hero;
+    assert.ok(shortDescription.length <= 90, `${shortDescription.length} characters is more than two phone lines`);
+    assert.ok(shortDescription.length < description.length);
+    assert.match(shortDescription, /shortlist to admission/);
   });
 });
