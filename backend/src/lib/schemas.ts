@@ -667,6 +667,9 @@ const studyField = z.object({
 export const educationContentSchema = divisionContentSchema
   .omit({ shortcuts: true })
   .extend({
+    // Phones show `shortDescription` under the options in place of the
+    // description, which runs to three lines there.
+    hero: divisionContentSchema.shape.hero.extend({ shortDescription: paragraph }),
     fields: z.object({
       medical: studyField,
       engineering: studyField,

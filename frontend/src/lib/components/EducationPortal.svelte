@@ -195,7 +195,8 @@
         </a>{/each}
     </nav>
     <div class="lede">
-      <p>{content.hero.description}</p>
+      <p class="full">{content.hero.description}</p>
+      <p class="brief">{content.hero.shortDescription || content.hero.description}</p>
       <div>
         <a class="primary" href={applyHref("EDUCATION")}
           >{content.hero.primary}<ArrowRight size={18} /></a
@@ -495,7 +496,8 @@
   }
 
   /* Hero: a centred title with the destination below it, then the four
-     options. On a phone the options are two by two and fit the first screen. */
+     options. On a phone the options are two by two and fit the first screen,
+     and the lede below them is the shorter one. */
   .hero {
     position: relative;
     isolation: isolate;
@@ -510,7 +512,7 @@
     box-shadow: inset 0 0 100px 80px #fdfdfb;
     color: var(--ink);
     text-align: center;
-    padding: 1.25rem 0.75rem 1.75rem;
+    padding: 1.65rem 0.75rem 1.75rem;
   }
   .hero > :not(.flags) {
     position: relative;
@@ -552,12 +554,12 @@
     animation: float-b 9s ease-in-out infinite;
   }
   .flag-ball-2 {
-    top: 5.5rem;
+    top: 5.9rem;
     left: 8%;
     animation: float-b 7s ease-in-out infinite;
   }
   .flag-ball-3 {
-    top: 5.9rem;
+    top: 6.3rem;
     right: 7%;
     animation: float-a 8.5s ease-in-out infinite;
   }
@@ -603,7 +605,7 @@
     }
   }
   .tagline {
-    margin: 0.55rem 0 0;
+    margin: 0.7rem 0 0;
     font-size: clamp(1rem, 3.7vw, 1.4rem);
     font-weight: 600;
     color: var(--muted);
@@ -614,7 +616,7 @@
     gap: 0.65rem;
     width: 100%;
     max-width: 76rem;
-    margin: 1.1rem auto 0;
+    margin: 1.5rem auto 0;
   }
   .option {
     display: flex;
@@ -674,12 +676,15 @@
     width: 100%;
     max-width: 40rem;
     margin: 0 auto;
-    padding: 1.5rem 0.25rem 0;
+    padding: 1.3rem 0.25rem 0;
   }
   .lede p {
     margin: 0;
     line-height: 1.7;
     color: var(--muted);
+  }
+  .lede .full {
+    display: none;
   }
   .lede > div,
   .closing > div:last-child {
@@ -1461,6 +1466,12 @@
     }
     .lede {
       padding-top: 2rem;
+    }
+    .lede .full {
+      display: block;
+    }
+    .lede .brief {
+      display: none;
     }
     .lede > div,
     .closing > div:last-child {

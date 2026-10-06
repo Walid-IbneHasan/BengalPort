@@ -91,7 +91,8 @@ export const defaultEducationContent = {
     tagline: "Choose clearly. Apply confidently.",
     description:
       "Explore trusted institutions, relevant programs and international study destinations with practical guidance from shortlist to admission.",
-      image: "/images/edu-hero.webp",
+    shortDescription: "Trusted institutions and programs abroad, with guidance from shortlist to admission.",
+    image: "/images/edu-hero.webp",
     primary: "Start education enquiry",
     secondary: "Explore programs",
   },
