@@ -38,7 +38,9 @@ body {
   min-width: 320px;
   background: #fafaf7;
   color: var(--text);
-  overflow-x: hidden;
+  /* clip, not hidden: hidden would make the body a scroll container and
+     break smooth scrolling to anchors in Chrome. */
+  overflow-x: clip;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
