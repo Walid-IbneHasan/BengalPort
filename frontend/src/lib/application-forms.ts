@@ -20,10 +20,15 @@ export type ApplicationField = {
   required?: boolean;
   options?: string[];
   hint?: string;
+  // Set on the field that opens a group of related fields; the form shows it
+  // as a sub-heading. Groups hold at most six fields.
+  section?: string;
 };
 export type ApplicationStep = {
   title: string;
   description: string;
+  // Why the step asks for sensitive details, shown under its heading.
+  note?: string;
   fields: ApplicationField[];
 };
 
@@ -31,12 +36,13 @@ const yesNo = ["Yes", "No"];
 
 export const applicationForms: Record<
   ApplicationDivision,
-  { title: string; intro: string; steps: ApplicationStep[] }
+  { title: string; intro: string; minutes: number; steps: ApplicationStep[] }
 > = {
   BUSINESS: {
     title: "Business Tour & Global Business Application",
     intro:
       "For business tours, trade fairs, factory visits, supplier meetings and global market exploration.",
+    minutes: 12,
     steps: [
       {
         title: "Travel request",
@@ -44,6 +50,7 @@ export const applicationForms: Record<
         fields: [
           {
             key: "applicationTypes",
+            section: "Your visit",
             label: "Application type",
             type: "multi",
             required: true,
@@ -74,6 +81,7 @@ export const applicationForms: Record<
           },
           {
             key: "expectedDuration",
+            section: "Travellers",
             label: "Expected duration of stay",
             required: true,
           },
@@ -92,6 +100,7 @@ export const applicationForms: Record<
           },
           {
             key: "fullName",
+            section: "About you",
             label: "Full name (as per passport)",
             required: true,
           },
@@ -123,6 +132,7 @@ export const applicationForms: Record<
           },
           {
             key: "currentAddress",
+            section: "Addresses",
             label: "Current address",
             type: "textarea",
             required: true,
@@ -137,9 +147,11 @@ export const applicationForms: Record<
       },
       {
         title: "Passport & business profile",
+        note:
+          "Why we ask: visa applications and supplier introductions need your passport and company details. They are used only to arrange your visit and are handled as described in our Privacy Policy.",
         description: "Provide travel-document and professional information.",
         fields: [
-          { key: "passportNumber", label: "Passport number", required: true },
+          { key: "passportNumber", section: "Passport", label: "Passport number", required: true },
           { key: "passportType", label: "Passport type", required: true },
           {
             key: "passportIssueDate",
@@ -164,6 +176,7 @@ export const applicationForms: Record<
           },
           {
             key: "internationalTravelHistory",
+            section: "Travel history",
             label: "International travel history",
             type: "textarea",
             required: true,
@@ -177,6 +190,7 @@ export const applicationForms: Record<
           },
           {
             key: "employmentStatus",
+            section: "Your business",
             label: "Employment status / profession",
             required: true,
           },
@@ -208,6 +222,7 @@ export const applicationForms: Record<
           },
           {
             key: "companyAddress",
+            section: "Company details",
             label: "Company address",
             type: "textarea",
             required: true,
@@ -226,6 +241,7 @@ export const applicationForms: Record<
         fields: [
           {
             key: "businessPurposes",
+            section: "Purpose",
             label: "Business purpose",
             type: "multi",
             required: true,
@@ -249,6 +265,7 @@ export const applicationForms: Record<
           },
           {
             key: "hotelPreference",
+            section: "Arrangements",
             label: "Preferred hotel standard / budget",
             required: true,
           },
@@ -294,6 +311,7 @@ export const applicationForms: Record<
         fields: [
           {
             key: "documents",
+            section: "Documents",
             label: "Documents available",
             type: "multi",
             options: [
@@ -309,6 +327,7 @@ export const applicationForms: Record<
           },
           {
             key: "truthDeclaration",
+            section: "Declarations",
             label:
               "I confirm that the information provided is true and complete to the best of my knowledge.",
             type: "checkbox",
@@ -330,6 +349,7 @@ export const applicationForms: Record<
           },
           {
             key: "signature",
+            section: "Signature",
             label: "Applicant signature (type full name)",
             required: true,
           },
@@ -342,6 +362,7 @@ export const applicationForms: Record<
     title: "Global Education Application",
     intro:
       "For university admission, scholarship guidance and international study planning.",
+    minutes: 15,
     steps: [
       {
         title: "Study plan & personal details",
@@ -349,6 +370,7 @@ export const applicationForms: Record<
         fields: [
           {
             key: "applicationPurposes",
+            section: "Your study plan",
             label: "Application purpose",
             type: "multi",
             required: true,
@@ -382,6 +404,7 @@ export const applicationForms: Record<
           { key: "studyLevel", label: "Study level", required: true },
           {
             key: "fullName",
+            section: "About you",
             label: "Full name (as per passport)",
             required: true,
           },
@@ -413,6 +436,7 @@ export const applicationForms: Record<
           },
           {
             key: "currentAddress",
+            section: "Addresses",
             label: "Current address",
             type: "textarea",
             required: true,
@@ -427,9 +451,11 @@ export const applicationForms: Record<
       },
       {
         title: "Passport & academics",
+        note:
+          "Why we ask: universities and visa offices need your passport and academic details to assess an application. They are used only for your admission and are handled as described in our Privacy Policy.",
         description: "Add your travel identity and complete academic history.",
         fields: [
-          { key: "passportNumber", label: "Passport number", required: true },
+          { key: "passportNumber", section: "Passport", label: "Passport number", required: true },
           {
             key: "passportExpiryDate",
             label: "Date of expiry",
@@ -461,6 +487,7 @@ export const applicationForms: Record<
           },
           {
             key: "latestQualification",
+            section: "Latest qualification",
             label: "Latest qualification",
             required: true,
           },
@@ -474,6 +501,7 @@ export const applicationForms: Record<
           { key: "latestResult", label: "Result / GPA / CGPA", required: true },
           {
             key: "previousQualification",
+            section: "Earlier qualification",
             label: "Previous qualification",
             required: true,
           },
@@ -502,11 +530,14 @@ export const applicationForms: Record<
       },
       {
         title: "Admission, family & career",
+        note:
+          "Why we ask: visa offices ask for family and sponsor details to confirm who supports your studies. They are used only for your application and are handled as described in our Privacy Policy.",
         description:
           "Help us understand language readiness, funding and career goals.",
         fields: [
           {
             key: "englishTest",
+            section: "Admission",
             label: "English test (IELTS / TOEFL / PTE / Other)",
             required: true,
           },
@@ -527,6 +558,7 @@ export const applicationForms: Record<
           { key: "preferredBudget", label: "Preferred budget", required: true },
           {
             key: "fatherDetails",
+            section: "Family",
             label: "Father's full name & profession",
             required: true,
           },
@@ -539,6 +571,7 @@ export const applicationForms: Record<
           { key: "spouseDetails", label: "Spouse details (if applicable)" },
           {
             key: "financialSponsor",
+            section: "Sponsor",
             label: "Primary financial sponsor",
             required: true,
           },
@@ -559,6 +592,7 @@ export const applicationForms: Record<
           },
           {
             key: "employmentStatus",
+            section: "Work",
             label: "Current employment status",
             required: true,
           },
@@ -576,6 +610,7 @@ export const applicationForms: Record<
           },
           {
             key: "studyAbroadReason",
+            section: "Your goals",
             label: "Reason for study abroad",
             type: "textarea",
             required: true,
@@ -595,6 +630,7 @@ export const applicationForms: Record<
         fields: [
           {
             key: "documents",
+            section: "Documents",
             label: "Documents available",
             type: "multi",
             options: [
@@ -612,6 +648,7 @@ export const applicationForms: Record<
           },
           {
             key: "truthDeclaration",
+            section: "Declarations",
             label:
               "I confirm that all information and documents provided are accurate and genuine.",
             type: "checkbox",
@@ -633,6 +670,7 @@ export const applicationForms: Record<
           },
           {
             key: "signature",
+            section: "Signature",
             label: "Applicant signature (type full name)",
             required: true,
           },
@@ -645,6 +683,7 @@ export const applicationForms: Record<
     title: "Global Healthcare & Treatment Application",
     intro:
       "For international hospital referral, medical consultation, treatment coordination and medical travel support.",
+    minutes: 12,
     steps: [
       {
         title: "Treatment request & patient",
@@ -652,6 +691,7 @@ export const applicationForms: Record<
         fields: [
           {
             key: "treatmentRequests",
+            section: "Treatment request",
             label: "Treatment request",
             type: "multi",
             required: true,
@@ -690,6 +730,7 @@ export const applicationForms: Record<
           },
           {
             key: "fullName",
+            section: "The patient",
             label: "Patient full name (as per passport)",
             required: true,
           },
@@ -721,6 +762,7 @@ export const applicationForms: Record<
           },
           {
             key: "currentAddress",
+            section: "Addresses",
             label: "Current address",
             type: "textarea",
             required: true,
@@ -735,9 +777,11 @@ export const applicationForms: Record<
       },
       {
         title: "Passport & medical summary",
+        note:
+          "Why we ask: hospitals need your passport and medical details to review your case and give an estimate. They are used only to arrange your treatment and are handled as described in our Privacy Policy.",
         description: "Provide travel details and a concise clinical history.",
         fields: [
-          { key: "passportNumber", label: "Passport number", required: true },
+          { key: "passportNumber", section: "Passport", label: "Passport number", required: true },
           {
             key: "passportExpiryDate",
             label: "Date of expiry",
@@ -764,6 +808,7 @@ export const applicationForms: Record<
           },
           {
             key: "diagnosis",
+            section: "Diagnosis",
             label: "Primary medical condition / diagnosis",
             required: true,
           },
@@ -798,6 +843,7 @@ export const applicationForms: Record<
           },
           {
             key: "medicalHistory",
+            section: "Medical history",
             label:
               "Medical history, current condition and reason for seeking treatment abroad",
             type: "textarea",
@@ -830,10 +876,13 @@ export const applicationForms: Record<
       },
       {
         title: "Companion & finance",
+        note:
+          "Why we ask: hospitals and visa offices ask who travels with you and who pays, so that estimates and visa letters are right. These details are used only for your application and are handled as described in our Privacy Policy.",
         description: "Add emergency, travel companion and funding information.",
         fields: [
           {
             key: "emergencyName",
+            section: "Emergency contact",
             label: "Emergency contact full name",
             required: true,
           },
@@ -856,6 +905,7 @@ export const applicationForms: Record<
           },
           {
             key: "companionTraveling",
+            section: "Companion",
             label: "Companion traveling?",
             type: "select",
             required: true,
@@ -875,6 +925,7 @@ export const applicationForms: Record<
           },
           {
             key: "fundingSource",
+            section: "Finance",
             label: "Who will fund treatment and travel?",
             required: true,
           },
@@ -913,6 +964,7 @@ export const applicationForms: Record<
         fields: [
           {
             key: "documents",
+            section: "Documents",
             label: "Medical documents available",
             type: "multi",
             options: [
@@ -930,6 +982,7 @@ export const applicationForms: Record<
           },
           {
             key: "truthDeclaration",
+            section: "Declarations",
             label:
               "I confirm that the medical and personal information provided is accurate to the best of my knowledge.",
             type: "checkbox",
@@ -958,6 +1011,7 @@ export const applicationForms: Record<
           },
           {
             key: "signature",
+            section: "Signature",
             label: "Patient / legal representative signature (type full name)",
             required: true,
           },
@@ -970,6 +1024,7 @@ export const applicationForms: Record<
     title: "Global Umrah Application",
     intro:
       "For individual, family and group Umrah journeys, including visa, flights, accommodation and ground support.",
+    minutes: 8,
     steps: [
       {
         title: "Journey plan & lead pilgrim",
@@ -977,6 +1032,7 @@ export const applicationForms: Record<
         fields: [
           {
             key: "packageTypes",
+            section: "Your journey",
             label: "Type of Umrah journey",
             type: "multi",
             required: true,
@@ -1021,6 +1077,7 @@ export const applicationForms: Record<
           },
           {
             key: "fullName",
+            section: "Lead pilgrim",
             label: "Full name (as per passport)",
             required: true,
           },
@@ -1040,6 +1097,7 @@ export const applicationForms: Record<
           { key: "nationality", label: "Nationality", required: true },
           {
             key: "phone",
+            section: "Contact",
             label: "Mobile / WhatsApp",
             type: "tel",
             required: true,
@@ -1060,9 +1118,11 @@ export const applicationForms: Record<
       },
       {
         title: "Passport & travel group",
+        note:
+          "Why we ask: the Umrah visa and hotel bookings need every pilgrim's passport details. They are used only to arrange your journey and are handled as described in our Privacy Policy.",
         description: "Passport details and the people travelling with you.",
         fields: [
-          { key: "passportNumber", label: "Passport number", required: true },
+          { key: "passportNumber", section: "Passport", label: "Passport number", required: true },
           {
             key: "passportExpiryDate",
             label: "Passport expiry date",
@@ -1084,6 +1144,7 @@ export const applicationForms: Record<
           },
           {
             key: "travelGroup",
+            section: "Travel group",
             label: "Pilgrims travelling with you",
             type: "textarea",
             required: true,
@@ -1091,6 +1152,7 @@ export const applicationForms: Record<
           },
           {
             key: "emergencyName",
+            section: "Emergency contact",
             label: "Emergency contact name",
             required: true,
           },
@@ -1113,6 +1175,7 @@ export const applicationForms: Record<
         fields: [
           {
             key: "makkahHotel",
+            section: "Stay",
             label: "Hotel preference in Makkah",
             type: "select",
             required: true,
@@ -1144,6 +1207,7 @@ export const applicationForms: Record<
           },
           {
             key: "flightPreference",
+            section: "Travel",
             label: "Flight preference",
             type: "select",
             required: true,
@@ -1162,6 +1226,7 @@ export const applicationForms: Record<
           },
           {
             key: "ziyaratRequired",
+            section: "Services",
             label: "Ziyarat tours required?",
             type: "select",
             required: true,
@@ -1192,6 +1257,7 @@ export const applicationForms: Record<
         fields: [
           {
             key: "documents",
+            section: "Documents",
             label: "Documents available",
             type: "multi",
             options: [
@@ -1205,6 +1271,7 @@ export const applicationForms: Record<
           },
           {
             key: "truthDeclaration",
+            section: "Declarations",
             label:
               "I confirm that the information provided is accurate and matches my passport.",
             type: "checkbox",
@@ -1226,6 +1293,7 @@ export const applicationForms: Record<
           },
           {
             key: "signature",
+            section: "Signature",
             label: "Applicant signature (type full name)",
             required: true,
           },
