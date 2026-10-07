@@ -7,7 +7,7 @@ export const enquirySchema = z.object({
   message: z.string().min(5),
   details: z.record(z.unknown()).optional(),
 });
-const requiredApplicationFields: Record<
+export const requiredApplicationFields: Record<
   "BUSINESS" | "EDUCATION" | "HEALTHCARE" | "UMRAH",
   string[]
 > = {
@@ -182,13 +182,18 @@ const requiredApplicationFields: Record<
     "signatureDate",
   ],
 };
+// The answers as written, with the spaces around each one removed: phone
+// keyboards finish a word with a space, and that must never fail a check.
+const trimmedAnswers = z
+  .record(z.unknown())
+  .transform((details) => Object.fromEntries(Object.entries(details).map(([key, value]) => [key, typeof value === "string" ? value.trim() : value])));
 export const applicationSchema = z
   .object({
     type: z.enum(["BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH"]),
     fullName: z.string().trim().min(2),
-    email: z.string().email(),
+    email: z.string().trim().email(),
     phone: z.string().trim().min(7),
-    details: z.record(z.unknown()),
+    details: trimmedAnswers,
   })
   .superRefine((value, ctx) => {
     for (const key of requiredApplicationFields[value.type]) {

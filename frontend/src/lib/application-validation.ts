@@ -30,3 +30,24 @@ export function fieldError(field: ApplicationField, value: unknown): string {
     return `“${field.label}” is in the past. Please check the date.`;
   return "";
 }
+
+// The fields a server refusal names, each with a message to show under it.
+// The server reports an issue's path as ["details", key] for an answer and
+// [key] for the name, email or phone it was sent with.
+export function serverFieldErrors(details: unknown): Record<string, string> {
+  const issues = (details as { issues?: Array<{ path?: unknown[]; message?: string }> } | undefined)?.issues;
+  if (!Array.isArray(issues)) return {};
+  const errors: Record<string, string> = {};
+  for (const issue of issues) {
+    const path = Array.isArray(issue.path) ? issue.path.map(String) : [];
+    const key = path[0] === "details" ? path[1] : path[0];
+    if (!key || errors[key]) continue;
+    const message = issue.message ?? "";
+    errors[key] = /required/i.test(message)
+      ? "Please complete this answer."
+      : /email/i.test(message)
+        ? "Enter a valid email address, like name@example.com."
+        : "Please check this answer.";
+  }
+  return errors;
+}

@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { toasts } from "$lib/toast";
-  import { api } from "$lib/api";
+  import { ApiError, api } from "$lib/api";
   import { applicationForms, type ApplicationDivision } from "$lib/application-forms";
-  import { fieldError } from "$lib/application-validation";
+  import { fieldError, serverFieldErrors } from "$lib/application-validation";
   import DocumentList from "./DocumentList.svelte";
   import PaymentPanel from "./PaymentPanel.svelte";
   import FormGuard from "./FormGuard.svelte";
@@ -91,7 +91,9 @@
     error = guard?.problem() ?? ""; if (error) return;
     sending = true;
     try {
-      const result = await api<{ id: string; reference: string; uploadToken: string; payToken: string; amountDue: string | null }>("/applications", { method: "POST", body: JSON.stringify({ division, type: division, fullName: form.fullName, email: form.email, phone: form.phone, details: form, ...guard?.fields() }) });
+      // Answers are sent without the spaces around them, as the server compares them.
+      const answers = Object.fromEntries(Object.entries(form).map(([key, value]) => [key, typeof value === "string" ? value.trim() : value]));
+      const result = await api<{ id: string; reference: string; uploadToken: string; payToken: string; amountDue: string | null }>("/applications", { method: "POST", body: JSON.stringify({ division, type: division, fullName: answers.fullName, email: answers.email, phone: answers.phone, details: answers, ...guard?.fields() }) });
       submitted = { id: result.id, uploadToken: result.uploadToken, payToken: result.payToken, amountDue: result.amountDue };
       reference = result.reference;
       clearDraft();
@@ -101,7 +103,20 @@
       await tick();
       showTop();
       shell?.querySelector<HTMLElement>(".complete h2")?.focus({ preventScroll: true });
-    } catch (e) { error = e instanceof Error ? e.message : "The application could not be submitted."; }
+    } catch (e) {
+      // A refusal that names fields is shown under them, on the step they are on.
+      const named = e instanceof ApiError ? serverFieldErrors(e.details) : {};
+      const keys = Object.keys(named);
+      if (keys.length) {
+        errors = named;
+        const at = config.steps.findIndex((item) => item.fields.some((field) => keys.includes(field.key)));
+        if (at >= 0) step = at;
+        error = keys.length === 1 ? "Please check the answer marked below." : `Please check the ${keys.length} answers marked below.`;
+        await tick();
+        showTop();
+        document.getElementById(`field-${keys[0]}`)?.focus({ preventScroll: true });
+      } else error = e instanceof Error ? e.message : "The application could not be submitted.";
+    }
     finally { sending = false; guard?.reset(); }
   }
 </script>
