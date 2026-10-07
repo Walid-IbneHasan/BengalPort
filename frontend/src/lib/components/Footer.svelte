@@ -15,7 +15,7 @@
       <h3>Explore</h3>
       <a href="/about">About Us</a><a href="/services">Services</a><a
         href="/opportunities">Opportunities</a
-      ><a href="/pay">Pay online</a>
+      ><a href="/contact">Contact</a><a href="/apply">Apply / Enquiry</a><a href="/pay">Pay online</a>
     </div>
     <div>
       <h3>Our Divisions</h3>

@@ -1,3 +1,5 @@
+import { fillMissing } from "./content-fields.js";
+
 export type HomeContent = {
   // The social links are optional; a blank one hides its icon in the header.
   utility: {
@@ -45,7 +47,7 @@ export type HomeContent = {
     title: string;
     description: string;
     items: Array<{
-      icon: "factory" | "education" | "healthcare";
+      icon: "factory" | "education" | "healthcare" | "umrah";
       label: string;
       title: string;
       description: string;
@@ -94,7 +96,7 @@ export const defaultHomeContent: HomeContent = {
     youtube: "",
   },
   hero: {
-    title: "BENGAL PORT",
+    title: "Trade, study, treatment and Umrah abroad, guided from Dhaka.",
     tagline: "Connecting Bengal to the World",
     description1:
       "Your trusted partner in international trade, global education, healthcare and Umrah services.",
@@ -146,7 +148,7 @@ export const defaultHomeContent: HomeContent = {
     eyebrow: "ONE TRUSTED GLOBAL PARTNER",
     title: "Opportunity travels farther with the right connections.",
     description:
-      "Bengal Port brings together verified business networks, international study pathways and trusted healthcare partners through one accountable team.",
+      "Bengal Port brings together verified business networks, international study pathways, trusted healthcare partners and guided Umrah travel through one accountable team.",
     cta: "Discover Bengal Port",
     href: "/about",
   },
@@ -171,7 +173,7 @@ export const defaultHomeContent: HomeContent = {
     },
   ],
   pathways: {
-    eyebrow: "THREE PATHWAYS. ONE STANDARD.",
+    eyebrow: "FOUR PATHWAYS. ONE STANDARD.",
     title: "Global access, shaped around your goal",
     description:
       "Choose the path that fits your next move. Each division combines informed guidance with practical, end-to-end coordination.",
@@ -202,6 +204,15 @@ export const defaultHomeContent: HomeContent = {
           "Find hospitals and specialists, then coordinate appointments, treatment and international patient support.",
         href: "/healthcare",
         cta: "Explore healthcare",
+      },
+      {
+        icon: "umrah",
+        label: "For pilgrims",
+        title: "Travel for Umrah with everything arranged",
+        description:
+          "Visa, flights, hotels near the Haram and guided Ziyarat, with our team on the ground in Makkah and Madinah.",
+        href: "/umrah",
+        cta: "Explore Umrah",
       },
     ],
   },
@@ -281,8 +292,43 @@ export const defaultHomeContent: HomeContent = {
   },
   footer: {
     description:
-      "Connecting Bengal to the world through trusted business, education and healthcare partnerships.",
+      "Connecting Bengal to the world through trusted business, education, healthcare and Umrah partnerships.",
     address: "Dhaka, Bangladesh",
     copyright: "Bengal Port. All rights reserved.",
   },
 };
+
+// Built-in wording retired by the October 2026 refresh, as a path into the
+// content and the old text. A saved page that still carries the old text
+// shows the current built-in text instead; wording the admin wrote is kept.
+const retiredWording: Array<{ path: string[]; was: string }> = [
+  { path: ["hero", "title"], was: "BENGAL PORT" },
+  {
+    path: ["intro", "description"],
+    was: "Bengal Port brings together verified business networks, international study pathways and trusted healthcare partners through one accountable team.",
+  },
+  { path: ["pathways", "eyebrow"], was: "THREE PATHWAYS. ONE STANDARD." },
+  {
+    path: ["footer", "description"],
+    was: "Connecting Bengal to the world through trusted business, education and healthcare partnerships.",
+  },
+];
+
+const at = (value: unknown, path: string[]) => path.reduce<any>((o, key) => o?.[key], value);
+
+// The home page as the site and the admin editor read it: whatever a saved
+// page lacks comes from the built-in page, retired wording is refreshed, and
+// a pathways list from before Umrah had one gains the built-in Umrah pathway.
+export function homeContentFrom(saved: unknown): HomeContent {
+  const content = fillMissing(defaultHomeContent, saved);
+  for (const { path, was } of retiredWording) {
+    const parent = at(content, path.slice(0, -1));
+    const key = path[path.length - 1];
+    if (parent && parent[key] === was) parent[key] = at(defaultHomeContent, path);
+  }
+  if (!content.pathways.items.some((item) => item.href === "/umrah")) {
+    const umrah = defaultHomeContent.pathways.items.find((item) => item.href === "/umrah");
+    if (umrah) content.pathways.items = [...content.pathways.items, structuredClone(umrah)];
+  }
+  return content;
+}

@@ -461,7 +461,7 @@ export const homeContentSchema = z.object({
     items: z
       .array(
         z.object({
-          icon: z.enum(["factory", "education", "healthcare"]),
+          icon: z.enum(["factory", "education", "healthcare", "umrah"]),
           label: text,
           title: text,
           description: paragraph,

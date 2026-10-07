@@ -44,6 +44,7 @@
     factory: Factory,
     education: BookOpenCheck,
     healthcare: Stethoscope,
+    umrah: MoonStar,
   };
   $: content = $cmsContent;
   $: divisions = content.divisions.map((item) => ({
@@ -132,7 +133,7 @@
   <title>Bengal Port | Connecting Bengal to the World</title>
   <meta
     name="description"
-    content="Trusted international business, education and healthcare connections from Bengal to the world."
+    content="Trusted business, education, healthcare and Umrah connections from Bangladesh to the world, guided by one accountable team in Dhaka."
   />
 </svelte:head>
 
@@ -385,12 +386,14 @@
     text-align: center;
   }
   .title h1 {
-    font-size: clamp(2.75rem, 5vw, 4.65rem);
-    letter-spacing: 0.025em;
+    font-size: clamp(2.1rem, 3.4vw, 3.2rem);
+    letter-spacing: -0.02em;
     color: var(--heading);
-    margin: 0 0 0.125rem;
+    max-width: 30ch;
+    margin: 0 auto 0.35rem;
     font-weight: 780;
-    line-height: 1;
+    line-height: 1.08;
+    text-wrap: balance;
   }
   .tag {
     display: flex;
@@ -1126,7 +1129,7 @@
       padding-top: 0.85rem;
     }
     .title h1 {
-      font-size: clamp(2.4rem, 4.4vw, 3.5rem);
+      font-size: clamp(1.9rem, 3vw, 2.7rem);
     }
     .tag h2 {
       font-size: clamp(1.2rem, 2.1vw, 1.7rem);
@@ -1205,7 +1208,7 @@
       padding-top: 0.4rem;
     }
     .title h1 {
-      font-size: 2.25rem;
+      font-size: 1.85rem;
     }
     .tag h2 {
       font-size: 1.18rem;

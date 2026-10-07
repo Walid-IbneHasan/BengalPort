@@ -52,7 +52,7 @@
 </script>
 
 <svelte:head><title>Apply / Enquiry | Bengal Port</title><meta name="description" content="Send Bengal Port a quick enquiry or complete a business, education, healthcare or Umrah application."/></svelte:head>
-<section class="page-hero apply-hero"><div class="wrap"><span class="eyebrow">APPLY / ENQUIRY</span><h1>Start with the right application.</h1><p>Guest enquiries remain open to everyone. Choose a division to send a quick enquiry or complete its detailed application form.</p></div></section>
+<section class="page-hero apply-hero"><div class="wrap"><span class="eyebrow">APPLY / ENQUIRY</span><h1>Ask a question or start an application.</h1><p>Questions are welcome without an account. Choose a division to send a quick enquiry, or complete its detailed application form when you are ready.</p></div></section>
 <section class="application-section"><div class="wrap">
   <div class="tabs" role="tablist" aria-label="Application type">{#each tabs as item}{@const Icon = item.icon}<button type="button" role="tab" aria-selected={tab===item.key} class:active={tab===item.key} onclick={()=>choose(item.key)}><Icon size={19}/><span>{item.label}</span></button>{/each}</div>
   {#if tab !== "GENERAL"}<div class="modes" role="group" aria-label="Form type"><button type="button" class:active={form==="enquiry"} aria-pressed={form==="enquiry"} onclick={()=>{form="enquiry";error=""}}>Quick enquiry</button><button type="button" class:active={form==="application"} aria-pressed={form==="application"} onclick={()=>{form="application";success="";error=""}}>Full application</button></div>{/if}
