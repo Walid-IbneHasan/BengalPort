@@ -111,11 +111,28 @@
     padding: 0 14px;
     background: white;
   }
+  /* Loading, empty and failed states: a centred message, and on failure a
+     button under it. The padding shrinks with the screen. */
   .state {
+    display: grid;
+    justify-items: center;
+    gap: 0.9rem;
     text-align: center;
-    padding: 70px;
+    padding: clamp(1.75rem, 10vw, 70px) 1.25rem;
     background: white;
     border-radius: 15px;
+    line-height: 1.5;
+  }
+  .state button {
+    min-height: 2.75rem;
+    padding: 0.55rem 1.25rem;
+    border: 1px solid var(--line, #e2e6e8);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--ink, #17304f);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
   }
   .opp {
     background: #fff;
