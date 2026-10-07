@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { fieldError } from "./application-validation";
+import { fieldError, phoneProblem } from "./application-validation";
 import type { ApplicationField } from "./application-forms";
 
 const text: ApplicationField = { key: "nationality", label: "Nationality", required: true };
@@ -46,6 +46,34 @@ describe("checking an answer before moving to the next step", () => {
 
   test("a phone number with spaces and a country code is accepted", () => {
     assert.equal(fieldError(phone, "+880 1711-991035"), "");
+  });
+
+  test("a phone number that is one digit repeated is questioned", () => {
+    assert.equal(fieldError(phone, "0000000"), "That does not look like a real phone number. Please check the digits.");
+  });
+});
+
+// The same phone check serves the quick enquiry form, which has no field
+// definitions.
+describe("checking a phone number on its own", () => {
+  test("a Bangladeshi mobile number is accepted", () => {
+    assert.equal(phoneProblem("01711991035"), "");
+    assert.equal(phoneProblem("+880 1711-991035"), "");
+  });
+
+  test("too few digits ask for the full number", () => {
+    assert.equal(phoneProblem("12345"), "Enter a full phone number, including the area or country code.");
+  });
+
+  test("one digit repeated, or more digits than any number has, is questioned", () => {
+    const message = "That does not look like a real phone number. Please check the digits.";
+    assert.equal(phoneProblem("0000000"), message);
+    assert.equal(phoneProblem("1111111111"), message);
+    assert.equal(phoneProblem("1234567890123456"), message);
+  });
+
+  test("a blank number is left to the required check", () => {
+    assert.equal(phoneProblem(""), "");
   });
 
   test("a passport that has already expired is questioned", () => {

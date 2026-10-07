@@ -5,7 +5,8 @@
   import FormGuard from "$lib/components/FormGuard.svelte";
   import type { ApplicationDivision } from "$lib/application-forms";
   import { applyState, type ApplyForm, type ApplyTab } from "$lib/apply-route";
-  import { onMount, tick } from "svelte";
+  import { onMount, tick, untrack } from "svelte";
+  import { phoneProblem } from "$lib/application-validation";
   import { toasts } from "$lib/toast";
   import { taka } from "$lib/payment-rules";
   import { Check, MessageSquareText, BriefcaseBusiness, GraduationCap, HeartPulse, MoonStar } from "lucide-svelte";
@@ -20,7 +21,26 @@
   const opened = applyState(page.url.searchParams);
   let tab = $state<ApplyTab>(opened.tab), form = $state<ApplyForm>(opened.form);
   let name = $state(""), phone = $state(""), email = $state(""), subject = $state(opened.subject), message = $state("");
-  let sending = $state(false), success = $state(""), error = $state("");
+  let sending = $state(false), success = $state(""), error = $state(""), phoneError = $state("");
+  // The quick enquiry's draft survives a refresh or an accidental tab switch,
+  // as the application form's does. Fields filled from the link win.
+  const draftKey = "bp_enquiry_draft";
+  let restored = false;
+  $effect(() => {
+    const draft = { name, phone, email, subject, message };
+    if (!restored) {
+      restored = true;
+      try {
+        const saved = JSON.parse(sessionStorage.getItem(draftKey) || "null");
+        if (saved) untrack(() => { name ||= saved.name ?? ""; phone ||= saved.phone ?? ""; email ||= saved.email ?? ""; subject ||= saved.subject ?? ""; message ||= saved.message ?? ""; });
+      } catch { /* nothing stored */ }
+      return;
+    }
+    try {
+      if (Object.values(draft).some(Boolean)) sessionStorage.setItem(draftKey, JSON.stringify(draft));
+      else sessionStorage.removeItem(draftKey);
+    } catch { /* storage full or blocked */ }
+  });
   let guard = $state<{ fields(): Record<string, string>; problem(): string; reset(): void }>();
   // The confirmation shown in place of the form once an enquiry is sent.
   let sentBox = $state<HTMLDivElement>();
@@ -39,6 +59,8 @@
     tab = next; form = applyState(new URLSearchParams({ tab: next })).form; success = ""; error = "";
   }
   async function submitEnquiry() {
+    phoneError = phoneProblem(phone);
+    if (phoneError) { document.getElementById("phone")?.focus(); return; }
     error = guard?.problem() ?? ""; if (error) return;
     sending = true;
     try { await api("/enquiries", { method: "POST", body: JSON.stringify({ type: tab, name, phone, email, message, details: { subject, service: tab }, ...guard?.fields() }) }); success = "Thank you. Your enquiry has been received and our team will contact you."; name = phone = email = subject = message = "";
@@ -60,7 +82,7 @@
   {#if form === "enquiry"}
     <div class="general-box"><div class="general-intro"><span>{copy.eyebrow}</span><h2>{copy.title}</h2><p>{copy.text}</p></div>
       {#if success}<div class="sent" role="status" tabindex="-1" bind:this={sentBox}><i><Check size={28}/></i><h3>Enquiry sent successfully</h3><p>{success}</p><div class="sent-actions"><button type="button" class="btn" onclick={()=>(success="")}>SEND ANOTHER ENQUIRY</button><a href="/">Back to home</a></div></div>{:else}{#if error}<p class="error" role="alert">{error}</p>{/if}
-      <form onsubmit={(e)=>{e.preventDefault();submitEnquiry()}}><div class="form-grid"><div class="field"><label for="name">Full name *</label><input id="name" bind:value={name} autocomplete="name" required minlength="2" maxlength="120"/></div><div class="field"><label for="phone">Phone number *</label><input id="phone" bind:value={phone} autocomplete="tel" inputmode="tel" required minlength="7" maxlength="30"/></div><div class="field"><label for="email">Email address</label><input id="email" type="email" bind:value={email} autocomplete="email" maxlength="160"/></div><div class="field"><label for="subject">Subject *</label><input id="subject" bind:value={subject} required maxlength="150"/></div></div><div class="field full"><label for="message">Enquiry information *</label><textarea id="message" bind:value={message} required minlength="5" maxlength="5000" rows="6"></textarea></div><FormGuard bind:this={guard} /><button class="btn" disabled={sending}>{sending?"SENDING...":"SUBMIT ENQUIRY"}</button><p class="legal-note">By submitting you agree to our <a href="/privacy">Privacy Policy</a>.</p></form>{/if}
+      <form onsubmit={(e)=>{e.preventDefault();submitEnquiry()}}><div class="form-grid"><div class="field"><label for="name">Full name *</label><input id="name" bind:value={name} autocomplete="name" required minlength="2" maxlength="120"/></div><div class="field"><label for="phone">Phone number *</label><input id="phone" bind:value={phone} autocomplete="tel" inputmode="tel" required minlength="7" maxlength="30" aria-invalid={phoneError ? "true" : undefined} aria-describedby={phoneError ? "phone-error" : undefined} oninput={() => (phoneError = "")}/>{#if phoneError}<small id="phone-error" class="field-error" role="alert">{phoneError}</small>{/if}</div><div class="field"><label for="email">Email address</label><input id="email" type="email" bind:value={email} autocomplete="email" maxlength="160"/></div><div class="field"><label for="subject">Subject *</label><input id="subject" bind:value={subject} required maxlength="150"/></div></div><div class="field full"><label for="message">Enquiry information *</label><textarea id="message" bind:value={message} required minlength="5" maxlength="5000" rows="6"></textarea></div><FormGuard bind:this={guard} /><button class="btn" disabled={sending}>{sending?"SENDING...":"SUBMIT ENQUIRY"}</button><p class="legal-note">By submitting you agree to our <a href="/privacy">Privacy Policy</a>.</p></form>{/if}
     </div>
   {:else}{#key tab}<DivisionApplicationForm division={tab as ApplicationDivision}/>{/key}{/if}
 </div></section>
@@ -70,5 +92,7 @@
   @media(min-width:42.01rem){.tabs{max-width:64rem;grid-template-columns:repeat(5,minmax(0,1fr))}}
   .fee-note{max-width:58rem;margin:0 auto 1.25rem;padding:.8rem 1rem;border:1px solid #e6cf9a;border-radius:.8rem;background:#fdf8ec;color:#5d4a1e;font-size:.88rem;line-height:1.55}.fee-note b{color:#17304f}
   .legal-note{margin:.9rem 0 0;font-size:.78rem;color:#6b7b88}.legal-note a{color:#9b6b16;font-weight:700}
+  .field-error{display:block;margin:.35rem 0 0;font-size:.8rem;font-weight:600;line-height:1.4;color:#b42318}
+  .field input[aria-invalid="true"]{border-color:#d9342b;box-shadow:0 0 0 3px rgba(217,52,43,.14)}
   .modes{max-width:26rem;margin:0 auto 1.25rem;padding:.3rem;display:grid;grid-template-columns:1fr 1fr;gap:.3rem;border:1px solid #e0e6e8;border-radius:2rem;background:#fff}.modes button{min-height:2.6rem;border:0;border-radius:2rem;background:transparent;color:#637484;font-weight:750;font-size:.86rem;transition:background-color 180ms ease,color 180ms ease}.modes button.active{background:#d0a03d;color:#17304f}@media(hover:hover) and (pointer:fine){.modes button:not(.active):hover{background:#f0f3f3;color:#17304f}}@media(prefers-reduced-motion:reduce){.modes button{transition-duration:.01ms}}
 </style>

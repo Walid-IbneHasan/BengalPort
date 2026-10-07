@@ -22,6 +22,7 @@
   import Testimonials from "./Testimonials.svelte";
   import { applyHref } from "$lib/apply-route";
   import { reveal } from "$lib/reveal";
+  import { distinct, liveStats } from "$lib/live-stats";
   import {
     destinations,
     fieldKeys,
@@ -74,6 +75,15 @@
     })),
   );
   let places = $derived(destinations(records));
+  // The figures, with institutions, programs and countries counted from the
+  // directory so they never contradict it.
+  let stats = $derived(
+    liveStats(content.stats, {
+      institutions: records.length,
+      programs: records.reduce((total: number, record: any) => total + (record.programs?.length ?? 0), 0),
+      countries: distinct(records, "country"),
+    }),
+  );
   let query = $state(""),
     country = $state("All"),
     field = $state<"all" | FieldKey>("all");
@@ -229,7 +239,7 @@
       </div>
     </section>{/each}
 
-  <section class="reviews" class:empty={!reviews.length} id="reviews" use:reveal>
+  {#if reviews.length}<section class="reviews" id="reviews" use:reveal>
     <header class="heading">
       <span class="eyebrow">{content.reviews.eyebrow}</span>
       <h2>{content.reviews.heading}</h2>
@@ -253,9 +263,9 @@
           >
         </div>
       </div>
-      {#if reviews.length}<Testimonials {reviews} />{/if}
+      <Testimonials {reviews} />
     </div>
-  </section>
+  </section>{/if}
 
   {#if places.length}<section class="section destinations" id="destinations" use:reveal>
       <header class="heading">
@@ -295,7 +305,7 @@
   </section>
 
   <section class="stats" use:reveal>
-    {#each content.stats as stat}{@const Icon = icons[stat.icon] || Globe2}
+    {#each stats as stat}{@const Icon = icons[stat.icon] || Globe2}
       <article>
         <Icon size={27} /><b>{stat.value}</b><span>{stat.label}</span>
       </article>{/each}
@@ -952,11 +962,6 @@
   .reviews-copy a {
     margin-top: 1.3rem;
   }
-  .reviews.empty .reviews-panel {
-    max-width: 34rem;
-    margin-inline: auto;
-  }
-
   /* Destinations: photo cards with the country on a strip along the bottom. */
   .place-grid {
     display: grid;
@@ -1467,16 +1472,6 @@
     .reviews-copy {
       padding: 2rem;
     }
-    /* With no reviews yet the panel stands alone: photo beside the words. */
-    .reviews.empty .reviews-panel {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      align-items: center;
-      max-width: 62rem;
-    }
-    .reviews.empty .reviews-photo {
-      aspect-ratio: auto;
-      min-height: 19rem;
-    }
     .place-grid {
       grid-template-columns: repeat(auto-fit, minmax(14rem, 24rem));
       justify-content: center;
@@ -1549,7 +1544,7 @@
       align-items: start;
     }
     /* Beside the reviews the panel stays as short as they are. */
-    .reviews:not(.empty) .reviews-photo {
+    .reviews .reviews-photo {
       display: none;
     }
   }

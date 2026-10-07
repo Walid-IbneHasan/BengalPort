@@ -155,7 +155,7 @@
     </div>
   </section>
 
-  <section class="reviews" class:empty={!reviews.length} id="reviews" use:reveal>
+  {#if reviews.length}<section class="reviews" id="reviews" use:reveal>
     <header class="heading">
       <span class="eyebrow">{content.reviews.eyebrow}</span>
       <h2>{content.reviews.heading}</h2>
@@ -169,9 +169,9 @@
           <a class="primary" href="/dashboard">{content.reviews.cta}<ArrowRight size={17} /></a>
         </div>
       </div>
-      {#if reviews.length}<Testimonials {reviews} />{/if}
+      <Testimonials {reviews} />
     </div>
-  </section>
+  </section>{/if}
 
   <section class="section begin" id="process" use:reveal>
     <header class="heading">
@@ -861,11 +861,6 @@
   .reviews-copy a {
     margin-top: 1.3rem;
   }
-  .reviews.empty .reviews-panel {
-    max-width: 34rem;
-    margin-inline: auto;
-  }
-
   /* How to begin: large gold numerals joined by a dotted line. */
   .numerals {
     display: grid;
@@ -1061,15 +1056,6 @@
     }
     .reviews-copy {
       padding: 2rem;
-    }
-    .reviews.empty .reviews-panel {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      align-items: center;
-      max-width: 62rem;
-    }
-    .reviews.empty .reviews-photo {
-      aspect-ratio: auto;
-      min-height: 19rem;
     }
     .closing {
       padding: 2.25rem 2rem;

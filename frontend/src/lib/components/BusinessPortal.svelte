@@ -25,6 +25,7 @@
   import TradeRoutesMap from "./TradeRoutesMap.svelte";
   import Testimonials from "./Testimonials.svelte";
   import JumpStrip from "./JumpStrip.svelte";
+  import { distinct, liveStats } from "$lib/live-stats";
 
   // The Global Business page: a hero that draws trade routes to the markets
   // it trades with, six photo tiles (three on phones), the engagement steps,
@@ -51,6 +52,9 @@
     file: FileText,
   };
   let quickLinks = $derived(content.shortcuts.map((item) => ({ ...item, icon: icons[item.icon] || ArrowRight })));
+  // The trust panel's figures, with partners and countries counted from the
+  // live partner list so they never contradict it.
+  let stats = $derived(liveStats(content.stats, { partners: partners.length, countries: distinct(partners, "country") }));
 
   // The market the title names right now; the map draws its route.
   let market = $state(0);
@@ -183,14 +187,14 @@
         {/each}
       </ul>
       <ul class="stats">
-        {#each content.stats as stat}{@const Icon = icons[stat.icon] || Globe2}
+        {#each stats as stat}{@const Icon = icons[stat.icon] || Globe2}
           <li><Icon size={22} /><b>{stat.value}</b><span>{stat.label}</span></li>
         {/each}
       </ul>
     </div>
   </section>
 
-  <section class="reviews" class:empty={!reviews.length} id="reviews" use:reveal>
+  {#if reviews.length}<section class="reviews" id="reviews" use:reveal>
     <header class="heading">
       <span class="eyebrow">{content.reviews.eyebrow}</span>
       <h2>{content.reviews.heading}</h2>
@@ -204,9 +208,9 @@
           <a class="primary" href="/dashboard">{content.reviews.cta}<ArrowRight size={17} /></a>
         </div>
       </div>
-      {#if reviews.length}<Testimonials {reviews} />{/if}
+      <Testimonials {reviews} />
     </div>
-  </section>
+  </section>{/if}
 
   <section class="band" id="process" use:reveal>
     <div class="section band-inner">
@@ -928,11 +932,6 @@
   .reviews-copy a {
     margin-top: 1.3rem;
   }
-  .reviews.empty .reviews-panel {
-    max-width: 34rem;
-    margin-inline: auto;
-  }
-
   .closing {
     margin-top: 2rem;
     background: var(--ink-panel);
@@ -1104,15 +1103,6 @@
     }
     .reviews-copy {
       padding: 2rem;
-    }
-    .reviews.empty .reviews-panel {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      align-items: center;
-      max-width: 62rem;
-    }
-    .reviews.empty .reviews-photo {
-      aspect-ratio: auto;
-      min-height: 19rem;
     }
     .closing {
       padding: 2.25rem 2rem;

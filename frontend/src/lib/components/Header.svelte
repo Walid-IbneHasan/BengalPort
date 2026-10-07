@@ -22,8 +22,21 @@
   let open = false;
   let servicesOpen = false;
   let accountHref = "/login";
-  // Re-checked on every navigation so the link follows sign-in and sign-out.
-  afterNavigate(() => { accountHref = localStorage.getItem("bp_token") ? "/dashboard" : "/login"; });
+  let headerEl: HTMLElement;
+  // Re-checked on every navigation so the link follows sign-in and sign-out;
+  // the menus close so a back or forward step never lands under one.
+  afterNavigate(() => { accountHref = localStorage.getItem("bp_token") ? "/dashboard" : "/login"; closeMenus(); });
+  function closeMenus() { open = false; servicesOpen = false; }
+  // Escape closes the innermost open menu; a tap or click outside the header
+  // closes them all.
+  function onKeydown(event: KeyboardEvent) {
+    if (event.key !== "Escape") return;
+    if (servicesOpen) servicesOpen = false;
+    else if (open) open = false;
+  }
+  function onPointerDown(event: PointerEvent) {
+    if ((open || servicesOpen) && headerEl && !headerEl.contains(event.target as Node)) closeMenus();
+  }
   const links = [
     ["HOME", "/"],
     ["ABOUT US", "/about"],
@@ -43,7 +56,9 @@
       : page.url.pathname.startsWith(href);
 </script>
 
-<header>
+<svelte:window onkeydown={onKeydown} onpointerdown={onPointerDown} />
+<header bind:this={headerEl} class:menu-open={open}>
+  <button type="button" class="scrim" tabindex="-1" aria-hidden="true" onclick={closeMenus}></button>
   <div class="utility">
     <div class="wrap utility-inner">
       <span><Globe2 size={17} />{$cmsContent.utility.message}</span>
@@ -67,7 +82,7 @@
         {#if link[0] === "SERVICES"}
           <div class:open={servicesOpen} class="services-nav">
             <button class:active={active(link[1]) || ["/business","/education","/healthcare","/umrah"].some(active)} aria-expanded={servicesOpen} aria-controls="services-menu" onclick={() => servicesOpen = !servicesOpen}>SERVICES <ChevronDown size={15}/></button>
-            <div id="services-menu" class="services-menu">
+            <div id="services-menu" class="services-menu" inert={!servicesOpen}>
               <div class="services-heading"><span>OUR GLOBAL DIVISIONS</span><a href="/services" onclick={() => { open=false; servicesOpen=false }}>View all services <ArrowRight size={14}/></a></div>
               <div class="division-links">{#each divisions as division}<a class={division.tone} href={division.href} onclick={() => { open=false; servicesOpen=false }}><i><svelte:component this={division.icon} size={20}/></i><span><b>{division.title}</b><small>{division.text}</small></span><ArrowRight class="card-arrow" size={16}/></a>{/each}</div>
             </div>
@@ -105,7 +120,13 @@
     height: 9.0625rem;
     pointer-events: none;
   }
+  /* The shade behind the phone drawer; a tap on it closes the drawer. */
+  .scrim {
+    display: none;
+  }
   .utility {
+    position: relative;
+    z-index: 15;
     background: #102b4b;
     color: #f7f9fb;
     height: 3.375rem;
@@ -349,6 +370,16 @@
     .links.show {
       display: flex;
       animation: menu-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    header.menu-open .scrim {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      border: 0;
+      padding: 0;
+      background: rgba(16, 38, 64, 0.38);
+      cursor: default;
     }
     /* A drawer taller than the screen scrolls inside the fixed header. */
     .links {
