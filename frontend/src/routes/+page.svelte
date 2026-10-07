@@ -954,6 +954,9 @@
   .feature-health {
     background: url("/images/global-healthcare.webp") center/cover;
   }
+  .feature-umrah {
+    background: url("/images/global-umrah.webp") center/cover;
+  }
   .feature:hover {
     transform: translateY(-0.45rem);
     box-shadow: 0 1.3rem 3rem rgba(23, 48, 79, 0.18);
