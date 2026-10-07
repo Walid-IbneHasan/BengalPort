@@ -109,7 +109,7 @@ async function seedDemoData(
       "Meet verified manufacturers and tour production facilities with Bengal Port coordination.",
       "China",
       "Guangzhou",
-      "/images/global-business.webp",
+      "/images/opp-china-sourcing.webp",
     ],
     [
       "international-mbbs-2026",
@@ -118,7 +118,7 @@ async function seedDemoData(
       "Applications are open for selected international medical institutions.",
       "Malaysia",
       "Kuala Lumpur",
-      "/images/edu-medical.webp",
+      "/images/opp-mbbs-admissions.webp",
     ],
     [
       "executive-health-check",
@@ -127,7 +127,7 @@ async function seedDemoData(
       "Coordinated comprehensive screening at a leading international hospital.",
       "Thailand",
       "Bangkok",
-      "/images/global-healthcare.webp",
+      "/images/opp-health-checkup.webp",
     ],
   ];
   for (const item of opportunities)
