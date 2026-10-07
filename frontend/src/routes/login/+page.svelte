@@ -151,10 +151,13 @@
         client_id: googleClientId,
         callback: (r: any) => googleLogin(r.credential),
       });
-      g.accounts.id.renderButton(document.getElementById("google-button"), {
+      // The button is an iframe of a fixed width: never wider than its slot,
+      // so a 320px phone does not scroll sideways.
+      const slot = document.getElementById("google-button");
+      g.accounts.id.renderButton(slot, {
         theme: "outline",
         size: "large",
-        width: 360,
+        width: Math.min(360, Math.floor(slot?.parentElement?.clientWidth || 360)),
         text: "continue_with",
         shape: "pill",
       });

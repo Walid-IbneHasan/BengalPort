@@ -2,7 +2,6 @@
   import {
     ArrowRight,
     BriefcaseBusiness,
-    Calculator,
     Factory,
     FileText,
     Globe2,
@@ -28,9 +27,9 @@
   import JumpStrip from "./JumpStrip.svelte";
 
   // The Global Business page: a hero that draws trade routes to the markets
-  // it sources from, six photo tiles, the engagement steps, the landed-cost
-  // calculator, the partner list by country, the trust panel, reviews and
-  // the closing panel. `partners` are the live suppliers and factories.
+  // it trades with, six photo tiles (three on phones), the engagement steps,
+  // the partner list by country, the trust panel, reviews and the closing
+  // panel. `partners` are the live suppliers and factories.
   let {
     content,
     partners,
@@ -47,7 +46,6 @@
     network: Network,
     headset: Headphones,
     shield: ShieldCheck,
-    calculator: Calculator,
     search: Search,
     handshake: Handshake,
     file: FileText,
@@ -56,13 +54,6 @@
 
   // The market the title names right now; the map draws its route.
   let market = $state(0);
-
-  // A planning estimate: product cost plus shipping plus duty on the cost.
-  let productCost = $state(100000);
-  let shipping = $state(18000);
-  let duty = $state(15);
-  let landed = $derived(Number(productCost || 0) + Number(shipping || 0) + (Number(productCost || 0) * Number(duty || 0)) / 100);
-  const taka = (amount: number) => `৳${Math.round(amount).toLocaleString("en-IN")}`;
 
   let kind = $state<PartnerKind>("all");
   let industry = $state("All");
@@ -137,29 +128,6 @@
           </li>
         {/each}
       </ol>
-    </div>
-  </section>
-
-  <section class="section desk" id="calculator" use:reveal>
-    <header class="heading">
-      <span class="eyebrow">{content.calculator.eyebrow}</span>
-      <h2>{content.calculator.title}</h2>
-      <p>{content.calculator.description}</p>
-    </header>
-    <div class="calc">
-      <form class="calc-inputs" onsubmit={(event) => event.preventDefault()}>
-        <label class="field"><span>Product value (৳)</span><input type="number" min="0" step="1000" bind:value={productCost} /></label>
-        <div class="two">
-          <label class="field"><span>Shipping (৳)</span><input type="number" min="0" step="500" bind:value={shipping} /></label>
-          <label class="field"><span>Estimated duty (%)</span><input type="number" min="0" max="100" step="1" bind:value={duty} /></label>
-        </div>
-      </form>
-      <div class="calc-result">
-        <small>Estimated landed cost</small>
-        <b>{taka(landed)}</b>
-        <p>{content.calculator.note}</p>
-        <a class="primary" href={applyHref("BUSINESS", "enquiry", `Landed cost estimate ${taka(landed)}`)}>{content.calculator.cta}<ArrowRight size={17} /></a>
-      </div>
     </div>
   </section>
 
@@ -298,11 +266,11 @@
     background: var(--ink);
     color: #fff;
   }
-  .biz :is(a, button, input, select):focus-visible {
+  .biz :is(a, button, select):focus-visible {
     outline: 3px solid rgba(199, 152, 54, 0.55);
     outline-offset: 3px;
   }
-  .biz :is(.hero, .closing, .reviews-panel, .calc-result) a:focus-visible {
+  .biz :is(.hero, .closing, .reviews-panel) a:focus-visible {
     outline-color: #ffffffc7;
   }
   .hero,
@@ -545,6 +513,13 @@
     grid-template-columns: 1fr;
     grid-auto-rows: 14rem;
   }
+  /* Phones show three tiles: the first, third and sixth (sourcing, visits
+     and documents in the built-in order). Every tile shows from 40rem. */
+  .tile:nth-child(2),
+  .tile:nth-child(4),
+  .tile:nth-child(5) {
+    display: none;
+  }
   .tile {
     position: relative;
     display: flex;
@@ -663,88 +638,6 @@
     margin: 0;
     font-size: 0.88rem;
     line-height: 1.6;
-  }
-
-  /* The landed-cost calculator as a trade desk: inputs beside a navy result. */
-  .calc {
-    display: grid;
-    gap: 1rem;
-    max-width: 62rem;
-    margin-inline: auto;
-  }
-  .calc-inputs {
-    display: grid;
-    gap: 0.9rem;
-    padding: 1.4rem;
-    border: 1px solid var(--line);
-    border-radius: 1.25rem;
-    background: #fff;
-    box-shadow: 0 0.8rem 2rem #17304f12;
-  }
-  .two {
-    display: grid;
-    gap: 0.9rem;
-    grid-template-columns: 1fr 1fr;
-  }
-  .field {
-    display: grid;
-    gap: 0.4rem;
-  }
-  .field span {
-    font-size: 0.78rem;
-    font-weight: 750;
-    color: var(--ink);
-  }
-  .field input {
-    min-height: 3rem;
-    width: 100%;
-    border: 1px solid #d7dce3;
-    border-radius: 0.7rem;
-    padding: 0.7rem 0.9rem;
-    background: #fff;
-    color: var(--ink);
-    font: inherit;
-    font-size: 1rem;
-    font-variant-numeric: tabular-nums;
-    outline: 0;
-    caret-color: var(--accent);
-  }
-  .field input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(199, 152, 54, 0.2);
-  }
-  .calc-result {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    padding: 1.6rem 1.4rem;
-    border-radius: 1.25rem;
-    background: var(--ink-panel);
-    color: #fff;
-    box-shadow: 0 1rem 2.4rem #17304f30;
-  }
-  .calc-result small {
-    font-size: 0.72rem;
-    letter-spacing: 0.13em;
-    font-weight: 800;
-    color: var(--on-ink-gold);
-  }
-  .calc-result b {
-    font-size: clamp(2.2rem, 7vw, 3.4rem);
-    line-height: 1.1;
-    letter-spacing: -0.03em;
-    font-variant-numeric: tabular-nums;
-    color: var(--on-ink-gold);
-  }
-  .calc-result p {
-    margin: 0 0 0.8rem;
-    font-size: 0.82rem;
-    line-height: 1.6;
-    color: var(--on-ink);
-  }
-  .calc-result .primary {
-    align-self: flex-start;
-    margin-top: auto;
   }
 
   /* Partner network: filters, then the partners grouped by country. */
@@ -1118,6 +1011,11 @@
     .tile-1 {
       grid-column: span 2;
     }
+    .tile:nth-child(2),
+    .tile:nth-child(4),
+    .tile:nth-child(5) {
+      display: flex;
+    }
     .filters {
       grid-template-columns: 1fr 14rem;
       align-items: center;
@@ -1192,15 +1090,6 @@
     }
     .tile-copy {
       padding: 1.5rem;
-    }
-    .calc {
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    }
-    .calc-inputs {
-      padding: 1.8rem;
-    }
-    .calc-result {
-      padding: 2rem 1.8rem;
     }
     .proof {
       padding: 2.4rem 2.2rem;

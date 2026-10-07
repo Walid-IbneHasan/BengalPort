@@ -24,4 +24,15 @@ describe("reading the saved Business page", () => {
   test("nothing saved gives the built-in page", () => {
     assert.deepEqual(businessContentFrom(undefined), defaultBusinessContent);
   });
+
+  test("a saved link to the removed landed-cost calculator asks for a quotation instead", () => {
+    const saved = structuredClone(defaultBusinessContent) as any;
+    saved.shortcuts[2] = { icon: "calculator", title: "Estimate landed cost", subtitle: "Product, shipping and duty", href: "#calculator" };
+    saved.services.items[4] = { ...saved.services.items[4], cta: "Calculate now", href: "#calculator" };
+    const content = businessContentFrom(saved);
+    assert.equal(content.shortcuts.some((item) => item.href === "#calculator"), false);
+    assert.equal(content.shortcuts[2].title, "Request a quotation");
+    assert.equal(content.services.items.some((item) => item.href === "#calculator"), false);
+    assert.equal(content.services.items[4].cta, "Request a quote");
+  });
 });
