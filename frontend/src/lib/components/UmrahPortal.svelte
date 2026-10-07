@@ -653,6 +653,11 @@
     margin-top: auto;
     align-self: flex-start;
   }
+  .tier.highlighted .pill {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--ink);
+  }
 
   /* The journey, stage by stage: photos on a gold ribbon. */
   .band {

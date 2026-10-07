@@ -169,7 +169,7 @@
           style={`--arrival-delay:${160 + index * 90}ms`}
           ><div class="photo-slot">
             <div class="photo">
-              <img src={division.image} alt={division.title} decoding="async" />
+              <img src={division.image} alt="" decoding="async" />
             </div>
           </div>
           <div class="panel">

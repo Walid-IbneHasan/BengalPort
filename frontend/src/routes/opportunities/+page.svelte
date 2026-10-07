@@ -1,5 +1,6 @@
 <script lang="ts">
   import { api } from "$lib/api";
+  import { shortDate } from "$lib/datetime";
   import { Search, MapPin, Calendar } from "lucide-svelte";
   // The first list is loaded on the server by +page.ts; searches run here.
   export let data: { items: any[] | null };
@@ -73,9 +74,7 @@
               <p>{o.description}</p>
               <span><MapPin size={15} />{o.location}, {o.country}</span
               >{#if o.deadline}<span
-                  ><Calendar size={15} />Deadline {new Date(
-                    o.deadline,
-                  ).toLocaleDateString()}</span
+                  ><Calendar size={15} />Apply by {shortDate(o.deadline)}</span
                 >{/if}<a href={`/opportunities/${o.slug}`}>VIEW DETAILS →</a>
             </div>
           </article>{/each}
