@@ -930,7 +930,7 @@ const admin: FastifyPluginAsync = async (app) => {
   };
 
   app.get("/payment-settings", async () => ({
-    data: { onlinePayment: app.gateway.configured, fees: await feeSettings() },
+    data: { onlinePayment: Object.values(app.gateways).some((gateway) => gateway.configured), payments: { bkash: app.gateways.bkash.configured, nagad: app.gateways.nagad.configured }, fees: await feeSettings() },
   }));
 
   app.put("/payment-settings", async (req, reply) => {
@@ -951,7 +951,7 @@ const admin: FastifyPluginAsync = async (app) => {
         create: { division, ...fee },
       });
     return {
-      data: { onlinePayment: app.gateway.configured, fees: await feeSettings() },
+      data: { onlinePayment: Object.values(app.gateways).some((gateway) => gateway.configured), payments: { bkash: app.gateways.bkash.configured, nagad: app.gateways.nagad.configured }, fees: await feeSettings() },
     };
   });
 
@@ -1096,7 +1096,7 @@ const admin: FastifyPluginAsync = async (app) => {
         backupTool: await dumpToolAvailable(),
         lastBackup: backup && { madeAt: backup.madeAt, bytes: backup.bytes },
         email: app.mailer.configured,
-        onlinePayment: app.gateway.configured,
+        onlinePayment: Object.values(app.gateways).some((gateway) => gateway.configured), payments: { bkash: app.gateways.bkash.configured, nagad: app.gateways.nagad.configured },
         teamInbox: teamAddresses().length > 0,
         formProtection: app.spamCheck.siteKey !== null,
       },

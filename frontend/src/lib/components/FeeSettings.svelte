@@ -8,11 +8,15 @@
   type Fee = { division: string; label: string; amount: number; minimumPayment: number };
   let fees = $state<Fee[]>([]);
   let onlinePayment = $state(false), loading = $state(true), saving = $state(false), error = $state(""), saved = $state(false);
+  let providers = $state<{ bkash: boolean; nagad: boolean }>({ bkash: false, nagad: false });
+  // "bKash and Nagad are connected", or which one is.
+  let connected = $derived([providers.bkash && "bKash", providers.nagad && "Nagad"].filter(Boolean) as string[]);
   const names: Record<string, string> = { BUSINESS: "Global Business", EDUCATION: "Global Education", HEALTHCARE: "Global Healthcare", UMRAH: "Global Umrah" };
 
   onMount(async () => {
     try {
-      const data = await api<{ onlinePayment: boolean; fees: Fee[] }>("/admin/payment-settings");
+      const data = await api<{ onlinePayment: boolean; payments?: { bkash: boolean; nagad: boolean }; fees: Fee[] }>("/admin/payment-settings");
+      providers = data.payments ?? { bkash: data.onlinePayment, nagad: false };
       fees = data.fees;
       onlinePayment = data.onlinePayment;
     } catch (e) {
@@ -47,9 +51,9 @@
       <b>Service fees and online payment</b>
       <span>A new application owes its division's fee. Leave a fee at 0 if staff will quote each application instead.</span>
     </div>
-    <strong class:off={!onlinePayment}>{onlinePayment ? "bKash is connected" : "bKash is not connected"}</strong>
+    <strong class:off={!onlinePayment}>{connected.length === 2 ? "bKash and Nagad are connected" : connected.length === 1 ? `${connected[0]} is connected` : "No payment provider is connected"}</strong>
   </header>
-  {#if !onlinePayment}<p class="hint">Customers cannot pay online until the bKash settings are added to the server. Fees set here still show on each application.</p>{/if}
+  {#if !onlinePayment}<p class="hint">Customers cannot pay online until the bKash or Nagad settings are added to the server. Fees set here still show on each application.</p>{:else if connected.length === 1}<p class="hint">Customers can pay with {connected[0]}. Add the {connected[0] === "bKash" ? "Nagad" : "bKash"} settings on the server to offer both.</p>{/if}
   {#if error}<p class="problem" role="alert">{error}</p>{/if}
   {#if loading}
     <p class="hint">Loading fees…</p>

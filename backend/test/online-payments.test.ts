@@ -37,11 +37,12 @@ const gateway: Gateway = {
   get configured() {
     return bkash.configured;
   },
+  refunds: true,
   async createPayment(order) {
     if (bkash.create === "down") throw new GatewayError("bKash is unavailable", "NO_RESPONSE");
     const paymentId = `TR-${stamp()}`;
     bkash.orders.push({ ...order, paymentId });
-    return { paymentId, bkashURL: `https://bkash.test/pay/${paymentId}`, signature: `sig-${paymentId}` };
+    return { paymentId, redirectUrl: `https://bkash.test/pay/${paymentId}`, signature: `sig-${paymentId}` };
   },
   async executePayment(paymentId) {
     bkash.executed.push(paymentId);
@@ -60,6 +61,44 @@ const gateway: Gateway = {
   },
   async refundStatus() {
     return [];
+  },
+};
+// A stand-in for Nagad. The money moves on Nagad's page, so completing and
+// querying a payment are the same verification; refunds are not made here.
+const nagadState = {
+  configured: true,
+  verify: "Success" as "Success" | "Aborted" | "Ready",
+  orders: [] as (PaymentOrder & { paymentId: string })[],
+  verified: [] as string[],
+};
+async function verifyNagad(paymentId: string): Promise<GatewayStatus> {
+  nagadState.verified.push(paymentId);
+  const outcome = nagadState.verify;
+  return {
+    paymentId,
+    status: outcome === "Success" ? "Completed" : outcome === "Aborted" ? "Cancelled" : "Initiated",
+    trxId: outcome === "Success" ? `NGD${paymentId.slice(-5)}` : null,
+    amount: nagadState.orders.find((order) => order.paymentId === paymentId)?.amount ?? null,
+    payerAccount: outcome === "Success" ? "01711222333" : null,
+  };
+}
+const nagad: Gateway = {
+  get configured() {
+    return nagadState.configured;
+  },
+  refunds: false,
+  async createPayment(order) {
+    const paymentId = `NG-${stamp()}`;
+    nagadState.orders.push({ ...order, paymentId });
+    return { paymentId, redirectUrl: `https://nagad.test/pay/${paymentId}`, signature: null };
+  },
+  executePayment: verifyNagad,
+  queryPayment: verifyNagad,
+  async refundPayment() {
+    throw new GatewayError("Nagad refunds are made in the Nagad merchant portal", "NOT_SUPPORTED");
+  },
+  async refundStatus() {
+    throw new GatewayError("Nagad refunds are made in the Nagad merchant portal", "NOT_SUPPORTED");
   },
 };
 const sent: Mail[] = [];
@@ -89,6 +128,7 @@ const lastOrder = () => bkash.orders.at(-1)!;
 const comeBack = (paymentId: string, outcome = "success", signature = `sig-${paymentId}`) =>
   app.inject({ method: "GET", url: `/api/payments/bkash/callback?paymentID=${paymentId}&status=${outcome}&signature=${signature}` });
 const landing = (res: { headers: Record<string, unknown> }) => new URL(String(res.headers.location));
+const landingOf = landing;
 const summary = async (applicationId: string) =>
   (await app.inject({ method: "GET", url: `/api/payments/application/${applicationId}`, headers: payToken(applicationId) })).json().data;
 // Starts a payment and returns from bKash having approved it.
@@ -101,7 +141,7 @@ const setFees = (fees: Record<string, unknown>[], who = admin) =>
 const fee = (overrides: Record<string, unknown> = {}) => ({ division: "UMRAH", label: "Umrah booking fee", amount: 5000, minimumPayment: 1000, ...overrides });
 
 before(async () => {
-  app = await buildApp({ gateway, mailer });
+  app = await buildApp({ gateway, gateways: { nagad }, mailer });
   admin = await createUser("ADMIN");
   member = await createUser("USER");
   stranger = await createUser("USER");
@@ -110,6 +150,8 @@ before(async () => {
 beforeEach(() => {
   Object.assign(bkash, { configured: true, create: "ok", execute: "completed", query: "initiated", reportedAmount: null });
   bkash.executed.length = bkash.queried.length = sent.length = 0;
+  Object.assign(nagadState, { configured: true, verify: "Success" });
+  nagadState.verified.length = 0;
 });
 after(async () => {
   const mine = { applicationId: { in: applications } };
@@ -126,9 +168,11 @@ after(async () => {
 describe("service fees and whether online payment is on", () => {
   const config = async () => (await app.inject({ method: "GET", url: "/api/payments/config" })).json().data;
 
-  test("online payment shows as unavailable until bKash is set up", async () => {
+  test("online payment shows as unavailable until a provider is set up", async () => {
     bkash.configured = false;
+    nagadState.configured = false;
     assert.equal((await config()).enabled, false);
+    assert.deepEqual((await config()).methods, []);
   });
 
   test("an admin sets a division's service fee and smallest part payment", async () => {
@@ -208,7 +252,7 @@ describe("starting a payment", () => {
     const owed = await application(60000);
     const res = await start(owed.id, 25000);
     assert.equal(res.statusCode, 200);
-    assert.equal(res.json().data.bkashURL, `https://bkash.test/pay/${lastOrder().paymentId}`);
+    assert.equal(res.json().data.redirectUrl, `https://bkash.test/pay/${lastOrder().paymentId}`);
     assert.equal(lastOrder().amount, 25000);
     assert.equal(lastOrder().payerReference, owed.reference);
     assert.match(lastOrder().invoice, /^BP-PAY-/);
@@ -477,5 +521,102 @@ describe("payments recorded by staff", () => {
     await record({ applicationId: open.id, service: "Consultation", totalDue: 30000, amount: 10000, method: "Cash" });
     const state = await summary(open.id);
     assert.deepEqual([state.amountDue, state.remaining], [30000, 20000]);
+  });
+});
+
+describe("paying with Nagad", () => {
+  const config = async () => (await app.inject({ method: "GET", url: "/api/payments/config" })).json().data;
+  const startNagad = (applicationId: string, amount: number) =>
+    app.inject({ method: "POST", url: "/api/payments/nagad/create", headers: payToken(applicationId), payload: { applicationId, amount }, remoteAddress: visitor() });
+  const lastNagad = () => nagadState.orders.at(-1)!;
+  const backFromNagad = (paymentId: string, outcome = "Success") =>
+    app.inject({ method: "GET", url: `/api/payments/nagad/callback?merchant=683002007104225&order_id=${lastNagad().invoice}&payment_ref_id=${paymentId}&status=${outcome}&status_code=000` });
+
+  test("the customer is offered every provider that is set up", async () => {
+    assert.deepEqual((await config()).methods, ["bkash", "nagad"]);
+    nagadState.configured = false;
+    assert.deepEqual((await config()).methods, ["bkash"]);
+    assert.equal((await config()).enabled, true);
+  });
+
+  test("online payment stays on while either provider is set up", async () => {
+    bkash.configured = false;
+    assert.equal((await config()).enabled, true);
+    assert.deepEqual((await config()).methods, ["nagad"]);
+    nagadState.configured = false;
+    assert.equal((await config()).enabled, false);
+  });
+
+  test("a Nagad payment sends the customer to Nagad with an order id Nagad accepts", async () => {
+    await setFees([fee({ amount: 5000, minimumPayment: 1000 })]);
+    const owed = await application(60000);
+    const res = await startNagad(owed.id, 25000);
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.json().data.redirectUrl, `https://nagad.test/pay/${lastNagad().paymentId}`);
+    assert.equal(lastNagad().amount, 25000);
+    assert.equal(lastNagad().payerReference, owed.reference);
+    // Nagad's order ids are plain letters and digits.
+    assert.match(lastNagad().invoice, /^BPPAY[A-Za-z0-9]{6,}$/);
+    assert.match(lastNagad().callbackURL, /\/api\/payments\/nagad\/callback$/);
+    assert.ok(lastNagad().clientIp, "the customer's address is passed on, since Nagad requires it");
+    assert.equal((await summary(owed.id)).paid, 0);
+  });
+
+  test("a payment Nagad verifies as successful is recorded as a Nagad payment with a receipt", async () => {
+    const owed = await application(60000);
+    await startNagad(owed.id, 25000);
+    const res = await backFromNagad(lastNagad().paymentId);
+    assert.equal(res.statusCode, 302);
+    const landing = landingOf(res);
+    assert.equal(landing.searchParams.get("status"), "success");
+    assert.equal(landing.searchParams.get("method"), "Nagad");
+    assert.ok(landing.searchParams.get("receipt"));
+    assert.deepEqual(nagadState.verified, [lastNagad().paymentId]);
+    const state = await summary(owed.id);
+    assert.equal(state.paid, 25000);
+    assert.equal(state.payments[0].method, "Nagad");
+    assert.equal(state.payments[0].amount, 25000);
+  });
+
+  test("a payment the customer abandoned on Nagad records nothing", async () => {
+    const owed = await application(60000);
+    await startNagad(owed.id, 25000);
+    const res = await backFromNagad(lastNagad().paymentId, "Aborted");
+    assert.equal(landingOf(res).searchParams.get("status"), "cancelled");
+    assert.equal((await summary(owed.id)).paid, 0);
+  });
+
+  test("a return that claims success counts only once Nagad itself verifies it", async () => {
+    const owed = await application(60000);
+    await startNagad(owed.id, 25000);
+    nagadState.verify = "Aborted";
+    const res = await backFromNagad(lastNagad().paymentId, "Success");
+    assert.equal(landingOf(res).searchParams.get("status"), "failed");
+    assert.equal((await summary(owed.id)).paid, 0);
+  });
+
+  test("a Nagad payment is refunded in Nagad's portal and recorded here by staff", async () => {
+    const owed = await application(60000);
+    await startNagad(owed.id, 25000);
+    await backFromNagad(lastNagad().paymentId);
+    const paymentId = (await summary(owed.id)).payments[0].id;
+    const res = await app.inject({ method: "GET", url: `/api/payments/${paymentId}/refunds`, headers: bearer(app, admin) });
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.json().data.viaGateway, false);
+    assert.equal(res.json().data.recordOnly, true);
+    assert.equal(res.json().data.gatewayName, "Nagad");
+  });
+
+  test("a Nagad payment cannot be started while Nagad is not set up", async () => {
+    nagadState.configured = false;
+    const owed = await application(60000);
+    const res = await startNagad(owed.id, 25000);
+    assert.equal(res.statusCode, 503);
+  });
+
+  test("an unknown provider is turned away", async () => {
+    const owed = await application(60000);
+    const res = await app.inject({ method: "POST", url: "/api/payments/rocket/create", headers: payToken(owed.id), payload: { applicationId: owed.id, amount: 1000 }, remoteAddress: visitor() });
+    assert.equal(res.statusCode, 404);
   });
 });

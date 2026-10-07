@@ -1,3 +1,4 @@
+import { providerKeys, providers } from "./gateway.js";
 import type { FastifyInstance } from "fastify";
 import { escapeHtml, type Mail } from "./email.js";
 
@@ -56,22 +57,27 @@ type PaymentNotice = {
   remaining: number;
   transactionId: string;
   receiptUrl: string;
+  // How the customer paid: bKash, Nagad, or the way staff recorded.
+  method: string;
 };
+// "bKash or Nagad": the providers a customer can pay with right now.
+const onlineNames = (app: FastifyInstance) =>
+  providerKeys.filter((provider) => app.gateways[provider].configured).map((provider) => providers[provider].name).join(" or ");
 const money = (amount: number) => `BDT ${new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(amount)}`;
 
-// A payment bKash has confirmed: the team is told, and the payer is sent
-// their receipt link.
+// A payment the provider has confirmed: the team is told, and the payer is
+// sent their receipt link.
 export function notifyPayment(app: FastifyInstance, notice: PaymentNotice) {
-  const { application, amount, remaining } = notice;
+  const { application, amount, remaining, method } = notice;
   const balance = remaining > 0 ? `Still due: ${money(remaining)}` : "The application is now fully paid.";
   const mails = teamAddresses().map((to) => mail(to, `Payment received for ${application.reference}: ${money(amount)}`, [
-    "A bKash payment was received on the Bengal Port website.",
-    [`Reference: ${application.reference}`, `Applicant: ${application.fullName}`, `Division: ${application.type}`, `Amount: ${money(amount)}`, `bKash transaction: ${notice.transactionId}`, balance].join("\n"),
+    `A ${method} payment was received on the Bengal Port website.`,
+    [`Reference: ${application.reference}`, `Applicant: ${application.fullName}`, `Division: ${application.type}`, `Amount: ${money(amount)}`, `${method} transaction: ${notice.transactionId}`, balance].join("\n"),
     `Payments in the admin: ${adminUrl("payments")}`,
   ]));
   mails.push(mail(application.email, `Payment received | Bengal Port ${application.reference}`, [
     "Hello,",
-    `We have received your bKash payment of ${money(amount)} for application ${application.reference}. bKash transaction: ${notice.transactionId}.`,
+    `We have received your ${method} payment of ${money(amount)} for application ${application.reference}. ${method} transaction: ${notice.transactionId}.`,
     balance,
     `Your receipt: ${notice.receiptUrl}`,
     notYou("make this payment"),
@@ -108,8 +114,8 @@ export function notifyAmountDue(app: FastifyInstance, application: ApplicantReco
   deliver(app, [mail(application.email, `Amount due for your application | Bengal Port ${application.reference}`, [
     "Hello,",
     `The amount due for your Bengal Port application ${application.reference} is ${money(amountDue)}.${remaining < amountDue ? ` After the payments we have received, ${money(remaining)} is still due.` : ""}`,
-    app.gateway.configured
-      ? `You can pay online with bKash, in full or in part: ${siteUrl()}/pay?ref=${application.reference}`
+    onlineNames(app)
+      ? `You can pay online with ${onlineNames(app)}, in full or in part: ${siteUrl()}/pay?ref=${application.reference}`
       : "Our team will contact you about how to pay.",
     "If you have a question about this amount, please contact us and quote your reference number.",
   ])]);
@@ -125,15 +131,15 @@ type RefundNotice = {
 // Money sent back to a customer: the team is told, and so is the payer.
 export function notifyRefund(app: FastifyInstance, notice: RefundNotice) {
   const { application, amount, method } = notice;
-  const trace = notice.transactionId ? ` bKash refund transaction: ${notice.transactionId}.` : "";
+  const trace = notice.transactionId ? ` ${method} refund transaction: ${notice.transactionId}.` : "";
   const mails = teamAddresses().map((to) => mail(to, `Refund made for ${application.reference}: ${money(amount)}`, [
     "A refund was recorded on the Bengal Port website.",
-    [`Reference: ${application.reference}`, `Applicant: ${application.fullName}`, `Amount: ${money(amount)}`, `Returned by: ${method}`, ...(notice.transactionId ? [`bKash refund transaction: ${notice.transactionId}`] : [])].join("\n"),
+    [`Reference: ${application.reference}`, `Applicant: ${application.fullName}`, `Amount: ${money(amount)}`, `Returned by: ${method}`, ...(notice.transactionId ? [`${method} refund transaction: ${notice.transactionId}`] : [])].join("\n"),
     `Payments in the admin: ${adminUrl("payments")}`,
   ]));
   mails.push(mail(application.email, `Refund made | Bengal Port ${application.reference}`, [
     "Hello,",
-    `We have refunded ${money(amount)} of your payment for application ${application.reference}${method === "bKash" ? " to the bKash wallet it was paid from" : ` by ${method.toLowerCase()}`}.${trace}`,
+    `We have refunded ${money(amount)} of your payment for application ${application.reference}${method === "bKash" || method === "Nagad" ? ` to the ${method} wallet it was paid from` : ` by ${method.toLowerCase()}`}.${trace}`,
     "If you have a question about this refund, please contact us and quote your reference number.",
   ]));
   deliver(app, mails);

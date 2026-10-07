@@ -8,7 +8,7 @@
   import { onMount, tick, untrack } from "svelte";
   import { phoneProblem } from "$lib/application-validation";
   import { toasts } from "$lib/toast";
-  import { taka } from "$lib/payment-rules";
+  import { paymentProviders, taka, type PaymentProvider } from "$lib/payment-rules";
   import { Check, MessageSquareText, BriefcaseBusiness, GraduationCap, HeartPulse, MoonStar } from "lucide-svelte";
   const tabs = [{ key: "GENERAL", label: "General enquiry", icon: MessageSquareText },{ key: "BUSINESS", label: "Business", icon: BriefcaseBusiness },{ key: "EDUCATION", label: "Education", icon: GraduationCap },{ key: "HEALTHCARE", label: "Healthcare", icon: HeartPulse },{ key: "UMRAH", label: "Umrah", icon: MoonStar }] as const;
   const enquiryCopy: Record<ApplyTab, { eyebrow: string; title: string; text: string }> = {
@@ -52,8 +52,10 @@
   });
   let copy = $derived(enquiryCopy[tab]);
   // Service fees, so an applicant knows the cost before filling in the form.
-  let payments = $state<{ enabled: boolean; fees: Record<string, { label: string; amount: number }> }>({ enabled: false, fees: {} });
+  let payments = $state<{ enabled: boolean; methods?: PaymentProvider[]; fees: Record<string, { label: string; amount: number }> }>({ enabled: false, fees: {} });
   let fee = $derived(payments.fees[tab]?.amount > 0 ? payments.fees[tab] : null);
+  // "bKash or Nagad": the providers a customer can pay with right now.
+  let payNames = $derived((payments.methods ?? (payments.enabled ? ["bkash" as const] : [])).map((item) => paymentProviders[item] ?? item).join(" or "));
   onMount(async () => { try { payments = await api("/payments/config"); } catch { /* the form works without it */ } });
   function choose(next: ApplyTab) {
     tab = next; form = applyState(new URLSearchParams({ tab: next })).form; success = ""; error = "";
@@ -78,7 +80,7 @@
 <section class="application-section"><div class="wrap">
   <div class="tabs" role="tablist" aria-label="Application type">{#each tabs as item}{@const Icon = item.icon}<button type="button" role="tab" aria-selected={tab===item.key} class:active={tab===item.key} onclick={()=>choose(item.key)}><Icon size={19}/><span>{item.label}</span></button>{/each}</div>
   {#if tab !== "GENERAL"}<div class="modes" role="group" aria-label="Form type"><button type="button" class:active={form==="enquiry"} aria-pressed={form==="enquiry"} onclick={()=>{form="enquiry";error=""}}>Quick enquiry</button><button type="button" class:active={form==="application"} aria-pressed={form==="application"} onclick={()=>{form="application";success="";error=""}}>Full application</button></div>{/if}
-  {#if fee && form === "application"}<p class="fee-note"><b>{fee.label}: {taka(fee.amount)}.</b> {payments.enabled ? "Paying online is optional: after you submit you can pay in full or in part with bKash, or pay later." : "Our team will tell you how to pay after you submit."} A quick enquiry is always free.</p>{/if}
+  {#if fee && form === "application"}<p class="fee-note"><b>{fee.label}: {taka(fee.amount)}.</b> {payments.enabled ? `Paying online is optional: after you submit you can pay in full or in part with ${payNames}, or pay later.` : "Our team will tell you how to pay after you submit."} A quick enquiry is always free.</p>{/if}
   {#if form === "enquiry"}
     <div class="general-box"><div class="general-intro"><span>{copy.eyebrow}</span><h2>{copy.title}</h2><p>{copy.text}</p></div>
       {#if success}<div class="sent" role="status" tabindex="-1" bind:this={sentBox}><i><Check size={28}/></i><h3>Enquiry sent successfully</h3><p>{success}</p><div class="sent-actions"><button type="button" class="btn" onclick={()=>(success="")}>SEND ANOTHER ENQUIRY</button><a href="/">Back to home</a></div></div>{:else}{#if error}<p class="error" role="alert">{error}</p>{/if}

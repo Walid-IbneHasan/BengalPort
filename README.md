@@ -53,11 +53,20 @@ Paying online is optional for the customer. An enquiry is always free; an applic
 
 **Refunds.** In Admin → Payments, *Refund* sends all or part of a bKash payment back to the wallet that paid (bKash allows this for 60 days, in up to ten parts) and records it; for a payment taken by staff it records a refund staff made by hand. Refunded money is owed again on the application, the payer is emailed, and the receipt lists the refunds. If bKash does not answer, the refund is shown as waiting and its amount is held back until bKash's own records settle it. A refund made directly in the bKash merchant portal is not seen by the website, so make refunds here.
 
-**Settings (backend).** Online payment stays switched off until all four keys are set:
+**Settings (backend).** Paying with bKash is switched on when all four keys are set:
 
 - `BKASH_USERNAME`, `BKASH_PASSWORD`, `BKASH_APP_KEY`, `BKASH_APP_SECRET`: issued by bKash for your merchant account.
 - `BKASH_BASE_URL`: `https://tokenized.sandbox.bka.sh` for testing (the default), and the live address bKash gives you, normally `https://tokenized.pay.bka.sh`, in production.
 - `API_PUBLIC_URL` must be the public address of the API: bKash sends customers back to `<API_PUBLIC_URL>/api/payments/bkash/callback`, and `FRONTEND_URL` decides which site they then land on.
+
+**Nagad.** Nagad can be offered beside bKash; when both are set up the customer chooses on the payment panel. Paying with Nagad is switched on when all four are set:
+
+- `NAGAD_MERCHANT_ID`, `NAGAD_MERCHANT_NUMBER`: the merchant id and the merchant wallet number Nagad issues.
+- `NAGAD_PUBLIC_KEY`, `NAGAD_PRIVATE_KEY`: Nagad's public key and the merchant's private key, pasted as Nagad issues them (base64, with or without the PEM lines).
+- `NAGAD_BASE_URL`: the sandbox `http://sandbox.mynagad.com:10080/remote-payment-gateway-1.0/api/dfs` when unset; in production the live address Nagad gives you, normally `https://api.mynagad.com/api/dfs`.
+- Nagad sends customers back to `<API_PUBLIC_URL>/api/payments/nagad/callback`. The money counts only once the API has verified the payment with Nagad.
+
+Nagad refunds are made in Nagad's merchant portal; record each one afterwards under Admin → Payments → Refund (method "Nagad (sent by staff)"), so the balance, the receipt and the customer's email stay right.
 
 bKash allows two token requests per hour, so the API stores its token in the database and renews it only when needed. Do not run a second copy of the API with the same bKash credentials against a different database.
 

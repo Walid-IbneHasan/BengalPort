@@ -986,7 +986,7 @@
               </form>
               <p class="hint">
                 The total this application costs. The customer can pay it in
-                full or in part{owing.onlinePayment ? " with bKash" : ""} from
+                full or in part{owing.onlinePayment ? " online" : ""} from
                 their dashboard or the Pay page.
               </p>{:else}<p class="hint">Loading payment details…</p>{/if}
           </section>

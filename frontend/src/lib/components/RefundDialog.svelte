@@ -5,12 +5,16 @@
   import { taka } from "$lib/payment-rules";
 
   // Admin: the refunds of one payment, and sending money back. A bKash payment
-  // is refunded through bKash, to the wallet that paid; for any other payment
-  // staff record how they returned the money.
+  // is refunded through bKash, to the wallet that paid. A Nagad payment is
+  // refunded in Nagad's merchant portal and recorded here; for any other
+  // payment staff record how they returned the money.
   type Refund = { id: string; amount: string; reason: string; method: string; status: "PENDING" | "COMPLETED" | "FAILED"; gatewayRefundId: string | null; recordedBy: string; createdAt: string };
   type State = {
     payment: { id: string; amount: number; method: string; status: string; payerAccount: string | null; application: { reference: string; fullName: string } | null };
     viaGateway: boolean;
+    // The payment went through a provider whose refunds are made in its own portal.
+    recordOnly: boolean;
+    gatewayName: string;
     gatewayReady: boolean;
     refundable: number;
     refunds: Refund[];
@@ -19,13 +23,14 @@
   let info = $state<State | null>(null);
   let amount = $state<number | null>(null), reason = $state(""), method = $state("Cash");
   let loading = $state(true), sending = $state(false), error = $state(""), notice = $state("");
-  const methods = ["Cash", "Bank transfer", "bKash (sent by staff)", "Cheque", "Other"];
-  const labels = { COMPLETED: "Refunded", PENDING: "Waiting for bKash", FAILED: "Not made" };
+  const methods = ["Cash", "Bank transfer", "bKash (sent by staff)", "Nagad (sent by staff)", "Cheque", "Other"];
+  const label = (status: Refund["status"]) => (status === "COMPLETED" ? "Refunded" : status === "PENDING" ? `Waiting for ${info?.gatewayName ?? "the provider"}` : "Not made");
 
   async function load(keepAmount = false) {
     try {
       info = await api<State>(`/payments/${paymentId}/refunds`);
       if (!keepAmount) amount = info.refundable || null;
+      if (info.recordOnly && methods.includes(`${info.gatewayName} (sent by staff)`)) method = `${info.gatewayName} (sent by staff)`;
     } catch (e) {
       error = e instanceof Error ? e.message : "The refunds could not be loaded.";
     } finally {
@@ -36,7 +41,7 @@
 
   async function send() {
     if (!info || amount === null) return;
-    const where = info.viaGateway ? `to the customer's bKash wallet${info.payment.payerAccount ? ` (${info.payment.payerAccount})` : ""}. bKash sends the money straight away and it cannot be undone` : `as returned by ${method.toLowerCase()}`;
+    const where = info.viaGateway ? `to the customer's ${info.gatewayName} wallet${info.payment.payerAccount ? ` (${info.payment.payerAccount})` : ""}. ${info.gatewayName} sends the money straight away and it cannot be undone` : `as returned by ${method.toLowerCase()}`;
     if (!confirm(`Record a refund of ${taka(Number(amount))} ${where}?`)) return;
     sending = true;
     error = notice = "";
@@ -48,7 +53,7 @@
       notice =
         refund.status === "COMPLETED"
           ? `${taka(Number(refund.amount))} has been refunded.`
-          : "bKash did not answer. The refund is waiting: open this payment again in a few minutes to see whether it went through. Its amount is held back until then.";
+          : `${info.gatewayName} did not answer. The refund is waiting: open this payment again in a few minutes to see whether it went through. Its amount is held back until then.`;
       reason = "";
       await load();
       onchange();
@@ -88,8 +93,9 @@
 
         {#if info.refundable > 0}
           {#if info.viaGateway && !info.gatewayReady}
-            <p class="hint boxed">bKash is not connected on the server, so this payment cannot be refunded here. Refund it in the bKash merchant portal.</p>
+            <p class="hint boxed">{info.gatewayName} is not connected on the server, so this payment cannot be refunded here. Refund it in the {info.gatewayName} merchant portal.</p>
           {:else}
+            {#if info.recordOnly}<p class="hint boxed">{info.gatewayName} refunds are made in the {info.gatewayName} merchant portal, to the wallet that paid{info.payment.payerAccount ? ` (${info.payment.payerAccount})` : ""}. Make the refund there first, then record it here so the balance, the receipt and the customer's email stay right.</p>{/if}
             <form onsubmit={(e) => { e.preventDefault(); send(); }}>
               <h3>Refund this payment</h3>
               <div class="grid">
@@ -98,10 +104,10 @@
               </div>
               <label><span>Reason</span><textarea rows="2" bind:value={reason} required minlength="3" maxlength="255" placeholder="e.g. The applicant withdrew"></textarea></label>
               <p class="hint">
-                {#if info.viaGateway}bKash sends the money to the wallet that paid{info.payment.payerAccount ? ` (${info.payment.payerAccount})` : ""}, straight away. bKash allows refunds for 60 days after a payment.{:else}This records a refund you have already made by hand; no money is moved by the website.{/if}
+                {#if info.viaGateway}{info.gatewayName} sends the money to the wallet that paid{info.payment.payerAccount ? ` (${info.payment.payerAccount})` : ""}, straight away. {info.gatewayName} allows refunds for 60 days after a payment.{:else}This records a refund you have already made by hand; no money is moved by the website.{/if}
                 The customer is emailed.
               </p>
-              <button class="send" disabled={sending}>{sending ? "Refunding…" : info.viaGateway ? "Refund through bKash" : "Record refund"}</button>
+              <button class="send" disabled={sending}>{sending ? "Refunding…" : info.viaGateway ? `Refund through ${info.gatewayName}` : "Record refund"}</button>
             </form>
           {/if}
         {:else if info.payment.status === "REFUNDED"}
@@ -114,7 +120,7 @@
             <ul>
               {#each info.refunds as refund (refund.id)}
                 <li>
-                  <div class="line"><b>{taka(Number(refund.amount))}</b><i class={refund.status.toLowerCase()}>{labels[refund.status]}</i></div>
+                  <div class="line"><b>{taka(Number(refund.amount))}</b><i class={refund.status.toLowerCase()}>{label(refund.status)}</i></div>
                   <p>{refund.reason}</p>
                   <small>{refund.method}{refund.gatewayRefundId ? ` · ${refund.gatewayRefundId}` : ""} · {refund.recordedBy} · {when(refund.createdAt)}</small>
                 </li>
