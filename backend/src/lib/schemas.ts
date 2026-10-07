@@ -490,7 +490,7 @@ export const homeContentSchema = z.object({
     items: z
       .array(
         z.object({
-          theme: z.enum(["business", "education", "health"]),
+          theme: z.enum(["business", "education", "health", "umrah"]),
           label: text,
           title: text,
           description: paragraph,

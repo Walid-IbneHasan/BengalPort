@@ -68,7 +68,7 @@ export type HomeContent = {
     title: string;
     description: string;
     items: Array<{
-      theme: "business" | "education" | "health";
+      theme: "business" | "education" | "health" | "umrah";
       label: string;
       title: string;
       description: string;
