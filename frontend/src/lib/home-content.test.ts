@@ -53,6 +53,36 @@ describe("reading the saved home page", () => {
     assert.equal(content.pathways.items[3].title, "Our own Umrah title");
   });
 
+  test("the retired five-figure stat strip becomes the current one", () => {
+    const saved = structuredClone(defaultHomeContent) as any;
+    // Keys in the order the database returns them, not the built-in order.
+    saved.stats = [
+      { icon: "globe", label: "Countries", value: "10+" },
+      { icon: "users", label: "Global Partners", value: "500+" },
+      { icon: "package", label: "Products", value: "1000+" },
+      { icon: "briefcase", label: "Business Tours", value: "100+" },
+      { icon: "smile", label: "Happy Clients", value: "500+" },
+    ];
+    const content = homeContentFrom(saved);
+    assert.deepEqual(content.stats, defaultHomeContent.stats);
+    assert.equal(content.stats.length, 4);
+    assert.equal(content.stats.some((stat) => stat.label === "Products"), false);
+  });
+
+  test("stats the admin edited are kept", () => {
+    const saved = structuredClone(defaultHomeContent) as any;
+    saved.stats = [
+      { value: "12+", label: "Countries", icon: "globe" },
+      { value: "500+", label: "Global Partners", icon: "users" },
+      { value: "1000+", label: "Products", icon: "package" },
+      { value: "100+", label: "Business Tours", icon: "briefcase" },
+      { value: "500+", label: "Happy Clients", icon: "smile" },
+    ];
+    const content = homeContentFrom(saved);
+    assert.equal(content.stats.length, 5);
+    assert.equal(content.stats[0].value, "12+");
+  });
+
   test("a saved page missing newer fields gets them from the built-in page", () => {
     const saved = structuredClone(defaultHomeContent) as any;
     delete saved.utility.facebook;

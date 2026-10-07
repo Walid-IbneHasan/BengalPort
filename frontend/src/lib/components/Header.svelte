@@ -210,7 +210,7 @@
   .division-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}
   @media (min-width:72rem){.division-links{grid-template-columns:repeat(4,minmax(0,1fr))}}
   .links .division-links>a{min-height:6.5rem;padding:1rem!important;border:1px solid #e3e8ea;border-radius:.8rem;align-items:flex-start;gap:.75rem;background:#fafbfb;color:#23405a!important;overflow:hidden;transition:transform 160ms var(--ease-out),border-color 160ms ease,background-color 160ms ease,box-shadow 160ms ease}
-  .links .division-links>a:after{display:none}.division-links i{width:2.3rem;height:2.3rem;flex:none;display:grid;place-items:center;border-radius:.65rem;background:#eaf0f5;color:#173f64}.division-links a.education i{background:#f1ecf6;color:#513374}.division-links a.healthcare i{background:#e7f3f1;color:#11665f}.division-links span{min-width:0}.division-links b,.division-links small{display:block}.division-links b{font-size:.86rem;line-height:1.25;white-space:normal}.division-links small{font-size:.7rem;line-height:1.45;color:#71808c;margin-top:.35rem;white-space:normal}.card-arrow{margin-left:auto;margin-top:.15rem;opacity:.45;transition:transform 160ms var(--ease-out),opacity 160ms ease}
+  .links .division-links>a:after{display:none}.division-links i{width:2.3rem;height:2.3rem;flex:none;display:grid;place-items:center;border-radius:.65rem;background:#eaf0f5;color:#173f64}.division-links span{min-width:0}.division-links b,.division-links small{display:block}.division-links b{font-size:.86rem;line-height:1.25;white-space:normal}.division-links small{font-size:.7rem;line-height:1.45;color:#71808c;margin-top:.35rem;white-space:normal}.card-arrow{margin-left:auto;margin-top:.15rem;opacity:.45;transition:transform 160ms var(--ease-out),opacity 160ms ease}
   .services-nav.open .services-menu{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}.services-nav.open>button svg{transform:rotate(180deg)}
   .links a:after {
     content: "";
@@ -695,7 +695,6 @@
       min-width: 3.75rem;
     }
   }
-  .division-links a.umrah i{background:#fbf2df;color:#9a6811}
 
   /* Final small-screen navigation hierarchy. */
   .mobile-menu-apply { display: none !important; }

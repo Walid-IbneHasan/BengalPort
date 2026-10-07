@@ -217,25 +217,6 @@
     </div>
   </section>
 
-  <section class="section journey" id="process" use:reveal>
-    <header class="heading">
-      <span class="eyebrow">{content.process.eyebrow}</span>
-      <h2>{content.process.title}</h2>
-      <p>{content.process.description}</p>
-    </header>
-    <ol class="timeline">
-      {#each content.process.steps as step, i}
-        <li class:right={i % 2 === 1}>
-          <i>{step.number}</i>
-          <div>
-            <h3>{step.title}</h3>
-            <p>{step.description}</p>
-          </div>
-        </li>
-      {/each}
-    </ol>
-  </section>
-
   <section class="section proof-wrap" use:reveal>
     <div class="proof">
       <div class="proof-copy">
@@ -278,6 +259,25 @@
       </div>
       {#if reviews.length}<Testimonials {reviews} />{/if}
     </div>
+  </section>
+
+  <section class="section journey" id="process" use:reveal>
+    <header class="heading">
+      <span class="eyebrow">{content.process.eyebrow}</span>
+      <h2>{content.process.title}</h2>
+      <p>{content.process.description}</p>
+    </header>
+    <ol class="timeline">
+      {#each content.process.steps as step, i}
+        <li class:right={i % 2 === 1}>
+          <i>{step.number}</i>
+          <div>
+            <h3>{step.title}</h3>
+            <p>{step.description}</p>
+          </div>
+        </li>
+      {/each}
+    </ol>
   </section>
 
   <section class="closing" use:reveal>

@@ -52,9 +52,8 @@ export const defaultHomeContent = {
   stats: [
     { value: "10+", label: "Countries", icon: "globe" },
     { value: "500+", label: "Global Partners", icon: "users" },
-    { value: "1000+", label: "Products", icon: "package" },
     { value: "100+", label: "Business Tours", icon: "briefcase" },
-    { value: "500+", label: "Happy Clients", icon: "smile" },
+    { value: "500+", label: "Happy Clients", icon: "handshake" },
   ],
   intro: {
     eyebrow: "ONE TRUSTED GLOBAL PARTNER",

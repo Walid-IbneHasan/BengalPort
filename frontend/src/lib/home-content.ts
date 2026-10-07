@@ -28,7 +28,7 @@ export type HomeContent = {
   stats: Array<{
     value: string;
     label: string;
-    icon: "globe" | "users" | "package" | "briefcase" | "smile";
+    icon: "globe" | "users" | "package" | "briefcase" | "smile" | "handshake";
   }>;
   intro: {
     eyebrow: string;
@@ -140,9 +140,8 @@ export const defaultHomeContent: HomeContent = {
   stats: [
     { value: "10+", label: "Countries", icon: "globe" },
     { value: "500+", label: "Global Partners", icon: "users" },
-    { value: "1000+", label: "Products", icon: "package" },
     { value: "100+", label: "Business Tours", icon: "briefcase" },
-    { value: "500+", label: "Happy Clients", icon: "smile" },
+    { value: "500+", label: "Happy Clients", icon: "handshake" },
   ],
   intro: {
     eyebrow: "ONE TRUSTED GLOBAL PARTNER",
@@ -301,8 +300,18 @@ export const defaultHomeContent: HomeContent = {
 // Built-in wording retired by the October 2026 refresh, as a path into the
 // content and the old text. A saved page that still carries the old text
 // shows the current built-in text instead; wording the admin wrote is kept.
-const retiredWording: Array<{ path: string[]; was: string }> = [
+const retiredWording: Array<{ path: string[]; was: unknown }> = [
   { path: ["hero", "title"], was: "BENGAL PORT" },
+  {
+    path: ["stats"],
+    was: [
+      { value: "10+", label: "Countries", icon: "globe" },
+      { value: "500+", label: "Global Partners", icon: "users" },
+      { value: "1000+", label: "Products", icon: "package" },
+      { value: "100+", label: "Business Tours", icon: "briefcase" },
+      { value: "500+", label: "Happy Clients", icon: "smile" },
+    ],
+  },
   {
     path: ["intro", "description"],
     was: "Bengal Port brings together verified business networks, international study pathways and trusted healthcare partners through one accountable team.",
@@ -316,6 +325,14 @@ const retiredWording: Array<{ path: string[]; was: string }> = [
 
 const at = (value: unknown, path: string[]) => path.reduce<any>((o, key) => o?.[key], value);
 
+// The same text whatever order the database returns an object's keys in.
+const canon = (value: unknown): string =>
+  Array.isArray(value)
+    ? `[${value.map(canon).join(",")}]`
+    : value && typeof value === "object"
+      ? `{${Object.keys(value as object).sort().map((key) => `${JSON.stringify(key)}:${canon((value as any)[key])}`).join(",")}}`
+      : JSON.stringify(value);
+
 // The home page as the site and the admin editor read it: whatever a saved
 // page lacks comes from the built-in page, retired wording is refreshed, and
 // a pathways list from before Umrah had one gains the built-in Umrah pathway.
@@ -324,7 +341,7 @@ export function homeContentFrom(saved: unknown): HomeContent {
   for (const { path, was } of retiredWording) {
     const parent = at(content, path.slice(0, -1));
     const key = path[path.length - 1];
-    if (parent && parent[key] === was) parent[key] = at(defaultHomeContent, path);
+    if (parent && canon(parent[key]) === canon(was)) parent[key] = structuredClone(at(defaultHomeContent, path));
   }
   if (!content.pathways.items.some((item) => item.href === "/umrah")) {
     const umrah = defaultHomeContent.pathways.items.find((item) => item.href === "/umrah");

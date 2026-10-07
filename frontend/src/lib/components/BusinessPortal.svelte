@@ -112,25 +112,6 @@
     </div>
   </section>
 
-  <section class="band" id="process" use:reveal>
-    <div class="section band-inner">
-      <header class="heading">
-        <span class="eyebrow">{content.process.eyebrow}</span>
-        <h2>{content.process.title}</h2>
-        <p>{content.process.description}</p>
-      </header>
-      <ol class="rail">
-        {#each content.process.steps as step}
-          <li>
-            <i>{step.number}</i>
-            <h3>{step.title}</h3>
-            <p>{step.description}</p>
-          </li>
-        {/each}
-      </ol>
-    </div>
-  </section>
-
   <section class="section network" id="partners" use:reveal>
     <header class="heading">
       <span class="eyebrow">{content.partners.eyebrow}</span>
@@ -224,6 +205,25 @@
         </div>
       </div>
       {#if reviews.length}<Testimonials {reviews} />{/if}
+    </div>
+  </section>
+
+  <section class="band" id="process" use:reveal>
+    <div class="section band-inner">
+      <header class="heading">
+        <span class="eyebrow">{content.process.eyebrow}</span>
+        <h2>{content.process.title}</h2>
+        <p>{content.process.description}</p>
+      </header>
+      <ol class="rail">
+        {#each content.process.steps as step}
+          <li>
+            <i>{step.number}</i>
+            <h3>{step.title}</h3>
+            <p>{step.description}</p>
+          </li>
+        {/each}
+      </ol>
     </div>
   </section>
 

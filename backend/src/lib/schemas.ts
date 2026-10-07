@@ -432,7 +432,7 @@ export const homeContentSchema = z.object({
       z.object({
         value: text,
         label: text,
-        icon: z.enum(["globe", "users", "package", "briefcase", "smile"]),
+        icon: z.enum(["globe", "users", "package", "briefcase", "smile", "handshake"]),
       }),
     )
     .min(1)
