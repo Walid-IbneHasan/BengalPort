@@ -8,7 +8,7 @@ export const defaultHomeContent = {
     youtube: "",
   },
   hero: {
-    title: "BENGAL PORT",
+    title: "Trade, study, treatment and Umrah abroad, guided from Dhaka.",
     tagline: "Connecting Bengal to the World",
     description1:
       "Your trusted partner in international trade, global education, healthcare and Umrah services.",
@@ -52,15 +52,14 @@ export const defaultHomeContent = {
   stats: [
     { value: "10+", label: "Countries", icon: "globe" },
     { value: "500+", label: "Global Partners", icon: "users" },
-    { value: "1000+", label: "Products", icon: "package" },
     { value: "100+", label: "Business Tours", icon: "briefcase" },
-    { value: "500+", label: "Happy Clients", icon: "smile" },
+    { value: "500+", label: "Happy Clients", icon: "handshake" },
   ],
   intro: {
     eyebrow: "ONE TRUSTED GLOBAL PARTNER",
     title: "Opportunity travels farther with the right connections.",
     description:
-      "Bengal Port brings together verified business networks, international study pathways and trusted healthcare partners through one accountable team.",
+      "Bengal Port brings together verified business networks, international study pathways, trusted healthcare partners and guided Umrah travel through one accountable team.",
     cta: "Discover Bengal Port",
     href: "/about",
   },
@@ -85,7 +84,7 @@ export const defaultHomeContent = {
     },
   ],
   pathways: {
-    eyebrow: "THREE PATHWAYS. ONE STANDARD.",
+    eyebrow: "FOUR PATHWAYS. ONE STANDARD.",
     title: "Global access, shaped around your goal",
     description:
       "Choose the path that fits your next move. Each division combines informed guidance with practical, end-to-end coordination.",
@@ -116,6 +115,15 @@ export const defaultHomeContent = {
           "Find hospitals and specialists, then coordinate appointments, treatment and international patient support.",
         href: "/healthcare",
         cta: "Explore healthcare",
+      },
+      {
+        icon: "umrah",
+        label: "For pilgrims",
+        title: "Travel for Umrah with everything arranged",
+        description:
+          "Visa, flights, hotels near the Haram and guided Ziyarat, with our team on the ground in Makkah and Madinah.",
+        href: "/umrah",
+        cta: "Explore Umrah",
       },
     ],
   },
@@ -195,7 +203,7 @@ export const defaultHomeContent = {
   },
   footer: {
     description:
-      "Connecting Bengal to the world through trusted business, education and healthcare partnerships.",
+      "Connecting Bengal to the world through trusted business, education, healthcare and Umrah partnerships.",
     address: "Dhaka, Bangladesh",
     copyright: "Bengal Port. All rights reserved.",
   },

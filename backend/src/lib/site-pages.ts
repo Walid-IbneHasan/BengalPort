@@ -38,22 +38,22 @@ export const defaultServicesContent = {
   groups: {
     business: {
       title: "Global Business",
-      image: "/images/global-business.webp",
+      image: "/images/services-business.webp",
       items: ["International Sourcing", "Supplier Connections", "Factory Visits", "Business Tours", "Trade Facilitation"],
     },
     education: {
       title: "Global Education",
-      image: "/images/global-education.webp",
+      image: "/images/services-education.webp",
       items: ["Study Abroad", "University Information", "Admission Guidance", "MBBS Opportunities", "Engineering Programs"],
     },
     healthcare: {
       title: "Global Healthcare",
-      image: "/images/global-healthcare.webp",
+      image: "/images/services-healthcare.webp",
       items: ["Hospital Connections", "International Treatment", "Health Checkups", "Surgery Coordination", "Patient Support"],
     },
     umrah: {
       title: "Global Umrah",
-      image: "/images/global-umrah.webp",
+      image: "/images/services-umrah.webp",
       items: ["Umrah Visa Support", "Flight Coordination", "Makkah and Madinah Stay", "Ground Transport", "Ziyarat Guidance"],
     },
   },

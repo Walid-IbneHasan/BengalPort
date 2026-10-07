@@ -34,6 +34,7 @@
     package: Package,
     briefcase: BriefcaseBusiness,
     smile: Smile,
+    handshake: Handshake,
   };
   const promiseIcons = {
     shield: ShieldCheck,
@@ -44,6 +45,7 @@
     factory: Factory,
     education: BookOpenCheck,
     healthcare: Stethoscope,
+    umrah: MoonStar,
   };
   $: content = $cmsContent;
   $: divisions = content.divisions.map((item) => ({
@@ -132,7 +134,7 @@
   <title>Bengal Port | Connecting Bengal to the World</title>
   <meta
     name="description"
-    content="Trusted international business, education and healthcare connections from Bengal to the world."
+    content="Trusted business, education, healthcare and Umrah connections from Bangladesh to the world, guided by one accountable team in Dhaka."
   />
 </svelte:head>
 
@@ -167,7 +169,7 @@
           style={`--arrival-delay:${160 + index * 90}ms`}
           ><div class="photo-slot">
             <div class="photo">
-              <img src={division.image} alt={division.title} decoding="async" />
+              <img src={division.image} alt="" decoding="async" />
             </div>
           </div>
           <div class="panel">
@@ -385,12 +387,14 @@
     text-align: center;
   }
   .title h1 {
-    font-size: clamp(2.75rem, 5vw, 4.65rem);
-    letter-spacing: 0.025em;
+    font-size: clamp(2.1rem, 3.4vw, 3.2rem);
+    letter-spacing: -0.02em;
     color: var(--heading);
-    margin: 0 0 0.125rem;
+    max-width: 30ch;
+    margin: 0 auto 0.35rem;
     font-weight: 780;
-    line-height: 1;
+    line-height: 1.08;
+    text-wrap: balance;
   }
   .tag {
     display: flex;
@@ -546,17 +550,14 @@
     border-radius: 2.5rem;
     padding: 3.45rem 1.5rem 1.125rem;
     position: relative;
-    background: var(--accent);
+    background: var(--panel);
     box-shadow: 0 0.75rem 2rem rgba(23, 48, 79, 0.08);
   }
-  .business {
-    --accent: #173c6c;
-  }
-  .education {
-    --accent: #59417a;
-  }
-  .health {
-    --accent: #247d7c;
+  /* One family of cards: navy panels, a gold ring and badge, as on the
+     division pages. The photo and icon tell the divisions apart. */
+  .division {
+    --panel: linear-gradient(145deg, #1d3a60, #102640);
+    --accent: #c79836;
   }
   .division-icon {
     z-index: 2;
@@ -569,6 +570,7 @@
     border: 0.3rem solid white;
     border-radius: 50%;
     background: var(--accent);
+    color: #102640;
     display: grid;
     place-items: center;
     box-shadow: 0 0.16rem 0 var(--gold);
@@ -655,8 +657,7 @@
     box-shadow: 0 0.35rem 0.8rem rgba(23, 48, 79, 0.09);
     background: #fff;
   }
-  .stat:nth-of-type(5) .stat-icon,
-  .stat:nth-of-type(9) .stat-icon {
+  .stat:last-of-type .stat-icon {
     color: var(--gold);
   }
   .stat b {
@@ -1126,7 +1127,7 @@
       padding-top: 0.85rem;
     }
     .title h1 {
-      font-size: clamp(2.4rem, 4.4vw, 3.5rem);
+      font-size: clamp(1.9rem, 3vw, 2.7rem);
     }
     .tag h2 {
       font-size: clamp(1.2rem, 2.1vw, 1.7rem);
@@ -1205,7 +1206,7 @@
       padding-top: 0.4rem;
     }
     .title h1 {
-      font-size: 2.25rem;
+      font-size: 1.85rem;
     }
     .tag h2 {
       font-size: 1.18rem;
@@ -1269,7 +1270,8 @@
     }
     .stats {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr);
       overflow: visible;
       gap: 0.5rem;
     }
@@ -1501,14 +1503,27 @@
   .mobile-hero-actions {
     display: none;
   }
-  .umrah {
-    --accent: #a97616;
-  }
   @media (min-width: 64rem) {
     .division-grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
       max-width: 86rem;
       gap: clamp(1rem, 2vw, 2rem);
+    }
+    .division {
+      display: flex;
+      flex-direction: column;
+    }
+    .panel {
+      flex: 1;
+      height: auto;
+      min-height: 12.125rem;
+    }
+    .panel h3 {
+      font-size: clamp(1.05rem, 1.55vw, 1.55rem);
+    }
+    .panel p {
+      font-size: clamp(0.75rem, 0.95vw, 0.875rem);
+      white-space: normal;
     }
   }
   @media (min-width: 46.251rem) and (max-width: 63.999rem) {
@@ -1670,7 +1685,7 @@
       height: 2.7rem;
       border: 0.18rem solid #fff;
       background: var(--accent);
-      color: #fff;
+      color: #102640;
       transform: translateX(50%);
       box-shadow: 0 0.35rem 0.85rem rgba(7, 28, 49, 0.2);
       backdrop-filter: none;
@@ -2263,7 +2278,7 @@
       inset: 0;
       background:
         linear-gradient(180deg, rgba(6, 23, 43, 0.03) 8%, rgba(6, 23, 43, 0.84) 100%),
-        linear-gradient(90deg, color-mix(in srgb, var(--accent) 60%, transparent), transparent 76%);
+        linear-gradient(90deg, rgba(23, 48, 79, 0.6), transparent 76%);
       pointer-events: none;
     }
     .photo:after {
@@ -2636,7 +2651,7 @@
       height: 2.7rem;
       border: 0.18rem solid #fff;
       background: var(--accent);
-      color: #fff;
+      color: #102640;
       box-shadow: 0 0.35rem 0.85rem rgba(7, 28, 49, 0.2);
       transform: translateX(50%);
       backdrop-filter: none;

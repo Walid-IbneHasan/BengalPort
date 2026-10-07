@@ -22,8 +22,21 @@
   let open = false;
   let servicesOpen = false;
   let accountHref = "/login";
-  // Re-checked on every navigation so the link follows sign-in and sign-out.
-  afterNavigate(() => { accountHref = localStorage.getItem("bp_token") ? "/dashboard" : "/login"; });
+  let headerEl: HTMLElement;
+  // Re-checked on every navigation so the link follows sign-in and sign-out;
+  // the menus close so a back or forward step never lands under one.
+  afterNavigate(() => { accountHref = localStorage.getItem("bp_token") ? "/dashboard" : "/login"; closeMenus(); });
+  function closeMenus() { open = false; servicesOpen = false; }
+  // Escape closes the innermost open menu; a tap or click outside the header
+  // closes them all.
+  function onKeydown(event: KeyboardEvent) {
+    if (event.key !== "Escape") return;
+    if (servicesOpen) servicesOpen = false;
+    else if (open) open = false;
+  }
+  function onPointerDown(event: PointerEvent) {
+    if ((open || servicesOpen) && headerEl && !headerEl.contains(event.target as Node)) closeMenus();
+  }
   const links = [
     ["HOME", "/"],
     ["ABOUT US", "/about"],
@@ -43,7 +56,9 @@
       : page.url.pathname.startsWith(href);
 </script>
 
-<header>
+<svelte:window onkeydown={onKeydown} onpointerdown={onPointerDown} />
+<header bind:this={headerEl} class:menu-open={open}>
+  <button type="button" class="scrim" tabindex="-1" aria-hidden="true" onclick={closeMenus}></button>
   <div class="utility">
     <div class="wrap utility-inner">
       <span><Globe2 size={17} />{$cmsContent.utility.message}</span>
@@ -67,7 +82,7 @@
         {#if link[0] === "SERVICES"}
           <div class:open={servicesOpen} class="services-nav">
             <button class:active={active(link[1]) || ["/business","/education","/healthcare","/umrah"].some(active)} aria-expanded={servicesOpen} aria-controls="services-menu" onclick={() => servicesOpen = !servicesOpen}>SERVICES <ChevronDown size={15}/></button>
-            <div id="services-menu" class="services-menu">
+            <div id="services-menu" class="services-menu" inert={!servicesOpen}>
               <div class="services-heading"><span>OUR GLOBAL DIVISIONS</span><a href="/services" onclick={() => { open=false; servicesOpen=false }}>View all services <ArrowRight size={14}/></a></div>
               <div class="division-links">{#each divisions as division}<a class={division.tone} href={division.href} onclick={() => { open=false; servicesOpen=false }}><i><svelte:component this={division.icon} size={20}/></i><span><b>{division.title}</b><small>{division.text}</small></span><ArrowRight class="card-arrow" size={16}/></a>{/each}</div>
             </div>
@@ -105,7 +120,13 @@
     height: 9.0625rem;
     pointer-events: none;
   }
+  /* The shade behind the phone drawer; a tap on it closes the drawer. */
+  .scrim {
+    display: none;
+  }
   .utility {
+    position: relative;
+    z-index: 15;
     background: #102b4b;
     color: #f7f9fb;
     height: 3.375rem;
@@ -145,7 +166,7 @@
     display: flex;
     align-items: center;
     padding: 0 max(3.6vw, 1.75rem);
-    gap: 1.75rem;
+    gap: clamp(1rem, 1.5vw, 1.75rem);
     box-shadow: 0 0.5rem 1.6rem rgba(23, 48, 79, 0.065);
     position: relative;
     z-index: 20;
@@ -155,7 +176,6 @@
     align-items: center;
     text-decoration: none;
     color: var(--heading);
-    min-width: 22.8rem;
   }
   .brand img {
     width: 4.25rem;
@@ -186,7 +206,7 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0 clamp(1rem, 2.2vw, 2.35rem);
+    padding: 0 clamp(0.75rem, 1.7vw, 2.35rem);
     text-decoration: none;
     color: #29405a;
     font-weight: 660;
@@ -200,7 +220,7 @@
     color: var(--gold-deep);
   }
   .services-nav{height:100%;display:flex;align-items:stretch;position:relative;flex:0 0 auto;min-width:max-content}
-  .services-nav>button{border:0;background:transparent;display:flex;align-items:center;gap:.4rem;padding:0 clamp(1rem,2.2vw,2.35rem);color:#3c5066;font:inherit;font-weight:640;font-size:.875rem;cursor:pointer;position:relative;white-space:nowrap;transition:color 160ms ease}
+  .services-nav>button{border:0;background:transparent;display:flex;align-items:center;gap:.4rem;padding:0 clamp(0.75rem,1.7vw,2.35rem);color:#3c5066;font:inherit;font-weight:640;font-size:.875rem;cursor:pointer;position:relative;white-space:nowrap;transition:color 160ms ease}
   .services-nav>button:after{content:"";position:absolute;bottom:.9rem;left:35%;right:35%;height:2px;background:var(--gold);transform:scaleX(0);transition:transform 200ms var(--ease-out)}
   .services-nav>button svg{transition:transform 180ms var(--ease-out)}
   .services-nav>button.active,.services-nav>button:hover{color:var(--gold-deep)}
@@ -211,7 +231,7 @@
   .division-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}
   @media (min-width:72rem){.division-links{grid-template-columns:repeat(4,minmax(0,1fr))}}
   .links .division-links>a{min-height:6.5rem;padding:1rem!important;border:1px solid #e3e8ea;border-radius:.8rem;align-items:flex-start;gap:.75rem;background:#fafbfb;color:#23405a!important;overflow:hidden;transition:transform 160ms var(--ease-out),border-color 160ms ease,background-color 160ms ease,box-shadow 160ms ease}
-  .links .division-links>a:after{display:none}.division-links i{width:2.3rem;height:2.3rem;flex:none;display:grid;place-items:center;border-radius:.65rem;background:#eaf0f5;color:#173f64}.division-links a.education i{background:#f1ecf6;color:#513374}.division-links a.healthcare i{background:#e7f3f1;color:#11665f}.division-links span{min-width:0}.division-links b,.division-links small{display:block}.division-links b{font-size:.86rem;line-height:1.25;white-space:normal}.division-links small{font-size:.7rem;line-height:1.45;color:#71808c;margin-top:.35rem;white-space:normal}.card-arrow{margin-left:auto;margin-top:.15rem;opacity:.45;transition:transform 160ms var(--ease-out),opacity 160ms ease}
+  .links .division-links>a:after{display:none}.division-links i{width:2.3rem;height:2.3rem;flex:none;display:grid;place-items:center;border-radius:.65rem;background:#eaf0f5;color:#173f64}.division-links span{min-width:0}.division-links b,.division-links small{display:block}.division-links b{font-size:.86rem;line-height:1.25;white-space:normal}.division-links small{font-size:.7rem;line-height:1.45;color:#71808c;margin-top:.35rem;white-space:normal}.card-arrow{margin-left:auto;margin-top:.15rem;opacity:.45;transition:transform 160ms var(--ease-out),opacity 160ms ease}
   .services-nav.open .services-menu{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}.services-nav.open>button svg{transform:rotate(180deg)}
   .links a:after {
     content: "";
@@ -287,6 +307,42 @@
   .menu:hover {
     background: #f1f3f4;
   }
+  /* Laptops between the drawer breakpoint and 85rem keep the full bar, with
+     the links spaced tighter so the last one never runs under the pill. */
+  @media (min-width: 68.76rem) and (max-width: 85rem) {
+    .links a,
+    .services-nav > button {
+      padding-inline: 0.8rem;
+    }
+    .brand img {
+      margin-right: 0.75rem;
+    }
+  }
+  /* Below 80rem the bar is compact: the brand drops its tagline and the
+     pill reads APPLY, as it does on phones. */
+  @media (min-width: 68.76rem) and (max-width: 80rem) {
+    .brand small {
+      display: none;
+    }
+    .brand b {
+      font-size: 1.5rem;
+    }
+    .brand img {
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+    .apply {
+      padding-left: 1.2rem;
+      gap: 0.7rem;
+    }
+    .apply span {
+      font-size: 0;
+    }
+    .apply span::after {
+      content: "APPLY";
+      font-size: 0.85rem;
+    }
+  }
   @media (max-width: 68.75rem) {
     .header-spacer { height: 8.3125rem; }
     .brand {
@@ -314,6 +370,16 @@
     .links.show {
       display: flex;
       animation: menu-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    header.menu-open .scrim {
+      display: block;
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      border: 0;
+      padding: 0;
+      background: rgba(16, 38, 64, 0.38);
+      cursor: default;
     }
     /* A drawer taller than the screen scrolls inside the fixed header. */
     .links {
@@ -660,7 +726,6 @@
       min-width: 3.75rem;
     }
   }
-  .division-links a.umrah i{background:#fbf2df;color:#9a6811}
 
   /* Final small-screen navigation hierarchy. */
   .mobile-menu-apply { display: none !important; }

@@ -13,8 +13,9 @@
 {#if page.url.pathname.startsWith('/admin')}
   <main>{@render children()}</main>
 {:else}
+  <a class="skip-link" href="#main">Skip to content</a>
   <Header/>
-  <main>{@render children()}</main>
+  <main id="main" tabindex="-1">{@render children()}</main>
   <Footer/>
   <WhatsApp/>
 {/if}

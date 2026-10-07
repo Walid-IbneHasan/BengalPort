@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { api } from "$lib/api";
   import { invalidateAll } from "$app/navigation";
-  import { defaultHomeContent, type HomeContent } from "$lib/home-content";
+  import { defaultHomeContent, homeContentFrom, type HomeContent } from "$lib/home-content";
   import {
     ArrowLeft,
     Check,
@@ -126,11 +126,9 @@
       const page = await api<any>("/admin/content/home", {
         headers: { authorization: `Bearer ${token}` },
       });
-      // Content saved before the social links existed gets their blank fields.
-      draft = {
-        ...page.content,
-        utility: { ...defaultHomeContent.utility, ...page.content.utility },
-      };
+      // Whatever the saved page lacks comes from the built-in page, and
+      // wording retired since it was saved is refreshed.
+      draft = homeContentFrom(page.content);
       revision = page.revision;
       published = page.published;
     } catch (e) {

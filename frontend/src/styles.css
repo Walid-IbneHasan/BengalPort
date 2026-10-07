@@ -82,13 +82,36 @@ a,
 button {
   -webkit-tap-highlight-color: transparent;
 }
+/* Deep gold reads against both the white pages and the navy panels. */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgba(199, 152, 54, 0.36);
+  outline: 3px solid #b8862a;
   outline-offset: 3px;
+}
+main:focus {
+  outline: none;
+}
+/* The skip link: off screen until a keyboard user tabs to it. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 200;
+  padding: 0.7rem 1rem;
+  border-radius: 0.6rem;
+  background: #17304f;
+  color: #fff;
+  font-weight: 750;
+  text-decoration: none;
+  opacity: 0;
+  transform: translateY(-200%);
+}
+.skip-link:focus-visible {
+  opacity: 1;
+  transform: none;
 }
 .wrap {
   width: min(86.25rem, calc(100% - 2rem));

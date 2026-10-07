@@ -21,6 +21,7 @@
   import { applyHref } from "$lib/apply-route";
   import { reveal } from "$lib/reveal";
   import { countryOf, flagCode } from "$lib/flags";
+  import { distinct, liveStats } from "$lib/live-stats";
   import RotatingWord from "./RotatingWord.svelte";
   import Testimonials from "./Testimonials.svelte";
 
@@ -92,6 +93,11 @@
   let query = $state("");
   let country = $state("All");
   let countries = $derived(["All", ...new Set(records.map((record) => record.country))]);
+  // The trust panel's figures, with hospitals, countries and treatments
+  // counted from what the page lists so they never contradict it.
+  let stats = $derived(
+    liveStats(content.stats, { hospitals: records.length, countries: distinct(records, "country"), treatments: content.treatments.length }),
+  );
   let filtered = $derived(
     records.filter((record) => {
       const haystack = `${record.name} ${record.city} ${record.country} ${record.description} ${(record.services ?? []).map((s: any) => s.title).join(" ")}`.toLowerCase();
@@ -217,25 +223,6 @@
     </div>
   </section>
 
-  <section class="section journey" id="process" use:reveal>
-    <header class="heading">
-      <span class="eyebrow">{content.process.eyebrow}</span>
-      <h2>{content.process.title}</h2>
-      <p>{content.process.description}</p>
-    </header>
-    <ol class="timeline">
-      {#each content.process.steps as step, i}
-        <li class:right={i % 2 === 1}>
-          <i>{step.number}</i>
-          <div>
-            <h3>{step.title}</h3>
-            <p>{step.description}</p>
-          </div>
-        </li>
-      {/each}
-    </ol>
-  </section>
-
   <section class="section proof-wrap" use:reveal>
     <div class="proof">
       <div class="proof-copy">
@@ -255,14 +242,14 @@
         {/each}
       </ol>
       <ul class="stats">
-        {#each content.stats as stat}{@const Icon = icons[stat.icon] || Globe2}
+        {#each stats as stat}{@const Icon = icons[stat.icon] || Globe2}
           <li><Icon size={22} /><b>{stat.value}</b><span>{stat.label}</span></li>
         {/each}
       </ul>
     </div>
   </section>
 
-  <section class="reviews" class:empty={!reviews.length} id="reviews" use:reveal>
+  {#if reviews.length}<section class="reviews" id="reviews" use:reveal>
     <header class="heading">
       <span class="eyebrow">{content.reviews.eyebrow}</span>
       <h2>{content.reviews.heading}</h2>
@@ -276,8 +263,27 @@
           <a class="primary" href="/dashboard">{content.reviews.cta}<ArrowRight size={17} /></a>
         </div>
       </div>
-      {#if reviews.length}<Testimonials {reviews} />{/if}
+      <Testimonials {reviews} />
     </div>
+  </section>{/if}
+
+  <section class="section journey" id="process" use:reveal>
+    <header class="heading">
+      <span class="eyebrow">{content.process.eyebrow}</span>
+      <h2>{content.process.title}</h2>
+      <p>{content.process.description}</p>
+    </header>
+    <ol class="timeline">
+      {#each content.process.steps as step, i}
+        <li class:right={i % 2 === 1}>
+          <i>{step.number}</i>
+          <div>
+            <h3>{step.title}</h3>
+            <p>{step.description}</p>
+          </div>
+        </li>
+      {/each}
+    </ol>
   </section>
 
   <section class="closing" use:reveal>
@@ -1051,11 +1057,6 @@
   .reviews-copy a {
     margin-top: 1.3rem;
   }
-  .reviews.empty .reviews-panel {
-    max-width: 34rem;
-    margin-inline: auto;
-  }
-
   .closing {
     margin-top: 2rem;
     background: var(--ink-panel);
@@ -1233,15 +1234,6 @@
     }
     .reviews-copy {
       padding: 2rem;
-    }
-    .reviews.empty .reviews-panel {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      align-items: center;
-      max-width: 62rem;
-    }
-    .reviews.empty .reviews-photo {
-      aspect-ratio: auto;
-      min-height: 19rem;
     }
     .closing {
       padding: 2.25rem 2rem;
