@@ -145,7 +145,7 @@
     display: flex;
     align-items: center;
     padding: 0 max(3.6vw, 1.75rem);
-    gap: 1.75rem;
+    gap: clamp(1rem, 1.5vw, 1.75rem);
     box-shadow: 0 0.5rem 1.6rem rgba(23, 48, 79, 0.065);
     position: relative;
     z-index: 20;
@@ -155,7 +155,6 @@
     align-items: center;
     text-decoration: none;
     color: var(--heading);
-    min-width: 22.8rem;
   }
   .brand img {
     width: 4.25rem;
@@ -186,7 +185,7 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0 clamp(1rem, 2.2vw, 2.35rem);
+    padding: 0 clamp(0.75rem, 1.7vw, 2.35rem);
     text-decoration: none;
     color: #29405a;
     font-weight: 660;
@@ -200,7 +199,7 @@
     color: var(--gold-deep);
   }
   .services-nav{height:100%;display:flex;align-items:stretch;position:relative;flex:0 0 auto;min-width:max-content}
-  .services-nav>button{border:0;background:transparent;display:flex;align-items:center;gap:.4rem;padding:0 clamp(1rem,2.2vw,2.35rem);color:#3c5066;font:inherit;font-weight:640;font-size:.875rem;cursor:pointer;position:relative;white-space:nowrap;transition:color 160ms ease}
+  .services-nav>button{border:0;background:transparent;display:flex;align-items:center;gap:.4rem;padding:0 clamp(0.75rem,1.7vw,2.35rem);color:#3c5066;font:inherit;font-weight:640;font-size:.875rem;cursor:pointer;position:relative;white-space:nowrap;transition:color 160ms ease}
   .services-nav>button:after{content:"";position:absolute;bottom:.9rem;left:35%;right:35%;height:2px;background:var(--gold);transform:scaleX(0);transition:transform 200ms var(--ease-out)}
   .services-nav>button svg{transition:transform 180ms var(--ease-out)}
   .services-nav>button.active,.services-nav>button:hover{color:var(--gold-deep)}
@@ -286,6 +285,42 @@
   .account:active{transform:scale(.96)}
   .menu:hover {
     background: #f1f3f4;
+  }
+  /* Laptops between the drawer breakpoint and 85rem keep the full bar, with
+     the links spaced tighter so the last one never runs under the pill. */
+  @media (min-width: 68.76rem) and (max-width: 85rem) {
+    .links a,
+    .services-nav > button {
+      padding-inline: 0.8rem;
+    }
+    .brand img {
+      margin-right: 0.75rem;
+    }
+  }
+  /* Below 80rem the bar is compact: the brand drops its tagline and the
+     pill reads APPLY, as it does on phones. */
+  @media (min-width: 68.76rem) and (max-width: 80rem) {
+    .brand small {
+      display: none;
+    }
+    .brand b {
+      font-size: 1.5rem;
+    }
+    .brand img {
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+    .apply {
+      padding-left: 1.2rem;
+      gap: 0.7rem;
+    }
+    .apply span {
+      font-size: 0;
+    }
+    .apply span::after {
+      content: "APPLY";
+      font-size: 0.85rem;
+    }
   }
   @media (max-width: 68.75rem) {
     .header-spacer { height: 8.3125rem; }
