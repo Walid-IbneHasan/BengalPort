@@ -29,7 +29,6 @@ export type BusinessContent = {
     description: string;
     steps: Array<{ number: string; title: string; description: string }>;
   };
-  calculator: { eyebrow: string; title: string; description: string; note: string; cta: string };
   partners: { eyebrow: string; title: string; description: string; empty: string };
   trust: {
     eyebrow: string;
@@ -64,13 +63,13 @@ export const defaultBusinessContent: BusinessContent = {
   shortcuts: [
     { icon: "search", title: "Find suppliers", subtitle: "Verified factories and exporters", href: "#partners" },
     { icon: "briefcase", title: "Plan a business visit", subtitle: "Factories, markets and trade fairs", href: "/apply?tab=business&form=enquiry&about=Business+tour" },
-    { icon: "calculator", title: "Estimate landed cost", subtitle: "Product, shipping and duty", href: "#calculator" },
+    { icon: "file", title: "Request a quotation", subtitle: "Shipping, duty and fees", href: "/apply?tab=business&form=enquiry&about=Quotation" },
     { icon: "handshake", title: "Trade opportunities", subtitle: "Buy, sell, partner", href: "/opportunities" },
   ],
   services: {
     eyebrow: "WHAT WE DO",
     title: "From the first product search to goods cleared at port",
-    description: "Six ways we work with importers, exporters and buyers.",
+    description: "How we work with importers, exporters and buyers.",
     items: [
       {
         image: "/images/divisions/biz-sourcing.webp",
@@ -104,9 +103,9 @@ export const defaultBusinessContent: BusinessContent = {
       {
         image: "/images/divisions/biz-costing.webp",
         title: "Landed-cost planning",
-        description: "Product cost, shipping and duty estimated before you commit to a purchase.",
-        cta: "Calculate now",
-        href: "#calculator",
+        description: "Product cost, shipping and duty estimated by our team before you commit to a purchase.",
+        cta: "Request a quote",
+        href: "/apply?tab=business&form=enquiry&about=Landed+cost+quotation",
       },
       {
         image: "/images/divisions/biz-documents.webp",
@@ -128,13 +127,6 @@ export const defaultBusinessContent: BusinessContent = {
       { number: "04", title: "Negotiate and order", description: "Terms, contracts and payment steps agreed with you in the loop." },
       { number: "05", title: "Ship and clear", description: "Shipping, documents and customs handled through to delivery." },
     ],
-  },
-  calculator: {
-    eyebrow: "TRADE PLANNING",
-    title: "Know your landed cost before you commit",
-    description: "A quick planning estimate. Our team prepares a detailed quotation for your actual shipment.",
-    note: "Planning estimate only; taxes and fees may vary.",
-    cta: "Request a detailed quote",
   },
   partners: {
     eyebrow: "BUSINESS NETWORK",
@@ -188,5 +180,12 @@ export const defaultBusinessContent: BusinessContent = {
 export function businessContentFrom(saved: unknown): BusinessContent {
   const hero = (saved as { hero?: { markets?: unknown } } | undefined)?.hero;
   if (!Array.isArray(hero?.markets)) return structuredClone(defaultBusinessContent);
-  return fillMissing(defaultBusinessContent, saved);
+  const content = fillMissing(defaultBusinessContent, saved);
+  // The landed-cost calculator left the page; a saved link to it asks for a
+  // quotation instead.
+  const quoteLink = defaultBusinessContent.shortcuts.find((item) => item.title === "Request a quotation");
+  const quoteTile = defaultBusinessContent.services.items.find((item) => item.title === "Landed-cost planning");
+  if (quoteLink) content.shortcuts = content.shortcuts.map((item) => (item.href === "#calculator" ? { ...quoteLink } : item));
+  if (quoteTile) content.services.items = content.services.items.map((item) => (item.href === "#calculator" ? { ...item, cta: quoteTile.cta, href: quoteTile.href } : item));
+  return content;
 }

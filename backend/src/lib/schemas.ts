@@ -536,9 +536,8 @@ const shortcuts = z
   .min(2)
   .max(4);
 // The Global Business page: a hero that names the markets it sources from,
-// six photo tiles, the engagement steps, the landed-cost calculator's
-// wording, the partner list's wording, the trust points with the stats, the
-// reviews and the closing panel.
+// six photo tiles, the engagement steps, the partner list's wording, the
+// trust points with the stats, the reviews and the closing panel.
 export const businessContentSchema = z.object({
   hero: z.object({
     eyebrow: text,
@@ -562,7 +561,6 @@ export const businessContentSchema = z.object({
       .max(6),
   }),
   process: processSection,
-  calculator: z.object({ eyebrow: text, title: text, description: paragraph, note: text, cta: text }),
   partners: z.object({ eyebrow: text, title: text, description: paragraph, empty: paragraph }),
   trust: z.object({
     eyebrow: text,

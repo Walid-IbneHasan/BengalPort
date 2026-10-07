@@ -87,11 +87,11 @@ describe("editing the Global Business page", () => {
   test("a page saved after the redesign that lacks a section gets the built-in one when the editor fills it", async () => {
     await clear();
     const partial = draft();
-    delete partial.calculator;
+    delete partial.trust;
     delete partial.reviews;
     const filled = fillMissing(defaultBusinessContent, partial);
     assert.equal((await save(filled)).statusCode, 200);
-    assert.equal((await live()).calculator.title, defaultBusinessContent.calculator.title);
+    assert.equal((await live()).trust.title, defaultBusinessContent.trust.title);
   });
 
   test("the built-in page, which replaces a page saved before the redesign, saves as it is", async () => {
