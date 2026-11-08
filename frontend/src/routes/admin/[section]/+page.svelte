@@ -212,6 +212,8 @@
   let owing: PaymentSummary | null = null;
   let amountDue: number | null = null;
   let savingAmount = false;
+  let owingFailed = false;
+  let amountSaved = false;
   // Whether the open application's answers are being corrected.
   let editing = false;
   let exporting = false;
@@ -229,6 +231,8 @@
     viewing = row;
     editing = false;
     owing = null;
+    owingFailed = false;
+    amountSaved = false;
     if (section !== "applications") return;
     try {
       owing = await api<PaymentSummary>(`/payments/application/${row.id}`, {
@@ -237,6 +241,7 @@
       amountDue = owing.amountDue;
     } catch {
       // The rest of the application still shows.
+      owingFailed = true;
     }
   }
   async function saveAmountDue() {
@@ -251,6 +256,7 @@
         }),
       });
       await openDetails(viewing);
+      amountSaved = true;
     } catch (e) {
       error = e instanceof Error ? e.message : "The amount could not be saved";
     } finally {
@@ -413,8 +419,10 @@
       rows = rows.map((row) => (row.id === id ? { ...row, ...updated } : row));
       success = "Saved";
       setTimeout(() => (success = ""), 1800);
+      return true;
     } catch (e) {
       error = e instanceof Error ? e.message : "Update failed";
+      return false;
     }
   }
   async function remove(id: string) {
@@ -536,6 +544,7 @@
           ><Search size={17} /><input
             bind:value={search}
             onkeydown={(e) => e.key === "Enter" && goToPage(1)}
+            aria-label={`Search ${config.title.toLowerCase()}`}
             placeholder={`Search ${config.title.toLowerCase()}`}
           /></label
         ><button onclick={() => goToPage(1)}>Search</button>{#if viewable}<button
@@ -564,17 +573,28 @@
                         data-label={column[1]}
                         >{#if column[0] === "status" && ["enquiries", "applications"].includes(section)}<select
                             class="status"
+                            aria-label="Status"
                             value={row.status}
-                            onchange={(e) =>
-                              update(row.id, { status: e.currentTarget.value })}
+                            onchange={(e) => {
+                              // A change the server refused goes back to what is saved.
+                              const select = e.currentTarget;
+                              update(row.id, { status: select.value }).then((saved) => {
+                                if (!saved) select.value = row.status;
+                              });
+                            }}
                             >{#each statuses as status}<option value={status}
                                 >{status.replaceAll("_", " ")}</option
                               >{/each}</select
                           >{:else if column[0] === "role"}<select
                             class="status"
+                            aria-label="Role"
                             value={row.role}
-                            onchange={(e) =>
-                              update(row.id, { role: e.currentTarget.value })}
+                            onchange={(e) => {
+                              const select = e.currentTarget;
+                              update(row.id, { role: select.value }).then((saved) => {
+                                if (!saved) select.value = row.role;
+                              });
+                            }}
                             ><option>USER</option><option>ADMIN</option></select
                           >{:else if column[0] === "published"}<button
                             class:off={!row.published}
@@ -683,6 +703,7 @@
           ><X /></button
         >
       </header>
+      {#if error}<p class="drawer-error" role="alert">{error}</p>{/if}
       <form
         onsubmit={(e) => {
           e.preventDefault();
@@ -918,6 +939,7 @@
           >
         </div>
       </header>
+      {#if error}<p class="drawer-error" role="alert">{error}</p>{/if}
       {#if editing}<div class="details-body">
           {#key viewing.id}<ApplicationEditor
               application={viewing}
@@ -1001,7 +1023,7 @@
                   /></label
                 ><button class="view" disabled={savingAmount}
                   >{savingAmount ? "Saving…" : "Save amount"}</button
-                >
+                >{#if amountSaved}<span class="amount-saved" role="status">Saved</span>{/if}
               </form>
               <p class="hint">
                 The total this application costs. The customer can pay it in
@@ -1010,7 +1032,7 @@
               </p>
               <a class="view invoice-link" href={`/admin/accounts/invoices?application=${viewing.id}`}
                 ><ReceiptText size={15} /> Generate invoice</a
-              >{:else}<p class="hint">Loading payment details…</p>{/if}
+              >{:else if owingFailed}<p class="hint" role="alert">Payment details could not be loaded. Close this panel and open it again.</p>{:else}<p class="hint">Loading payment details…</p>{/if}
           </section>
           <section>
             <h3>Documents</h3>
@@ -1207,6 +1229,19 @@
     margin-left: 0.3rem;
     padding: 0;
     vertical-align: middle;
+  }
+  .drawer-error {
+    margin: 1rem 1.5rem 0;
+    padding: 0.7rem 0.85rem;
+    border-radius: 0.6rem;
+    background: #fff0f0;
+    color: #943d45;
+    font-size: 0.82rem;
+  }
+  .amount-saved {
+    color: #17704b;
+    font-size: 0.78rem;
+    font-weight: 700;
   }
   .invoice-link {
     display: inline-flex;

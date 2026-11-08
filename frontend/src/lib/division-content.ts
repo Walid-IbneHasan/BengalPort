@@ -120,7 +120,7 @@ export type UmrahContent = Omit<DivisionContent, "services" | "directory"> & {
 export const defaultEducationContent: EducationContent = {
   hero: {
     eyebrow: "GLOBAL EDUCATION",
-    title: "Study beyond borders.",
+    title: "Study Abroad",
     tagline: "Choose clearly. Apply confidently.",
     description:
       "Explore trusted institutions, relevant programs and international study destinations with practical guidance from shortlist to admission.",

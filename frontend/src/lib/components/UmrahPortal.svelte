@@ -42,7 +42,7 @@
   </svg>
 {/snippet}
 
-<main class="umrah">
+<div class="umrah">
   <section class="hero">
     <div class="sky" aria-hidden="true"><span class="stars"></span><span class="stars twinkle"></span></div>
     <div class="skyline" aria-hidden="true">
@@ -201,7 +201,7 @@
       <a class="outline" href="/contact">{content.closing.secondary}</a>
     </div>
   </section>
-</main>
+</div>
 
 <style>
   /* The site's palette: navy for headings and dark surfaces, gold for actions

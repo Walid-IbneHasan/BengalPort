@@ -15,7 +15,7 @@ const paid = (payments: Parameters<typeof balance>[1]) => balance(null, payments
 
 const routes: FastifyPluginAsync = async (app) => {
   // The approved reviews, for one service or for all of them.
-  app.get("/", async (req, reply) => {
+  app.get("/", { config: { publicCache: true } }, async (req, reply) => {
     const parsed = reviewDivisionSchema.safeParse(req.query);
     if (!parsed.success) return reply.badRequest("Unknown service");
     return {

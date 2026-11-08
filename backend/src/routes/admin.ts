@@ -58,6 +58,9 @@ import {
   teamAddresses,
 } from "../lib/notifications.js";
 
+// A photo straight from a camera fits comfortably; it is resized before storing.
+const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
+
 function rangeStart(period: string) {
   const now = new Date();
   if (period === "day")
@@ -72,19 +75,21 @@ function rangeStart(period: string) {
 }
 
 const admin: FastifyPluginAsync = async (app) => {
-  app.addHook("preHandler", app.authenticate);
-  app.addHook("preHandler", async (req, reply) => {
+  // On arrival, so that nothing a visitor sends is read before they are checked.
+  app.addHook("onRequest", app.authenticate);
+  app.addHook("onRequest", async (req, reply) => {
     if ((req.user as any).role !== "ADMIN")
       return reply.forbidden("Admin access required");
   });
 
   app.post("/media", async (req, reply) => {
-    const upload = await req.file();
+    const upload = await req.file({ limits: { fileSize: MAX_IMAGE_BYTES } });
     if (!upload) return reply.badRequest("Choose an image to upload");
     if (!upload.mimetype.startsWith("image/"))
       return reply.badRequest("The selected file is not a supported image");
     try {
-      const processor = sharp({ limitInputPixels: false, sequentialRead: true })
+      const original = await upload.toBuffer();
+      const processor = sharp(original, { sequentialRead: true })
         .rotate()
         .resize({
           width: 2400,
@@ -93,7 +98,6 @@ const admin: FastifyPluginAsync = async (app) => {
           withoutEnlargement: true,
         })
         .webp({ quality: 84, effort: 5, smartSubsample: true });
-      upload.file.pipe(processor);
       const result = await processor.toBuffer({ resolveWithObject: true });
       const width = result.info.width;
       const height = result.info.height;
@@ -133,6 +137,8 @@ const admin: FastifyPluginAsync = async (app) => {
         },
       });
     } catch (error) {
+      if ((error as { statusCode?: number }).statusCode === 413)
+        return reply.code(413).send({ error: { code: "TOO_LARGE", message: `Choose an image under ${MAX_IMAGE_BYTES / 1024 / 1024} MB` } });
       req.log.warn({ error }, "Image processing failed");
       return reply.badRequest(
         "The selected file could not be decoded as an image",
@@ -385,6 +391,7 @@ const admin: FastifyPluginAsync = async (app) => {
         payments: {
           table: prisma.payment,
           args: {
+            omit: { gatewaySignature: true },
             where: matching("service", "transactionId", "method"),
             include: {
               user: person,
@@ -399,12 +406,12 @@ const admin: FastifyPluginAsync = async (app) => {
           table: prisma.receipt,
           args: {
             where: matching("receiptNumber"),
-            include: { payment: { include: { user: person, application } } },
+            include: { payment: { omit: { gatewaySignature: true }, include: { user: person, application } } },
             orderBy: newest,
           },
         },
       };
-    const list = lists[resource];
+    const list = Object.hasOwn(lists, resource) ? lists[resource] : undefined;
     if (!list) return reply.notFound("Admin resource not found");
     if (query.page === undefined)
       return { data: await list.table.findMany(list.args) };
@@ -438,7 +445,7 @@ const admin: FastifyPluginAsync = async (app) => {
 
   app.patch("/resources/:resource/:id", async (req, reply) => {
     const { resource, id } = req.params as { resource: string; id: string };
-    const body = req.body as Record<string, unknown>;
+    const body = (req.body ?? {}) as Record<string, unknown>;
     // What an application costs, set by staff after quoting the customer.
     if (resource === "applications" && body.amountDue !== undefined) {
       const amountDue = amountDueSchema.safeParse(body.amountDue);
@@ -540,7 +547,7 @@ const admin: FastifyPluginAsync = async (app) => {
   };
   type ManagedResource = keyof typeof resourceSchemas;
   const isManaged = (resource: string): resource is ManagedResource =>
-    resource in resourceSchemas;
+    Object.hasOwn(resourceSchemas, resource);
   const invalid = (reply: any, error: { flatten(): unknown }) =>
     reply.code(400).send({
       error: {

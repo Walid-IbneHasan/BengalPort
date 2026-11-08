@@ -138,7 +138,7 @@ describe("refunding a bKash payment", () => {
     await refund(payment.id, { amount: 4000, reason: "Trip postponed" });
     const res = await refund(payment.id, { amount: 1000.01, reason: "Trip cancelled" });
     assert.equal(res.statusCode, 400);
-    assert.match(res.json().message, /up to ৳1,000/);
+    assert.match(res.json().error.message, /up to ৳1,000/);
     assert.equal(bkash.orders.length, 1);
   });
 

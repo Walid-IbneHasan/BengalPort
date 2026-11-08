@@ -13,7 +13,7 @@
   ] as const;
 </script>
 
-<svelte:head><title>Services | Bengal Port</title><meta name="description" content={content.hero.description} /></svelte:head>
+<svelte:head><title>Services — Bengal Port</title><meta name="description" content={content.hero.description} /></svelte:head>
 <section class="page-hero"><div class="wrap"><span class="eyebrow">{content.hero.eyebrow}</span><h1>{content.hero.title}</h1><p>{content.hero.description}</p></div></section>
 <section class="section"><div class="wrap service-grid">{#each divisions as division}{@const group = content.groups[division.key]}<a class="service" href={division.href}><div class="visual"><img src={group.image} alt={group.title}/><span><division.icon size={24}/></span></div><div class="copy"><h2>{group.title}</h2><ul>{#each group.items as item}<li>{item}<ArrowRight size={14}/></li>{/each}</ul><strong>EXPLORE SERVICE <ArrowRight size={18}/></strong></div></a>{/each}</div></section>
 

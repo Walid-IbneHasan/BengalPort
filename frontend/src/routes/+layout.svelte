@@ -8,7 +8,20 @@
   import WhatsApp from '$lib/components/WhatsApp.svelte';
   import Toasts from '$lib/components/Toasts.svelte';
   let { children } = $props();
+  // One address for each page, whichever link or query led to it.
+  const canonical = $derived(`${page.url.origin}${page.url.pathname}`);
 </script>
+
+<svelte:head>
+  {#if !page.url.pathname.startsWith('/admin')}
+    <link rel="canonical" href={canonical} />
+    <meta property="og:site_name" content="Bengal Port" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    {#if !page.url.pathname.startsWith('/opportunities/')}<meta property="og:image" content={`${page.url.origin}/images/og-default.jpg`} />{/if}
+    <meta name="twitter:card" content="summary_large_image" />
+  {/if}
+</svelte:head>
 
 {#if page.url.pathname.startsWith('/admin')}
   <main>{@render children()}</main>

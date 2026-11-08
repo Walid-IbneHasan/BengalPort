@@ -2,6 +2,7 @@
   import { api } from "$lib/api";
   import { shortDate } from "$lib/datetime";
   import { Search, MapPin, Calendar } from "lucide-svelte";
+  const categories = [["BUSINESS", "Business"], ["EDUCATION", "Education"], ["HEALTHCARE", "Healthcare"], ["UMRAH", "Umrah"], ["FACTORY_VISIT", "Factory visit"], ["BUSINESS_TOUR", "Business tour"], ["SCHOLARSHIP", "Scholarship"], ["EVENT", "Event"]];
   // The first list is loaded on the server by +page.ts; searches run here.
   export let data: { items: any[] | null };
   let items: any[] = data.items ?? [];
@@ -24,7 +25,7 @@
   }
 </script>
 
-<svelte:head><title>Opportunities — Bengal Port</title></svelte:head>
+<svelte:head><title>Opportunities — Bengal Port</title><meta name="description" content="Current business delegations, factory visits, scholarships and events from Bengal Port." /></svelte:head>
 <section class="page-hero">
   <div class="wrap">
     <span class="eyebrow">OPPORTUNITIES</span>
@@ -51,12 +52,7 @@
           aria-label="Search opportunities"
         /></label
       ><select bind:value={category} aria-label="Category"
-        ><option value="">All categories</option><option>BUSINESS</option
-        ><option>EDUCATION</option><option>HEALTHCARE</option><option>UMRAH</option><option
-          >FACTORY_VISIT</option
-        ><option>BUSINESS_TOUR</option><option>SCHOLARSHIP</option><option
-          >EVENT</option
-        ></select
+        ><option value="">All categories</option>{#each categories as [value, name]}<option {value}>{name}</option>{/each}</select
       ><button class="btn">SEARCH</button>
     </form>
     {#if loading}<div class="state">
@@ -64,7 +60,7 @@
       </div>{:else if error}<div class="state error">
         {error}<button onclick={load}>Try again</button>
       </div>{:else if !items.length}<div class="state">
-        No opportunities match your filters.
+        {search || category ? "No opportunities match your filters." : "No opportunities are open right now. Please check back soon."}
       </div>{:else}<div class="grid-3">
         {#each items as o}<article class="opp">
             <img src={o.image} alt={o.title} loading="lazy" decoding="async" />

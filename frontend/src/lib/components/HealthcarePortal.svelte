@@ -106,7 +106,7 @@
   );
 </script>
 
-<main class="care">
+<div class="care">
   <section class="hero">
     <div class="chips" aria-hidden="true">
       {#each places as place, i}
@@ -296,7 +296,7 @@
       <a class="outline" href="/contact">{content.closing.secondary}</a>
     </div>
   </section>
-</main>
+</div>
 
 <style>
   /* The site's palette: navy for headings and dark surfaces, gold for actions

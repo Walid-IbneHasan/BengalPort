@@ -15,7 +15,9 @@
       signInRequired = e instanceof ApiError && e.status === 401;
       error = signInRequired
         ? "Sign in to view this receipt."
-        : "Receipt not found";
+        : e instanceof ApiError
+          ? "Receipt not found"
+          : "The receipt could not be loaded. Check your connection and try again.";
     }
   });
 </script>

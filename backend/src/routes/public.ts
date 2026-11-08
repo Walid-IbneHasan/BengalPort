@@ -1,6 +1,8 @@
 import type { FastifyPluginAsync } from 'fastify'; import { defaultAboutContent,defaultServicesContent,defaultContactContent } from '../lib/site-pages.js'; import { randomCode } from '../lib/reference.js'; import { notifyNewEnquiry,notifyNewApplication } from '../lib/notifications.js'; import { prisma } from '../lib/prisma.js'; import { enquirySchema,applicationSchema } from '../lib/schemas.js'; import { defaultHomeContent } from '../lib/home-content.js'; import {defaultBusinessContent} from '../lib/business-content.js'; import {defaultEducationContent,defaultHealthcareContent,defaultUmrahContent} from '../lib/division-content.js';
 const routes:FastifyPluginAsync=async app=>{
  const optionalUser=async(req:any)=>{if(!req.headers.authorization)return undefined;try{await app.authenticate(req,undefined);return req.user?.sub as string}catch{return undefined}};
+ // Everything read here is the same for every visitor, so browsers may keep it briefly.
+ app.addHook('onRoute',route=>{if(route.method==='GET'&&!route.url.endsWith('/health'))route.config={...route.config,publicCache:true}});
  app.get('/health',async()=>({data:{status:'ok'}}));
  app.get('/media/:asset',async(req,reply)=>{const assetParam=(req.params as {asset:string}).asset;const id=assetParam.replace(/\.(webp|avif)$/i,'');const asset=await prisma.mediaAsset.findUnique({where:{id}});if(!asset)return reply.notFound('Image not found');const etag=`\"${asset.id}-${asset.byteSize}\"`;if(req.headers['if-none-match']===etag)return reply.code(304).send();return reply.header('Content-Type',asset.mimeType).header('Content-Length',String(asset.byteSize)).header('Cache-Control','public, max-age=31536000, immutable').header('ETag',etag).header('X-Content-Type-Options','nosniff').send(asset.data)});
  app.get('/content/home',async()=>{const page=await prisma.pageContent.findUnique({where:{slug:'home'}});return {data:page?.published?{content:page.content,revision:page.revision,updatedAt:page.updatedAt}:{content:defaultHomeContent,revision:0,updatedAt:null}}});
@@ -15,7 +17,8 @@ const routes:FastifyPluginAsync=async app=>{
  app.get('/factories',async()=>({data:await prisma.factory.findMany({orderBy:[{featured:'desc'},{createdAt:'desc'}]})}));
  app.get('/education',async()=>({data:await prisma.institution.findMany({include:{programs:true}})}));
  app.get('/healthcare',async()=>({data:await prisma.hospital.findMany({include:{services:true}})}));
- const formLimit={config:{rateLimit:{max:10,timeWindow:'10 minutes'}}};
+ // The longest real application is far below this; anything larger is turned away unread.
+ const formLimit={bodyLimit:256*1024,config:{rateLimit:{max:10,timeWindow:'10 minutes'}}};
  // Spam protection for the two public forms. The forms carry a field no
  // person sees; a submission that fills it in is answered as if it had
  // worked and is thrown away. Visitors who are not signed in must also pass

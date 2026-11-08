@@ -2,6 +2,8 @@
 // medical reports). They are stored in the database and are never public.
 export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
 export const MAX_DOCUMENTS = 10;
+// Files live in the database, so one application cannot be allowed to fill it.
+export const MAX_APPLICATION_BYTES = 30 * 1024 * 1024;
 
 // What lists show about a document: everything except its contents.
 export const documentSummary = {

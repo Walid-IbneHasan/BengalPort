@@ -25,8 +25,8 @@
     </div>
     <div>
       <h3>Contact</h3>
-      <p><Phone size={16} /> {$cmsContent.utility.phone}</p>
-      <p><Mail size={16} /> {$cmsContent.utility.email}</p>
+      <p><a href={`tel:${$cmsContent.utility.phone.replace(/\s/g, "")}`}><Phone size={16} /> {$cmsContent.utility.phone}</a></p>
+      <p><a href={`mailto:${$cmsContent.utility.email}`}><Mail size={16} /> {$cmsContent.utility.email}</a></p>
       <p><MapPin size={16} /> {$cmsContent.footer.address}</p>
     </div>
   </div>

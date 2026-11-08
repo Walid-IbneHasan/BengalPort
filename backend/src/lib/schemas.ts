@@ -1,11 +1,14 @@
 import { z } from "zod";
 export const enquirySchema = z.object({
   type: z.enum(["GENERAL", "BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH"]),
-  name: z.string().min(2),
-  phone: z.string().min(7),
-  email: z.string().email().optional().or(z.literal("")),
-  message: z.string().min(5),
-  details: z.record(z.unknown()).optional(),
+  name: z.string().min(2).max(120),
+  phone: z.string().min(7).max(30),
+  email: z.string().email().max(160).optional().or(z.literal("")),
+  message: z.string().min(5).max(5000),
+  details: z
+    .record(z.string(), z.unknown())
+    .refine((details) => JSON.stringify(details).length <= 2000, "These details are too long")
+    .optional(),
 });
 export const requiredApplicationFields: Record<
   "BUSINESS" | "EDUCATION" | "HEALTHCARE" | "UMRAH",
@@ -185,15 +188,15 @@ export const requiredApplicationFields: Record<
 // The answers as written, with the spaces around each one removed: phone
 // keyboards finish a word with a space, and that must never fail a check.
 const trimmedAnswers = z
-  .record(z.unknown())
+  .record(z.string(), z.unknown())
   .transform((details) => Object.fromEntries(Object.entries(details).map(([key, value]) => [key, typeof value === "string" ? value.trim() : value])));
 export const applicationSchema = z
   .object({
     type: z.enum(["BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH"]),
-    fullName: z.string().trim().min(2),
-    email: z.string().trim().email(),
-    phone: z.string().trim().min(7),
-    details: trimmedAnswers,
+    fullName: z.string().trim().min(2).max(160),
+    email: z.string().trim().email().max(160),
+    phone: z.string().trim().min(7).max(30),
+    details: trimmedAnswers.refine((details) => JSON.stringify(details).length <= 100_000, "These answers are too long"),
   })
   .superRefine((value, ctx) => {
     for (const key of requiredApplicationFields[value.type]) {
@@ -236,7 +239,7 @@ export const applicationEditSchema = z.object({
   fullName: z.string().trim().min(2),
   email: z.string().email(),
   phone: z.string().trim().min(7),
-  details: z.record(z.unknown()),
+  details: z.record(z.string(), z.unknown()),
 });
 export const noteSchema = z.object({ body: z.string().trim().min(1).max(2000) });
 // A customer's review: a rating, the name to show, an optional line about

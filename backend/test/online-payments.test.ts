@@ -270,14 +270,14 @@ describe("starting a payment", () => {
     const orders = bkash.orders.length;
     const res = await start(owed.id, 70000);
     assert.equal(res.statusCode, 400);
-    assert.match(res.json().message, /You can pay up to ৳60,000/);
+    assert.match(res.json().error.message, /You can pay up to ৳60,000/);
     assert.equal(bkash.orders.length, orders);
   });
 
   test("less than the smallest part payment is refused", async () => {
     await setFees([fee({ amount: 5000, minimumPayment: 1000 })]);
     const owed = await application(60000);
-    assert.match((await start(owed.id, 500)).json().message, /smallest part payment is ৳1,000/);
+    assert.match((await start(owed.id, 500)).json().error.message, /smallest part payment is ৳1,000/);
   });
 
   test("an application with no amount set cannot be paid yet", async () => {
@@ -402,6 +402,8 @@ describe("coming back from bKash", () => {
     const owed = await application(60000);
     const res = await pay(owed.id, 25000);
     assert.equal(landing(res).searchParams.get("status"), "pending");
+    // The result page waits for this payment, not for any payment on the application.
+    assert.ok(landing(res).searchParams.get("payment"));
     assert.equal((await summary(owed.id)).paid, 0);
     bkash.query = "completed";
     assert.equal((await summary(owed.id)).paid, 25000);
@@ -531,6 +533,31 @@ describe("paying with Nagad", () => {
   const lastNagad = () => nagadState.orders.at(-1)!;
   const backFromNagad = (paymentId: string, outcome = "Success") =>
     app.inject({ method: "GET", url: `/api/payments/nagad/callback?merchant=683002007104225&order_id=${lastNagad().invoice}&payment_ref_id=${paymentId}&status=${outcome}&status_code=000` });
+
+  test("a payment the provider has not decided waits, rather than being marked failed", async () => {
+    nagadState.verify = "Ready";
+    try {
+      const owed = await application(60000);
+      await startNagad(owed.id, 1000);
+      const paymentId = lastNagad().paymentId;
+      const res = await backFromNagad(paymentId);
+      assert.equal(landing(res).searchParams.get("status"), "pending");
+      const row = await prisma.payment.findFirstOrThrow({ where: { gatewayPaymentId: paymentId } });
+      assert.equal(row.status, "PENDING");
+    } finally {
+      nagadState.verify = "Success";
+    }
+  });
+
+  test("a rejected or cancelled application cannot be paid", async () => {
+    for (const status of ["REJECTED", "CANCELLED"] as const) {
+      const owed = await application(60000);
+      await prisma.application.update({ where: { id: owed.id }, data: { status } });
+      const res = await startNagad(owed.id, 1000);
+      assert.equal(res.statusCode, 400);
+      assert.match(res.json().error.message, /closed/i);
+    }
+  });
 
   test("the customer is offered every provider that is set up", async () => {
     assert.deepEqual((await config()).methods, ["bkash", "nagad"]);

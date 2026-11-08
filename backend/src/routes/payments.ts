@@ -108,7 +108,7 @@ const routes: FastifyPluginAsync = async (app) => {
   // Asks the provider what became of a payment whose confirmation went
   // unanswered. "pending" means it could not be reached, so nothing is
   // decided yet.
-  async function confirm(payment: { id: string; provider: string; gatewayPaymentId: string | null }) {
+  async function confirm(payment: { id: string; provider: string; gatewayPaymentId: string | null; createdAt: Date }, undecidedWaits = true) {
     let result: GatewayStatus;
     try {
       result = await gatewayFor(payment.provider)!.queryPayment(payment.gatewayPaymentId!);
@@ -120,6 +120,12 @@ const routes: FastifyPluginAsync = async (app) => {
       await complete(payment.id, result);
       return "paid" as const;
     }
+    // "Initiated" means the provider has not decided: money may still move, so
+    // the payment waits, up to the time after which an attempt counts as abandoned.
+    if (undecidedWaits && result.status === "Initiated" && Date.now() - payment.createdAt.getTime() < ABANDONED_AFTER_MS) {
+      await prisma.payment.updateMany({ where: { id: payment.id, status: "PENDING" }, data: { gatewayStatus: "unknown" } });
+      return "pending" as const;
+    }
     await prisma.payment.updateMany({ where: { id: payment.id, status: "PENDING" }, data: { status: "FAILED", gatewayStatus: "failed" } });
     return "failed" as const;
   }
@@ -128,7 +134,7 @@ const routes: FastifyPluginAsync = async (app) => {
   async function summary(applicationId: string) {
     const unsettled = await prisma.payment.findMany({
       where: { applicationId, provider: { in: providerKeys }, status: "PENDING", gatewayStatus: { in: ["executing", "unknown"] } },
-      select: { id: true, provider: true, gatewayPaymentId: true },
+      select: { id: true, provider: true, gatewayPaymentId: true, createdAt: true },
     });
     for (const payment of unsettled) await confirm(payment);
     const application = await prisma.application.findUnique({
@@ -209,6 +215,8 @@ const routes: FastifyPluginAsync = async (app) => {
     if (!gateway.configured) return reply.serviceUnavailable(`Paying with ${name} is not available yet. Please choose another way to pay, or contact us.`);
 
     const application = await prisma.application.findUniqueOrThrow({ where: { id: applicationId } });
+    if (application.status === "REJECTED" || application.status === "CANCELLED")
+      return reply.badRequest("This application has been closed, so it cannot be paid. Please contact us.");
     await prisma.payment.updateMany({
       where: { applicationId, provider, status: "PENDING", gatewayStatus: "created", createdAt: { lt: new Date(Date.now() - ABANDONED_AFTER_MS) } },
       data: { status: "FAILED", gatewayStatus: "abandoned" },
@@ -273,7 +281,7 @@ const routes: FastifyPluginAsync = async (app) => {
       });
     const payment = gatewayPaymentId || query.orderId ? await find() : null;
     if (!payment) return back("error");
-    const details = { ref: payment.application?.reference ?? "", application: payment.applicationId ?? "" };
+    const details = { ref: payment.application?.reference ?? "", application: payment.applicationId ?? "", payment: payment.id };
     const paid = (row: { receipt: { receiptNumber: string } | null }) =>
       back("success", { ...details, receipt: row.receipt!.receiptNumber, key: receiptKey(row.receipt!.receiptNumber) });
 
@@ -309,7 +317,8 @@ const routes: FastifyPluginAsync = async (app) => {
       } else outcome = await confirm(payment);
     } catch (error) {
       req.log.warn({ error }, `${name} did not confirm the payment; checking its state`);
-      outcome = await confirm(payment);
+      // A clear refusal is final; silence is not, because the money may have moved.
+      outcome = await confirm(payment, !(error instanceof GatewayError && error.code !== "NO_RESPONSE"));
     }
     if (outcome === "paid") return paid((await find())!);
     return back(outcome, details);
@@ -378,6 +387,7 @@ const routes: FastifyPluginAsync = async (app) => {
       where: { receiptNumber: number },
       include: {
         payment: {
+          omit: { gatewaySignature: true, gatewayPaymentId: true },
           include: {
             user: { select: { name: true } },
             application: { select: { reference: true, fullName: true } },

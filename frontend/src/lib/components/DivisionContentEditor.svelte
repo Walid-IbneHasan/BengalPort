@@ -172,9 +172,11 @@
                   >{/if}</span
               >{#if field.long}<textarea
                   rows="3"
+                  aria-label={field.label}
                   value={field.value}
                   oninput={(e) => setPath(field.path, e.currentTarget.value)}
                 ></textarea>{:else}<input
+                  aria-label={field.label}
                   value={field.value}
                   oninput={(e) => setPath(field.path, e.currentTarget.value)}
                 />{/if}</label
