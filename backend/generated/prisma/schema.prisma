@@ -152,6 +152,7 @@ model Application {
   documents ApplicationDocument[]
   notes     StaffNote[]
   review    Review?
+  invoices  Invoice[]
   createdAt DateTime              @default(now())
   updatedAt DateTime              @updatedAt
 }
@@ -381,7 +382,37 @@ model FinancialTransaction {
   paymentStatus PaymentStatus?
   categoryId    String
   category      FinancialCategory @relation(fields: [categoryId], references: [id])
+  invoices      Invoice[]
   createdAt     DateTime          @default(now())
+}
+
+// A bill given to a customer. The customer's details and the amounts are kept
+// on the invoice itself, so that a printed copy stays true after the
+// application or ledger entry it came from changes or is removed.
+model Invoice {
+  id              String                @id @default(cuid())
+  // The invoice number is made from this: INV-000123. Deleting an invoice
+  // never frees its number.
+  serial          Int                   @unique @default(autoincrement())
+  issuedAt        DateTime
+  dueAt           DateTime?
+  customerName    String
+  customerPhone   String?
+  customerEmail   String?
+  customerAddress String?
+  // [{ description, quantity, unitPrice }]
+  items           Json
+  total           Decimal               @db.Decimal(12, 2)
+  paid            Decimal               @default(0) @db.Decimal(12, 2)
+  notes           String?
+  applicationId   String?
+  application     Application?          @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  transactionId   String?
+  transaction     FinancialTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([issuedAt])
 }
 
 model PageContent {

@@ -327,6 +327,37 @@ export const transactionSchema = z
     { message: "Enter a total amount, or both quantity and unit price" },
   );
 
+const optionalText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .nullish()
+    .transform((value) => value || null);
+
+export const invoiceSchema = z.object({
+  issuedAt: z.coerce.date(),
+  dueAt: z.coerce.date().nullish().transform((value) => value ?? null),
+  customerName: z.string().trim().min(2).max(160),
+  customerPhone: optionalText(40),
+  customerEmail: optionalText(160),
+  customerAddress: optionalText(300),
+  items: z
+    .array(
+      z.object({
+        description: z.string().trim().min(1).max(300),
+        quantity: z.coerce.number().positive().max(1_000_000),
+        unitPrice: z.coerce.number().min(0).max(9_999_999_999),
+      }),
+    )
+    .min(1)
+    .max(50),
+  paid: z.coerce.number().min(0).default(0),
+  notes: optionalText(2000),
+  applicationId: z.string().nullish(),
+  transactionId: z.string().nullish(),
+});
+
 const text = z.string().trim().min(1).max(500);
 const paragraph = z.string().trim().min(1).max(2000);
 const link = z

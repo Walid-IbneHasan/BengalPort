@@ -5,6 +5,8 @@ export type DetailGroup = {
   rows: { label: string; value: string }[];
 };
 
+export const ADDITIONAL_DETAILS = "Additional details";
+
 function display(value: unknown): string {
   if (value === null || value === undefined) return "";
   if (Array.isArray(value)) return value.map(display).filter(Boolean).join(", ");
@@ -39,7 +41,7 @@ export function detailGroups(
     }),
   }));
   groups.push({
-    title: "Additional details",
+    title: ADDITIONAL_DETAILS,
     rows: Object.entries(answers).flatMap(([key, raw]) => {
       const value = display(raw);
       return !known.has(key) && value ? [{ label: readable(key), value }] : [];
