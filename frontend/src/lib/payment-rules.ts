@@ -1,5 +1,5 @@
 // The amount rules the API enforces, checked in the form first so the
-// customer is told before being sent to bKash. Amounts are compared in paisa.
+// customer is told before being sent to the provider. Amounts are compared in paisa.
 const paisa = (amount: number) => Math.round(amount * 100);
 
 export const taka = (amount: number) =>
@@ -18,7 +18,12 @@ export function paymentProblem(amount: number, limits: { remaining: number | nul
   return "";
 }
 
-// What the API reports about an application's money.
+// The online payment providers, and what the customer sees them called.
+export type PaymentProvider = "bkash" | "nagad";
+export const paymentProviders: Record<PaymentProvider, string> = { bkash: "bKash", nagad: "Nagad" };
+
+// What the API reports about an application's money. `onlineMethods` are the
+// providers switched on, in the order they are offered.
 export type PaymentSummary = {
   id: string;
   reference: string;
@@ -28,5 +33,6 @@ export type PaymentSummary = {
   remaining: number | null;
   minimumPayment: number;
   onlinePayment: boolean;
+  onlineMethods?: PaymentProvider[];
   payments: { id: string; amount: number; method: string; status: string; paidAt: string; receiptNumber: string | null; receiptKey: string | null }[];
 };

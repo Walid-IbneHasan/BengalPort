@@ -11,6 +11,8 @@
     ExternalLink,
     FileText,
     Plus,
+    Printer,
+    ReceiptText,
     Search,
     Trash2,
     X,
@@ -294,6 +296,9 @@
     }
   }
   $: viewable = ["enquiries", "applications"].includes(section);
+  // The page that prints one enquiry or application, as it was filled in.
+  const printPath = (row: any) =>
+    `/admin/print/${section === "applications" ? "application" : "enquiry"}/${row.id}`;
   $: viewingGroups = viewing
     ? detailGroups(
         section === "applications" ? viewing.type : undefined,
@@ -615,6 +620,14 @@
                               title={`${row._count.notes} staff ${row._count.notes === 1 ? "note" : "notes"}`}
                               >{row._count.notes}</span
                             >{/if}</button
+                        ><a
+                          class="view print-row"
+                          href={printPath(row)}
+                          target="_blank"
+                          rel="noopener"
+                          aria-label="Print or save as PDF"
+                          title="Print or save as PDF"
+                          ><Printer size={15} /></a
                         ><button
                           class="delete"
                           aria-label={section === "enquiries"
@@ -890,6 +903,12 @@
           <h2 id="details-title">{viewing.reference || viewing.name}</h2>
         </div>
         <div class="header-actions">
+          <a
+            class="print-link"
+            href={printPath(viewing)}
+            target="_blank"
+            rel="noopener"><Printer size={15} /> Print / PDF</a
+          >
           {#if section === "applications" && !editing}<button
               class="edit-answers"
               onclick={() => (editing = true)}>Edit answers</button
@@ -986,9 +1005,12 @@
               </form>
               <p class="hint">
                 The total this application costs. The customer can pay it in
-                full or in part{owing.onlinePayment ? " with bKash" : ""} from
+                full or in part{owing.onlinePayment ? " online" : ""} from
                 their dashboard or the Pay page.
-              </p>{:else}<p class="hint">Loading payment details…</p>{/if}
+              </p>
+              <a class="view invoice-link" href={`/admin/accounts/invoices?application=${viewing.id}`}
+                ><ReceiptText size={15} /> Generate invoice</a
+              >{:else}<p class="hint">Loading payment details…</p>{/if}
           </section>
           <section>
             <h3>Documents</h3>
@@ -1163,6 +1185,35 @@
     padding: 0 0.9rem;
     font-size: 0.75rem;
     font-weight: 700;
+  }
+  .drawer header .print-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 2.5rem;
+    padding: 0 0.9rem;
+    border-radius: 0.65rem;
+    background: #ffffff12;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .print-row {
+    display: inline-grid;
+    place-items: center;
+    width: 2.2rem;
+    margin-left: 0.3rem;
+    padding: 0;
+    vertical-align: middle;
+  }
+  .invoice-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+    text-decoration: none;
   }
   .toolbar > span {
     margin-left: auto;

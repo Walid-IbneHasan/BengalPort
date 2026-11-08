@@ -106,7 +106,7 @@
 </script>
 
 <svelte:head><meta name="robots" content="noindex" /></svelte:head>
-{#if page.url.pathname === "/admin/content"}
+{#if page.url.pathname === "/admin/content" || page.url.pathname.startsWith("/admin/print/")}
   {@render children()}
 {:else if !ready}
   <div class="admin-loading">

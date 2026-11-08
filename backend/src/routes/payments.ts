@@ -5,7 +5,7 @@ import { randomCode } from "../lib/reference.js";
 import { balance, paymentProblem, received, refundProblem, refundable, refundedInFull } from "../lib/payment-rules.js";
 import { notifyPayment, notifyRefund } from "../lib/notifications.js";
 import { findApplication } from "../lib/application-lookup.js";
-import { GatewayError, type GatewayRefund, type GatewayStatus } from "../lib/bkash.js";
+import { GatewayError, isProvider, providerKeys, providers, type Gateway, type GatewayRefund, type GatewayStatus } from "../lib/gateway.js";
 
 const manualPaymentSchema = z
   .object({
@@ -19,8 +19,8 @@ const manualPaymentSchema = z
   })
   .refine((v) => v.amount <= v.totalDue);
 
-// How long a customer has to finish on bKash's page before the attempt is
-// treated as abandoned.
+// How long a customer has to finish on the provider's page before the
+// attempt is treated as abandoned.
 const ABANDONED_AFTER_MS = 30 * 60_000;
 
 const refundSchema = z.object({
@@ -36,6 +36,11 @@ const refundFields = { id: true, amount: true, reason: true, method: true, statu
 
 const routes: FastifyPluginAsync = async (app) => {
   const siteUrl = () => (process.env.FRONTEND_URL || "http://localhost:5173").split(",")[0].trim();
+  // The provider a payment went through, and what to call it.
+  const gatewayFor = (provider: string): Gateway | null => (isProvider(provider) ? app.gateways[provider] : null);
+  const nameOf = (provider: string) => (isProvider(provider) ? providers[provider].name : provider);
+  const configuredProviders = () => providerKeys.filter((provider) => app.gateways[provider].configured);
+  const anyConfigured = () => configuredProviders().length > 0;
   const receiptNumber = () => `BPR-${new Date().getFullYear()}-${randomCode(7)}`;
   // Lets someone without an account open one receipt: sent to the payer by
   // email and in the address they land on after paying.
@@ -58,8 +63,8 @@ const routes: FastifyPluginAsync = async (app) => {
     return application?.userId === req.user.sub ? "owner" : null;
   }
 
-  // Records a payment bKash has confirmed: the payment, its receipt and what
-  // is still due. Safe to call twice; the receipt is created once.
+  // Records a payment the provider has confirmed: the payment, its receipt
+  // and what is still due. Safe to call twice; the receipt is created once.
   async function complete(paymentId: string, result: GatewayStatus) {
     const { payment, created } = await prisma.$transaction(async (tx) => {
       const row = await tx.payment.findUniqueOrThrow({
@@ -91,6 +96,7 @@ const routes: FastifyPluginAsync = async (app) => {
     if (created && payment.application && payment.receipt)
       notifyPayment(app, {
         application: payment.application,
+        method: payment.method,
         amount: Number(payment.amount),
         remaining: Number(payment.receipt.remainingDue),
         transactionId: payment.gatewayTransactionId ?? payment.transactionId,
@@ -99,12 +105,13 @@ const routes: FastifyPluginAsync = async (app) => {
     return payment;
   }
 
-  // Asks bKash what became of a payment whose confirmation went unanswered.
-  // "pending" means bKash could not be reached, so nothing is decided yet.
-  async function confirm(payment: { id: string; gatewayPaymentId: string | null }) {
+  // Asks the provider what became of a payment whose confirmation went
+  // unanswered. "pending" means it could not be reached, so nothing is
+  // decided yet.
+  async function confirm(payment: { id: string; provider: string; gatewayPaymentId: string | null }) {
     let result: GatewayStatus;
     try {
-      result = await app.gateway.queryPayment(payment.gatewayPaymentId!);
+      result = await gatewayFor(payment.provider)!.queryPayment(payment.gatewayPaymentId!);
     } catch {
       await prisma.payment.updateMany({ where: { id: payment.id, status: "PENDING" }, data: { gatewayStatus: "unknown" } });
       return "pending" as const;
@@ -120,8 +127,8 @@ const routes: FastifyPluginAsync = async (app) => {
   // What an application costs, what has been paid and what is left.
   async function summary(applicationId: string) {
     const unsettled = await prisma.payment.findMany({
-      where: { applicationId, provider: "bkash", status: "PENDING", gatewayStatus: { in: ["executing", "unknown"] } },
-      select: { id: true, gatewayPaymentId: true },
+      where: { applicationId, provider: { in: providerKeys }, status: "PENDING", gatewayStatus: { in: ["executing", "unknown"] } },
+      select: { id: true, provider: true, gatewayPaymentId: true },
     });
     for (const payment of unsettled) await confirm(payment);
     const application = await prisma.application.findUnique({
@@ -136,7 +143,8 @@ const routes: FastifyPluginAsync = async (app) => {
       type: application.type,
       ...balance(application.amountDue === null ? null : Number(application.amountDue), application.payments),
       minimumPayment: Number(fee?.minimumPayment ?? 0),
-      onlinePayment: app.gateway.configured,
+      onlinePayment: anyConfigured(),
+      onlineMethods: configuredProviders(),
       payments: application.payments
         .filter((payment) => received(payment.status))
         .map((payment) => ({
@@ -156,7 +164,8 @@ const routes: FastifyPluginAsync = async (app) => {
     const fees = await prisma.serviceFee.findMany();
     return {
       data: {
-        enabled: app.gateway.configured,
+        enabled: anyConfigured(),
+        methods: configuredProviders(),
         fees: Object.fromEntries(
           fees.map((fee) => [fee.division, { label: fee.label, amount: Number(fee.amount), minimumPayment: Number(fee.minimumPayment) }]),
         ),
@@ -183,8 +192,13 @@ const routes: FastifyPluginAsync = async (app) => {
     return data ? { data } : reply.notFound("Application not found");
   });
 
-  // Starts a bKash payment and returns the bKash page to send the customer to.
-  app.post("/bkash/create", { config: { rateLimit: { max: 20, timeWindow: "10 minutes" } } }, async (req, reply) => {
+  // Starts a payment with the chosen provider and returns the page to send
+  // the customer to.
+  app.post("/:provider/create", { config: { rateLimit: { max: 20, timeWindow: "10 minutes" } } }, async (req, reply) => {
+    const { provider } = req.params as { provider: string };
+    const gateway = gatewayFor(provider);
+    if (!gateway) return reply.notFound("Unknown payment provider");
+    const name = nameOf(provider);
     const parsed = z.object({ applicationId: z.string().min(1), amount: z.coerce.number() }).safeParse(req.body);
     if (!parsed.success) return reply.badRequest("Enter the amount you want to pay.");
     const { applicationId, amount } = parsed.data;
@@ -192,14 +206,15 @@ const routes: FastifyPluginAsync = async (app) => {
     if (!state) return reply.notFound("Application not found");
     const problem = paymentProblem(amount, { remaining: state.remaining, minimum: state.minimumPayment });
     if (problem) return reply.badRequest(problem);
-    if (!app.gateway.configured) return reply.serviceUnavailable("Online payment is not available yet. Please contact us to pay.");
+    if (!gateway.configured) return reply.serviceUnavailable(`Paying with ${name} is not available yet. Please choose another way to pay, or contact us.`);
 
     const application = await prisma.application.findUniqueOrThrow({ where: { id: applicationId } });
     await prisma.payment.updateMany({
-      where: { applicationId, provider: "bkash", status: "PENDING", gatewayStatus: "created", createdAt: { lt: new Date(Date.now() - ABANDONED_AFTER_MS) } },
+      where: { applicationId, provider, status: "PENDING", gatewayStatus: "created", createdAt: { lt: new Date(Date.now() - ABANDONED_AFTER_MS) } },
       data: { status: "FAILED", gatewayStatus: "abandoned" },
     });
-    const invoice = `BP-PAY-${randomCode(10)}`;
+    // Nagad accepts only letters and digits in an order id.
+    const invoice = provider === "nagad" ? `BPPAY${randomCode(10)}` : `BP-PAY-${randomCode(10)}`;
     const payment = await prisma.payment.create({
       data: {
         applicationId,
@@ -207,43 +222,56 @@ const routes: FastifyPluginAsync = async (app) => {
         service: `${application.type.charAt(0)}${application.type.slice(1).toLowerCase()} application ${application.reference}`,
         amount,
         totalDue: state.remaining!,
-        method: "bKash",
+        method: name,
         transactionId: invoice,
         status: "PENDING",
-        provider: "bkash",
+        provider,
         gatewayStatus: "starting",
       },
     });
     try {
-      const created = await app.gateway.createPayment({
+      const created = await gateway.createPayment({
         amount,
         invoice,
         payerReference: application.reference,
-        callbackURL: `${process.env.API_PUBLIC_URL || `${req.protocol}://${req.host}`}/api/payments/bkash/callback`,
+        callbackURL: `${process.env.API_PUBLIC_URL || `${req.protocol}://${req.host}`}/api/payments/${provider}/callback`,
+        clientIp: req.ip,
       });
       await prisma.payment.update({
         where: { id: payment.id },
         data: { gatewayPaymentId: created.paymentId, gatewaySignature: created.signature, gatewayStatus: "created" },
       });
-      return { data: { bkashURL: created.bkashURL } };
+      return { data: { redirectUrl: created.redirectUrl } };
     } catch (error) {
-      req.log.error({ error }, "bKash payment could not be started");
+      req.log.error({ error }, `${name} payment could not be started`);
       await prisma.payment.update({ where: { id: payment.id }, data: { status: "FAILED", gatewayStatus: "not_started" } });
-      return reply.code(502).send({ error: { code: "GATEWAY_ERROR", message: "bKash could not start the payment. Please try again in a moment." } });
+      return reply.code(502).send({ error: { code: "GATEWAY_ERROR", message: `${name} could not start the payment. Please try again in a moment.` } });
     }
   });
 
-  // bKash sends the customer's browser here after they approve, cancel or
-  // fail the payment. Nothing in the address is trusted: the money only
-  // counts once bKash itself confirms the payment.
-  app.get("/bkash/callback", async (req, reply) => {
-    const query = req.query as { paymentID?: string; paymentId?: string; status?: string; signature?: string };
+  // The provider sends the customer's browser here after they approve, cancel
+  // or fail the payment. Nothing in the address is trusted: the money only
+  // counts once the provider itself confirms the payment.
+  app.get("/:provider/callback", async (req, reply) => {
+    const { provider } = req.params as { provider: string };
+    const gateway = gatewayFor(provider);
+    if (!gateway) return reply.notFound("Unknown payment provider");
+    const name = nameOf(provider);
+    const raw = req.query as Record<string, string | undefined>;
+    // bKash and Nagad name the payment and its outcome differently.
+    const query =
+      provider === "nagad"
+        ? { paymentId: raw.payment_ref_id, orderId: raw.order_id, status: raw.status === "Success" ? "success" : raw.status === "Aborted" ? "cancel" : "failure", signature: undefined }
+        : { paymentId: raw.paymentID ?? raw.paymentId, orderId: undefined, status: raw.status, signature: raw.signature };
     const back = (status: string, details: Record<string, string> = {}) =>
-      reply.redirect(`${siteUrl()}/payment/result?${new URLSearchParams({ status, ...details })}`);
-    const gatewayPaymentId = query.paymentID ?? query.paymentId;
+      reply.redirect(`${siteUrl()}/payment/result?${new URLSearchParams({ status, method: name, ...details })}`);
+    const gatewayPaymentId = query.paymentId;
     const find = () =>
-      prisma.payment.findUnique({ where: { gatewayPaymentId: gatewayPaymentId ?? "" }, include: { receipt: true, application: true } });
-    const payment = gatewayPaymentId ? await find() : null;
+      prisma.payment.findFirst({
+        where: { provider, OR: [{ gatewayPaymentId: gatewayPaymentId ?? "" }, ...(query.orderId ? [{ transactionId: query.orderId }] : [])] },
+        include: { receipt: true, application: true },
+      });
+    const payment = gatewayPaymentId || query.orderId ? await find() : null;
     if (!payment) return back("error");
     const details = { ref: payment.application?.reference ?? "", application: payment.applicationId ?? "" };
     const paid = (row: { receipt: { receiptNumber: string } | null }) =>
@@ -274,13 +302,13 @@ const routes: FastifyPluginAsync = async (app) => {
 
     let outcome: "paid" | "failed" | "pending";
     try {
-      const result = await app.gateway.executePayment(gatewayPaymentId!);
+      const result = await gateway.executePayment(payment.gatewayPaymentId ?? gatewayPaymentId!);
       if (result.status === "Completed") {
         await complete(payment.id, result);
         outcome = "paid";
       } else outcome = await confirm(payment);
     } catch (error) {
-      req.log.warn({ error }, "bKash execute did not succeed; checking the payment's state");
+      req.log.warn({ error }, `${name} did not confirm the payment; checking its state`);
       outcome = await confirm(payment);
     }
     if (outcome === "paid") return paid((await find())!);
@@ -379,12 +407,12 @@ const routes: FastifyPluginAsync = async (app) => {
   // Settles the refunds bKash never answered, from bKash's own list of the
   // refunds it made for the payment. One it lists is completed; one it still
   // does not list after a few minutes was never made and is given up.
-  async function settleRefunds(payment: { id: string; gatewayPaymentId: string | null; gatewayTransactionId: string | null }) {
+  async function settleRefunds(payment: { id: string; provider: string; gatewayPaymentId: string | null; gatewayTransactionId: string | null }) {
     const waiting = await prisma.refund.findMany({ where: { paymentId: payment.id, status: "PENDING" }, orderBy: { createdAt: "asc" } });
     if (!waiting.length || !payment.gatewayPaymentId || !payment.gatewayTransactionId) return;
     let held: GatewayRefund[];
     try {
-      held = await app.gateway.refundStatus(payment.gatewayPaymentId, payment.gatewayTransactionId);
+      held = await gatewayFor(payment.provider)!.refundStatus(payment.gatewayPaymentId, payment.gatewayTransactionId);
     } catch {
       return; // Still unknown; the amount stays held back.
     }
@@ -410,7 +438,8 @@ const routes: FastifyPluginAsync = async (app) => {
     const { id } = req.params as { id: string };
     const found = await prisma.payment.findUnique({ where: { id } });
     if (!found) return reply.notFound("Payment not found");
-    if (found.provider === "bkash") await settleRefunds(found);
+    const gateway = gatewayFor(found.provider);
+    if (gateway?.refunds) await settleRefunds(found);
     const payment = await prisma.payment.findUniqueOrThrow({
       where: { id },
       include: { refunds: { select: refundFields, orderBy: { createdAt: "desc" } }, application: { select: { reference: true, fullName: true } } },
@@ -418,9 +447,13 @@ const routes: FastifyPluginAsync = async (app) => {
     return {
       data: {
         payment: { id: payment.id, amount: Number(payment.amount), method: payment.method, status: payment.status, payerAccount: payment.payerAccount, application: payment.application },
-        // A bKash payment is refunded through bKash; any other is recorded by staff.
-        viaGateway: payment.provider === "bkash",
-        gatewayReady: app.gateway.configured,
+        // A bKash payment is refunded through bKash. A payment through a
+        // provider whose refunds are made in its own portal (Nagad), and any
+        // payment taken by staff, is recorded by staff.
+        viaGateway: Boolean(gateway?.refunds),
+        recordOnly: Boolean(gateway) && !gateway!.refunds,
+        gatewayName: nameOf(payment.provider),
+        gatewayReady: gateway?.configured ?? false,
         refundable: refundable(payment),
         refunds: payment.refunds,
       },
@@ -435,14 +468,16 @@ const routes: FastifyPluginAsync = async (app) => {
     const { amount, reason } = parsed.data;
     const payment = await prisma.payment.findUnique({ where: { id }, include: { refunds: true, application: true } });
     if (!payment) return reply.notFound("Payment not found");
-    const viaGateway = payment.provider === "bkash";
+    const gateway = gatewayFor(payment.provider);
+    const viaGateway = Boolean(gateway?.refunds);
+    const name = nameOf(payment.provider);
     const problem = refundProblem(amount, payment);
     if (problem) return reply.badRequest(problem);
     if (!viaGateway && !parsed.data.method) return reply.badRequest("Say how the money was returned.");
-    if (viaGateway && !app.gateway.configured)
-      return reply.serviceUnavailable("bKash is not connected, so this payment cannot be refunded here. Refund it in the bKash merchant portal.");
+    if (viaGateway && !gateway!.configured)
+      return reply.serviceUnavailable(`${name} is not connected, so this payment cannot be refunded here. Refund it in the ${name} merchant portal.`);
     if (viaGateway && (!payment.gatewayPaymentId || !payment.gatewayTransactionId))
-      return reply.code(409).send({ error: { code: "NO_GATEWAY_TRANSACTION", message: "This payment has no bKash transaction to refund." } });
+      return reply.code(409).send({ error: { code: "NO_GATEWAY_TRANSACTION", message: `This payment has no ${name} transaction to refund.` } });
     const staff = await prisma.user.findUnique({ where: { id: req.user.sub }, select: { name: true } });
 
     // The payment is locked while the refund is added, so two refunds started
@@ -453,7 +488,7 @@ const routes: FastifyPluginAsync = async (app) => {
       const late = refundProblem(amount, current);
       if (late) return late;
       return tx.refund.create({
-        data: { paymentId: id, amount, reason, method: viaGateway ? "bKash" : parsed.data.method!, status: "PENDING", recordedBy: staff?.name ?? "Staff" },
+        data: { paymentId: id, amount, reason, method: viaGateway ? name : parsed.data.method!, status: "PENDING", recordedBy: staff?.name ?? "Staff" },
       });
     });
     if (typeof refund === "string") return reply.badRequest(refund);
@@ -467,7 +502,7 @@ const routes: FastifyPluginAsync = async (app) => {
       return answer();
     }
     try {
-      const result = await app.gateway.refundPayment({
+      const result = await gateway!.refundPayment({
         paymentId: payment.gatewayPaymentId!,
         trxId: payment.gatewayTransactionId!,
         amount,
@@ -481,9 +516,9 @@ const routes: FastifyPluginAsync = async (app) => {
     } catch (error) {
       if (error instanceof GatewayError && error.code !== "NO_RESPONSE") {
         await prisma.refund.update({ where: { id: refund.id }, data: { status: "FAILED" } });
-        return reply.code(502).send({ error: { code: "REFUND_REFUSED", message: `bKash refused the refund: ${error.message}` } });
+        return reply.code(502).send({ error: { code: "REFUND_REFUSED", message: `${name} refused the refund: ${error.message}` } });
       }
-      req.log.warn({ error }, "bKash did not answer a refund; checking its list of refunds");
+      req.log.warn({ error }, `${name} did not answer a refund; checking its list of refunds`);
     }
     // No clear answer. bKash's own list decides; until it shows the refund,
     // the refund waits and its amount cannot be refunded again.

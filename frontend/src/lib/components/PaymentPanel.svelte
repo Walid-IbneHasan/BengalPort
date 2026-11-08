@@ -2,12 +2,13 @@
   import { onMount } from "svelte";
   import { ArrowRight, LoaderCircle, ReceiptText, ShieldCheck } from "lucide-svelte";
   import { api } from "$lib/api";
-  import { paymentProblem, taka, type PaymentSummary } from "$lib/payment-rules";
+  import { paymentProblem, paymentProviders, taka, type PaymentProvider, type PaymentSummary } from "$lib/payment-rules";
 
   // What an application owes and, when something is left, the choice to pay
-  // it all or a part of it through bKash. Paying is always optional.
-  // `token` is the payment link of a guest; without it the signed-in
-  // session is used. `quiet` shows nothing while no amount has been set.
+  // it all or a part of it through bKash or Nagad, whichever are switched
+  // on. Paying is always optional. `token` is the payment link of a guest;
+  // without it the signed-in session is used. `quiet` shows nothing while no
+  // amount has been set.
   let {
     applicationId,
     token,
@@ -27,12 +28,17 @@
   // svelte-ignore state_referenced_locally
   let loading = $state(!summary), error = $state(""), starting = $state(false);
   let choice = $state<"full" | "part">("full"), part = $state<number | null>(null);
+  let picked = $state<PaymentProvider | "">("");
 
   const headers = () => (token ? { authorization: `Bearer ${token}` } : undefined);
   let remaining = $derived(info?.remaining ?? 0);
   let amount = $derived(choice === "full" ? remaining : Number(part ?? 0));
   // A part payment is on offer only while the minimum leaves room for one.
   let canSplit = $derived(Boolean(info) && remaining > Math.max(info!.minimumPayment, 0) && remaining > 1);
+  // The providers switched on, and the one the customer pays with: their pick, or the first.
+  let methods = $derived<PaymentProvider[]>(info?.onlineMethods ?? (info?.onlinePayment ? ["bkash"] : []));
+  let method = $derived<PaymentProvider | undefined>(methods.includes(picked as PaymentProvider) ? (picked as PaymentProvider) : methods[0]);
+  let providerName = $derived(method ? paymentProviders[method] : "");
 
   onMount(async () => {
     if (info) return;
@@ -46,19 +52,19 @@
   });
 
   async function pay() {
-    if (!info) return;
+    if (!info || !method) return;
     error = paymentProblem(amount, { remaining: info.remaining, minimum: info.minimumPayment });
     if (error) return;
     starting = true;
     try {
-      const { bkashURL } = await api<{ bkashURL: string }>("/payments/bkash/create", {
+      const { redirectUrl } = await api<{ redirectUrl: string }>(`/payments/${method}/create`, {
         method: "POST",
         headers: headers(),
         body: JSON.stringify({ applicationId, amount }),
       });
-      // Read again on the page bKash sends the customer back to.
+      // Read again on the page the provider sends the customer back to.
       try { sessionStorage.setItem("bp_payment", JSON.stringify({ applicationId, token: token ?? null })); } catch { /* storage blocked */ }
-      window.location.href = bkashURL;
+      window.location.href = redirectUrl;
     } catch (e) {
       error = e instanceof Error ? e.message : "The payment could not be started.";
       starting = false;
@@ -79,7 +85,7 @@
 
     {#if remaining === 0}
       <p class="done"><ShieldCheck size={17} /> Fully paid. Thank you.</p>
-    {:else if !info.onlinePayment}
+    {:else if !methods.length}
       <p class="note">Online payment is not available yet. Please contact us to arrange payment.</p>
     {:else}
       <form onsubmit={(e) => { e.preventDefault(); pay(); }}>
@@ -94,11 +100,23 @@
             </label>
           {/if}
         {/if}
+        {#if methods.length > 1}
+          <fieldset class="methods">
+            <legend>Pay with</legend>
+            {#each methods as item}
+              <label class="method {item}" class:picked={method === item}>
+                <input type="radio" name="method" value={item} checked={method === item} onchange={() => (picked = item)} />
+                <i aria-hidden="true"></i>
+                <span>{paymentProviders[item]}</span>
+              </label>
+            {/each}
+          </fieldset>
+        {/if}
         {#if error}<p class="problem" role="alert">{error}</p>{/if}
-        <button class="pay" disabled={starting}>
-          {#if starting}<LoaderCircle size={17} /> Opening bKash…{:else}Pay {amount > 0 ? taka(amount) : ""} with bKash <ArrowRight size={17} />{/if}
+        <button class="pay {method}" disabled={starting}>
+          {#if starting}<LoaderCircle size={17} /> Opening {providerName}…{:else}Pay {amount > 0 ? taka(amount) : ""} with {providerName} <ArrowRight size={17} />{/if}
         </button>
-        <small class="assure">Paying now is optional. You approve the payment on bKash's own page with your wallet PIN; Bengal Port never sees it.</small>
+        <small class="assure">Paying now is optional. You approve the payment on {providerName}'s own page with your wallet PIN; Bengal Port never sees it.</small>
       </form>
     {/if}
 
@@ -138,7 +156,17 @@
   .amount input{min-height:2.9rem;border:1px solid #d6dfe2;border-radius:.65rem;padding:.6rem .8rem;font-size:1rem;outline:none}
   .amount input:focus{border-color:#bf8e2d;box-shadow:0 0 0 .2rem rgba(199,152,54,.14)}
   .amount small,.assure,.note{font-size:.76rem;font-weight:400;line-height:1.5;color:#6b7b88;margin:0}
+  /* The choice of provider: one card each, in the provider's own colour. */
+  .methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem;margin:0;padding:0;border:0}
+  .methods legend{padding:0 0 .4rem;font-size:.8rem;font-weight:750;color:#29465f}
+  .method{--brand:#e2136e;position:relative;display:flex;align-items:center;gap:.6rem;min-height:3rem;padding:.6rem .8rem;border:1px solid #dfe5e8;border-radius:.65rem;background:#fff;color:#17304f;font-weight:750;font-size:.92rem;cursor:pointer;transition:border-color 160ms ease,box-shadow 160ms ease}
+  .method.nagad{--brand:#f6821f}
+  .method input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+  .method i{width:.9rem;height:.9rem;border-radius:50%;background:var(--brand);flex:none;box-shadow:0 0 0 .2rem color-mix(in srgb,var(--brand) 18%,transparent)}
+  .method.picked{border-color:var(--brand);box-shadow:0 0 0 .15rem color-mix(in srgb,var(--brand) 25%,transparent)}
+  .method:has(input:focus-visible){outline:3px solid #b8862a;outline-offset:2px}
   .pay{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:3rem;border:0;border-radius:1.6rem;padding:.7rem 1.3rem;background:#e2136e;color:#fff;font-weight:800;font-size:.95rem;cursor:pointer;transition:transform 150ms cubic-bezier(.23,1,.32,1),background-color 180ms ease}
+  .pay.nagad{background:#f6821f;color:#1c1917}
   .pay:active{transform:scale(.98)}
   .pay:disabled{opacity:.7;cursor:default}
   .problem{margin:0;padding:.6rem .8rem;border-radius:.6rem;background:#fff0f0;color:#943d45;font-size:.84rem}
@@ -147,7 +175,7 @@
   .history li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.4rem 1rem;padding:.5rem .1rem;border-top:1px solid #edf0f2;font-size:.82rem;color:#526477}
   .history b{color:#17304f}
   .history a{display:inline-flex;align-items:center;gap:.3rem;color:#a87618;font-weight:750;text-decoration:none}
-  @media(hover:hover) and (pointer:fine){.pay:not(:disabled):hover{background:#c90f61}.option:hover{border-color:#c9d2d7}}
+  @media(hover:hover) and (pointer:fine){.pay:not(:disabled):hover{background:#c90f61}.pay.nagad:not(:disabled):hover{background:#e0710f}.option:hover,.method:hover{border-color:#c9d2d7}}
   @media(max-width:30rem){dl{grid-template-columns:1fr}dl div{display:flex;justify-content:space-between;align-items:center}dd{margin:0}}
-  @media(prefers-reduced-motion:reduce){.pay{transition-duration:.01ms}}
+  @media(prefers-reduced-motion:reduce){.pay,.method{transition-duration:.01ms}}
 </style>

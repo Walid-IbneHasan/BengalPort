@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { fieldError, phoneProblem } from "./application-validation";
+import { fieldError, phoneProblem, serverFieldErrors } from "./application-validation";
 import type { ApplicationField } from "./application-forms";
 
 const text: ApplicationField = { key: "nationality", label: "Nationality", required: true };
@@ -84,5 +84,30 @@ describe("checking a phone number on its own", () => {
   test("a date of birth in the past is fine", () => {
     const field: ApplicationField = { key: "dateOfBirth", label: "Date of birth", type: "date", required: true };
     assert.equal(fieldError(field, "1990-05-20"), "");
+  });
+});
+
+// When the server refuses an application it names the fields; the form
+// shows each message under its field instead of one line at the top.
+describe("reading the fields a server refusal names", () => {
+  test("issues on application details and on the top-level fields map to their field keys", () => {
+    const errors = serverFieldErrors({
+      formErrors: [],
+      fieldErrors: {},
+      issues: [
+        { path: ["details", "departureCity"], message: "Required field" },
+        { path: ["email"], message: "Invalid email" },
+        { path: ["fullName"], message: "Full name does not match application details" },
+      ],
+    });
+    assert.deepEqual(Object.keys(errors), ["departureCity", "email", "fullName"]);
+    assert.equal(errors.departureCity, "Please complete this answer.");
+    assert.equal(errors.email, "Enter a valid email address, like name@example.com.");
+    assert.equal(errors.fullName, "Please check this answer.");
+  });
+
+  test("a refusal without field details gives nothing to mark", () => {
+    assert.deepEqual(serverFieldErrors(undefined), {});
+    assert.deepEqual(serverFieldErrors({ formErrors: ["bad"], fieldErrors: {} }), {});
   });
 });

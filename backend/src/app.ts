@@ -16,12 +16,16 @@ import adminRoutes from "./routes/admin.js";
 import paymentRoutes from "./routes/payments.js";
 import documentRoutes from "./routes/documents.js";
 import { createMailer, type Mailer } from "./lib/email.js";
-import { createBkashGateway, type Gateway } from "./lib/bkash.js";
+import { createBkashGateway } from "./lib/bkash.js";
 import { databaseTokens } from "./lib/bkash-store.js";
+import { createNagadGateway } from "./lib/nagad.js";
+import { providerKeys, providers, type Gateway, type Provider } from "./lib/gateway.js";
 
-declare module "fastify" { interface FastifyInstance { mailer: Mailer; gateway: Gateway; spamCheck: SpamCheck } }
+// `gateways` holds every online payment provider; `gateway` is bKash, kept
+// for the parts of the API that only know one provider.
+declare module "fastify" { interface FastifyInstance { mailer: Mailer; gateway: Gateway; gateways: Record<Provider, Gateway>; spamCheck: SpamCheck } }
 
-export async function buildApp(options:{mailer?:Mailer;gateway?:Gateway;spamCheck?:SpamCheck}={}) {
+export async function buildApp(options:{mailer?:Mailer;gateway?:Gateway;gateways?:Partial<Record<Provider, Gateway>>;spamCheck?:SpamCheck}={}) {
   // TRUST_PROXY=true makes rate limits and generated URLs use the real client
   // address and protocol when the API runs behind a reverse proxy.
   const app=Fastify({logger:{level:process.env.LOG_LEVEL||"info"},trustProxy:process.env.TRUST_PROXY==="true"});
@@ -42,8 +46,10 @@ export async function buildApp(options:{mailer?:Mailer;gateway?:Gateway;spamChec
   await app.register(multipart,{limits:{files:1,fileSize:Number.MAX_SAFE_INTEGER,parts:20}});
   app.decorate("mailer",options.mailer??createMailer());
   if(!app.mailer.configured)app.log.warn("SMTP is not configured: sign-up, password reset and notification emails are disabled.");
-  app.decorate("gateway",options.gateway??createBkashGateway({tokens:databaseTokens}));
-  if(!app.gateway.configured)app.log.warn("bKash is not configured: online payment is switched off.");
+  const gateways:Record<Provider,Gateway>={bkash:options.gateways?.bkash??options.gateway??createBkashGateway({tokens:databaseTokens}),nagad:options.gateways?.nagad??createNagadGateway()};
+  app.decorate("gateways",gateways);
+  app.decorate("gateway",gateways.bkash);
+  for(const provider of providerKeys)if(!gateways[provider].configured)app.log.warn(`${providers[provider].name} is not configured: paying with ${providers[provider].name} is switched off.`);
   app.decorate("spamCheck",options.spamCheck??createSpamCheck({warn:(message)=>app.log.warn(message)}));
   await app.register(authPlugin);
   await app.register(publicRoutes,{prefix:"/api"});

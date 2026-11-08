@@ -364,6 +364,25 @@ exports.Prisma.FinancialTransactionScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.InvoiceScalarFieldEnum = {
+  id: 'id',
+  serial: 'serial',
+  issuedAt: 'issuedAt',
+  dueAt: 'dueAt',
+  customerName: 'customerName',
+  customerPhone: 'customerPhone',
+  customerEmail: 'customerEmail',
+  customerAddress: 'customerAddress',
+  items: 'items',
+  total: 'total',
+  paid: 'paid',
+  notes: 'notes',
+  applicationId: 'applicationId',
+  transactionId: 'transactionId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.PageContentScalarFieldEnum = {
   id: 'id',
   slug: 'slug',
@@ -513,6 +532,7 @@ exports.Prisma.ModelName = {
   GatewayToken: 'GatewayToken',
   FinancialCategory: 'FinancialCategory',
   FinancialTransaction: 'FinancialTransaction',
+  Invoice: 'Invoice',
   PageContent: 'PageContent',
   MediaAsset: 'MediaAsset'
 };

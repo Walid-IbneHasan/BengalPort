@@ -85,7 +85,7 @@ describe("starting a payment", () => {
   test("the caller gets the bKash page to send the customer to", async () => {
     const bkash = fakeBkash();
     const payment = await createBkashGateway({ env: settings, fetch: bkash.fetch, tokens: memoryStore() }).createPayment(order);
-    assert.deepEqual(payment, { paymentId: "TR0011abc", bkashURL: "https://sandbox.payment.bkash.com/?paymentId=TR0011abc", signature: "sig123" });
+    assert.deepEqual(payment, { paymentId: "TR0011abc", redirectUrl: "https://sandbox.payment.bkash.com/?paymentId=TR0011abc", signature: "sig123" });
   });
 
   test("requests go to the sandbox unless a live address is configured", async () => {

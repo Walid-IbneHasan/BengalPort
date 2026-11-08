@@ -27,14 +27,14 @@
 
 <svelte:head>
   <title>Pay for your application — Bengal Port</title>
-  <meta name="description" content="Pay a Bengal Port application online with bKash, in full or in part, using your reference number." />
+  <meta name="description" content="Pay a Bengal Port application online with bKash or Nagad, in full or in part, using your reference number." />
 </svelte:head>
 
 <section class="page-hero pay-hero">
   <div class="wrap">
     <span class="eyebrow">PAY ONLINE</span>
     <h1>Pay for your application.</h1>
-    <p>Pay in full or in part with bKash. Members can also pay from their <a href="/dashboard">dashboard</a>.</p>
+    <p>Pay in full or in part with bKash or Nagad. Members can also pay from their <a href="/dashboard">dashboard</a>.</p>
   </div>
 </section>
 

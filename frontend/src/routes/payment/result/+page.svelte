@@ -5,10 +5,11 @@
   import { api } from "$lib/api";
   import { taka, type PaymentSummary } from "$lib/payment-rules";
 
-  // Where bKash's return leads. The address only says what to show: the
-  // amounts come from the receipt, and a "pending" payment is checked again
-  // with the server rather than taken on trust.
+  // Where the provider's return leads. The address only says what to show:
+  // the amounts come from the receipt, and a "pending" payment is checked
+  // again with the server rather than taken on trust.
   const params = page.url.searchParams;
+  const provider = params.get("method") || "your payment provider";
   const reference = params.get("ref") ?? "";
   const receiptNumber = params.get("receipt") ?? "";
   const receiptKey = params.get("key") ?? "";
@@ -20,8 +21,8 @@
   const receiptLink = $derived(`/receipt/${receiptNumber}${receiptKey ? `?key=${receiptKey}` : ""}`);
   const payAgain = $derived(signedIn ? "/dashboard" : `/pay${reference ? `?ref=${reference}` : ""}`);
 
-  // A payment whose confirmation bKash had not answered: looking at the
-  // application makes the server ask bKash again.
+  // A payment whose confirmation the provider had not answered: looking at
+  // the application makes the server ask again.
   async function checkPending() {
     let context: { applicationId?: string; token?: string | null } = {};
     try { context = JSON.parse(sessionStorage.getItem("bp_payment") || "{}"); } catch { /* nothing stored */ }
@@ -77,12 +78,12 @@
     {:else if status === "pending"}
       <i class="wait"><LoaderCircle size={34} /></i>
       <span class="eyebrow">CONFIRMING YOUR PAYMENT</span>
-      <h1>We are checking with bKash.</h1>
+      <h1>We are checking with {provider}.</h1>
       {#if tries <= 6}
         <p>This usually takes a few seconds. Please keep this page open.</p>
       {:else}
         <p>
-          bKash has not confirmed the payment yet. <b>Please do not pay again.</b> If the money has left your bKash
+          {provider} has not confirmed the payment yet. <b>Please do not pay again.</b> If the money has left your {provider}
           account, it will be added to your application automatically; you can also <a href="/contact">contact us</a>{reference ? ` with your reference ${reference}` : ""}.
         </p>
         <div class="actions"><a href={payAgain}>Check my balance</a><a href="/">Back to home</a></div>
@@ -91,19 +92,19 @@
       <i class="neutral"><CircleX size={34} /></i>
       <span class="eyebrow">PAYMENT CANCELLED</span>
       <h1>No payment was made.</h1>
-      <p>You cancelled the payment on bKash, so nothing was charged. Your application{reference ? ` ${reference}` : ""} is still with us, and you can pay whenever you are ready.</p>
+      <p>You cancelled the payment on {provider}, so nothing was charged. Your application{reference ? ` ${reference}` : ""} is still with us, and you can pay whenever you are ready.</p>
       <div class="actions"><a class="btn" href={payAgain}>TRY AGAIN <ArrowRight size={17} /></a><a href="/">Back to home</a></div>
     {:else if status === "failed"}
       <i class="bad"><CircleAlert size={34} /></i>
       <span class="eyebrow">PAYMENT NOT COMPLETED</span>
       <h1>The payment did not go through.</h1>
-      <p>bKash did not complete the payment, so nothing was added to your application. Please check your bKash balance and try again.</p>
+      <p>{provider} did not complete the payment, so nothing was added to your application. Please check your {provider} balance and try again.</p>
       <div class="actions"><a class="btn" href={payAgain}>TRY AGAIN <ArrowRight size={17} /></a><a href="/contact">Contact us</a></div>
     {:else}
       <i class="bad"><CircleAlert size={34} /></i>
       <span class="eyebrow">PAYMENT NOT FOUND</span>
       <h1>We could not match this payment.</h1>
-      <p>If money has left your bKash account, please <a href="/contact">contact us</a> with your application reference and the bKash transaction ID.</p>
+      <p>If money has left your {provider} account, please <a href="/contact">contact us</a> with your application reference and the {provider} transaction ID.</p>
       <div class="actions"><a href={payAgain}>Check my balance</a><a href="/">Back to home</a></div>
     {/if}
   </div>

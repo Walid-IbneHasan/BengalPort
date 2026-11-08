@@ -26,6 +26,7 @@ const bkash = {
 const unused = async (): Promise<never> => { throw new Error("Not used in these tests"); };
 const gateway: Gateway = {
   get configured() { return bkash.configured; },
+  refunds: true,
   createPayment: unused,
   executePayment: unused,
   queryPayment: unused,

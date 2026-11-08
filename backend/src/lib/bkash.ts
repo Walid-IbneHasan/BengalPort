@@ -12,29 +12,13 @@
 // and BKASH_BASE_URL (the sandbox when unset; bKash supplies the live address
 // with the live credentials).
 
+import { GatewayError, type Gateway, type GatewayRefund, type GatewayStatus } from "./gateway.js";
+// The shared gateway types live in gateway.ts; they stay reachable from here.
+export { GatewayError } from "./gateway.js";
+export type { Gateway, GatewayPayment, GatewayRefund, GatewayStatus, PaymentOrder, RefundOrder } from "./gateway.js";
+
 export type StoredToken = { idToken: string; refreshToken: string; expiresAt: Date };
 export type TokenStore = { load(): Promise<StoredToken | null>; save(token: StoredToken): Promise<void> };
-export type GatewayPayment = { paymentId: string; bkashURL: string; signature: string | null };
-export type GatewayStatus = { paymentId: string; status: string; trxId: string | null; amount: number | null; payerAccount: string | null };
-export type PaymentOrder = { amount: number; invoice: string; payerReference: string; callbackURL: string };
-// `paymentId` and `trxId` are the ones bKash gave the original payment; `sku`
-// is a tag for what was bought, which bKash requires.
-export type RefundOrder = { paymentId: string; trxId: string; amount: number; reason: string; sku: string };
-export type GatewayRefund = { refundTrxId: string | null; status: string; amount: number | null };
-export type Gateway = {
-  configured: boolean;
-  createPayment(order: PaymentOrder): Promise<GatewayPayment>;
-  executePayment(paymentId: string): Promise<GatewayStatus>;
-  queryPayment(paymentId: string): Promise<GatewayStatus>;
-  refundPayment(order: RefundOrder): Promise<GatewayRefund>;
-  refundStatus(paymentId: string, trxId: string): Promise<GatewayRefund[]>;
-};
-
-export class GatewayError extends Error {
-  constructor(message: string, public code?: string) {
-    super(message);
-  }
-}
 
 const SANDBOX = "https://tokenized.sandbox.bka.sh";
 const API = "/v2/tokenized-checkout";
@@ -147,6 +131,7 @@ export function createBkashGateway(options: {
 
   return {
     configured,
+    refunds: true,
     async createPayment(order) {
       const data = await call(
         "/payment/create",
@@ -162,7 +147,7 @@ export function createBkashGateway(options: {
       );
       const paymentId = data.paymentId ?? data.paymentID;
       if (!paymentId || !data.bkashURL) throw new GatewayError("bKash returned an incomplete payment", "INCOMPLETE");
-      return { paymentId, bkashURL: data.bkashURL, signature: data.signature ?? null };
+      return { paymentId, redirectUrl: data.bkashURL, signature: data.signature ?? null };
     },
     async executePayment(paymentId) {
       return status(await call("/payment/execute", { paymentId }, "bKash could not complete the payment"), paymentId);

@@ -6,6 +6,7 @@ import {
   institutionSchema,
   hospitalSchema,
   transactionSchema,
+  invoiceSchema,
   pageContentUpdateSchema,
   businessContentUpdateSchema,
   feeSettingsSchema,
@@ -45,6 +46,12 @@ import { z } from "zod";
 import sharp from "sharp";
 import { documentSummary } from "../lib/documents.js";
 import { balance } from "../lib/payment-rules.js";
+import {
+  invoiceAmounts,
+  invoiceNumber,
+  serialFromSearch,
+  type InvoiceLine,
+} from "../lib/invoices.js";
 import {
   notifyAmountDue,
   notifyApplicationStatus,
@@ -412,6 +419,21 @@ const admin: FastifyPluginAsync = async (app) => {
       list.table.count({ where: list.args.where }),
     ]);
     return { data, meta: { total, page, pageSize } };
+  });
+
+  // One application or enquiry, whole, for the page that prints it.
+  app.get("/resources/:resource/:id", async (req, reply) => {
+    const { resource, id } = req.params as { resource: string; id: string };
+    const record =
+      resource === "applications"
+        ? await prisma.application.findUnique({
+            where: { id },
+            include: { documents: { select: documentSummary } },
+          })
+        : resource === "enquiries"
+          ? await prisma.enquiry.findUnique({ where: { id } })
+          : null;
+    return record ? { data: record } : reply.notFound("Record not found");
   });
 
   app.patch("/resources/:resource/:id", async (req, reply) => {
@@ -930,7 +952,7 @@ const admin: FastifyPluginAsync = async (app) => {
   };
 
   app.get("/payment-settings", async () => ({
-    data: { onlinePayment: app.gateway.configured, fees: await feeSettings() },
+    data: { onlinePayment: Object.values(app.gateways).some((gateway) => gateway.configured), payments: { bkash: app.gateways.bkash.configured, nagad: app.gateways.nagad.configured }, fees: await feeSettings() },
   }));
 
   app.put("/payment-settings", async (req, reply) => {
@@ -951,7 +973,7 @@ const admin: FastifyPluginAsync = async (app) => {
         create: { division, ...fee },
       });
     return {
-      data: { onlinePayment: app.gateway.configured, fees: await feeSettings() },
+      data: { onlinePayment: Object.values(app.gateways).some((gateway) => gateway.configured), payments: { bkash: app.gateways.bkash.configured, nagad: app.gateways.nagad.configured }, fees: await feeSettings() },
     };
   });
 
@@ -1096,7 +1118,7 @@ const admin: FastifyPluginAsync = async (app) => {
         backupTool: await dumpToolAvailable(),
         lastBackup: backup && { madeAt: backup.madeAt, bytes: backup.bytes },
         email: app.mailer.configured,
-        onlinePayment: app.gateway.configured,
+        onlinePayment: Object.values(app.gateways).some((gateway) => gateway.configured), payments: { bkash: app.gateways.bkash.configured, nagad: app.gateways.nagad.configured },
         teamInbox: teamAddresses().length > 0,
         formProtection: app.spamCheck.siteKey !== null,
       },
@@ -1321,6 +1343,134 @@ const admin: FastifyPluginAsync = async (app) => {
     return count
       ? reply.code(204).send()
       : reply.notFound("Ledger entry not found");
+  });
+
+  // Invoices. The total is always worked out here from the invoice's lines.
+  const invoiceDetails = {
+    application: { select: { reference: true, type: true } },
+  };
+  const invoiceView = (row: any) => ({
+    ...row,
+    number: invoiceNumber(row.serial),
+    ...invoiceAmounts(row.items as InvoiceLine[], Number(row.paid)),
+  });
+
+  // Checks an invoice. When it is not acceptable the problem is sent as the
+  // reply and null is returned.
+  async function invoiceData(req: any, reply: any) {
+    const problem = (code: string, message: string, details?: unknown) => {
+      reply.code(400).send({ error: { code, message, details } });
+      return null;
+    };
+    const parsed = invoiceSchema.safeParse(req.body);
+    if (!parsed.success)
+      return problem(
+        "VALIDATION_ERROR",
+        "Check the customer's name, the invoice date and every line of the invoice",
+        parsed.error.flatten(),
+      );
+    const { paid, applicationId, transactionId, ...rest } = parsed.data;
+    const amounts = invoiceAmounts(rest.items, paid);
+    if (amounts.total <= 0)
+      return problem("INVOICE_EMPTY", "An invoice must be for more than ৳0");
+    if (amounts.total >= 10_000_000_000)
+      return problem("INVOICE_TOO_LARGE", "This total is too large to record");
+    if (amounts.paid > amounts.total)
+      return problem(
+        "INVOICE_OVERPAID",
+        "The amount paid cannot be more than the total",
+      );
+    if (
+      applicationId &&
+      !(await prisma.application.count({ where: { id: applicationId } }))
+    )
+      return problem("INVALID_APPLICATION", "That application no longer exists");
+    if (
+      transactionId &&
+      !(await prisma.financialTransaction.count({
+        where: { id: transactionId },
+      }))
+    )
+      return problem("INVALID_LEDGER_ENTRY", "That ledger entry no longer exists");
+    return {
+      ...rest,
+      total: amounts.total,
+      paid: amounts.paid,
+      applicationId: applicationId ?? null,
+      transactionId: transactionId ?? null,
+    };
+  }
+
+  app.get("/invoices", async (req) => {
+    const query = req.query as {
+      search?: string;
+      page?: string;
+      pageSize?: string;
+    };
+    const search = String(query.search || "").trim();
+    const serial = serialFromSearch(search);
+    const where = search
+      ? {
+          OR: [
+            ...["customerName", "customerPhone", "customerEmail", "notes"].map(
+              (field) => ({
+                [field]: { contains: search, mode: "insensitive" as const },
+              }),
+            ),
+            ...(serial === null ? [] : [{ serial }]),
+          ],
+        }
+      : {};
+    const pageSize = Math.min(100, Math.max(1, Number(query.pageSize) || 25));
+    const page = Math.max(1, Number(query.page) || 1);
+    const [rows, total] = await Promise.all([
+      prisma.invoice.findMany({
+        where,
+        include: invoiceDetails,
+        orderBy: { serial: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.invoice.count({ where }),
+    ]);
+    return { data: rows.map(invoiceView), meta: { total, page, pageSize } };
+  });
+
+  app.get("/invoices/:id", async (req, reply) => {
+    const row = await prisma.invoice.findUnique({
+      where: { id: (req.params as { id: string }).id },
+      include: invoiceDetails,
+    });
+    return row ? { data: invoiceView(row) } : reply.notFound("Invoice not found");
+  });
+
+  app.post("/invoices", async (req, reply) => {
+    const data = await invoiceData(req, reply);
+    if (!data) return reply;
+    const row = await prisma.invoice.create({ data, include: invoiceDetails });
+    return reply.code(201).send({ data: invoiceView(row) });
+  });
+
+  app.put("/invoices/:id", async (req, reply) => {
+    const where = { id: (req.params as { id: string }).id };
+    if (!(await prisma.invoice.count({ where })))
+      return reply.notFound("Invoice not found");
+    const data = await invoiceData(req, reply);
+    if (!data) return reply;
+    const row = await prisma.invoice.update({
+      where,
+      data,
+      include: invoiceDetails,
+    });
+    return { data: invoiceView(row) };
+  });
+
+  app.delete("/invoices/:id", async (req, reply) => {
+    const where = { id: (req.params as { id: string }).id };
+    const { count } = await prisma.invoice.deleteMany({ where });
+    return count
+      ? reply.code(204).send()
+      : reply.notFound("Invoice not found");
   });
 };
 
