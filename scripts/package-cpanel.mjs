@@ -29,6 +29,44 @@ import(${JSON.stringify(entry)}).catch((error) => {
 });
 `;
 
+// The website's startup file: a plain Node server around the built site. The
+// site's own images keep their names when they change, so browsers may keep
+// them for a week rather than for ever.
+const webStartupFile = `const fs = require("node:fs");
+const http = require("node:http");
+const path = require("node:path");
+try {
+  process.loadEnvFile(path.join(__dirname, ".env"));
+} catch {
+  // No .env file: settings come from cPanel's environment variables.
+}
+const kept = /^\\/(images\\/|favicon\\.png|apple-touch-icon\\.png|icon-\\d+\\.png|site\\.webmanifest)/;
+const isKept = (url) => {
+  try {
+    const { pathname } = new URL(url, "http://site");
+    return kept.test(pathname) && fs.existsSync(path.join(__dirname, "build", "client", pathname));
+  } catch {
+    return false;
+  }
+};
+import("./build/handler.js")
+  .then(({ handler }) => {
+    http
+      .createServer((req, res) => {
+        if (isKept(req.url)) res.setHeader("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
+        handler(req, res, () => {
+          res.statusCode = 404;
+          res.end("Not found");
+        });
+      })
+      .listen(Number(process.env.PORT) || 3000, process.env.HOST || "0.0.0.0");
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+`;
+
 rmSync(out, { recursive: true, force: true });
 run("npm run build -w backend");
 run("npm run build -w frontend");
@@ -102,6 +140,14 @@ BKASH_PASSWORD=""
 BKASH_APP_KEY=""
 BKASH_APP_SECRET=""
 
+# Nagad online payment (stays off until these are set). Use the live address
+# and the keys Nagad issues for your merchant account.
+NAGAD_BASE_URL=""
+NAGAD_MERCHANT_ID=""
+NAGAD_MERCHANT_NUMBER=""
+NAGAD_PUBLIC_KEY=""
+NAGAD_PRIVATE_KEY=""
+
 # Cloudflare Turnstile on the enquiry and application forms (stays off until
 # both keys are set). Create a widget for your website address at
 # dash.cloudflare.com -> Turnstile.
@@ -127,7 +173,7 @@ write(
   path.join(web, "package.json"),
   JSON.stringify({ name: "bengal-port-web", private: true, type: "module", scripts: { start: "node server.cjs" } }, null, 2) + "\n",
 );
-write(path.join(web, "server.cjs"), startupFile("./build/index.js"));
+write(path.join(web, "server.cjs"), webStartupFile);
 write(
   path.join(web, ".env.example"),
   `# The public address of this website.

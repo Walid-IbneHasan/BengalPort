@@ -9,7 +9,7 @@
   // photo (or their initials), their name and a short excerpt. It moves on
   // by itself, waits while the pointer or focus is on it, and stays still for
   // people who asked for less motion. `interval` is the time each is shown.
-  let { reviews, interval = 7000 }: { reviews: PublicReview[]; interval?: number } = $props();
+  let { reviews, interval = 7000, label = "Customer reviews" }: { reviews: PublicReview[]; interval?: number; label?: string } = $props();
 
   let index = $state(0);
   let paused = $state(false);
@@ -53,7 +53,7 @@
   <section
     class="testimonials"
     aria-roledescription="carousel"
-    aria-label="Student reviews"
+    aria-label={label}
     onmouseenter={() => (paused = true)}
     onmouseleave={() => (paused = false)}
     onfocusin={() => (paused = true)}

@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from "fastify";
 import { prisma } from "../lib/prisma.js";
 import {
   MAX_DOCUMENT_BYTES,
+  MAX_APPLICATION_BYTES,
   MAX_DOCUMENTS,
   detectDocumentType,
   documentSummary,
@@ -52,6 +53,14 @@ const routes: FastifyPluginAsync = async (app) => {
       )
         return reply.badRequest(
           `An application can hold up to ${MAX_DOCUMENTS} documents`,
+        );
+      const stored = await prisma.applicationDocument.aggregate({
+        where: { applicationId: id },
+        _sum: { byteSize: true },
+      });
+      if ((stored._sum.byteSize ?? 0) + bytes.length > MAX_APPLICATION_BYTES)
+        return reply.badRequest(
+          `These documents are too large in total. An application can hold up to ${MAX_APPLICATION_BYTES / 1024 / 1024} MB.`,
         );
       const name =
         upload.filename.replace(/[\\/\u0000-\u001f]/g, "_").slice(-150) ||

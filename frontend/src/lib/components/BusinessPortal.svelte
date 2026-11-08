@@ -74,7 +74,7 @@
   };
 </script>
 
-<main class="biz">
+<div class="biz">
   <section class="hero">
     <div class="map-wrap" aria-hidden="true"><TradeRoutesMap markets={content.hero.markets} active={market} /></div>
     <div class="chips" aria-hidden="true">
@@ -241,7 +241,7 @@
       <a class="outline" href={content.closing.secondaryHref}>{content.closing.secondary}</a>
     </div>
   </section>
-</main>
+</div>
 
 <style>
   /* The site's palette: navy for headings and dark surfaces, gold for actions

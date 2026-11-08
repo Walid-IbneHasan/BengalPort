@@ -124,7 +124,7 @@ describe("who can write a review", () => {
     const row = await paidApplication();
     const res = await write(row.id, words, stranger);
     assert.equal(res.statusCode, 404);
-    assert.equal(res.json().message, "Application not found");
+    assert.equal(res.json().error.message, "Application not found");
   });
 
   test("a visitor who is not signed in cannot write a review", async () => {

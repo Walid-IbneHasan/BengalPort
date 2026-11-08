@@ -146,7 +146,7 @@
   });
 </script>
 
-<main class="edu">
+<div class="edu">
   <section class="hero">
     <div class="flags" aria-hidden="true">
       {#each flagsShown as code, i}
@@ -166,7 +166,7 @@
       {/each}
     </div>
     <span class="eyebrow">{content.hero.eyebrow}</span>
-    <h1>Study Abroad</h1>
+    <h1>{content.hero.title}</h1>
     <p class="places">
       <span class="sr">Study in {heroCountries.join(", ")}</span>
       <span aria-hidden="true" class="places-inner">
@@ -239,7 +239,7 @@
       </div>
     </section>{/each}
 
-  {#if reviews.length}<section class="reviews" id="reviews" use:reveal>
+  <section class="reviews" id="reviews" use:reveal>
     <header class="heading">
       <span class="eyebrow">{content.reviews.eyebrow}</span>
       <h2>{content.reviews.heading}</h2>
@@ -263,9 +263,9 @@
           >
         </div>
       </div>
-      <Testimonials {reviews} />
+      {#if reviews.length}<Testimonials {reviews} label="Student reviews" />{:else}<p class="reviews-empty">Reviews from our students will appear here once they have shared their experience.</p>{/if}
     </div>
-  </section>{/if}
+  </section>
 
   {#if places.length}<section class="section destinations" id="destinations" use:reveal>
       <header class="heading">
@@ -413,9 +413,10 @@
       ><a class="outline" href="/contact">{content.closing.secondary}</a>
     </div>
   </section>
-</main>
+</div>
 
 <style>
+  .reviews-empty{align-self:center;margin:0;color:#5b6675;line-height:1.6}
   /* The site's palette: navy for headings and dark surfaces, gold for
      actions and accents. Small gold text uses the deeper gold, which stays
      readable on the page's light backgrounds; the lighter gold is for fills

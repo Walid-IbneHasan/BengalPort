@@ -129,11 +129,11 @@ describe("the website's application forms", () => {
 });
 
 describe("sign-in code emails", () => {
-  test("the member's name is escaped in the HTML email", async () => {
+  test("a code email carries the code and nothing a visitor typed", async () => {
     const { sent, mailer } = fakeMailer();
-    await sendAuthCode(mailer, "member@example.test", "<script>x</script>", "123456", "VERIFY_EMAIL");
+    await sendAuthCode(mailer, "member@example.test", "123456", "VERIFY_EMAIL");
     assert.equal(sent.length, 1);
-    assert.doesNotMatch(sent[0].html, /<script>/);
+    assert.match(sent[0].html, /123456/);
   });
 });
 

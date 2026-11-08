@@ -2,18 +2,22 @@
   import { onMount } from "svelte";
   import { page } from "$app/state";
   import { ArrowRight, CircleAlert, CircleCheck, CircleX, LoaderCircle } from "lucide-svelte";
-  import { api } from "$lib/api";
-  import { taka, type PaymentSummary } from "$lib/payment-rules";
+  import { api, ApiError } from "$lib/api";
+  import { paymentProviders, taka, type PaymentSummary } from "$lib/payment-rules";
 
-  // Where the provider's return leads. The address only says what to show:
-  // the amounts come from the receipt, and a "pending" payment is checked
-  // again with the server rather than taken on trust.
+  // Where the provider's return leads. Anyone can type this address, so it
+  // never proves a payment by itself: "received" is shown only once the server
+  // has produced the receipt, and a "pending" payment is checked again.
   const params = page.url.searchParams;
-  const provider = params.get("method") || "your payment provider";
+  const named = params.get("method") ?? "";
+  const provider = (Object.values(paymentProviders) as string[]).includes(named) ? named : "your payment provider";
   const reference = params.get("ref") ?? "";
   const receiptNumber = params.get("receipt") ?? "";
   const receiptKey = params.get("key") ?? "";
+  const paymentId = params.get("payment");
   let status = $state(params.get("status") ?? "error");
+  // Whether the receipt behind a "success" address is still being fetched.
+  let verifying = $state(params.get("status") === "success");
   let receipt = $state<any>(null);
   let signedIn = $state(false);
   let tries = $state(0);
@@ -28,12 +32,12 @@
     try { context = JSON.parse(sessionStorage.getItem("bp_payment") || "{}"); } catch { /* nothing stored */ }
     const applicationId = context.applicationId || params.get("application");
     if (!applicationId) return;
-    const before = Number(params.get("paid") ?? NaN);
     for (tries = 1; tries <= 6 && status === "pending"; tries++) {
       try {
         const summary = await api<PaymentSummary>(`/payments/application/${applicationId}`, context.token ? { headers: { authorization: `Bearer ${context.token}` } } : undefined);
-        const latest = summary.payments[0];
-        if (latest && (Number.isNaN(before) || summary.paid > before) && Date.now() - new Date(latest.paidAt).getTime() < 15 * 60_000) {
+        // This payment, not merely the latest one on the application.
+        const latest = summary.payments.find((item) => item.id === paymentId);
+        if (latest) {
           receipt = { payment: { amount: latest.amount }, remainingDue: summary.remaining, receiptNumber: latest.receiptNumber, key: latest.receiptKey };
           status = "confirmed";
           return;
@@ -45,8 +49,16 @@
 
   onMount(async () => {
     signedIn = Boolean(localStorage.getItem("bp_token"));
-    if (status === "success" && receiptNumber) {
-      try { receipt = await api(`/payments/receipt/${receiptNumber}${receiptKey ? `?key=${receiptKey}` : ""}`); } catch { /* the receipt link still works */ }
+    if (status === "success") {
+      try {
+        if (!receiptNumber) throw new ApiError("No receipt");
+        receipt = await api(`/payments/receipt/${receiptNumber}${receiptKey ? `?key=${encodeURIComponent(receiptKey)}` : ""}`);
+      } catch (e) {
+        // Refused or unknown means no such payment; anything else is the connection.
+        status = e instanceof ApiError ? "error" : "unverified";
+      } finally {
+        verifying = false;
+      }
     }
     if (status === "pending") await checkPending();
     if (status !== "pending") try { sessionStorage.removeItem("bp_payment"); } catch { /* nothing stored */ }
@@ -57,7 +69,18 @@
 
 <section class="section result">
   <div class="card">
-    {#if status === "success" || status === "confirmed"}
+    {#if verifying}
+      <i class="wait"><LoaderCircle size={34} /></i>
+      <span class="eyebrow">CONFIRMING YOUR PAYMENT</span>
+      <h1>One moment.</h1>
+      <p>We are fetching your receipt.</p>
+    {:else if status === "unverified"}
+      <i class="wait"><CircleAlert size={34} /></i>
+      <span class="eyebrow">COULD NOT CHECK YET</span>
+      <h1>We could not reach our server.</h1>
+      <p><b>Please do not pay again.</b> Check your connection and reload this page to see your receipt.</p>
+      <div class="actions"><a class="btn" href={page.url.pathname + page.url.search} data-sveltekit-reload>TRY AGAIN <ArrowRight size={17} /></a><a href="/contact">Contact us</a></div>
+    {:else if status === "success" || status === "confirmed"}
       <i class="good"><CircleCheck size={34} /></i>
       <span class="eyebrow">PAYMENT RECEIVED</span>
       <h1>Thank you. Your payment is confirmed.</h1>

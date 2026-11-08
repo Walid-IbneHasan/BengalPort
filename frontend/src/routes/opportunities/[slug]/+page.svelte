@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { page } from "$app/state";
   import { ArrowLeft, ArrowRight, Calendar, MapPin } from "lucide-svelte";
   import { applyHref, opportunityTab } from "$lib/apply-route";
 
@@ -13,7 +14,7 @@
   <meta name="description" content={summary} />
   <meta property="og:title" content={opportunity.title} />
   <meta property="og:description" content={summary} />
-  <meta property="og:image" content={opportunity.image} />
+  <meta property="og:image" content={new URL(opportunity.image, page.url.origin).href} />
 </svelte:head>
 
 <section class="page-hero detail-hero">

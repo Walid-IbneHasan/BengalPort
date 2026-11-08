@@ -4,6 +4,7 @@
   import { page } from "$app/state";
   import { api, ApiError } from "$lib/api";
   import { googleClientId as publicGoogleClientId } from "$lib/config";
+  import { afterLogin } from "$lib/safe-next";
   import {
     ArrowRight,
     Check,
@@ -41,12 +42,26 @@
   const save = (data: any) => {
     localStorage.setItem("bp_token", data.token);
     localStorage.setItem("bp_user", JSON.stringify(data.user));
-    goto(
-      data.user.role === "ADMIN"
-        ? "/admin"
-        : page.url.searchParams.get("next") || "/dashboard",
-    );
+    goto(afterLogin(page.url.searchParams.get("next"), data.user.role));
   };
+  // Another code for the screen asking for one. The email is known by then.
+  async function resendCode() {
+    loading = true;
+    error = notice = "";
+    try {
+      const reset = mode === "reset";
+      const data: any = await api(reset ? "/auth/forgot-password" : "/auth/resend-verification", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      if (data.challengeId) setChallenge(reset ? "reset" : "verify", data);
+      else notice = "If this code is still needed, a new one has been sent.";
+    } catch (e) {
+      error = e instanceof Error ? e.message : "A new code could not be sent";
+    } finally {
+      loading = false;
+    }
+  }
   const setChallenge = (next: Mode, data: any) => {
     mode = next;
     challengeId = data.challengeId;
@@ -233,12 +248,16 @@
               bind:value={name}
               autocomplete="name"
               required
+              minlength="2"
+              maxlength="100"
             /></label
           ><label
             ><span>Phone number <small>Optional</small></span><input
               bind:value={phone}
               autocomplete="tel"
               inputmode="tel"
+              minlength="7"
+              maxlength="30"
             /></label
           >{/if}
         {#if ["login", "register", "forgot"].includes(mode)}<label
@@ -290,6 +309,12 @@
               required
             /></label
           >{/if}
+        {#if mode === "verify" || mode === "reset"}<button
+            type="button"
+            class="forgot"
+            disabled={loading}
+            onclick={resendCode}>Send a new code</button
+          >{/if}
         {#if mode === "login"}<button
             type="button"
             class="forgot"
@@ -314,15 +339,10 @@
           ><ArrowRight /></button
         >
       </form>
-      {#if mode === "login" || mode === "register"}<div class="divider">
+      {#if googleClientId && (mode === "login" || mode === "register")}<div class="divider">
           <span>or</span>
         </div>
-        {#if googleClientId}<div
-            id="google-button"
-            class="google"
-          ></div>{:else}<button class="google-placeholder" disabled
-            >Google sign-in available after configuration</button
-          >{/if}{/if}
+        <div id="google-button" class="google"></div>{/if}
       <div class="switches">
         {#if mode === "login"}<button
             onclick={() => {

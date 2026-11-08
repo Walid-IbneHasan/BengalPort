@@ -16,7 +16,7 @@
   const pointIcons = [ShieldCheck, Handshake, Globe2];
 </script>
 
-<svelte:head><title>About Us — Bengal Port</title></svelte:head>
+<svelte:head><title>About Us — Bengal Port</title><meta name="description" content="Who Bengal Port is and how we connect Bangladesh to global business, education, healthcare and Umrah services." /></svelte:head>
 <section class="page-hero">
   <div class="wrap">
     <span class="eyebrow">{content.hero.eyebrow}</span>

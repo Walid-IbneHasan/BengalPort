@@ -39,12 +39,12 @@ export const escapeHtml = (value: string) =>
 
 const subjects = { VERIFY_EMAIL:"Verify your Bengal Port email", LOGIN_2FA:"Your Bengal Port login code", RESET_PASSWORD:"Reset your Bengal Port password" } as const;
 
-export async function sendAuthCode(mailer:Mailer,to:string,name:string,code:string,purpose:keyof typeof subjects) {
+export async function sendAuthCode(mailer:Mailer,to:string,code:string,purpose:keyof typeof subjects) {
   if (!mailer.configured) return false;
   await mailer.send({
     to, subject: subjects[purpose],
-    text: `Hello ${name}, your Bengal Port verification code is ${code}. It expires in 10 minutes.`,
-    html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#102642"><h2 style="color:#0a1d3a">Bengal Port</h2><p>Hello ${escapeHtml(name)},</p><p>Your verification code is:</p><p style="font-size:30px;font-weight:800;letter-spacing:8px;color:#b98522">${code}</p><p>This code expires in 10 minutes. If you did not request it, you can ignore this email.</p></div>`,
+    text: `Your Bengal Port verification code is ${code}. It expires in 10 minutes.`,
+    html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#102642"><h2 style="color:#0a1d3a">Bengal Port</h2><p>Your verification code is:</p><p style="font-size:30px;font-weight:800;letter-spacing:8px;color:#b98522">${code}</p><p>This code expires in 10 minutes. If you did not request it, you can ignore this email.</p></div>`,
   });
   return true;
 }

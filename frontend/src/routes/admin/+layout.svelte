@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
-  import { api } from "$lib/api";
+  import { api, ApiError } from "$lib/api";
   import {
     Activity,
     BriefcaseBusiness,
@@ -30,7 +30,8 @@
   } from "lucide-svelte";
   let { children } = $props();
   let menuOpen = $state(false),
-    ready = $state(false);
+    ready = $state(false),
+    unreachable = $state(false);
   const nav = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquare },
@@ -84,7 +85,7 @@
     const token = localStorage.getItem("bp_token");
     const user = JSON.parse(localStorage.getItem("bp_user") || "null");
     if (!token || user?.role !== "ADMIN") {
-      goto("/login?next=/admin");
+      goto(`/login?next=${encodeURIComponent(page.url.pathname)}`);
       return;
     }
     try {
@@ -92,10 +93,13 @@
         headers: { authorization: `Bearer ${token}` },
       });
       ready = true;
-    } catch {
-      localStorage.removeItem("bp_token");
-      localStorage.removeItem("bp_user");
-      goto("/login?next=/admin");
+    } catch (e) {
+      // Only a refused session ends it; a network problem can be retried.
+      if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
+        localStorage.removeItem("bp_token");
+        localStorage.removeItem("bp_user");
+        goto(`/login?next=${encodeURIComponent(page.url.pathname)}`);
+      } else unreachable = true;
     }
   });
   function signOut() {
@@ -110,7 +114,10 @@
   {@render children()}
 {:else if !ready}
   <div class="admin-loading">
-    <img src="/images/logo-192.webp" alt="" /><span>Opening admin workspace…</span>
+    <img src="/images/logo-192.webp" alt="" />
+    {#if unreachable}<span role="alert">The server could not be reached.</span
+      ><a href={page.url.pathname} data-sveltekit-reload>Try again</a
+      >{:else}<span>Opening admin workspace…</span>{/if}
   </div>
 {:else}
   <div class="admin-shell">

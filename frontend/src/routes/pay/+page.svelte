@@ -1,14 +1,25 @@
 <script lang="ts">
   import { page } from "$app/state";
+  import { onMount } from "svelte";
   import { api } from "$lib/api";
   import PaymentPanel from "$lib/components/PaymentPanel.svelte";
-  import type { PaymentSummary } from "$lib/payment-rules";
+  import { paymentProviders, type PaymentProvider, type PaymentSummary } from "$lib/payment-rules";
 
   // Pay for an application without an account: the reference number plus the
   // phone number or email it was submitted with.
   let reference = $state(page.url.searchParams.get("ref") ?? "");
   let contact = $state("");
   let finding = $state(false), error = $state("");
+  // The ways of paying that are switched on right now.
+  let methods = $state("");
+  onMount(async () => {
+    try {
+      const config = await api<{ methods?: PaymentProvider[] }>("/payments/config");
+      methods = (config.methods ?? []).map((item) => paymentProviders[item] ?? item).join(" or ");
+    } catch {
+      // The page works without naming them.
+    }
+  });
   let found = $state<{ application: PaymentSummary; token: string } | null>(null);
 
   async function find() {
@@ -27,14 +38,14 @@
 
 <svelte:head>
   <title>Pay for your application — Bengal Port</title>
-  <meta name="description" content="Pay a Bengal Port application online with bKash or Nagad, in full or in part, using your reference number." />
+  <meta name="description" content="Pay for a Bengal Port application online, in full or in part, using your reference number." />
 </svelte:head>
 
 <section class="page-hero pay-hero">
   <div class="wrap">
     <span class="eyebrow">PAY ONLINE</span>
     <h1>Pay for your application.</h1>
-    <p>Pay in full or in part with bKash or Nagad. Members can also pay from their <a href="/dashboard">dashboard</a>.</p>
+    <p>{methods ? `Pay in full or in part with ${methods}.` : "Find your application to see what is due."} Members can also pay from their <a href="/dashboard">dashboard</a>.</p>
   </div>
 </section>
 

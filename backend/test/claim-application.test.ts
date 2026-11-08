@@ -85,7 +85,7 @@ describe("adding an application made before signing up to an account", () => {
     const wrongContact = await claim({ reference: row.reference, contact: "01999999999" });
     const unknown = await claim({ reference: "BP-NOSUCHREF", contact: "01711000000" });
     assert.equal(unknown.statusCode, 404);
-    assert.equal(unknown.json().message, wrongContact.json().message);
+    assert.equal(unknown.json().error.message, wrongContact.json().error.message);
   });
 
   test("an application that belongs to another account stays with it", async () => {
