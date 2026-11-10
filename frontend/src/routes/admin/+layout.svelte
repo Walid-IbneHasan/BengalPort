@@ -94,6 +94,9 @@
       });
       ready = true;
     } catch (e) {
+      // Being asked to replace a temporary password is not a refused session:
+      // the request itself has already moved them to the profile page.
+      if (e instanceof ApiError && e.code === "PASSWORD_CHANGE_REQUIRED") return;
       // Only a refused session ends it; a network problem can be retried.
       if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
         localStorage.removeItem("bp_token");
@@ -140,7 +143,9 @@
           >{/each}
       </nav>
       <div class="account">
-        <span>Signed in as</span><b>Administrator</b><a href="/"
+        <span>Signed in as</span><b>Administrator</b><a href="/profile"
+          >My profile</a
+        ><a href="/"
           >View public website</a
         ><button onclick={signOut}>Sign out</button>
       </div>
@@ -301,6 +306,8 @@
     margin: 0.2rem 0 0.65rem;
   }
   .account a {
+    display: block;
+    margin-top: 0.3rem;
     color: #e1ba60;
     font-size: 0.75rem;
   }

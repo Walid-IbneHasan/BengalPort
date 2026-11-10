@@ -23,7 +23,12 @@ import {
   noteSchema,
   adminReviewSchema,
   reviewChangeSchema,
+  newUserSchema,
+  blockUserSchema,
 } from "../lib/schemas.js";
+import { sendAccountCreated } from "../lib/email.js";
+import { temporaryPassword } from "../lib/passwords.js";
+import bcrypt from "bcryptjs";
 import { defaultHomeContent } from "../lib/home-content.js";
 import { defaultBusinessContent } from "../lib/business-content.js";
 import {
@@ -60,6 +65,18 @@ import {
 
 // A photo straight from a camera fits comfortably; it is resized before storing.
 const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
+
+// What the admin sees of an account. Never the password or sign-in codes.
+const userFields = {
+  id: true,
+  name: true,
+  email: true,
+  phone: true,
+  role: true,
+  createdAt: true,
+  blockedAt: true,
+  mustChangePassword: true,
+} as const;
 
 function rangeStart(period: string) {
   const now = new Date();
@@ -375,12 +392,7 @@ const admin: FastifyPluginAsync = async (app) => {
           args: {
             where: matching("name", "email", "phone"),
             select: {
-              id: true,
-              name: true,
-              email: true,
-              phone: true,
-              role: true,
-              createdAt: true,
+              ...userFields,
               _count: {
                 select: { enquiries: true, applications: true, payments: true },
               },
@@ -521,18 +533,67 @@ const admin: FastifyPluginAsync = async (app) => {
         data: await prisma.user.update({
           where: { id },
           data: { role: body.role as any },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            role: true,
-            createdAt: true,
-          },
+          select: userFields,
         }),
       };
     }
     return reply.badRequest("This resource cannot be updated here");
+  });
+
+  // An account made by staff. Its owner gets a temporary password by email,
+  // which is not kept or shown here, and must replace it at first sign-in.
+  app.post("/users", async (req, reply) => {
+    const parsed = newUserSchema.safeParse(req.body);
+    if (!parsed.success)
+      return reply.code(400).send({
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Enter the person's name, a valid email address and a phone number of at least 7 digits, or leave the phone empty.",
+          details: parsed.error.flatten(),
+        },
+      });
+    const developing =
+      process.env.AUTH_DEV_CODES === "true" && process.env.NODE_ENV !== "production";
+    if (!app.mailer.configured && !developing)
+      return reply.serviceUnavailable("Email is not set up, so the temporary password cannot be sent.");
+    if (await prisma.user.findUnique({ where: { email: parsed.data.email }, select: { id: true } }))
+      return reply.conflict("An account with this email already exists.");
+    const password = temporaryPassword();
+    const user = await prisma.user.create({
+      data: {
+        ...parsed.data,
+        passwordHash: await bcrypt.hash(password, 12),
+        // The emailed password is what proves they own this address.
+        emailVerifiedAt: new Date(),
+        mustChangePassword: true,
+      },
+      select: userFields,
+    });
+    let delivered = false;
+    try {
+      delivered = await sendAccountCreated(app.mailer, { to: user.email, name: user.name, password });
+    } catch (error) {
+      req.log.error(error);
+      await prisma.user.delete({ where: { id: user.id } });
+      return reply.serviceUnavailable("The email could not be sent, so the account was not created. Please try again in a few minutes.");
+    }
+    return reply.code(201).send({ data: { ...user, ...(delivered ? {} : { developmentPassword: password }) } });
+  });
+
+  // Blocking keeps everything the person has on record. Their open sessions
+  // end for good: unblocking lets them sign in again, not resume.
+  app.patch("/users/:id/block", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const parsed = blockUserSchema.safeParse(req.body);
+    if (!parsed.success) return reply.badRequest("Say whether to block or unblock this account");
+    if (id === (req.user as any).sub) return reply.badRequest("You cannot block your own account");
+    return {
+      data: await prisma.user.update({
+        where: { id },
+        data: parsed.data.blocked ? { blockedAt: new Date(), tokenVersion: { increment: 1 } } : { blockedAt: null },
+        select: userFields,
+      }),
+    };
   });
 
   // Records an admin can add, correct and remove: partners, the education
