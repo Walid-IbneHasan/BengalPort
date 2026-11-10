@@ -2,6 +2,20 @@ import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { blankRecord, recordBody, recordFromRow } from "./admin-records";
 
+describe("adding a user", () => {
+  test("a new user starts as a normal member", () => {
+    assert.equal(blankRecord("user").role, "USER");
+  });
+
+  test("only the person's details and role are sent", () => {
+    assert.deepEqual(recordBody("user", { ...blankRecord("user"), name: "Karim", email: "k@example.test", phone: "01711000000", role: "ADMIN" }), { name: "Karim", email: "k@example.test", phone: "01711000000", role: "ADMIN" });
+  });
+
+  test("a blank phone is left out", () => {
+    assert.equal("phone" in recordBody("user", { ...blankRecord("user"), name: "Karim", email: "k@example.test", phone: "  " }), false);
+  });
+});
+
 describe("what the admin form sends when saving", () => {
   test("an opportunity without a link name gets one made from its title", () => {
     const body = recordBody("opportunity", { ...blankRecord(), title: "  China Sourcing & Factory Tour 2027 ", description: "Meet manufacturers.", country: "China", location: "Guangzhou" });

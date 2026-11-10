@@ -42,7 +42,7 @@
   const save = (data: any) => {
     localStorage.setItem("bp_token", data.token);
     localStorage.setItem("bp_user", JSON.stringify(data.user));
-    goto(afterLogin(page.url.searchParams.get("next"), data.user.role));
+    goto(data.user.mustChangePassword ? "/profile" : afterLogin(page.url.searchParams.get("next"), data.user.role));
   };
   // Another code for the screen asking for one. The email is known by then.
   async function resendCode() {

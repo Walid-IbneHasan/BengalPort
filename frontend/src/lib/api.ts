@@ -32,6 +32,9 @@ async function request(path: string, options?: RequestInit): Promise<any> {
   }
 
   if (!response.ok) {
+    // Still on the temporary password an administrator emailed: nothing else
+    // works until it is replaced, and the profile page is where that happens.
+    if (body?.error?.code === 'PASSWORD_CHANGE_REQUIRED' && typeof location !== 'undefined' && location.pathname !== '/profile') location.assign('/profile');
     throw new ApiError(body?.error?.message || body?.message || 'Request failed', body?.error?.code, body?.error?.details, response.status);
   }
 

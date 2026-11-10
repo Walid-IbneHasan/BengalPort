@@ -242,6 +242,13 @@ export const applicationEditSchema = z.object({
   details: z.record(z.string(), z.unknown()),
 });
 export const noteSchema = z.object({ body: z.string().trim().min(1).max(2000) });
+export const newUserSchema = z.object({
+  name: z.string().trim().min(2).max(100),
+  email: z.string().trim().toLowerCase().email().max(254),
+  phone: z.string().trim().min(7).max(30).optional(),
+  role: z.enum(["USER", "ADMIN"]),
+});
+export const blockUserSchema = z.object({ blocked: z.boolean() });
 // A customer's review: a rating, the name to show, an optional line about
 // the service ("MBBS, Malaysia") and their own words.
 const reviewDivision = z.enum(["BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH"]);

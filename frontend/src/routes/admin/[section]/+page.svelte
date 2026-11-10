@@ -140,7 +140,7 @@
     },
     users: {
       title: "Users",
-      description: "Manage registered users and administrative access.",
+      description: "Add people, block accounts and manage administrative access.",
       columns: [
         ["name", "User"],
         ["email", "Email"],
@@ -148,7 +148,9 @@
         ["role", "Role"],
         ["activity", "Activity"],
         ["createdAt", "Joined"],
+        ["access", "Access"],
       ],
+      add: "user",
     },
     payments: {
       title: "Payments",
@@ -319,9 +321,11 @@
     institution: "institution",
     hospital: "hospital",
     payment: "payment",
+    user: "user",
   };
   // Payments are a record of money received, so they are added but never edited.
-  $: editable = Boolean(config?.add) && config.add !== "payment";
+  // A person's details are theirs to change, from their own profile.
+  $: editable = Boolean(config?.add) && config.add !== "payment" && config.add !== "user";
   let applications: any[] = [];
   $: noun =
     section === "suppliers"
@@ -395,6 +399,12 @@
       return `${row[key]?.length || 0} ${key}`;
     if (key === "activity")
       return `${row._count?.enquiries || 0} enquiries · ${row._count?.applications || 0} applications`;
+    if (key === "access")
+      return row.blockedAt
+        ? "Blocked"
+        : row.mustChangePassword
+          ? "Not signed in yet"
+          : "Active";
     if (key === "customer")
       return (
         row.application?.fullName ||
@@ -425,6 +435,29 @@
       return false;
     }
   }
+  async function setBlocked(row: any) {
+    const blocked = !row.blockedAt;
+    if (
+      blocked &&
+      !confirm(
+        `Block ${row.name}? They will be signed out and unable to sign in. Their applications and payments are kept.`,
+      )
+    )
+      return;
+    error = "";
+    try {
+      const updated: any = await api(`/admin/users/${row.id}/block`, {
+        method: "PATCH",
+        headers: headers(),
+        body: JSON.stringify({ blocked }),
+      });
+      rows = rows.map((item) => (item.id === row.id ? { ...item, ...updated } : item));
+      success = blocked ? "Account blocked" : "Account unblocked";
+      setTimeout(() => (success = ""), 1800);
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Update failed";
+    }
+  }
   async function remove(id: string) {
     const question =
       section === "applications"
@@ -449,6 +482,7 @@
     try {
       const kind = config.add as RecordKind;
       const body = JSON.stringify(recordBody(kind, form));
+      let created: any;
       if (form.id)
         await api(`/admin/resources/${section}/${form.id}`, {
           method: "PUT",
@@ -456,12 +490,14 @@
           body,
         });
       else
-        await api(
+        created = await api(
           kind === "opportunity"
             ? "/admin/opportunities"
             : kind === "payment"
               ? "/payments"
-              : `/admin/resources/${section}`,
+              : kind === "user"
+                ? "/admin/users"
+                : `/admin/resources/${section}`,
           { method: "POST", headers: headers(), body },
         );
       drawer = false;
@@ -469,8 +505,12 @@
         ? "Changes saved"
         : kind === "payment"
           ? "Payment recorded"
-          : "Record created";
-      setTimeout(() => (success = ""), 1800);
+          : kind === "user"
+            ? created?.developmentPassword
+              ? `User added. Email is not set up here, so use this password: ${created.developmentPassword}`
+              : "User added. A temporary password has been emailed to them."
+            : "Record created";
+      setTimeout(() => (success = ""), kind === "user" ? 8000 : 1800);
       await load();
     } catch (e) {
       error = e instanceof Error ? e.message : "Unable to save the record";
@@ -478,7 +518,16 @@
       saving = false;
     }
   }
-  onMount(load);
+  // An administrator cannot block their own account.
+  let ownId = "";
+  onMount(() => {
+    try {
+      ownId = JSON.parse(localStorage.getItem("bp_user") || "{}").id ?? "";
+    } catch {
+      ownId = "";
+    }
+    load();
+  });
   afterNavigate(() => {
     const next = page.params.section ?? "";
     if (next !== section) {
@@ -596,7 +645,18 @@
                               });
                             }}
                             ><option>USER</option><option>ADMIN</option></select
-                          >{:else if column[0] === "published"}<button
+                          >{:else if column[0] === "access"}<div class="access">
+                            <span
+                              class="badge"
+                              class:yes={row.mustChangePassword && !row.blockedAt}
+                              class:blocked={row.blockedAt}
+                              >{value(row, "access")}</span
+                            >{#if row.id !== ownId}<button
+                                class="view"
+                                onclick={() => setBlocked(row)}
+                                >{row.blockedAt ? "Unblock" : "Block"}</button
+                              >{/if}
+                          </div>{:else if column[0] === "published"}<button
                             class:off={!row.published}
                             class="toggle"
                             aria-label="Toggle publishing"
@@ -710,7 +770,42 @@
           save();
         }}
       >
-        {#if config.add === "payment"}<label
+        {#if config.add === "user"}<label
+            ><span>Full name *</span><input
+              bind:value={form.name}
+              required
+              minlength="2"
+              maxlength="100"
+              autocomplete="off"
+            /></label
+          ><label
+            ><span>Email address *</span><input
+              type="email"
+              bind:value={form.email}
+              required
+              maxlength="254"
+              autocomplete="off"
+            /></label
+          ><label
+            ><span>Phone number</span><input
+              bind:value={form.phone}
+              inputmode="tel"
+              minlength="7"
+              maxlength="30"
+              autocomplete="off"
+              placeholder="Optional"
+            /></label
+          ><label
+            ><span>Role</span><select bind:value={form.role}
+              ><option value="USER">User</option><option value="ADMIN"
+                >Administrator</option
+              ></select
+            ></label
+          >
+          <p class="hint">
+            They will be emailed a temporary password and must choose their own
+            the first time they sign in.
+          </p>{:else if config.add === "payment"}<label
             ><span>Application</span><select bind:value={form.applicationId}
               ><option value="">No application (walk-in customer)</option
               >{#each applications as item}<option value={item.id}
@@ -833,7 +928,7 @@
           <label class="check"
             ><input type="checkbox" bind:checked={form.featured} /> Feature this partner</label
           >{/if}
-          {#if config.add !== "payment"}<CmsImageField
+          {#if config.add !== "payment" && config.add !== "user"}<CmsImageField
             label="Card image"
             value={form.image}
             purpose={`${section} card image`}
@@ -893,7 +988,9 @@
                 ? "Save changes"
                 : config.add === "payment"
                   ? "Record payment"
-                  : "Create record"}</button
+                  : config.add === "user"
+                    ? "Add user and send email"
+                    : "Create record"}</button
           >
         </footer>
       </form>
@@ -1440,6 +1537,16 @@
   .badge.yes {
     background: #faf0d5;
     color: #72591e;
+  }
+  .badge.blocked {
+    background: #fbe9e9;
+    color: #8d2f36;
+  }
+  .access {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
   }
   .actions {
     text-align: right;

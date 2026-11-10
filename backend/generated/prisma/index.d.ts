@@ -3451,6 +3451,8 @@ export namespace Prisma {
     emailVerifiedAt: Date | null
     twoFactorEnabled: boolean | null
     tokenVersion: number | null
+    mustChangePassword: boolean | null
+    blockedAt: Date | null
     lastLoginAt: Date | null
     role: $Enums.Role | null
     createdAt: Date | null
@@ -3468,6 +3470,8 @@ export namespace Prisma {
     emailVerifiedAt: Date | null
     twoFactorEnabled: boolean | null
     tokenVersion: number | null
+    mustChangePassword: boolean | null
+    blockedAt: Date | null
     lastLoginAt: Date | null
     role: $Enums.Role | null
     createdAt: Date | null
@@ -3485,6 +3489,8 @@ export namespace Prisma {
     emailVerifiedAt: number
     twoFactorEnabled: number
     tokenVersion: number
+    mustChangePassword: number
+    blockedAt: number
     lastLoginAt: number
     role: number
     createdAt: number
@@ -3512,6 +3518,8 @@ export namespace Prisma {
     emailVerifiedAt?: true
     twoFactorEnabled?: true
     tokenVersion?: true
+    mustChangePassword?: true
+    blockedAt?: true
     lastLoginAt?: true
     role?: true
     createdAt?: true
@@ -3529,6 +3537,8 @@ export namespace Prisma {
     emailVerifiedAt?: true
     twoFactorEnabled?: true
     tokenVersion?: true
+    mustChangePassword?: true
+    blockedAt?: true
     lastLoginAt?: true
     role?: true
     createdAt?: true
@@ -3546,6 +3556,8 @@ export namespace Prisma {
     emailVerifiedAt?: true
     twoFactorEnabled?: true
     tokenVersion?: true
+    mustChangePassword?: true
+    blockedAt?: true
     lastLoginAt?: true
     role?: true
     createdAt?: true
@@ -3650,6 +3662,8 @@ export namespace Prisma {
     emailVerifiedAt: Date | null
     twoFactorEnabled: boolean
     tokenVersion: number
+    mustChangePassword: boolean
+    blockedAt: Date | null
     lastLoginAt: Date | null
     role: $Enums.Role
     createdAt: Date
@@ -3686,6 +3700,8 @@ export namespace Prisma {
     emailVerifiedAt?: boolean
     twoFactorEnabled?: boolean
     tokenVersion?: boolean
+    mustChangePassword?: boolean
+    blockedAt?: boolean
     lastLoginAt?: boolean
     role?: boolean
     createdAt?: boolean
@@ -3710,6 +3726,8 @@ export namespace Prisma {
     emailVerifiedAt?: boolean
     twoFactorEnabled?: boolean
     tokenVersion?: boolean
+    mustChangePassword?: boolean
+    blockedAt?: boolean
     lastLoginAt?: boolean
     role?: boolean
     createdAt?: boolean
@@ -3727,6 +3745,8 @@ export namespace Prisma {
     emailVerifiedAt?: boolean
     twoFactorEnabled?: boolean
     tokenVersion?: boolean
+    mustChangePassword?: boolean
+    blockedAt?: boolean
     lastLoginAt?: boolean
     role?: boolean
     createdAt?: boolean
@@ -3744,13 +3764,15 @@ export namespace Prisma {
     emailVerifiedAt?: boolean
     twoFactorEnabled?: boolean
     tokenVersion?: boolean
+    mustChangePassword?: boolean
+    blockedAt?: boolean
     lastLoginAt?: boolean
     role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phone" | "passwordHash" | "googleId" | "avatarUrl" | "emailVerifiedAt" | "twoFactorEnabled" | "tokenVersion" | "lastLoginAt" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phone" | "passwordHash" | "googleId" | "avatarUrl" | "emailVerifiedAt" | "twoFactorEnabled" | "tokenVersion" | "mustChangePassword" | "blockedAt" | "lastLoginAt" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     staffNotes?: boolean | User$staffNotesArgs<ExtArgs>
     reviews?: boolean | User$reviewsArgs<ExtArgs>
@@ -3784,6 +3806,8 @@ export namespace Prisma {
       emailVerifiedAt: Date | null
       twoFactorEnabled: boolean
       tokenVersion: number
+      mustChangePassword: boolean
+      blockedAt: Date | null
       lastLoginAt: Date | null
       role: $Enums.Role
       createdAt: Date
@@ -4227,6 +4251,8 @@ export namespace Prisma {
     readonly emailVerifiedAt: FieldRef<"User", 'DateTime'>
     readonly twoFactorEnabled: FieldRef<"User", 'Boolean'>
     readonly tokenVersion: FieldRef<"User", 'Int'>
+    readonly mustChangePassword: FieldRef<"User", 'Boolean'>
+    readonly blockedAt: FieldRef<"User", 'DateTime'>
     readonly lastLoginAt: FieldRef<"User", 'DateTime'>
     readonly role: FieldRef<"User", 'Role'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
@@ -30812,6 +30838,8 @@ export namespace Prisma {
     emailVerifiedAt: 'emailVerifiedAt',
     twoFactorEnabled: 'twoFactorEnabled',
     tokenVersion: 'tokenVersion',
+    mustChangePassword: 'mustChangePassword',
+    blockedAt: 'blockedAt',
     lastLoginAt: 'lastLoginAt',
     role: 'role',
     createdAt: 'createdAt',
@@ -31476,6 +31504,8 @@ export namespace Prisma {
     emailVerifiedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     twoFactorEnabled?: BoolFilter<"User"> | boolean
     tokenVersion?: IntFilter<"User"> | number
+    mustChangePassword?: BoolFilter<"User"> | boolean
+    blockedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
     role?: EnumRoleFilter<"User"> | $Enums.Role
     createdAt?: DateTimeFilter<"User"> | Date | string
@@ -31499,6 +31529,8 @@ export namespace Prisma {
     emailVerifiedAt?: SortOrderInput | SortOrder
     twoFactorEnabled?: SortOrder
     tokenVersion?: SortOrder
+    mustChangePassword?: SortOrder
+    blockedAt?: SortOrderInput | SortOrder
     lastLoginAt?: SortOrderInput | SortOrder
     role?: SortOrder
     createdAt?: SortOrder
@@ -31525,6 +31557,8 @@ export namespace Prisma {
     emailVerifiedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     twoFactorEnabled?: BoolFilter<"User"> | boolean
     tokenVersion?: IntFilter<"User"> | number
+    mustChangePassword?: BoolFilter<"User"> | boolean
+    blockedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     lastLoginAt?: DateTimeNullableFilter<"User"> | Date | string | null
     role?: EnumRoleFilter<"User"> | $Enums.Role
     createdAt?: DateTimeFilter<"User"> | Date | string
@@ -31548,6 +31582,8 @@ export namespace Prisma {
     emailVerifiedAt?: SortOrderInput | SortOrder
     twoFactorEnabled?: SortOrder
     tokenVersion?: SortOrder
+    mustChangePassword?: SortOrder
+    blockedAt?: SortOrderInput | SortOrder
     lastLoginAt?: SortOrderInput | SortOrder
     role?: SortOrder
     createdAt?: SortOrder
@@ -31573,6 +31609,8 @@ export namespace Prisma {
     emailVerifiedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     twoFactorEnabled?: BoolWithAggregatesFilter<"User"> | boolean
     tokenVersion?: IntWithAggregatesFilter<"User"> | number
+    mustChangePassword?: BoolWithAggregatesFilter<"User"> | boolean
+    blockedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     lastLoginAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -33335,6 +33373,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -33358,6 +33398,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -33381,6 +33423,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33404,6 +33448,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33427,6 +33473,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -33444,6 +33492,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -33461,6 +33511,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -35543,6 +35595,8 @@ export namespace Prisma {
     emailVerifiedAt?: SortOrder
     twoFactorEnabled?: SortOrder
     tokenVersion?: SortOrder
+    mustChangePassword?: SortOrder
+    blockedAt?: SortOrder
     lastLoginAt?: SortOrder
     role?: SortOrder
     createdAt?: SortOrder
@@ -35564,6 +35618,8 @@ export namespace Prisma {
     emailVerifiedAt?: SortOrder
     twoFactorEnabled?: SortOrder
     tokenVersion?: SortOrder
+    mustChangePassword?: SortOrder
+    blockedAt?: SortOrder
     lastLoginAt?: SortOrder
     role?: SortOrder
     createdAt?: SortOrder
@@ -35581,6 +35637,8 @@ export namespace Prisma {
     emailVerifiedAt?: SortOrder
     twoFactorEnabled?: SortOrder
     tokenVersion?: SortOrder
+    mustChangePassword?: SortOrder
+    blockedAt?: SortOrder
     lastLoginAt?: SortOrder
     role?: SortOrder
     createdAt?: SortOrder
@@ -39093,6 +39151,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -39115,6 +39175,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -39153,6 +39215,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39175,6 +39239,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39197,6 +39263,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -39219,6 +39287,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -39285,6 +39355,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39307,6 +39379,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39345,6 +39419,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -39367,6 +39443,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -39592,6 +39670,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39614,6 +39694,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -39850,6 +39932,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -39872,6 +39956,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -39998,6 +40084,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40020,6 +40108,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40085,6 +40175,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -40107,6 +40199,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -40194,6 +40288,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40216,6 +40312,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40535,6 +40633,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -40557,6 +40657,8 @@ export namespace Prisma {
     emailVerifiedAt?: Date | string | null
     twoFactorEnabled?: boolean
     tokenVersion?: number
+    mustChangePassword?: boolean
+    blockedAt?: Date | string | null
     lastLoginAt?: Date | string | null
     role?: $Enums.Role
     createdAt?: Date | string
@@ -40691,6 +40793,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -40713,6 +40817,8 @@ export namespace Prisma {
     emailVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     twoFactorEnabled?: BoolFieldUpdateOperationsInput | boolean
     tokenVersion?: IntFieldUpdateOperationsInput | number
+    mustChangePassword?: BoolFieldUpdateOperationsInput | boolean
+    blockedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

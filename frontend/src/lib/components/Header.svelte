@@ -21,6 +21,27 @@
   import { cmsContent } from "$lib/cms";
   let open = false;
   let servicesOpen = false;
+  // A mouse opens the Services panel by pointing at it. Leaving closes it after
+  // a short pause, so a slightly crooked path to a service does not. Touch and
+  // keyboard use the button, and the phone drawer keeps its own tap-to-expand.
+  let mouseInside = false;
+  let closing: ReturnType<typeof setTimeout> | undefined;
+  function servicesEnter(event: PointerEvent) {
+    if (event.pointerType !== "mouse" || open) return;
+    clearTimeout(closing);
+    mouseInside = true;
+    servicesOpen = true;
+  }
+  function servicesLeave(event: PointerEvent) {
+    if (event.pointerType !== "mouse" || open) return;
+    mouseInside = false;
+    clearTimeout(closing);
+    closing = setTimeout(() => (servicesOpen = false), 220);
+  }
+  // A click while the mouse is already holding the panel open leaves it open.
+  function toggleServices() {
+    servicesOpen = mouseInside ? true : !servicesOpen;
+  }
   let accountHref = "/login";
   let headerEl: HTMLElement;
   // Re-checked on every navigation so the link follows sign-in and sign-out;
@@ -80,8 +101,8 @@
     <div class:show={open} class="links">
       {#each links as link}
         {#if link[0] === "SERVICES"}
-          <div class:open={servicesOpen} class="services-nav">
-            <button class:active={active(link[1]) || ["/business","/education","/healthcare","/umrah"].some(active)} aria-expanded={servicesOpen} aria-controls="services-menu" onclick={() => servicesOpen = !servicesOpen}>SERVICES <ChevronDown size={15}/></button>
+          <div class:open={servicesOpen} class="services-nav" role="presentation" onpointerenter={servicesEnter} onpointerleave={servicesLeave}>
+            <button class:active={active(link[1]) || ["/business","/education","/healthcare","/umrah"].some(active)} aria-expanded={servicesOpen} aria-controls="services-menu" onclick={toggleServices}>SERVICES <ChevronDown size={15}/></button>
             <div id="services-menu" class="services-menu" inert={!servicesOpen}>
               <div class="services-heading"><span>OUR GLOBAL DIVISIONS</span><a href="/services" onclick={() => { open=false; servicesOpen=false }}>View all services <ArrowRight size={14}/></a></div>
               <div class="division-links">{#each divisions as division}<a class={division.tone} href={division.href} onclick={() => { open=false; servicesOpen=false }}><i><svelte:component this={division.icon} size={20}/></i><span><b>{division.title}</b><small>{division.text}</small></span><ArrowRight class="card-arrow" size={16}/></a>{/each}</div>
@@ -232,7 +253,7 @@
   @media (min-width:72rem){.division-links{grid-template-columns:repeat(4,minmax(0,1fr))}}
   .links .division-links>a{min-height:6.5rem;padding:1rem!important;border:1px solid #e3e8ea;border-radius:.8rem;align-items:flex-start;gap:.75rem;background:#fafbfb;color:#23405a!important;overflow:hidden;transition:transform 160ms var(--ease-out),border-color 160ms ease,background-color 160ms ease,box-shadow 160ms ease}
   .links .division-links>a:after{display:none}.division-links i{width:2.3rem;height:2.3rem;flex:none;display:grid;place-items:center;border-radius:.65rem;background:#eaf0f5;color:#173f64}.division-links span{min-width:0}.division-links b,.division-links small{display:block}.division-links b{font-size:.86rem;line-height:1.25;white-space:normal}.division-links small{font-size:.7rem;line-height:1.45;color:#71808c;margin-top:.35rem;white-space:normal}.card-arrow{margin-left:auto;margin-top:.15rem;opacity:.45;transition:transform 160ms var(--ease-out),opacity 160ms ease}
-  .services-nav.open .services-menu{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}.services-nav.open>button svg{transform:rotate(180deg)}
+  .services-nav.open .services-menu{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}.services-nav.open>button :global(svg){transform:rotate(180deg)}
   .links a:after {
     content: "";
     position: absolute;
@@ -614,7 +635,7 @@
     .menu:hover {
       background: #f1f3f4;
     }
-    .services-nav:hover .services-menu,.services-nav:focus-within .services-menu{opacity:1;pointer-events:auto;transform:translate(-50%,0) scale(1)}.services-nav:hover>button :global(svg),.services-nav:focus-within>button :global(svg){transform:rotate(180deg)}.links .division-links>a:hover{transform:translateY(-.12rem);border-color:#cbd6da;background:#fff;box-shadow:0 .65rem 1.3rem rgba(24,54,80,.08)}.division-links>a:hover :global(.card-arrow){opacity:1;transform:translateX(.18rem);background:#fbf4e4}
+    .links .division-links>a:hover{transform:translateY(-.12rem);border-color:#cbd6da;background:#fff;box-shadow:0 .65rem 1.3rem rgba(24,54,80,.08)}.division-links>a:hover :global(.card-arrow){opacity:1;transform:translateX(.18rem);background:#fbf4e4}
   }
   @media (prefers-reduced-motion: reduce) {
     .brand img,

@@ -183,7 +183,7 @@ describe("emails after a new enquiry", () => {
       enquiry({ message: 'Hello <img src=x onerror="alert(1)">' }),
     );
     const html = mailTo(sent, adminEmail)!.html;
-    assert.doesNotMatch(html, /<img/);
+    assert.doesNotMatch(html, /<img src=x/);
     assert.match(html, /&lt;img/);
   });
 

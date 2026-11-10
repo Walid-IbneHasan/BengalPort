@@ -81,27 +81,31 @@ enum AuthCodePurpose {
 }
 
 model User {
-  id               String        @id @default(cuid())
-  name             String
-  email            String        @unique
-  phone            String?
-  passwordHash     String?
-  googleId         String?       @unique
-  avatarUrl        String?
-  emailVerifiedAt  DateTime?
-  twoFactorEnabled Boolean       @default(false)
+  id                 String        @id @default(cuid())
+  name               String
+  email              String        @unique
+  phone              String?
+  passwordHash       String?
+  googleId           String?       @unique
+  avatarUrl          String?
+  emailVerifiedAt    DateTime?
+  twoFactorEnabled   Boolean       @default(false)
   // Raised when the password changes; sessions issued for an older value stop working.
-  tokenVersion     Int           @default(0)
-  lastLoginAt      DateTime?
-  role             Role          @default(USER)
-  staffNotes       StaffNote[]
-  reviews          Review[]
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  enquiries        Enquiry[]
-  applications     Application[]
-  payments         Payment[]
-  authCodes        AuthCode[]
+  tokenVersion       Int           @default(0)
+  // An administrator made this account: its owner must choose a password first.
+  mustChangePassword Boolean       @default(false)
+  // Set while the account is blocked. Its applications and payments are kept.
+  blockedAt          DateTime?
+  lastLoginAt        DateTime?
+  role               Role          @default(USER)
+  staffNotes         StaffNote[]
+  reviews            Review[]
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  enquiries          Enquiry[]
+  applications       Application[]
+  payments           Payment[]
+  authCodes          AuthCode[]
 }
 
 model AuthCode {

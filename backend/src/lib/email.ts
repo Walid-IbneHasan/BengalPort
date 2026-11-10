@@ -1,6 +1,10 @@
 import nodemailer from "nodemailer";
+import { brandedMail, siteUrl } from "./email-layout.js";
 
-export type Mail = { to: string; subject: string; text: string; html: string };
+export { brandedMail, escapeHtml, siteUrl } from "./email-layout.js";
+
+export type MailAttachment = { filename: string; content: Buffer; cid: string; contentType: string; contentDisposition: "inline" };
+export type Mail = { to: string; subject: string; text: string; html: string; attachments?: MailAttachment[] };
 export type Mailer = { configured: boolean; send(mail: Mail): Promise<void> };
 
 // Connection settings for the mail server, or null when email is not set up.
@@ -34,17 +38,35 @@ export function createMailer(env: NodeJS.ProcessEnv = process.env): Mailer {
   };
 }
 
-export const escapeHtml = (value: string) =>
-  value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+const codeEmails = {
+  VERIFY_EMAIL: { subject: "Verify your Bengal Port email", heading: "Verify your email", intro: "Use this code to finish setting up your Bengal Port account.", label: "Verification code" },
+  LOGIN_2FA: { subject: "Your Bengal Port login code", heading: "Your sign-in code", intro: "Use this code to finish signing in to Bengal Port.", label: "Sign-in code" },
+  RESET_PASSWORD: { subject: "Reset your Bengal Port password", heading: "Reset your password", intro: "Use this code to choose a new password for your Bengal Port account.", label: "Reset code" },
+} as const;
 
-const subjects = { VERIFY_EMAIL:"Verify your Bengal Port email", LOGIN_2FA:"Your Bengal Port login code", RESET_PASSWORD:"Reset your Bengal Port password" } as const;
-
-export async function sendAuthCode(mailer:Mailer,to:string,code:string,purpose:keyof typeof subjects) {
+export async function sendAuthCode(mailer: Mailer, to: string, code: string, purpose: keyof typeof codeEmails) {
   if (!mailer.configured) return false;
-  await mailer.send({
-    to, subject: subjects[purpose],
-    text: `Your Bengal Port verification code is ${code}. It expires in 10 minutes.`,
-    html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#102642"><h2 style="color:#0a1d3a">Bengal Port</h2><p>Your verification code is:</p><p style="font-size:30px;font-weight:800;letter-spacing:8px;color:#b98522">${code}</p><p>This code expires in 10 minutes. If you did not request it, you can ignore this email.</p></div>`,
-  });
+  const { subject, heading, intro, label } = codeEmails[purpose];
+  await mailer.send(brandedMail(to, subject, {
+    heading,
+    paragraphs: [intro],
+    highlight: { label, value: code },
+    note: "This code expires in 10 minutes. If you did not request it, you can ignore this email.",
+  }));
+  return true;
+}
+
+// An administrator has made this person an account. They sign in once with
+// this password and are then required to choose their own.
+export async function sendAccountCreated(mailer: Mailer, account: { to: string; name: string; password: string }) {
+  if (!mailer.configured) return false;
+  await mailer.send(brandedMail(account.to, "Your Bengal Port account is ready", {
+    heading: "Welcome to Bengal Port",
+    paragraphs: [`Hello ${account.name},`, "An account has been created for you on Bengal Port. Sign in with this email address and the temporary password below."],
+    highlight: { label: "Temporary password", value: account.password },
+    details: [["Email", account.to]],
+    action: { label: "Sign in", url: `${siteUrl()}/login` },
+    note: "You will be asked to choose a new password when you first sign in. Please do not share this email with anyone.",
+  }));
   return true;
 }
