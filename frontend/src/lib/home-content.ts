@@ -1,6 +1,25 @@
 import { fillMissing } from "./content-fields.js";
 
 export type HomeContent = {
+  brand: { name: string; tagline: string; logo: string };
+  navigation: {
+    home: string;
+    about: string;
+    services: string;
+    opportunities: string;
+    contact: string;
+    apply: string;
+    // Shown instead of `apply` where the top bar is short of room.
+    applyShort: string;
+    menuHeading: string;
+    menuViewAll: string;
+    business: { title: string; text: string };
+    education: { title: string; text: string };
+    healthcare: { title: string; text: string };
+    umrah: { title: string; text: string };
+  };
+  // A blank number keeps the one the website is configured with.
+  whatsapp: { number: string; label: string; callToAction: string };
   // The social links are optional; a blank one hides its icon in the header.
   utility: {
     message: string;
@@ -16,6 +35,11 @@ export type HomeContent = {
     description1: string;
     description2: string;
     backgroundImage: string;
+    mobileImage: string;
+    mobileLine1: string;
+    mobileLine2: string;
+    mobileLine3: string;
+    servicesHeading: string;
   };
   divisions: Array<{
     key: "business" | "education" | "health" | "umrah";
@@ -84,9 +108,53 @@ export type HomeContent = {
     cta: string;
     href: string;
   };
-  footer: { description: string; address: string; copyright: string };
+  footer: {
+    description: string;
+    address: string;
+    copyright: string;
+    exploreHeading: string;
+    divisionsHeading: string;
+    contactHeading: string;
+    aboutLink: string;
+    servicesLink: string;
+    opportunitiesLink: string;
+    contactLink: string;
+    applyLink: string;
+    payLink: string;
+    businessLink: string;
+    educationLink: string;
+    healthcareLink: string;
+    umrahLink: string;
+    privacyLink: string;
+    termsLink: string;
+  };
 };
 export const defaultHomeContent: HomeContent = {
+  brand: {
+    name: "BENGAL PORT",
+    tagline: "Connecting Bengal to the World",
+    logo: "/images/logo-192.webp",
+  },
+  navigation: {
+    home: "HOME",
+    about: "ABOUT US",
+    services: "SERVICES",
+    opportunities: "OPPORTUNITIES",
+    contact: "CONTACT US",
+    apply: "APPLY / ENQUIRY",
+    applyShort: "APPLY",
+    menuHeading: "OUR GLOBAL DIVISIONS",
+    menuViewAll: "View all services",
+    business: { title: "Global Business", text: "Trade, sourcing and business tours" },
+    education: { title: "Global Education", text: "Study abroad and admissions" },
+    healthcare: { title: "Global Healthcare", text: "Treatment and patient support" },
+    umrah: { title: "Global Umrah", text: "Pilgrimage travel and on-ground support" },
+  },
+  whatsapp: {
+    number: "",
+    label: "Chat with us",
+    callToAction: "Chat with us on WhatsApp",
+  },
   utility: {
     message: "Your Global Partner for Business • Education • Healthcare • Umrah",
     email: "info@bengalport.com",
@@ -102,6 +170,11 @@ export const defaultHomeContent: HomeContent = {
       "Your trusted partner in international trade, global education, healthcare and Umrah services.",
     description2: "We connect people, opportunities and solutions worldwide.",
     backgroundImage: "/images/hero-global-background.svg",
+    mobileImage: "/images/mobile-global-journey-v1.webp",
+    mobileLine1: "Your global journey",
+    mobileLine2: "Starts",
+    mobileLine3: "Here",
+    servicesHeading: "Our Global Services",
   },
   divisions: [
     {
@@ -294,8 +367,27 @@ export const defaultHomeContent: HomeContent = {
       "Connecting Bengal to the world through trusted business, education, healthcare and Umrah partnerships.",
     address: "Dhaka, Bangladesh",
     copyright: "Bengal Port. All rights reserved.",
+    exploreHeading: "Explore",
+    divisionsHeading: "Our Divisions",
+    contactHeading: "Contact",
+    aboutLink: "About Us",
+    servicesLink: "Services",
+    opportunitiesLink: "Opportunities",
+    contactLink: "Contact",
+    applyLink: "Apply / Enquiry",
+    payLink: "Pay online",
+    businessLink: "Global Business",
+    educationLink: "Global Education",
+    healthcareLink: "Global Healthcare",
+    umrahLink: "Global Umrah",
+    privacyLink: "Privacy Policy",
+    termsLink: "Terms of Use",
   },
 };
+
+// The WhatsApp number to link to: the administrator's, or the configured one.
+export const whatsappDigits = (content: HomeContent, configured: string) =>
+  content.whatsapp.number.replace(/\D/g, "") || configured;
 
 // Built-in wording retired by the October 2026 refresh, as a path into the
 // content and the old text. A saved page that still carries the old text

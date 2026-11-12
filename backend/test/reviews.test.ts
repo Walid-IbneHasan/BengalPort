@@ -142,7 +142,8 @@ describe("what a review must contain", () => {
 
   test("the customer's own words and a name to show", async () => {
     const row = await paidApplication();
-    assert.equal((await write(row.id, { ...words, body: "Good" })).statusCode, 400);
+    // Any length will do, but not nothing.
+    assert.equal((await write(row.id, { ...words, body: "   " })).statusCode, 400);
     assert.equal((await write(row.id, { ...words, name: " " })).statusCode, 400);
   });
 

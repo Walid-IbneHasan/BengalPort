@@ -7,24 +7,24 @@
   <div class="wrap cols">
     <div>
       <div class="foot-brand">
-        <img src="/images/logo-192.webp" alt="Bengal Port" /><b>BENGAL PORT</b>
+        <img src={$cmsContent.brand.logo} alt={$cmsContent.brand.name} /><b>{$cmsContent.brand.name}</b>
       </div>
       <p>{$cmsContent.footer.description}</p>
     </div>
     <div>
-      <h3>Explore</h3>
-      <a href="/about">About Us</a><a href="/services">Services</a><a
-        href="/opportunities">Opportunities</a
-      ><a href="/contact">Contact</a><a href="/apply">Apply / Enquiry</a><a href="/pay">Pay online</a>
+      <h3>{$cmsContent.footer.exploreHeading}</h3>
+      <a href="/about">{$cmsContent.footer.aboutLink}</a><a href="/services">{$cmsContent.footer.servicesLink}</a><a
+        href="/opportunities">{$cmsContent.footer.opportunitiesLink}</a
+      ><a href="/contact">{$cmsContent.footer.contactLink}</a><a href="/apply">{$cmsContent.footer.applyLink}</a><a href="/pay">{$cmsContent.footer.payLink}</a>
     </div>
     <div>
-      <h3>Our Divisions</h3>
-      <a href="/business">Global Business</a><a href="/education"
-        >Global Education</a
-      ><a href="/healthcare">Global Healthcare</a><a href="/umrah">Global Umrah</a>
+      <h3>{$cmsContent.footer.divisionsHeading}</h3>
+      <a href="/business">{$cmsContent.footer.businessLink}</a><a href="/education"
+        >{$cmsContent.footer.educationLink}</a
+      ><a href="/healthcare">{$cmsContent.footer.healthcareLink}</a><a href="/umrah">{$cmsContent.footer.umrahLink}</a>
     </div>
     <div>
-      <h3>Contact</h3>
+      <h3>{$cmsContent.footer.contactHeading}</h3>
       <p><a href={`tel:${$cmsContent.utility.phone.replace(/\s/g, "")}`}><Phone size={16} /> {$cmsContent.utility.phone}</a></p>
       <p><a href={`mailto:${$cmsContent.utility.email}`}><Mail size={16} /> {$cmsContent.utility.email}</a></p>
       <p><MapPin size={16} /> {$cmsContent.footer.address}</p>
@@ -32,7 +32,7 @@
   </div>
   <div class="bottom wrap">
     <span>© {new Date().getFullYear()} {$cmsContent.footer.copyright}</span>
-    <nav aria-label="Legal"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Use</a></nav>
+    <nav aria-label="Legal"><a href="/privacy">{$cmsContent.footer.privacyLink}</a><a href="/terms">{$cmsContent.footer.termsLink}</a></nav>
   </div>
 </footer>
 

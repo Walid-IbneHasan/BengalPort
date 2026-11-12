@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
   import { api } from "$lib/api";
   import { editBody, editProblem, editSteps, editValues } from "$lib/application-edit";
 
@@ -26,7 +27,7 @@
     try {
       onsaved(await api<Application>(`/admin/resources/applications/${application.id}`, { method: "PUT", body: JSON.stringify(editBody(application, values)) }));
     } catch (e) {
-      error = e instanceof Error ? e.message : "The changes could not be saved.";
+      error = problemText(e, "The changes could not be saved.");
     } finally {
       saving = false;
     }

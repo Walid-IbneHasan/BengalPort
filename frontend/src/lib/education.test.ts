@@ -1,7 +1,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultEducationContent } from "./division-content.js";
-import { destinations, fieldPrograms, flagCodes, institutionFields, studyField } from "./education.js";
+import { destinations, fieldPrograms, flagCodes, institutionFields, fieldInstitutions, studyField } from "./education.js";
 
 const records = [
   {
@@ -71,6 +71,23 @@ describe("the fields an institution teaches", () => {
 
   test("an institution with no programmes has none", () => {
     assert.deepEqual(institutionFields({ name: "New College", country: "Turkey", image: "" }), []);
+  });
+
+  test("the pages an administrator chose win over what its programmes suggest", () => {
+    assert.deepEqual(institutionFields({ ...records[1], fields: ["general", "medical"] }), ["medical", "general"]);
+  });
+
+  test("institutions listed on a field's page, with their photos in order", () => {
+    const listed = fieldInstitutions(
+      [
+        { ...records[0], gallery: ["/a.webp", "/b.webp"] },
+        { ...records[1], fields: ["medical"] },
+      ],
+      "medical",
+    );
+    assert.deepEqual(listed.map((x) => x.name), [records[0].name, records[1].name]);
+    assert.deepEqual(listed[0].photos, [records[0].image, "/a.webp", "/b.webp"]);
+    assert.deepEqual(listed[1].photos, [records[1].image]);
   });
 });
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { problemText, reportProblem } from "$lib/problem";
   import { onMount } from "svelte";
   import { Check } from "lucide-svelte";
   import { api } from "$lib/api";
@@ -20,7 +21,7 @@
       fees = data.fees;
       onlinePayment = data.onlinePayment;
     } catch (e) {
-      error = e instanceof Error ? e.message : "The fees could not be loaded.";
+      error = problemText(e, "The fees could not be loaded.");
     } finally {
       loading = false;
     }
@@ -38,7 +39,7 @@
       fees = data.fees;
       saved = true;
     } catch (e) {
-      error = e instanceof Error ? e.message : "The fees could not be saved.";
+      error = reportProblem(e, "The fees could not be saved.");
     } finally {
       saving = false;
     }

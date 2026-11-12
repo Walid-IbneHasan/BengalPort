@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { staffRole } from "$lib/staff";
+  import { problemText } from "$lib/problem";
+  import { confirmAction } from "$lib/confirm";
   import { onMount } from "svelte";
   import { Check, EyeOff, ImageUp, LoaderCircle, Plus, Star, Trash2, X } from "lucide-svelte";
   import { api } from "$lib/api";
@@ -58,7 +61,7 @@
       photoRow = "";
       notice = url ? `The review by ${row.name} now shows this photo.` : `The review by ${row.name} shows initials instead of a photo.`;
     } catch (e) {
-      error = e instanceof Error ? e.message : "The photo could not be changed.";
+      error = problemText(e, "The photo could not be changed.");
     } finally {
       busy = "";
     }
@@ -73,7 +76,7 @@
       rows = await api<Row[]>("/admin/reviews");
       if (!count("PENDING")) filter = "ALL";
     } catch (e) {
-      error = e instanceof Error ? e.message : "The reviews could not be loaded.";
+      error = problemText(e, "The reviews could not be loaded.");
     } finally {
       loading = false;
     }
@@ -87,14 +90,14 @@
       rows = rows.map((item) => (item.id === row.id ? saved : item));
       notice = status === "APPROVED" ? `The review by ${row.name} is now on the website.` : `The review by ${row.name} is no longer shown.`;
     } catch (e) {
-      error = e instanceof Error ? e.message : "The review could not be changed.";
+      error = problemText(e, "The review could not be changed.");
     } finally {
       busy = "";
     }
   }
 
   async function remove(row: Row) {
-    if (!confirm(`Delete the review by ${row.name}? This cannot be undone.`)) return;
+    if (!(await confirmAction({ title: `Delete the review by ${row.name}?`, message: "This cannot be undone." }))) return;
     busy = row.id;
     error = notice = "";
     try {
@@ -102,7 +105,7 @@
       rows = rows.filter((item) => item.id !== row.id);
       notice = "Review deleted.";
     } catch (e) {
-      error = e instanceof Error ? e.message : "The review could not be deleted.";
+      error = problemText(e, "The review could not be deleted.");
     } finally {
       busy = "";
     }
@@ -124,7 +127,7 @@
       filter = "APPROVED";
       notice = `The review by ${saved.name} was added and is on the website.`;
     } catch (e) {
-      formError = e instanceof Error ? e.message : "The review could not be added.";
+      formError = problemText(e, "The review could not be added.");
     } finally {
       saving = false;
     }
@@ -155,7 +158,7 @@
         <label><span>About <em>(optional)</em></span><input bind:value={detail} maxlength="80" placeholder="e.g. MBBS admission, Malaysia" /></label>
       </div>
       <StarInput bind:value={rating} name="new-rating" label="Rating" />
-      <label><span>Review</span><textarea bind:value={body} required minlength="10" maxlength={REVIEW_LENGTH} rows="4"></textarea></label>
+      <label><span>Review</span><textarea bind:value={body} required maxlength={REVIEW_LENGTH} rows="4"></textarea></label>
       <CmsImageField label="Profile photo (optional)" value={photoUrl} recommendation={photoHint} purpose="review photo" onchange={(value) => (photoUrl = value)} />
       {#if formError}<p class="notice bad" role="alert">{formError}</p>{/if}
       <div><button class="primary" disabled={saving}>{saving ? "Adding…" : "Add review"}</button></div>
@@ -196,7 +199,7 @@
           {#if row.status !== "APPROVED"}<button type="button" class="primary" disabled={busy === row.id} onclick={() => decide(row, "APPROVED")}><Check size={16} /> Approve</button>{/if}
           {#if row.status !== "HIDDEN"}<button type="button" disabled={busy === row.id} onclick={() => decide(row, "HIDDEN")}><EyeOff size={16} /> {row.status === "APPROVED" ? "Hide" : "Do not publish"}</button>{/if}
           <button type="button" disabled={busy === row.id} aria-expanded={photoRow === row.id} onclick={() => editPhoto(row)}><ImageUp size={16} /> {row.photoUrl ? "Change photo" : "Add photo"}</button>
-          <button type="button" class="danger" disabled={busy === row.id} onclick={() => remove(row)}><Trash2 size={16} /> Delete</button>
+          {#if $staffRole !== "MODERATOR"}<button type="button" class="danger" disabled={busy === row.id} onclick={() => remove(row)}><Trash2 size={16} /> Delete</button>{/if}
         </div>
         {#if photoRow === row.id}
           <div class="photo-editor">

@@ -34,6 +34,20 @@ describe("turning page content into editor rows", () => {
     assert.equal(rows["hero.image"].image, true);
   });
 
+  test("a background image and a logo get an image picker too", () => {
+    const rows = Object.fromEntries(fields(contentRows({ hero: { backgroundImage: "/a.webp", mobileImage: "/b.webp" }, brand: { logo: "/c.webp", name: "Port" } })).map((row) => [row.path, row]));
+    assert.equal(rows["hero.backgroundImage"].image, true);
+    assert.equal(rows["hero.mobileImage"].image, true);
+    assert.equal(rows["brand.logo"].image, true);
+    assert.equal(rows["brand.name"].image, false);
+  });
+
+  test("the text of a section gets a larger box even when it is short", () => {
+    const rows = Object.fromEntries(fields(contentRows({ sections: [{ heading: "Children", body: "Short." }] })).map((row) => [row.path, row]));
+    assert.equal(rows["sections.0.body"].long, true);
+    assert.equal(rows["sections.0.heading"].long, false);
+  });
+
   test("a photo gets an image picker too", () => {
     const rows = Object.fromEntries(fields(contentRows({ fields: { medical: { photo: "/images/medical.webp", title: "Medical" } } })).map((row) => [row.path, row]));
     assert.equal(rows["fields.medical.photo"].image, true);

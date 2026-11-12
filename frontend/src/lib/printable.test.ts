@@ -118,4 +118,12 @@ describe("naming the file a browser saves", () => {
   test("an invoice is named by number and customer", () => {
     assert.equal(printTitle("invoice", { number: "INV-000012", customerName: "Rahim" }), "INV-000012 - Rahim");
   });
+
+  test("a Hisab Kitab entry is named by its number and what it was", () => {
+    assert.equal(printTitle("ledger-entry", { id: "cm3abcdefgh12345", type: "INCOME", description: "Visa fee" }), "HK-GH12345 - Income - Visa fee");
+  });
+
+  test("a day of Hisab Kitab is named by its date", () => {
+    assert.equal(printTitle("ledger-day", { day: "2026-11-11" }), "Hisab Kitab - 2026-11-11");
+  });
 });

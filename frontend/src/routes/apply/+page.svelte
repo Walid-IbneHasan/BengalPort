@@ -1,16 +1,20 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
   import { api } from "$lib/api";
   import { page } from "$app/state";
   import DivisionApplicationForm from "$lib/components/DivisionApplicationForm.svelte";
   import FormGuard from "$lib/components/FormGuard.svelte";
   import type { ApplicationDivision } from "$lib/application-forms";
-  import { applyState, enquiryCopy, type ApplyForm, type ApplyTab } from "$lib/apply-route";
+  import { applyState, type ApplyForm, type ApplyTab } from "$lib/apply-route";
+  import type { ApplyContent } from "$lib/site-pages";
   import { onMount, tick, untrack } from "svelte";
   import { phoneProblem } from "$lib/application-validation";
   import { toasts } from "$lib/toast";
   import { paymentProviders, taka, type PaymentProvider } from "$lib/payment-rules";
   import { Check, MessageSquareText, BriefcaseBusiness, GraduationCap, HeartPulse, MoonStar } from "lucide-svelte";
-  const tabs = [{ key: "GENERAL", label: "General enquiry", icon: MessageSquareText },{ key: "BUSINESS", label: "Business", icon: BriefcaseBusiness },{ key: "EDUCATION", label: "Education", icon: GraduationCap },{ key: "HEALTHCARE", label: "Healthcare", icon: HeartPulse },{ key: "UMRAH", label: "Umrah", icon: MoonStar }] as const;
+  let { data }: { data: { content: ApplyContent } } = $props();
+  let content = $derived(data.content);
+  let tabs = $derived([{ key: "GENERAL", label: content.tabs.general, icon: MessageSquareText },{ key: "BUSINESS", label: content.tabs.business, icon: BriefcaseBusiness },{ key: "EDUCATION", label: content.tabs.education, icon: GraduationCap },{ key: "HEALTHCARE", label: content.tabs.healthcare, icon: HeartPulse },{ key: "UMRAH", label: content.tabs.umrah, icon: MoonStar }] as const);
   const opened = applyState(page.url.searchParams);
   let tab = $state<ApplyTab>(opened.tab), form = $state<ApplyForm>(opened.form);
   let name = $state(""), phone = $state(""), email = $state(""), subject = $state(opened.subject), message = $state("");
@@ -43,7 +47,7 @@
     tab = requested.tab; form = requested.form;
     if (requested.subject) subject = requested.subject;
   });
-  let copy = $derived(enquiryCopy[tab]);
+  let copy = $derived(content.enquiry[tab.toLowerCase() as keyof ApplyContent["enquiry"]]);
   // Service fees, so an applicant knows the cost before filling in the form.
   let payments = $state<{ enabled: boolean; methods?: PaymentProvider[]; fees: Record<string, { label: string; amount: number }> }>({ enabled: false, fees: {} });
   let fee = $derived(payments.fees[tab]?.amount > 0 ? payments.fees[tab] : null);
@@ -63,21 +67,21 @@
       await tick();
       sentBox?.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
       sentBox?.focus({ preventScroll: true }); }
-    catch (e) { error = e instanceof Error ? e.message : "Could not submit the enquiry."; }
+    catch (e) { error = problemText(e, "Could not submit the enquiry."); }
     finally { sending = false; guard?.reset(); }
   }
 </script>
 
 <svelte:head><title>Apply / Enquiry — Bengal Port</title><meta name="description" content="Send Bengal Port a quick enquiry or complete a business, education, healthcare or Umrah application."/></svelte:head>
-<section class="page-hero apply-hero"><div class="wrap"><span class="eyebrow">APPLY / ENQUIRY</span><h1>Ask a question or start an application.</h1><p>Questions are welcome without an account. Choose a division to send a quick enquiry, or complete its detailed application form when you are ready.</p></div></section>
+<section class="page-hero apply-hero"><div class="wrap"><span class="eyebrow">{content.hero.eyebrow}</span><h1>{content.hero.title}</h1><p>{content.hero.description}</p></div></section>
 <section class="application-section"><div class="wrap">
   <div class="tabs" role="tablist" aria-label="Application type">{#each tabs as item}{@const Icon = item.icon}<button type="button" role="tab" aria-selected={tab===item.key} class:active={tab===item.key} onclick={()=>choose(item.key)}><Icon size={19}/><span>{item.label}</span></button>{/each}</div>
-  {#if tab !== "GENERAL"}<div class="modes" role="group" aria-label="Form type"><button type="button" class:active={form==="enquiry"} aria-pressed={form==="enquiry"} onclick={()=>{form="enquiry";error=""}}>Quick enquiry</button><button type="button" class:active={form==="application"} aria-pressed={form==="application"} onclick={()=>{form="application";success="";error=""}}>Full application</button></div>{/if}
+  {#if tab !== "GENERAL"}<div class="modes" role="group" aria-label="Form type"><button type="button" class:active={form==="enquiry"} aria-pressed={form==="enquiry"} onclick={()=>{form="enquiry";error=""}}>{content.modes.enquiry}</button><button type="button" class:active={form==="application"} aria-pressed={form==="application"} onclick={()=>{form="application";success="";error=""}}>{content.modes.application}</button></div>{/if}
   {#if fee && form === "application"}<p class="fee-note"><b>{fee.label}: {taka(fee.amount)}.</b> {payments.enabled ? `Paying online is optional: after you submit you can pay in full or in part with ${payNames}, or pay later.` : "Our team will tell you how to pay after you submit."} A quick enquiry is always free.</p>{/if}
   {#if form === "enquiry"}
     <div class="general-box"><div class="general-intro"><span>{copy.eyebrow}</span><h2>{copy.title}</h2><p>{copy.text}</p></div>
-      {#if success}<div class="sent" role="status" tabindex="-1" bind:this={sentBox}><i><Check size={28}/></i><h3>Enquiry sent successfully</h3><p>{success}</p><div class="sent-actions"><button type="button" class="btn" onclick={()=>(success="")}>SEND ANOTHER ENQUIRY</button><a href="/">Back to home</a></div></div>{:else}{#if error}<p class="error" role="alert">{error}</p>{/if}
-      <form onsubmit={(e)=>{e.preventDefault();submitEnquiry()}}><div class="form-grid"><div class="field"><label for="name">Full name *</label><input id="name" bind:value={name} autocomplete="name" required minlength="2" maxlength="120"/></div><div class="field"><label for="phone">Phone number *</label><input id="phone" bind:value={phone} autocomplete="tel" inputmode="tel" required minlength="7" maxlength="30" aria-invalid={phoneError ? "true" : undefined} aria-describedby={phoneError ? "phone-error" : undefined} oninput={() => (phoneError = "")}/>{#if phoneError}<small id="phone-error" class="field-error" role="alert">{phoneError}</small>{/if}</div><div class="field"><label for="email">Email address</label><input id="email" type="email" bind:value={email} autocomplete="email" maxlength="160"/></div><div class="field"><label for="subject">Subject *</label><input id="subject" bind:value={subject} required maxlength="150"/></div></div><div class="field full"><label for="message">Enquiry information *</label><textarea id="message" bind:value={message} required minlength="5" maxlength="5000" rows="6"></textarea></div><FormGuard bind:this={guard} /><button class="btn" disabled={sending}>{sending?"SENDING...":"SUBMIT ENQUIRY"}</button><p class="legal-note">By submitting you agree to our <a href="/privacy">Privacy Policy</a>.</p></form>{/if}
+      {#if success}<div class="sent" role="status" tabindex="-1" bind:this={sentBox}><i><Check size={28}/></i><h3>{content.sent.title}</h3><p>{success}</p><div class="sent-actions"><button type="button" class="btn" onclick={()=>(success="")}>{content.sent.another}</button><a href="/">{content.sent.home}</a></div></div>{:else}{#if error}<p class="error" role="alert">{error}</p>{/if}
+      <form onsubmit={(e)=>{e.preventDefault();submitEnquiry()}}><div class="form-grid"><div class="field"><label for="name">Full name *</label><input id="name" bind:value={name} autocomplete="name" required minlength="2" maxlength="120"/></div><div class="field"><label for="phone">Phone number *</label><input id="phone" bind:value={phone} autocomplete="tel" inputmode="tel" required minlength="7" maxlength="30" aria-invalid={phoneError ? "true" : undefined} aria-describedby={phoneError ? "phone-error" : undefined} oninput={() => (phoneError = "")}/>{#if phoneError}<small id="phone-error" class="field-error" role="alert">{phoneError}</small>{/if}</div><div class="field"><label for="email">Email address</label><input id="email" type="email" bind:value={email} autocomplete="email" maxlength="160"/></div><div class="field"><label for="subject">Subject *</label><input id="subject" bind:value={subject} required maxlength="150"/></div></div><div class="field full"><label for="message">Enquiry information *</label><textarea id="message" bind:value={message} required minlength="5" maxlength="5000" rows="6"></textarea></div><FormGuard bind:this={guard} /><button class="btn" disabled={sending}>{sending?"SENDING...":content.form.submit}</button><p class="legal-note">{content.form.agreement} <a href="/privacy">{content.form.privacyLink}</a>.</p></form>{/if}
     </div>
   {:else}{#key tab}<DivisionApplicationForm division={tab as ApplicationDivision}/>{/key}{/if}
 </div></section>

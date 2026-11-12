@@ -1,9 +1,11 @@
 <script lang="ts">
+  import { problemText, reportProblem } from "$lib/problem";
   import { onMount } from "svelte";
   import { Check, Code2, Eye, LoaderCircle, Plus, Save, Trash2 } from "lucide-svelte";
   import { api } from "$lib/api";
   import { addItem, contentRows, fillMissing, removeItem, setAt } from "$lib/content-fields";
   import CmsImageField from "./CmsImageField.svelte";
+  import PlaceField from "./PlaceField.svelte";
   // Edits one page of the public website: a division portal, or the About,
   // Services or Contact page. `lists` lets items be added to and removed
   // from the page's lists; `note` is shown above the fields.
@@ -15,7 +17,7 @@
     note = "",
     prepare,
   }: {
-    division: "business" | "education" | "healthcare" | "umrah" | "about" | "services" | "contact";
+    division: "business" | "education" | "healthcare" | "umrah" | "about" | "services" | "contact" | "opportunities" | "apply" | "pay" | "login" | "privacy" | "terms" | "documents";
     fallback: Content;
     lists?: boolean;
     note?: string;
@@ -42,6 +44,13 @@
       about: "About Us",
       services: "Services",
       contact: "Contact",
+      opportunities: "Opportunities",
+      apply: "Apply / Enquiry",
+      pay: "Pay online",
+      login: "Sign-in",
+      privacy: "Privacy Policy",
+      terms: "Terms of Use",
+      documents: "Documents and PDFs",
     }[division],
   );
   function change(next: Content) {
@@ -73,7 +82,7 @@
       revision = page.revision;
       published = page.published;
     } catch (e) {
-      error = e instanceof Error ? e.message : "Unable to load content";
+      error = problemText(e, "Unable to load content");
     } finally {
       loading = false;
     }
@@ -92,7 +101,7 @@
       revision = page.revision;
       success = `${name} saved as revision ${revision}.`;
     } catch (e) {
-      error = e instanceof Error ? e.message : "Unable to save content";
+      error = reportProblem(e, "The changes could not be saved.");
     } finally {
       saving = false;
     }
@@ -146,7 +155,7 @@
               type="button"
               class="list-button"
               onclick={() => change(addItem($state.snapshot(draft), field.list))}
-              ><Plus size={15} /> {field.label}</button
+              ><Plus size={15} /> {division === "healthcare" && field.list === "hero.cities" ? "Add a destination (country and city)" : field.label}</button
             >
           {:else if field.kind === "remove"}<button
               type="button"
@@ -154,6 +163,13 @@
               onclick={() => change(removeItem($state.snapshot(draft), field.list, field.index))}
               ><Trash2 size={15} /> {field.label}</button
             >
+          {:else if division === "healthcare" && /^hero\.cities\.\d+$/.test(field.path)}{@const item = field.remove}<PlaceField
+              label={`Destination ${Number(field.path.split(".")[2]) + 1}`}
+              value={field.value}
+              onchange={(value) => setPath(field.path, value)}
+              explain={field.path === "hero.cities.0"}
+              onremove={item ? () => change(removeItem($state.snapshot(draft), item.list, item.index)) : undefined}
+            />
           {:else if field.image}<CmsImageField
               label={field.label}
               value={field.value}
@@ -161,7 +177,7 @@
               recommendation="Landscape recommended · ideally 16:9 or wider. Portrait uploads are supported and will be responsively cropped."
               onchange={(value) => setPath(field.path, value)}
             />
-          {:else}<label
+          {:else}<label class:wide={field.path.endsWith(".body")}
               ><span
                 >{field.label}{#if field.remove}{@const item = field.remove}<button
                     type="button"
@@ -171,7 +187,7 @@
                     ><Trash2 size={13} /> Remove</button
                   >{/if}</span
               >{#if field.long}<textarea
-                  rows="3"
+                  rows={field.path.endsWith(".body") ? 12 : 3}
                   aria-label={field.label}
                   value={field.value}
                   oninput={(e) => setPath(field.path, e.currentTarget.value)}
@@ -303,6 +319,12 @@
     padding: 1rem;
     display: grid;
     gap: 1rem;
+  }
+  .fields {
+    align-items: start;
+  }
+  .fields label.wide {
+    grid-column: 1 / -1;
   }
   .fields label {
     display: grid;

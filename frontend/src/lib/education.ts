@@ -5,7 +5,9 @@ export type FieldKey = "medical" | "engineering" | "general";
 export const fieldKeys: FieldKey[] = ["medical", "engineering", "general"];
 
 type Programme = { title?: string; level?: string; discipline?: string };
-type Institution = { name: string; country: string; image?: string; programs?: Programme[] };
+// `fields` are the pages an administrator chose for it; none means worked
+// out from its programmes.
+type Institution = { name: string; country: string; image?: string; fields?: string[]; programs?: Programme[] };
 
 const medical = /mbbs|medic|dent|\bbds\b|nurs|pharm|surg|physio|health|clinical/i;
 const technical = /comput|software|technolog|electr|mechan|robot|architect|cyber|data scien/i;
@@ -24,6 +26,7 @@ export function studyField(programme: Programme): FieldKey {
 }
 
 export function institutionFields(institution: Institution): FieldKey[] {
+  if (institution.fields?.length) return fieldKeys.filter((key) => institution.fields!.includes(key));
   const taught = new Set((institution.programs ?? []).map(studyField));
   return fieldKeys.filter((key) => taught.has(key));
 }
@@ -57,3 +60,14 @@ export function destinations(institutions: Institution[]) {
 
 // The flags for a list of destinations live with the other place helpers.
 export { flagCodes } from "./flags.js";
+
+// The institutions shown on one field's own page, each with its photos in
+// order: the main picture first, then the gallery.
+export function fieldInstitutions<T extends Institution & { gallery?: string[] }>(institutions: T[], field: FieldKey) {
+  return institutions
+    .filter((institution) => institutionFields(institution).includes(field))
+    .map((institution) => ({
+      ...institution,
+      photos: [institution.image, ...(institution.gallery ?? [])].filter((photo): photo is string => Boolean(photo)),
+    }));
+}

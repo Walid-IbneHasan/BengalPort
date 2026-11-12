@@ -5,6 +5,8 @@
 
   let { data } = $props();
   let opportunity = $derived(data.opportunity);
+  let words = $derived(data.content.detail);
+  let applyBy = $derived(data.content.list.applyBy);
   let tab = $derived(opportunityTab(opportunity.category));
   let summary = $derived(opportunity.description.replace(/\s+/g, " ").slice(0, 155));
 </script>
@@ -19,12 +21,12 @@
 
 <section class="page-hero detail-hero">
   <div class="wrap">
-    <a class="back" href="/opportunities"><ArrowLeft size={16} /> All opportunities</a>
+    <a class="back" href="/opportunities"><ArrowLeft size={16} /> {words.back}</a>
     <span class="eyebrow">{opportunity.category.replaceAll("_", " ")}</span>
     <h1>{opportunity.title}</h1>
     <div class="facts">
       <span><MapPin size={16} />{opportunity.location}, {opportunity.country}</span>
-      {#if opportunity.deadline}<span><Calendar size={16} />Apply by {new Date(opportunity.deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>{/if}
+      {#if opportunity.deadline}<span><Calendar size={16} />{applyBy} {new Date(opportunity.deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>{/if}
     </div>
   </div>
 </section>
@@ -33,13 +35,13 @@
   <div class="wrap layout">
     <img src={opportunity.image} alt={opportunity.title} />
     <div class="copy">
-      <h2>About this opportunity</h2>
+      <h2>{words.about}</h2>
       <p>{opportunity.description}</p>
       <div class="actions">
-        <a class="btn" href={applyHref(tab, tab === "GENERAL" ? undefined : "enquiry", opportunity.title)}>ENQUIRE ABOUT THIS <ArrowRight size={17} /></a>
-        {#if tab !== "GENERAL"}<a class="secondary" href={applyHref(tab, "application")}>Start a full application</a>{/if}
+        <a class="btn" href={applyHref(tab, tab === "GENERAL" ? undefined : "enquiry", opportunity.title)}>{words.enquire} <ArrowRight size={17} /></a>
+        {#if tab !== "GENERAL"}<a class="secondary" href={applyHref(tab, "application")}>{words.fullApplication}</a>{/if}
       </div>
-      <small>Enquiries are free and need no account. Our team replies with requirements, costs and next steps.</small>
+      <small>{words.note}</small>
     </div>
   </div>
 </section>

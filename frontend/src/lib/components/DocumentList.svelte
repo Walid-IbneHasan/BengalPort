@@ -1,7 +1,10 @@
 <script lang="ts">
+  import { staffRole } from "$lib/staff";
+  import { problemText } from "$lib/problem";
   import { Download, FileText, LoaderCircle, Paperclip, Trash2 } from "lucide-svelte";
   import { DOCUMENT_ACCEPT, MAX_DOCUMENTS, documentProblem, formatBytes } from "$lib/document-rules";
   import { downloadDocument, removeDocument, uploadDocument, type DocumentInfo } from "$lib/documents";
+  import { shrinkImage } from "$lib/image-resize";
 
   // The documents attached to one application. With `canAttach` the viewer can
   // add and remove files; with `canDownload` (a signed-in member or admin) they
@@ -29,12 +32,15 @@
 
   async function attach(files: FileList | null) {
     error = "";
-    for (const file of files ?? []) {
+    for (const picked of files ?? []) {
+      // A large phone photo is made smaller before the size limit is checked.
+      busy = `Preparing ${picked.name}…`;
+      const file = await shrinkImage(picked);
       const problem = documentProblem(file, items.length);
       if (problem) { error = problem; continue; }
-      busy = `Uploading ${file.name}…`;
+      busy = `Uploading ${picked.name}…`;
       try { items = [...items, await uploadDocument(applicationId, file, uploadToken)]; }
-      catch (e) { error = `“${file.name}” was not attached: ${e instanceof Error ? e.message : "upload failed"}.`; }
+      catch (e) { error = `“${file.name}” was not attached: ${problemText(e, "upload failed")}.`; }
     }
     busy = "";
     onchange?.(items);
@@ -42,12 +48,12 @@
   async function remove(item: DocumentInfo) {
     error = "";
     try { await removeDocument(item.id, uploadToken); items = items.filter((other) => other.id !== item.id); onchange?.(items); }
-    catch (e) { error = e instanceof Error ? e.message : "The document could not be removed."; }
+    catch (e) { error = problemText(e, "The document could not be removed."); }
   }
   async function download(item: DocumentInfo) {
     error = "";
     try { await downloadDocument(item); }
-    catch (e) { error = e instanceof Error ? e.message : "The document could not be downloaded."; }
+    catch (e) { error = problemText(e, "The document could not be downloaded."); }
   }
 </script>
 
@@ -59,7 +65,7 @@
           <FileText size={18} />
           <span><b>{item.name}</b><small>{formatBytes(item.byteSize)}</small></span>
           {#if canDownload}<button type="button" aria-label={`Download ${item.name}`} onclick={() => download(item)}><Download size={16} /></button>{/if}
-          {#if canAttach}<button type="button" class="danger" aria-label={`Remove ${item.name}`} onclick={() => remove(item)}><Trash2 size={16} /></button>{/if}
+          {#if canAttach && $staffRole !== "MODERATOR"}<button type="button" class="danger" aria-label={`Remove ${item.name}`} onclick={() => remove(item)}><Trash2 size={16} /></button>{/if}
         </li>
       {/each}
     </ul>

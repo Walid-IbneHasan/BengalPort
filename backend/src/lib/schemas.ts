@@ -1,4 +1,6 @@
 import { z } from "zod";
+// Plain wording for checks that carry no message of their own.
+import "./zod-messages.js";
 export const enquirySchema = z.object({
   type: z.enum(["GENERAL", "BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH"]),
   name: z.string().min(2).max(120),
@@ -246,7 +248,7 @@ export const newUserSchema = z.object({
   name: z.string().trim().min(2).max(100),
   email: z.string().trim().toLowerCase().email().max(254),
   phone: z.string().trim().min(7).max(30).optional(),
-  role: z.enum(["USER", "ADMIN"]),
+  role: z.enum(["USER", "MODERATOR", "ADMIN", "MANAGER", "ACCOUNTANT", "EMPLOYEE"]),
 });
 export const blockUserSchema = z.object({ blocked: z.boolean() });
 // A customer's review: a rating, the name to show, an optional line about
@@ -269,7 +271,7 @@ export const reviewSchema = z.object({
     .max(80)
     .nullish()
     .transform((value) => value || null),
-  body: z.string().trim().min(10).max(1500),
+  body: z.string().trim().min(1).max(1500),
   // Whether the member wants their account photo shown with the review.
   showPhoto: z.boolean().optional(),
 });
@@ -291,20 +293,14 @@ export const categorySchema = z.object({
   name: z.string().trim().min(2).max(60),
   type: z.enum(["INCOME", "EXPENSE"]),
 });
+export const opportunityCategorySchema = z.object({
+  label: z.string().trim().min(2).max(60),
+});
 export const opportunitySchema = z.object({
   slug: z.string().min(3),
-  category: z.enum([
-    "BUSINESS",
-    "EDUCATION",
-    "HEALTHCARE",
-    "UMRAH",
-    "FACTORY_VISIT",
-    "BUSINESS_TOUR",
-    "SCHOLARSHIP",
-    "EVENT",
-  ]),
+  category: z.string().trim().min(1).max(200),
   title: z.string().min(3),
-  description: z.string().min(10),
+  description: z.string().trim().min(1),
   country: z.string().min(2),
   location: z.string().min(2),
   deadline: z.coerce.date().nullable().optional(),
@@ -329,6 +325,15 @@ export const transactionSchema = z
       .enum(["PAID", "PARTIALLY_PAID", "DUE", "PENDING", "FAILED", "REFUNDED"])
       .optional(),
     categoryId: z.string(),
+    // The customer's account and application, when the entry is about one.
+    // Income for an application is also recorded as a payment on it, made
+    // the way `paymentMethod` says (cash unless told otherwise).
+    userId: z.string().trim().min(1).nullish().transform((value) => value || null),
+    applicationId: z.string().trim().min(1).nullish().transform((value) => value || null),
+    paymentMethod: z.string().trim().max(60).nullish().transform((value) => value || "Cash"),
+    // The cash, bank or mobile wallet account the money went into or came
+    // out of (its id or code). Left out: cash in hand.
+    moneyAccount: z.string().trim().max(60).nullish().transform((value) => value || null),
   })
   .refine(
     (v) =>
@@ -366,6 +371,19 @@ export const invoiceSchema = z.object({
   notes: optionalText(2000),
   applicationId: z.string().nullish(),
   transactionId: z.string().nullish(),
+  // The office workflow: the CRM customer and deal, the currency and its
+  // rate in taka, the work's timeline, what each side commits to, and terms.
+  customerId: z.string().trim().min(1).nullish().transform((value) => value || null),
+  dealId: z.string().trim().min(1).nullish().transform((value) => value || null),
+  currency: z.string().trim().toUpperCase().regex(/^[A-Z]{3}$/, "Use a three-letter currency code such as BDT or USD").default("BDT"),
+  exchangeRate: z.coerce.number().positive().max(100000).default(1),
+  startDate: z.preprocess((value) => (value === "" ? null : value), z.coerce.date().nullish()).transform((value) => value ?? null),
+  endDate: z.preprocess((value) => (value === "" ? null : value), z.coerce.date().nullish()).transform((value) => value ?? null),
+  companyCommitments: optionalText(4000),
+  clientCommitments: optionalText(4000),
+  terms: optionalText(6000),
+  // Issue it at once instead of keeping a draft.
+  issue: z.boolean().optional(),
 });
 
 const text = z.string().trim().min(1).max(500);
@@ -402,15 +420,20 @@ export const partnerSchema = z.object({
   country: label,
   industry: label,
   product: label,
-  description: z.string().trim().min(10).max(2000),
+  description: z.string().trim().min(1).max(2000),
   image: image("/images/global-business.webp"),
   featured: z.boolean().default(false),
 });
+// More photos of a place, shown after its main one as a slideshow.
+const gallery = z.array(link).max(12).default([]);
 export const institutionSchema = z.object({
   name: label,
   country: label,
-  description: z.string().trim().min(10).max(2000),
+  description: z.string().trim().min(1).max(2000),
   image: image("/images/global-education.webp"),
+  gallery: gallery,
+  // The Education pages it appears on; none means worked out from its programmes.
+  fields: z.array(z.enum(["medical", "engineering", "general"])).max(3).default([]),
   programs: z
     .array(
       z.object({
@@ -430,8 +453,9 @@ export const hospitalSchema = z.object({
   name: label,
   country: label,
   city: label,
-  description: z.string().trim().min(10).max(2000),
+  description: z.string().trim().min(1).max(2000),
   image: image("/images/global-healthcare.webp"),
+  gallery: gallery,
   services: z
     .array(z.object({ title: label, category: label, description: paragraph }))
     .max(100)
@@ -446,6 +470,28 @@ const socialLink = z
   .or(z.literal(""))
   .default("");
 export const homeContentSchema = z.object({
+  brand: z.object({ name: text, tagline: text, logo: link }),
+  navigation: z.object({
+    home: text,
+    about: text,
+    services: text,
+    opportunities: text,
+    contact: text,
+    apply: text,
+    applyShort: text,
+    menuHeading: text,
+    menuViewAll: text,
+    business: z.object({ title: text, text }),
+    education: z.object({ title: text, text }),
+    healthcare: z.object({ title: text, text }),
+    umrah: z.object({ title: text, text }),
+  }),
+  // A blank number keeps the one the website is configured with.
+  whatsapp: z.object({
+    number: z.string().trim().max(30).regex(/^\+?[\d\s-]*$/, "Use digits only, for example 8801711991035"),
+    label: text,
+    callToAction: text,
+  }),
   utility: z.object({
     message: text,
     email: z.string().email(),
@@ -460,6 +506,11 @@ export const homeContentSchema = z.object({
     description1: paragraph,
     description2: paragraph,
     backgroundImage: link,
+    mobileImage: link,
+    mobileLine1: text,
+    mobileLine2: text,
+    mobileLine3: text,
+    servicesHeading: text,
   }),
   divisions: z
     .array(
@@ -555,7 +606,26 @@ export const homeContentSchema = z.object({
     cta: text,
     href: link,
   }),
-  footer: z.object({ description: paragraph, address: text, copyright: text }),
+  footer: z.object({
+    description: paragraph,
+    address: text,
+    copyright: text,
+    exploreHeading: text,
+    divisionsHeading: text,
+    contactHeading: text,
+    aboutLink: text,
+    servicesLink: text,
+    opportunitiesLink: text,
+    contactLink: text,
+    applyLink: text,
+    payLink: text,
+    businessLink: text,
+    educationLink: text,
+    healthcareLink: text,
+    umrahLink: text,
+    privacyLink: text,
+    termsLink: text,
+  }),
 });
 // A list of short texts, such as the markets a hero names.
 const stringList = (max: number) => z.array(text).min(1).max(max);
@@ -608,6 +678,7 @@ export const businessContentSchema = z.object({
   }),
   process: processSection,
   partners: z.object({ eyebrow: text, title: text, description: paragraph, empty: paragraph }),
+  labels: z.object({ allPartners: text, suppliers: text, factories: text, all: text, featured: text, supplier: text, factory: text, requestConnection: text, noMatches: text, askAboutSourcing: text, unavailable: text }),
   trust: z.object({
     eyebrow: text,
     title: text,
@@ -718,6 +789,8 @@ const studyField = z.object({
   points: z.array(text).min(1).max(8),
   subjects: z.array(text).min(1).max(12),
   cta: text,
+  // The field's own page: facts such as entry requirements and costs.
+  info: z.array(z.object({ title: text, body: paragraph })).max(8),
 });
 export const educationContentSchema = divisionContentSchema
   .omit({ shortcuts: true })
@@ -742,6 +815,7 @@ export const educationContentSchema = divisionContentSchema
       cta: text,
     }),
     destinations: heading,
+    labels: z.object({ askQuestion: text, popularSubjects: text, inDirectory: text, seeInstitutions: text, reviewsEmpty: text, explore: text, allFields: text, all: text, searchPlaceholder: text, institution: text, viewPrograms: text, noMatches: text, listUpdating: text, askAboutInstitutions: text }),
   });
 // The Healthcare page: a hero that names the specialties and the three-step
 // pathway, the treatments index with photos, the live hospital directory's
@@ -751,11 +825,11 @@ export const educationContentSchema = divisionContentSchema
 export const healthcareContentSchema = divisionContentSchema
   .omit({ shortcuts: true, services: true })
   .extend({
+    // The hero shows only the destinations, each with its flag.
     hero: divisionContentSchema.shape.hero.extend({
-      specialties: stringList(8),
-      pathway: z.array(z.object({ icon: text, title: text, description: text })).length(3),
       cities: stringList(8),
     }),
+    labels: z.object({ usualProcedures: text, availableAt: text, searchPlaceholder: text, all: text, requestConnection: text, noMatches: text, listUpdating: text, askAboutHospitals: text }),
     treatmentsHeading: heading,
     treatments: z
       .array(z.object({ title: text, image: link, description: paragraph, procedures: stringList(8), cta: text }))
@@ -775,8 +849,11 @@ export const umrahContentSchema = divisionContentSchema
       departures: z
         .array(z.object({ date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Write the date as year-month-day"), label: text }))
         .max(3),
+      // Photos that take turns on both sides of the hero.
+      sideImages: z.array(link).max(12),
     }),
     shortcuts,
+    labels: z.object({ nextDepartures: text, makkah: text, madinah: text }),
     packagesHeading: heading,
     packages: z
       .array(
@@ -821,6 +898,7 @@ const serviceGroup = z.object({
 });
 export const servicesContentSchema = z.object({
   hero: heading,
+  button: text,
   groups: z.object({
     business: serviceGroup,
     education: serviceGroup,
@@ -832,4 +910,72 @@ export const contactContentSchema = z.object({
   hero: heading,
   hours: text,
   card: z.object({ title: text, description: paragraph, button: text }),
+  labels: z.object({ call: text, email: text, office: text, hours: text }),
+});
+// Pages whose built-in wording lives only in the website's code. The API
+// serves an empty page until the administrator saves one.
+export const opportunitiesContentSchema = z.object({
+  hero: heading,
+  list: z.object({ searchPlaceholder: text, allCategories: text, search: text, applyBy: text, viewDetails: text, noMatch: text, empty: text }),
+  detail: z.object({ back: text, about: text, enquire: text, fullApplication: text, note: paragraph }),
+});
+const enquiryHeading = z.object({ eyebrow: text, title: text, text: paragraph });
+export const applyContentSchema = z.object({
+  hero: heading,
+  tabs: z.object({ general: text, business: text, education: text, healthcare: text, umrah: text }),
+  modes: z.object({ enquiry: text, application: text }),
+  enquiry: z.object({
+    general: enquiryHeading,
+    business: enquiryHeading,
+    education: enquiryHeading,
+    healthcare: enquiryHeading,
+    umrah: enquiryHeading,
+  }),
+  form: z.object({ submit: text, agreement: text, privacyLink: text }),
+  sent: z.object({ title: text, another: text, home: text }),
+});
+export const payContentSchema = z.object({
+  hero: z.object({ eyebrow: text, title: text, payWith: text, findFirst: text, members: text, dashboard: text }),
+  card: z.object({ title: text, description: paragraph, submit: text }),
+});
+export const loginContentSchema = z.object({
+  story: z.object({
+    eyebrow: text,
+    titleLine1: text,
+    titleLine2: text,
+    description: paragraph,
+    points: z.array(text).min(1).max(6),
+  }),
+  intro: paragraph,
+  withoutAccount: text,
+});
+// Every printed document and PDF: the letterhead it is printed on, and the
+// signatures at the foot (the customer's on the left, the owner's on the
+// right). The owner's signature picture is optional.
+export const documentsContentSchema = z.object({
+  // An empty picture means Bengal Port's own drawn letterhead.
+  letterhead: z.object({
+    backgroundImage: z.union([link, z.literal("")]),
+    subtitle: text,
+    tagline: text,
+    website: z.string().trim().max(120),
+  }),
+  signatures: z.object({
+    customerLabel: text,
+    ownerLabel: text,
+    ownerName: z.string().trim().max(120),
+    ownerTitle: z.string().trim().max(120),
+    signatureImage: z.union([link, z.literal("")]),
+  }),
+  closing: z.object({ thanks: text }),
+});
+export const legalContentSchema = z.object({
+  eyebrow: text,
+  title: text,
+  updatedLabel: text,
+  updated: text,
+  sections: z
+    .array(z.object({ heading: text, body: z.string().trim().min(1).max(10000) }))
+    .min(1)
+    .max(40),
 });

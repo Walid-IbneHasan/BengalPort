@@ -57,6 +57,7 @@ export const defaultServicesContent = {
       items: ["Umrah Visa Support", "Flight Coordination", "Makkah and Madinah Stay", "Ground Transport", "Ziyarat Guidance"],
     },
   },
+  button: "EXPLORE SERVICE",
 };
 
 export const defaultContactContent = {
@@ -71,4 +72,5 @@ export const defaultContactContent = {
     description: "Use our enquiry form to route your request to the right division.",
     button: "APPLY / ENQUIRY",
   },
+  labels: { call: "Call", email: "Email", office: "Office", hours: "Hours" },
 };

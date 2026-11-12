@@ -7,6 +7,7 @@
   import Footer from '$lib/components/Footer.svelte';
   import WhatsApp from '$lib/components/WhatsApp.svelte';
   import Toasts from '$lib/components/Toasts.svelte';
+  import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
   let { children } = $props();
   // One address for each page, whichever link or query led to it.
   const canonical = $derived(`${page.url.origin}${page.url.pathname}`);
@@ -33,3 +34,4 @@
   <WhatsApp/>
 {/if}
 <Toasts/>
+<ConfirmDialog/>

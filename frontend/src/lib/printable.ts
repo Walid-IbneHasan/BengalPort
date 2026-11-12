@@ -92,6 +92,11 @@ const titleCase = (text: string) => text.charAt(0) + text.slice(1).toLowerCase()
 // The page title, which browsers offer as the name of the saved PDF.
 export function printTitle(kind: string, record: any): string {
   if (kind === "invoice") return `${record.number} - ${record.customerName}`;
+  if (kind === "ledger-entry") return `${ledgerNumber(record.id)} - ${titleCase(record.type)} - ${record.description}`;
+  if (kind === "ledger-day") return `Hisab Kitab - ${record.day}`;
   if (kind === "enquiry") return `${titleCase(record.type)} enquiry - ${record.name}`;
   return `${record.reference} - ${titleCase(record.type)} application - ${record.fullName}`;
 }
+
+// The number printed on one Hisab Kitab entry: HK- and the end of its id.
+export const ledgerNumber = (id: string) => `HK-${id.slice(-7).toUpperCase()}`;

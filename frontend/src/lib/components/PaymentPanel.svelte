@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
   import { onMount } from "svelte";
   import { ArrowRight, LoaderCircle, ReceiptText, ShieldCheck } from "lucide-svelte";
   import { api } from "$lib/api";
@@ -66,7 +67,7 @@
       try { sessionStorage.setItem("bp_payment", JSON.stringify({ applicationId, token: token ?? null })); } catch { /* storage blocked */ }
       window.location.href = redirectUrl;
     } catch (e) {
-      error = e instanceof Error ? e.message : "The payment could not be started.";
+      error = problemText(e, "The payment could not be started.");
       starting = false;
     }
   }

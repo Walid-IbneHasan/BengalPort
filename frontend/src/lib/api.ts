@@ -2,9 +2,8 @@ import { apiUrl } from './config';
 import { requestHeaders } from './request-headers';
 import type { PageMeta } from './pagination';
 
-export class ApiError extends Error {
-  constructor(message: string, public code?: string, public details?: any, public status?: number) { super(message); }
-}
+import { ApiError } from './api-error';
+export { ApiError };
 
 function sessionToken(): string | null {
   try {

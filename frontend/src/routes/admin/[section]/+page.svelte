@@ -1,4 +1,9 @@
 <script lang="ts">
+  import { intoView } from "$lib/into-view";
+  import { staffRole } from "$lib/staff";
+  import { problemText } from "$lib/problem";
+  import { confirmAction } from "$lib/confirm";
+  import CategorySelect from "$lib/components/CategorySelect.svelte";
   import { onMount } from "svelte";
   import { afterNavigate } from "$app/navigation";
   import { page } from "$app/state";
@@ -26,6 +31,7 @@
   import StaffNotes from "$lib/components/StaffNotes.svelte";
   import ApplicationEditor from "$lib/components/ApplicationEditor.svelte";
   import RefundDialog from "$lib/components/RefundDialog.svelte";
+  import ApplicationCustomer from "$lib/components/ApplicationCustomer.svelte";
   import { xlsx } from "$lib/xlsx";
   import {
     applicationRows,
@@ -260,7 +266,7 @@
       await openDetails(viewing);
       amountSaved = true;
     } catch (e) {
-      error = e instanceof Error ? e.message : "The amount could not be saved";
+      error = problemText(e, "The amount could not be saved");
     } finally {
       savingAmount = false;
     }
@@ -298,7 +304,7 @@
       link.click();
       setTimeout(() => URL.revokeObjectURL(link.href), 1000);
     } catch (e) {
-      error = e instanceof Error ? e.message : "The export could not be made";
+      error = problemText(e, "The export could not be made");
     } finally {
       exporting = false;
     }
@@ -351,7 +357,26 @@
   }
   const token = () => localStorage.getItem("bp_token");
   const headers = () => ({ authorization: `Bearer ${token()}` });
+  // The kinds of opportunity, which the administrator can add to from the form.
+  let opportunityCategories: Array<{ value: string; label: string }> = [];
+  async function loadOpportunityCategories() {
+    try {
+      opportunityCategories = await api("/admin/opportunity-categories", { headers: headers() });
+    } catch (e) {
+      error = problemText(e, "The categories could not be loaded.");
+    }
+  }
+  async function createOpportunityCategory(label: string) {
+    const created = await api<{ value: string }>("/admin/opportunity-categories", {
+      method: "POST",
+      headers: headers(),
+      body: JSON.stringify({ label }),
+    });
+    await loadOpportunityCategories();
+    return created.value;
+  }
   async function load() {
+    if (section === "opportunities") loadOpportunityCategories();
     if (!config || section === "settings") {
       loading = false;
       return;
@@ -371,7 +396,7 @@
       rows = result.rows;
       meta = result.meta;
     } catch (e) {
-      error = e instanceof Error ? e.message : "Unable to load records";
+      error = problemText(e, "Unable to load records");
     } finally {
       loading = false;
     }
@@ -381,6 +406,8 @@
     load();
   }
   function value(row: any, key: string) {
+    if (key === "category" && section === "opportunities")
+      return opportunityCategories.find((option) => option.value === row.category)?.label ?? row.category;
     if (key === "contact")
       return row.email || row.phone
         ? [row.email, row.phone].filter(Boolean).join(" · ")
@@ -431,7 +458,7 @@
       setTimeout(() => (success = ""), 1800);
       return true;
     } catch (e) {
-      error = e instanceof Error ? e.message : "Update failed";
+      error = problemText(e, "Update failed");
       return false;
     }
   }
@@ -439,9 +466,11 @@
     const blocked = !row.blockedAt;
     if (
       blocked &&
-      !confirm(
-        `Block ${row.name}? They will be signed out and unable to sign in. Their applications and payments are kept.`,
-      )
+      !(await confirmAction({
+        title: `Block ${row.name}?`,
+        message: "They will be signed out and unable to sign in. Their applications and payments are kept.",
+        confirmLabel: "Block account",
+      }))
     )
       return;
     error = "";
@@ -455,15 +484,16 @@
       success = blocked ? "Account blocked" : "Account unblocked";
       setTimeout(() => (success = ""), 1800);
     } catch (e) {
-      error = e instanceof Error ? e.message : "Update failed";
+      error = problemText(e, "Update failed");
     }
   }
   async function remove(id: string) {
-    const question =
+    const asked = await confirmAction(
       section === "applications"
-        ? "Delete this application with its documents and notes? This cannot be undone."
-        : "Delete this record? This cannot be undone.";
-    if (!confirm(question)) return;
+        ? { title: "Delete this application?", message: "Its documents and staff notes go with it. This cannot be undone." }
+        : { title: "Delete this record?", message: "This cannot be undone." },
+    );
+    if (!asked) return;
     try {
       await api(`/admin/resources/${section}/${id}`, {
         method: "DELETE",
@@ -473,7 +503,7 @@
       await load();
       setTimeout(() => (success = ""), 1800);
     } catch (e) {
-      error = e instanceof Error ? e.message : "Delete failed";
+      error = problemText(e, "Delete failed");
     }
   }
   async function save() {
@@ -513,7 +543,7 @@
       setTimeout(() => (success = ""), kind === "user" ? 8000 : 1800);
       await load();
     } catch (e) {
-      error = e instanceof Error ? e.message : "Unable to save the record";
+      error = problemText(e, "Unable to save the record");
     } finally {
       saving = false;
     }
@@ -527,6 +557,12 @@
       ownId = "";
     }
     load();
+    // Arriving from a customer page: open that one record straight away.
+    const wanted = page.url.searchParams.get("open");
+    if (wanted && (section === "applications" || section === "enquiries"))
+      api(`/admin/resources/${section}/${encodeURIComponent(wanted)}`, { headers: headers() })
+        .then((record) => openDetails(record))
+        .catch((e) => (error = problemText(e, "That record could not be opened")));
   });
   afterNavigate(() => {
     const next = page.params.section ?? "";
@@ -644,7 +680,7 @@
                                 if (!saved) select.value = row.role;
                               });
                             }}
-                            ><option>USER</option><option>ADMIN</option></select
+                            ><option value="USER">Member</option><option value="EMPLOYEE">Employee</option><option value="ACCOUNTANT">Accountant</option><option value="MANAGER">Manager</option><option value="MODERATOR">Moderator (website)</option><option value="ADMIN">Super Admin / CEO</option></select
                           >{:else if column[0] === "access"}<div class="access">
                             <span
                               class="badge"
@@ -687,12 +723,12 @@
                       >{/each}{#if editable}<td class="actions"
                         ><button class="view" onclick={() => startEditing(row)}
                           >Edit</button
-                        ><button
+                        >{#if $staffRole !== "MODERATOR"}<button
                           class="delete"
                           aria-label="Delete record"
                           onclick={() => remove(row.id)}
                           ><Trash2 size={16} /></button
-                        ></td
+                        >{/if}</td
                       >{/if}{#if viewable}<td class="actions"
                         ><button class="view" onclick={() => openDetails(row)}
                           >View{#if row._count?.notes}<span
@@ -708,14 +744,14 @@
                           aria-label="Print or save as PDF"
                           title="Print or save as PDF"
                           ><Printer size={15} /></a
-                        ><button
+                        >{#if $staffRole !== "MODERATOR"}<button
                           class="delete"
                           aria-label={section === "enquiries"
                             ? "Delete enquiry"
                             : "Delete application"}
                           onclick={() => remove(row.id)}
                           ><Trash2 size={16} /></button
-                        ></td
+                        >{/if}</td
                       >{/if}{#if section === "payments"}<td class="actions"
                         >{#if canRefund(row)}<button
                             class="view"
@@ -763,7 +799,6 @@
           ><X /></button
         >
       </header>
-      {#if error}<p class="drawer-error" role="alert">{error}</p>{/if}
       <form
         onsubmit={(e) => {
           e.preventDefault();
@@ -797,8 +832,10 @@
             /></label
           ><label
             ><span>Role</span><select bind:value={form.role}
-              ><option value="USER">User</option><option value="ADMIN"
-                >Administrator</option
+              ><option value="USER">Member</option><option value="EMPLOYEE">Employee</option><option value="ACCOUNTANT">Accountant</option><option value="MANAGER">Manager</option><option value="MODERATOR"
+                >Moderator (website)</option
+              ><option value="ADMIN"
+                >Super Admin / CEO</option
               ></select
             ></label
           >
@@ -862,11 +899,7 @@
           >
           <div class="form-grid">
             <label
-              ><span>Category *</span><select bind:value={form.category}
-                >{#each ["BUSINESS", "EDUCATION", "HEALTHCARE", "UMRAH", "FACTORY_VISIT", "BUSINESS_TOUR", "SCHOLARSHIP", "EVENT"] as c}<option
-                    >{c}</option
-                  >{/each}</select
-              ></label
+              ><span>Category *</span><CategorySelect bind:value={form.category} options={opportunityCategories} create={createOpportunityCategory} required /></label
             ><label
               ><span>Country *</span><input
                 bind:value={form.country}
@@ -939,9 +972,43 @@
           ><span>Description *</span><textarea
             rows="5"
             bind:value={form.description}
-            required
-            minlength="10"></textarea></label
+            required></textarea></label
         >{/if}
+        {#if config.add === "institution" || config.add === "hospital"}<fieldset class="items photos">
+            <legend>More photos</legend>
+            <p class="hint">Shown after the card image as a slideshow on the website. Up to 12; large photos are made smaller automatically.</p>
+            {#each form.gallery as photo, i}<div class="photo-row">
+                <CmsImageField
+                  label={`Photo ${i + 2}`}
+                  value={photo}
+                  purpose={`${section} gallery`}
+                  recommendation="Landscape works best · approximately 4:3."
+                  onchange={(value) => (form.gallery = form.gallery.map((old: string, n: number) => (n === i ? value : old)))}
+                />
+                <button
+                  type="button"
+                  class="delete"
+                  aria-label={`Remove photo ${i + 2}`}
+                  onclick={() => (form.gallery = form.gallery.filter((_: unknown, n: number) => n !== i))}
+                  ><Trash2 size={15} /></button
+                >
+              </div>{/each}
+            {#if form.gallery.length < 12}<button type="button" class="add-item" onclick={() => (form.gallery = [...form.gallery, ""])}
+                ><Plus size={15} /> Add a photo</button
+              >{/if}
+          </fieldset>{/if}
+        {#if config.add === "institution"}<fieldset class="items pages">
+            <legend>Education pages it appears on</legend>
+            <p class="hint">Leave all unticked to place it by its programmes.</p>
+            {#each [["medical", "Medical"], ["engineering", "Engineering"], ["general", "General Subjects"]] as [key, name]}<label class="check"
+                ><input
+                  type="checkbox"
+                  checked={form.fields.includes(key)}
+                  onchange={(e) =>
+                    (form.fields = e.currentTarget.checked ? [...form.fields, key] : form.fields.filter((x: string) => x !== key))}
+                /> {name}</label
+              >{/each}
+          </fieldset>{/if}
         {#if config.add === "institution"}<fieldset class="items">
             <legend>Programs</legend>
             {#each form.programs as program, i}<div class="item">
@@ -978,6 +1045,7 @@
               ><Plus size={15} /> Add service</button
             >
           </fieldset>{/if}
+        {#if error}<p class="drawer-error" role="alert" use:intoView={error}>{error}</p>{/if}
         <footer>
           <button type="button" class="cancel" onclick={() => (drawer = false)}
             >Cancel</button
@@ -1036,7 +1104,7 @@
           >
         </div>
       </header>
-      {#if error}<p class="drawer-error" role="alert">{error}</p>{/if}
+      {#if error}<p class="drawer-error" role="alert" use:intoView={error}>{error}</p>{/if}
       {#if editing}<div class="details-body">
           {#key viewing.id}<ApplicationEditor
               application={viewing}
@@ -1103,7 +1171,7 @@
                   <dd>{owing.remaining === null ? "Not set" : taka(owing.remaining)}</dd>
                 </div>
               </dl>
-              <form
+              {#if $staffRole !== "MODERATOR"}<form
                 class="amount-due"
                 onsubmit={(e) => {
                   e.preventDefault();
@@ -1121,7 +1189,7 @@
                 ><button class="view" disabled={savingAmount}
                   >{savingAmount ? "Saving…" : "Save amount"}</button
                 >{#if amountSaved}<span class="amount-saved" role="status">Saved</span>{/if}
-              </form>
+              </form>{/if}
               <p class="hint">
                 The total this application costs. The customer can pay it in
                 full or in part{owing.onlinePayment ? " online" : ""} from
@@ -1129,7 +1197,7 @@
               </p>
               <a class="view invoice-link" href={`/admin/accounts/invoices?application=${viewing.id}`}
                 ><ReceiptText size={15} /> Generate invoice</a
-              >{:else if owingFailed}<p class="hint" role="alert">Payment details could not be loaded. Close this panel and open it again.</p>{:else}<p class="hint">Loading payment details…</p>{/if}
+              ><ApplicationCustomer applicationId={viewing.id} customerId={viewing.customerId ?? null} />{:else if owingFailed}<p class="hint" role="alert">Payment details could not be loaded. Close this panel and open it again.</p>{:else}<p class="hint">Loading payment details…</p>{/if}
           </section>
           <section>
             <h3>Documents</h3>
@@ -1323,9 +1391,34 @@
     display: inline-grid;
     place-items: center;
     width: 2.2rem;
-    margin-left: 0.3rem;
     padding: 0;
-    vertical-align: middle;
+  }
+  .photos .hint,
+  .pages .hint {
+    margin: 0 0 0.6rem;
+    font-size: 0.8rem;
+    color: #5d7080;
+  }
+  .photo-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.6rem;
+    align-items: start;
+    padding: 0.6rem 0;
+    border-top: 1px solid #e7ebed;
+  }
+  .pages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+  }
+  .pages legend,
+  .pages .hint {
+    flex: 1 1 100%;
+  }
+  form .drawer-error {
+    margin: 1.1rem 0 0;
+    scroll-margin-bottom: 6rem;
   }
   .drawer-error {
     margin: 1rem 1.5rem 0;
@@ -1440,10 +1533,13 @@
     tbody td.actions {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.5rem;
       width: auto;
       padding: 0.6rem 0.6rem 0 0;
       text-align: left;
+    }
+    tbody td.actions > * + * {
+      margin-left: 0;
     }
     tbody td.actions:empty {
       display: none;
@@ -1553,9 +1649,13 @@
     width: 8rem;
     white-space: nowrap;
   }
-  .actions button + button {
-    margin-left: 0.4rem;
+  /* View, print, edit and delete sit centred on one line, evenly spaced,
+     whether each is a button or a link. */
+  .actions > * {
     vertical-align: middle;
+  }
+  .actions > * + * {
+    margin-left: 0.4rem;
   }
   .delete {
     width: 2.2rem;

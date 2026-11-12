@@ -91,8 +91,27 @@ describe("opening an existing record for editing", () => {
   test("saving an edited record sends back what was loaded", () => {
     const row = { id: "h1", name: "KL Specialist", country: "Malaysia", city: "Kuala Lumpur", description: "Specialist hospital.", image: "/images/x.webp", services: [{ id: "s1", hospitalId: "h1", title: "Oncology", category: "Cancer care", description: "Diagnosis and treatment." }] };
     assert.deepEqual(recordBody("hospital", recordFromRow("hospital", row)), {
-      name: "KL Specialist", country: "Malaysia", city: "Kuala Lumpur", description: "Specialist hospital.", image: "/images/x.webp",
+      name: "KL Specialist", country: "Malaysia", city: "Kuala Lumpur", description: "Specialist hospital.", image: "/images/x.webp", gallery: [],
       services: [{ title: "Oncology", category: "Cancer care", description: "Diagnosis and treatment." }],
     });
+  });
+
+  test("an institution's extra photos and Education pages are sent, leaving out empty photos", () => {
+    const form = recordFromRow("institution", { id: "i1", name: "IMU", country: "Malaysia", description: "Medical.", image: "/images/x.webp", gallery: ["/images/a.webp"], fields: ["medical"], programs: [] });
+    form.gallery = [...form.gallery, "", "/images/b.webp"];
+    const body = recordBody("institution", form);
+    assert.deepEqual(body.gallery, ["/images/a.webp", "/images/b.webp"]);
+    assert.deepEqual(body.fields, ["medical"]);
+  });
+
+  test("a new institution starts with no extra photos and no chosen pages", () => {
+    const body = recordBody("institution", { ...blankRecord("institution"), name: "New" });
+    assert.deepEqual(body.gallery, []);
+    assert.deepEqual(body.fields, []);
+  });
+
+  test("a hospital keeps its extra photos", () => {
+    const form = recordFromRow("hospital", { id: "h1", name: "Apollo", country: "India", city: "Delhi", description: "Care.", image: "/images/x.webp", gallery: ["/images/c.webp"], services: [] });
+    assert.deepEqual(recordBody("hospital", form).gallery, ["/images/c.webp"]);
   });
 });

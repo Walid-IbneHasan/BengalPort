@@ -108,7 +108,9 @@ describe("generating an invoice", () => {
     assert.equal(created.total, 3250.5);
     assert.equal(created.paid, 1000);
     assert.equal(created.due, 2250.5);
-    assert.equal(created.status, "PARTIALLY_PAID");
+    // A new invoice is a draft until it is issued.
+    assert.equal(created.status, "DRAFT");
+    assert.equal(created.paymentStatus, "PARTIALLY_PAID");
     assert.equal(created.issuedAt.slice(0, 10), "2026-11-08");
     assert.equal(created.items.length, 2);
   });
@@ -155,13 +157,13 @@ describe("generating an invoice", () => {
 });
 
 describe("keeping invoices", () => {
-  test("recording a later payment updates what is due and keeps the number", async () => {
+  test("a draft can still be corrected, and keeps its number", async () => {
     const created = await generate();
     const res = await call("PUT", `/api/admin/invoices/${created.id}`, invoice({ paid: 3250.5 }));
     assert.equal(res.statusCode, 200, res.body);
     assert.equal(res.json().data.number, created.number);
     assert.equal(res.json().data.due, 0);
-    assert.equal(res.json().data.status, "PAID");
+    assert.equal(res.json().data.paymentStatus, "PAID");
   });
 
   test("a deleted invoice's number is never given to another", async () => {

@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { staffRole } from "$lib/staff";
+  import { problemText } from "$lib/problem";
+  import { confirmAction } from "$lib/confirm";
   import { onMount } from "svelte";
   import { Trash2 } from "lucide-svelte";
   import { api } from "$lib/api";
@@ -14,7 +17,7 @@
     try {
       notes = await api<Note[]>(`/admin/resources/${resource}/${id}/notes`);
     } catch (e) {
-      error = e instanceof Error ? e.message : "The notes could not be loaded.";
+      error = problemText(e, "The notes could not be loaded.");
     } finally {
       loading = false;
     }
@@ -30,21 +33,21 @@
       draft = "";
       onchange?.(notes.length);
     } catch (e) {
-      error = e instanceof Error ? e.message : "The note could not be saved.";
+      error = problemText(e, "The note could not be saved.");
     } finally {
       saving = false;
     }
   }
 
   async function remove(note: Note) {
-    if (!confirm("Delete this note?")) return;
+    if (!(await confirmAction({ title: "Delete this note?", message: "This cannot be undone." }))) return;
     error = "";
     try {
       await api(`/admin/notes/${note.id}`, { method: "DELETE" });
       notes = notes.filter((item) => item.id !== note.id);
       onchange?.(notes.length);
     } catch (e) {
-      error = e instanceof Error ? e.message : "The note could not be deleted.";
+      error = problemText(e, "The note could not be deleted.");
     }
   }
 
@@ -72,7 +75,7 @@
           <p>{note.body}</p>
           <footer>
             <span>{note.authorName} · {when(note.createdAt)}</span>
-            <button type="button" aria-label="Delete note" onclick={() => remove(note)}><Trash2 size={14} /></button>
+            {#if $staffRole !== "MODERATOR"}<button type="button" aria-label="Delete note" onclick={() => remove(note)}><Trash2 size={14} /></button>{/if}
           </footer>
         </li>
       {/each}

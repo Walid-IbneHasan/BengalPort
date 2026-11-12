@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
   import { ImageUp, LoaderCircle, CheckCircle2 } from "lucide-svelte";
   import { apiUrl } from "$lib/config";
+  import { shrinkImage } from "$lib/image-resize";
 
   let {
     label,
@@ -31,7 +33,9 @@
       const token = localStorage.getItem("bp_token");
       if (!token) throw new Error("Admin sign-in required");
       const body = new FormData();
-      body.append("image", file, file.name);
+      // A big camera photo is made smaller here first, so it uploads quickly.
+      const ready = await shrinkImage(file);
+      body.append("image", ready, ready.name);
       const response = await fetch(
         `${apiUrl()}/admin/media?purpose=${encodeURIComponent(purpose)}`,
         {
@@ -47,7 +51,7 @@
       const kb = Math.max(1, Math.round(payload.data.byteSize / 1024));
       message = `Optimized to WebP · ${payload.data.width}×${payload.data.height} · ${kb} KB`;
     } catch (cause) {
-      error = cause instanceof Error ? cause.message : "Image upload failed";
+      error = problemText(cause, "Image upload failed");
       if (localPreview) {
         URL.revokeObjectURL(localPreview);
         localPreview = "";

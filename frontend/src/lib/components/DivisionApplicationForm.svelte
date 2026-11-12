@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
   import { onMount, tick } from "svelte";
   import { toasts } from "$lib/toast";
   import { ApiError, api } from "$lib/api";
@@ -120,7 +121,7 @@
         await tick();
         showTop();
         document.getElementById(`field-${keys[0]}`)?.focus({ preventScroll: true });
-      } else error = e instanceof Error ? e.message : "The application could not be submitted.";
+      } else error = problemText(e, "The application could not be submitted.");
     }
     finally { sending = false; guard?.reset(); }
   }
@@ -202,16 +203,34 @@
 
 <style>
   .application-shell{max-width:68rem;margin:auto;background:#fff;border:1px solid #e1e7e9;border-radius:1.25rem;box-shadow:0 1rem 3rem rgba(23,48,79,.09);overflow:hidden}.form-header{display:flex;justify-content:space-between;gap:1.5rem;padding:clamp(1.35rem,4vw,2.5rem);background:linear-gradient(135deg,#143451,#1c476b);color:#fff}.form-header span,.step-heading>span,.complete>span{font-size:.7rem;letter-spacing:.14em;font-weight:800;color:#e2b753}.form-header h2{margin:.45rem 0 .5rem;font-size:clamp(1.45rem,4vw,2.2rem);line-height:1.15}.form-header p{max-width:43rem;margin:0;color:#d6e1e8;line-height:1.6}.form-header>svg{flex:none;color:#e2b753}.progress{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:1.2rem clamp(1rem,4vw,2.5rem);border-bottom:1px solid #e7ebed}.progress button{position:relative;border:0;background:none;color:#7a8893;padding:.3rem;cursor:pointer}.progress button:not(:last-child):after{content:"";position:absolute;top:1.25rem;left:calc(50% + 1.25rem);right:calc(-50% + 1.25rem);height:1px;background:#dce3e6}.progress i{position:relative;z-index:1;display:grid;place-items:center;width:2.5rem;height:2.5rem;margin:auto;border-radius:50%;background:#edf1f2;font-style:normal;font-weight:800}.progress span{display:block;margin-top:.5rem;font-size:.72rem}.progress .active i,.progress .done i{background:#d2a342;color:#17304f}.progress .active span{color:#17304f;font-weight:800}.application-shell form{padding:clamp(1.25rem,4vw,2.5rem)}.step-heading{margin-bottom:1.6rem}.step-heading h3{margin:.35rem 0;font-size:1.45rem;color:#17304f}.step-heading p{margin:0;color:#687a89}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.15rem}.field{display:grid;gap:.45rem}.field.wide{grid-column:1/-1}.field>label,.field>.field-label,legend{color:#29465f;font-size:.82rem;font-weight:750}input,select,textarea{width:100%;min-height:3rem;border:1px solid #d6dfe2;border-radius:.7rem;background:#fbfcfc;padding:.7rem .85rem;color:#263c50;outline:none}textarea{resize:vertical;line-height:1.55}input:focus,select:focus,textarea:focus,fieldset:focus{border-color:#bf8e2d;box-shadow:0 0 0 .2rem rgba(199,152,54,.14)}fieldset{margin:0;padding:1rem;border:1px solid #dce3e5;border-radius:.8rem}.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem;margin-top:.8rem}.choices label,.check{display:flex;align-items:flex-start;gap:.65rem;min-height:2.75rem;padding:.65rem .75rem;border:1px solid #e2e7e9;border-radius:.65rem;background:#f8faf9;color:#40576b;font-size:.82rem;line-height:1.4}.choices input,.check input{width:1.1rem;min-height:1.1rem;height:1.1rem;margin:.08rem 0 0;accent-color:#b78320;flex:none}.consent+.consent{margin-top:-.55rem}.form-error{padding:.8rem 1rem;border-radius:.7rem;background:#fff0f0;color:#943d45}.form-note{padding:.8rem 1rem;border-radius:.7rem;background:#f1f6f9;color:#40576b;font-size:.86rem}.form-note button{border:0;background:none;padding:0;color:#9b6b16;font-weight:750;text-decoration:underline;cursor:pointer}.actions{display:flex;justify-content:flex-end;gap:.75rem;margin-top:2rem;padding-top:1.4rem;border-top:1px solid #e4e9eb}.actions button{display:flex;align-items:center;justify-content:center;gap:.55rem;min-height:3rem;border-radius:1.6rem;padding:.7rem 1.2rem;font-weight:800;transition:transform 150ms cubic-bezier(.23,1,.32,1),background-color 180ms ease}.actions button:active{transform:scale(.97)}.primary{border:0;background:#d0a03d;color:#17304f}.secondary{border:1px solid #d7dfe2;background:#fff;color:#40566a}.complete{padding:clamp(2rem,7vw,5rem);text-align:center}.complete i{display:grid;place-items:center;width:4.5rem;height:4.5rem;margin:0 auto 1.3rem;border-radius:50%;background:#eaf6ef;color:#2f7650}.complete h2{font-size:clamp(1.8rem,5vw,2.8rem);color:#17304f;margin:.6rem 0}.complete p{max-width:38rem;margin:0 auto 1.5rem;color:#687986;line-height:1.7}.complete strong{color:#17304f}.attach{max-width:34rem;margin:0 auto 1.8rem;padding:1.2rem;border:1px solid #e1e7e9;border-radius:1rem;background:#f8faf9;text-align:left}.attach h3{margin:0 0 .3rem;font-size:1.05rem;color:#17304f}.attach h3 small{font-weight:500;color:#748391}.attach p{margin:0 0 .9rem;font-size:.86rem;line-height:1.55;color:#687986}.complete h2:focus{outline:none}.finished{max-width:34rem;margin:0 auto;padding-top:1.4rem;border-top:1px solid #e4e9eb}.complete p.submitted{display:inline-flex;align-items:center;gap:.65rem;max-width:100%;margin:0 auto .7rem;padding:.7rem 1.2rem .7rem .8rem;border-radius:1.4rem;background:#eaf6ef;color:#256645;font-weight:750;line-height:1.35;text-align:left}.tick{flex:none;display:grid;place-items:center;width:1.7rem;height:1.7rem;border-radius:50%;background:#2f9a63;color:#fff}.complete p.after{margin:0 auto 1.1rem;font-size:.9rem}.next{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.8rem 1.4rem}.next .plain{color:#9b6b16;font-weight:750}.legal-note{margin:1.4rem 0 0;font-size:.8rem;color:#6b7b88}.legal-note a{color:#9b6b16;font-weight:700}.form-header .meta{display:flex;align-items:flex-start;gap:.5rem;margin:.9rem 0 0;font-size:.82rem;line-height:1.45;color:#c9d5e2}.form-header .meta :global(svg){flex:none;margin-top:.15rem;color:#e2b753}.why{display:flex;gap:.6rem;align-items:flex-start;margin:1rem 0 0;padding:.8rem 1rem;border-radius:.7rem;background:#fbf5e8;color:#5b4a22;font-size:.86rem;line-height:1.5}.why :global(svg){flex:none;margin-top:.1rem;color:#a87618}.group-title{grid-column:1/-1;margin:.8rem 0 -.3rem;padding-bottom:.45rem;border-bottom:1px solid #e7ebed;font-size:1rem;font-weight:800;letter-spacing:-.01em;color:#17304f}.group-title:first-child{margin-top:0}.field-error{margin:0;font-size:.8rem;font-weight:600;line-height:1.4;color:#b42318}.field [aria-invalid="true"]{border-color:#d9342b;box-shadow:0 0 0 .2rem rgba(217,52,43,.14)}@media(hover:hover) and (pointer:fine){.primary:hover{background:#dfb757;transform:translateY(-.1rem)}.secondary:hover{background:#f4f6f6}}@media(max-width:42rem){.form-header{align-items:flex-start}.form-header>svg{display:none}.progress{display:flex;gap:.4rem;padding:1rem 1rem 0;border-bottom:0}.progress button{flex:1;height:.4rem;padding:0;border-radius:99px;background:#e4e9eb}.progress button:after,.progress i,.progress span{display:none}.progress .active,.progress .done{background:#d2a342}.application-shell form{padding-inline:1rem}.fields{grid-template-columns:1fr;gap:1rem}.field.wide{grid-column:auto}.choices{grid-template-columns:1fr}.actions{flex-direction:column-reverse}.actions button{width:100%}}@media(max-width:25rem){.form-header{padding:1.2rem}.application-shell{border-radius:1rem}}@media(prefers-reduced-motion:reduce){.actions button{transition-duration:.01ms}}
-  /* A submitted application shown for printing. Answers sit in boxes drawn like
-     the form's fields, but they grow, so a long answer is never cut off. */
+  /* A submitted application shown for printing, on the letterhead: every
+     answer as plain text under its question, with no boxes around it. */
   .progress button:disabled{cursor:default}
-  .filled-step{padding:clamp(1.25rem,4vw,2.5rem)}.filled-step+.filled-step{border-top:1px solid #e7ebed}
-  .answer{display:flex;align-items:center;min-height:3rem;border:1px solid #d6dfe2;border-radius:.7rem;background:#fbfcfc;padding:.7rem .85rem;color:#263c50;overflow-wrap:anywhere}
-  .answer.long{display:block;min-height:7.6rem;line-height:1.55;white-space:pre-wrap}
-  .answer.select{position:relative;padding-right:2.2rem}.answer.select::after{content:"";position:absolute;top:50%;right:1rem;width:.45rem;height:.45rem;margin-top:-.32rem;border-right:2px solid #5d7080;border-bottom:2px solid #5d7080;transform:rotate(45deg)}
+  .application-shell.filled{max-width:none;margin:0;background:transparent;border:0;border-radius:0;box-shadow:none;overflow:visible}
+  .filled .form-header{padding:0 0 1rem;background:none;color:#07182f;border-bottom:2px solid #c9952d}
+  .filled .form-header span{color:#a87618}
+  .filled .form-header h2{font-size:clamp(1.25rem,3.4vw,1.7rem)}
+  .filled .form-header p{color:#4b6072}
+  .filled .form-header .meta{color:#17304f;font-weight:650}
+  .filled .form-header>svg{display:none}
+  .filled-step{padding:1.25rem 0 .4rem}.filled-step+.filled-step{border-top:1px solid rgba(23,48,79,.12)}
+  .filled .step-heading{margin-bottom:.9rem}
+  .filled .step-heading h3{font-size:1.15rem}
+  /* Rows of two that a printed page can split between any two rows; a grid
+     here made the browser push a whole step to the next page. */
+  .filled .fields{display:flex;flex-wrap:wrap;gap:.85rem 2rem}
+  .filled .fields>*{flex:1 1 calc(50% - 1rem);min-width:0}
+  .filled .fields>.wide,.filled .fields>.group-title{flex-basis:100%}
+  @media(max-width:42rem){.filled .fields>*{flex-basis:100%}}
+  .filled .field{gap:.2rem}
+  .filled .field-label,.filled legend{color:#5d7080;font-size:.76rem;font-weight:700}
+  .answer{color:#0f2238;font-size:.95rem;font-weight:650;line-height:1.45;overflow-wrap:anywhere}
+  .answer.long{font-weight:500;line-height:1.6;white-space:pre-wrap}
+  .filled fieldset{padding:0;border:0}
+  .filled .choices{gap:.3rem 1rem;margin-top:.4rem}
+  .filled .choices label,.filled .check{min-height:0;padding:.15rem 0;border:0;background:none}
   .filled-documents{margin:0;padding-left:1.1rem;color:#263c50;line-height:1.8}
   @media print{
-    .application-shell.filled{max-width:none;border:1px solid #e1e7e9;border-radius:0;box-shadow:none;overflow:visible}
     .filled .field{break-inside:avoid}
     .filled .step-heading,.filled .group-title{break-after:avoid}
   }

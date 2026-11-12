@@ -6,10 +6,10 @@ import { prisma } from "../src/lib/prisma.js";
 
 export const stamp = () => `test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-export async function createUser(role: "USER" | "ADMIN" = "USER", password = "Secret123") {
+export async function createUser(role: "USER" | "ADMIN" | "MODERATOR" | "MANAGER" | "ACCOUNTANT" | "EMPLOYEE" = "USER", password = "Secret123") {
   return prisma.user.create({
     data: {
-      name: role === "ADMIN" ? "Test Admin" : "Test Member",
+      name: role === "USER" ? "Test Member" : `Test ${role.charAt(0)}${role.slice(1).toLowerCase()}`,
       email: `${stamp()}-${role.toLowerCase()}@example.test`,
       passwordHash: await bcrypt.hash(password, 4),
       emailVerifiedAt: new Date(),

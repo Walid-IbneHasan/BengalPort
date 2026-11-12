@@ -25,9 +25,12 @@
 </div>
 
 <style>
-  .label{font-size:.82rem;font-weight:720;color:var(--heading)}
-  .answer{display:flex;align-items:center;min-height:2.9rem;border:1px solid #d7dce3;border-radius:.65rem;padding:.8rem .9rem;background:#fff;overflow-wrap:anywhere}
-  .answer.long{display:block;min-height:10rem;line-height:1.55;white-space:pre-wrap}
+  /* On the letterhead: every answer as plain text, with no boxes. */
+  .filled-enquiry{max-width:none;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none}
+  .filled-enquiry .field{gap:.2rem}
+  .label{font-size:.76rem;font-weight:700;color:#5d7080}
+  .answer{color:#0f2238;font-size:.95rem;font-weight:650;line-height:1.45;overflow-wrap:anywhere}
+  .answer.long{font-weight:500;line-height:1.6;white-space:pre-wrap}
   .full{margin-top:1.1rem}
   .general-intro .received{margin-top:-1rem;font-size:.82rem;font-weight:700;color:#17304f}
   @media print{

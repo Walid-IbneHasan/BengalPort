@@ -2,15 +2,19 @@
   import { page } from "$app/state";
   import { onMount } from "svelte";
   import { api, ApiError } from "$lib/api";
-  let receipt: any,
-    error = "",
-    signInRequired = false;
+  import { bdt } from "$lib/invoices";
+  import PrintSheet from "$lib/components/PrintSheet.svelte";
+  import { Printer } from "lucide-svelte";
+
+  // A payment receipt on the letterhead, for the customer to keep, print or
+  // save as PDF. It shows the whole service fee as well as what was paid.
+  let receipt = $state<any>(null),
+    error = $state(""),
+    signInRequired = $state(false);
   onMount(async () => {
     try {
       const key = page.url.searchParams.get("key");
-      receipt = await api(
-        `/payments/receipt/${page.params.number}${key ? `?key=${encodeURIComponent(key)}` : ""}`,
-      );
+      receipt = await api(`/payments/receipt/${page.params.number}${key ? `?key=${encodeURIComponent(key)}` : ""}`);
     } catch (e) {
       signInRequired = e instanceof ApiError && e.status === 401;
       error = signInRequired
@@ -20,155 +24,91 @@
           : "The receipt could not be loaded. Check your connection and try again.";
     }
   });
+  const day = (value: string) =>
+    new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Dhaka" }).format(new Date(value));
+  let customer = $derived(receipt ? receipt.payment.application?.fullName || receipt.payment.user?.name || "Customer" : "");
+  let fee = $derived(receipt?.payment.application?.amountDue == null ? null : Number(receipt.payment.application.amountDue));
 </script>
 
-<svelte:head><title>Payment Receipt — Bengal Port</title></svelte:head>
-<section class="section">
-  <div class="receipt">
-    <header>
-      <img src="/images/logo-192.webp" alt="Bengal Port" />
-      <div>
-        <h1>PAYMENT RECEIPT</h1>
-        <p>Bengal Port · Connecting Bengal to the World</p>
-      </div>
-    </header>
-    {#if error}<p class="error">
-        {error}
-        {#if signInRequired}<a href={`/login?next=${page.url.pathname}`}
-            >Sign in</a
-          >{/if}
-      </p>{:else if !receipt}<p>
-        Loading receipt…
-      </p>{:else}<div class="meta">
-        <p>Receipt Number <b>{receipt.receiptNumber}</b></p>
-        <p>
-          Payment Date <b>{new Date(receipt.createdAt).toLocaleDateString()}</b>
-        </p>
-        <p>
-          Customer <b
-            >{receipt.payment.application?.fullName ||
-              receipt.payment.user?.name ||
-              "Customer"}</b
-          >
-        </p>
-        <p>Service <b>{receipt.payment.service}</b></p>
-        <p>Payment Method <b>{receipt.payment.method}</b></p>
-        <p>
-          Transaction ID <b
-            >{receipt.payment.gatewayTransactionId ||
-              receipt.payment.transactionId}</b
-          >
-        </p>
-      </div>
-      <table>
-        <tbody
-          ><tr
-            ><td>Total Amount</td><td
-              >৳{Number(receipt.previousDue).toLocaleString()}</td
-            ></tr
-          ><tr
-            ><td>Amount Paid</td><td
-              >৳{Number(receipt.payment.amount).toLocaleString()}</td
-            ></tr
-          ><tr
-            ><th>Remaining Due</th><th
-              >৳{Number(receipt.remainingDue).toLocaleString()}</th
-            ></tr
-          ></tbody
-        >
-      </table>
-      {#if receipt.payment.refunds?.length}<div class="refunds">
-          <h2>Refunded since this payment</h2>
-          <table>
-            <tbody
-              >{#each receipt.payment.refunds as refund}<tr
-                  ><td
-                    >{new Date(refund.createdAt).toLocaleDateString()} · {refund.method}</td
-                  ><td>৳{Number(refund.amount).toLocaleString()}</td></tr
-                >{/each}</tbody
-            >
-          </table>
-        </div>{/if}
-      <button class="btn" onclick={() => window.print()}
-        >PRINT / DOWNLOAD PDF</button
-      >{/if}
-  </div>
+<svelte:head><title>Payment Receipt {receipt?.receiptNumber ?? ""} — Bengal Port</title></svelte:head>
+<section class="section receipt-page">
+  {#if error}
+    <p class="error" role="alert">
+      {error}
+      {#if signInRequired}<a href={`/login?next=${page.url.pathname}`}>Sign in</a>{/if}
+    </p>
+  {:else if !receipt}
+    <p class="loading">Loading receipt…</p>
+  {:else}
+    <div class="tools"><button class="btn" onclick={() => window.print()}><Printer size={17} /> Print / Save as PDF</button></div>
+    <PrintSheet signed customerName={customer}>
+      <article class="receipt">
+        <header>
+          <h1>PAYMENT RECEIPT</h1>
+          <p>{receipt.receiptNumber}</p>
+        </header>
+        <dl class="meta">
+          <div><dt>Payment date</dt><dd>{day(receipt.createdAt)}</dd></div>
+          <div><dt>Customer</dt><dd>{customer}</dd></div>
+          <div><dt>Service</dt><dd>{receipt.payment.service}</dd></div>
+          {#if receipt.payment.application}<div><dt>Application</dt><dd>{receipt.payment.application.reference}</dd></div>{/if}
+          <div><dt>Payment method</dt><dd>{receipt.payment.method}</dd></div>
+          <div><dt>Transaction ID</dt><dd>{receipt.payment.gatewayTransactionId || receipt.payment.transactionId}</dd></div>
+        </dl>
+        <table>
+          <tbody>
+            {#if fee !== null}<tr><td>Total service fee</td><td>{bdt(fee)}</td></tr>{/if}
+            <tr><td>Due before this payment</td><td>{bdt(Number(receipt.previousDue))}</td></tr>
+            <tr class="paid"><td>Amount paid</td><td>{bdt(Number(receipt.payment.amount))}</td></tr>
+            <tr class="due"><th>Remaining due</th><th>{bdt(Number(receipt.remainingDue))}</th></tr>
+          </tbody>
+        </table>
+        {#if receipt.payment.refunds?.length}
+          <div class="refunds">
+            <h2>Refunded since this payment</h2>
+            <table>
+              <tbody>
+                {#each receipt.payment.refunds as refund}<tr><td>{day(refund.createdAt)} · {refund.method}</td><td>{bdt(Number(refund.amount))}</td></tr>{/each}
+              </tbody>
+            </table>
+          </div>
+        {/if}
+      </article>
+    </PrintSheet>
+  {/if}
 </section>
 
 <style>
-  .receipt {
-    width: min(780px, 92vw);
-    margin: auto;
-    background: white;
-    padding: 45px;
-    box-shadow: var(--shadow);
+  .receipt-page{background:#eef1f4}
+  .tools{display:flex;justify-content:flex-end;width:min(100%,52rem);margin:0 auto 1rem}
+  .tools .btn{display:inline-flex;align-items:center;gap:.45rem}
+  .loading,.error{text-align:center;color:var(--navy)}
+  .error a{margin-left:.4rem;font-weight:750}
+  .receipt{color:#17304f}
+  header{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:.3rem 1rem;padding-bottom:.8rem;border-bottom:2px solid #c9952d}
+  h1{margin:0;font-size:clamp(1.2rem,3.6vw,1.7rem);letter-spacing:.08em;color:#07182f}
+  header p{margin:0;font-weight:800;color:#a87618}
+  .meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.2rem 2rem;margin:1.4rem 0}
+  .meta div{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:.5rem 0;border-bottom:1px solid rgba(23,48,79,.1)}
+  dt{font-size:.8rem;color:#5d7080}
+  dd{margin:0;font-weight:700;text-align:right;overflow-wrap:anywhere}
+  table{width:100%;border-collapse:collapse;margin-bottom:1rem;font-size:.95rem}
+  td,th{padding:.7rem .8rem;border-bottom:1px solid rgba(23,48,79,.12);text-align:left}
+  td:last-child,th:last-child{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .paid td{font-weight:800}
+  .due th{background:#07182f;color:#fff}
+  .due th:last-child{color:#e1b34a;font-size:1.1rem}
+  .refunds h2{margin:1rem 0 .4rem;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:#8a6417}
+  @media(max-width:36rem){
+    .meta{grid-template-columns:1fr}
+    table{font-size:.85rem}
   }
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 3px solid var(--gold);
-    padding-bottom: 22px;
-  }
-  header img {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-  }
-  header h1 {
-    color: var(--navy);
-  }
-  .meta {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 30px;
-    margin: 35px 0;
-  }
-  .meta p {
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid #e5e7ea;
-    padding: 10px 0;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 30px;
-  }
-  td,
-  th {
-    padding: 15px;
-    border: 1px solid #dfe2e5;
-    text-align: left;
-  }
-  td:last-child,
-  th:last-child {
-    text-align: right;
-  }
-  .refunds h2 {
-    font-size: 1rem;
-    color: var(--navy);
-    margin: 0 0 10px;
-  }
-  @media print {
-    /* Hide the site header, footer and chat button around the receipt. */
-    :global(body > div > :not(main)) {
-      display: none;
-    }
-    .receipt {
-      box-shadow: none;
-      width: 100%;
-    }
-    .btn {
-      display: none;
-    }
-  }
-  @media (max-width: 600px) {
-    .receipt {
-      padding: 22px;
-    }
-    .meta {
-      grid-template-columns: 1fr;
-    }
+  @media print{
+    /* Only the receipt: not the site's header, footer or chat button. */
+    :global(body > div > :not(main)){display:none}
+    :global(html),:global(body){background:#fff!important}
+    :global(*){-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .receipt-page{padding:0!important;background:transparent}
+    .tools{display:none}
   }
 </style>

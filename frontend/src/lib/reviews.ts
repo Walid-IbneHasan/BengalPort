@@ -22,7 +22,7 @@ export const REVIEW_LENGTH = 1500;
 export function reviewProblem(review: { rating: number; name: string; body: string }): string {
   if (!Number.isInteger(review.rating) || review.rating < 1 || review.rating > 5) return "Choose a rating from 1 to 5 stars.";
   if (review.name.trim().length < 2) return "Enter the name to show with your review.";
-  if (review.body.trim().length < 10) return "Write at least a sentence about your experience.";
+  if (!review.body.trim()) return "Write a few words about your experience.";
   if (review.body.trim().length > REVIEW_LENGTH) return "Keep your review under 1,500 characters.";
   return "";
 }

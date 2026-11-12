@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
+  import { confirmAction } from "$lib/confirm";
   import { onMount } from "svelte";
   import { X } from "lucide-svelte";
   import { api } from "$lib/api";
@@ -32,7 +34,7 @@
       if (!keepAmount) amount = info.refundable || null;
       if (info.recordOnly && methods.includes(`${info.gatewayName} (sent by staff)`)) method = `${info.gatewayName} (sent by staff)`;
     } catch (e) {
-      error = e instanceof Error ? e.message : "The refunds could not be loaded.";
+      error = problemText(e, "The refunds could not be loaded.");
     } finally {
       loading = false;
     }
@@ -42,7 +44,7 @@
   async function send() {
     if (!info || amount === null) return;
     const where = info.viaGateway ? `to the customer's ${info.gatewayName} wallet${info.payment.payerAccount ? ` (${info.payment.payerAccount})` : ""}. ${info.gatewayName} sends the money straight away and it cannot be undone` : `as returned by ${method.toLowerCase()}`;
-    if (!confirm(`Record a refund of ${taka(Number(amount))} ${where}?`)) return;
+    if (!(await confirmAction({ title: `Refund ${taka(Number(amount))}?`, message: `The refund is recorded ${where}.`, confirmLabel: "Record refund" }))) return;
     sending = true;
     error = notice = "";
     try {
@@ -58,7 +60,7 @@
       await load();
       onchange();
     } catch (e) {
-      error = e instanceof Error ? e.message : "The refund could not be made.";
+      error = problemText(e, "The refund could not be made.");
       await load(true);
     } finally {
       sending = false;
