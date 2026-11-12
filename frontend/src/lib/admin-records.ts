@@ -32,6 +32,9 @@ export function blankRecord(kind: RecordKind = "partner"): Record<string, any> {
     deadline: "",
     image: defaultImages[kind],
     published: true,
+    // More photos after the main one, and the Education pages an institution is on.
+    gallery: [],
+    fields: [],
     programs: [],
     services: [],
     applicationId: "",
@@ -49,6 +52,7 @@ export function blankRecord(kind: RecordKind = "partner"): Record<string, any> {
 const dateValue = (value: unknown) => (typeof value === "string" ? value.slice(0, 10) : "");
 const slugFrom = (title: string) =>
   title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const photos = (list: unknown) => (Array.isArray(list) ? list.map((x) => String(x).trim()).filter(Boolean) : []);
 const filled = (row: Record<string, string>) => Object.values(row).some((value) => value.trim());
 
 // Fills the form from a table row so the record can be edited.
@@ -57,6 +61,8 @@ export function recordFromRow(kind: RecordKind, row: Record<string, any>): Recor
     ...blankRecord(kind),
     ...row,
     deadline: dateValue(row.deadline),
+    gallery: [...(row.gallery ?? [])],
+    fields: [...(row.fields ?? [])],
     programs: (row.programs ?? []).map((p: any) => ({ title: p.title, level: p.level, discipline: p.discipline, deadline: dateValue(p.deadline) })),
     services: (row.services ?? []).map((s: any) => ({ title: s.title, category: s.category, description: s.description })),
   };
@@ -99,7 +105,9 @@ export function recordBody(kind: RecordKind, form: Record<string, any>): Record<
       country,
       description,
       image,
+      gallery: photos(form.gallery),
+      fields: [...(form.fields ?? [])],
       programs: form.programs.filter(filled).map((p: any) => ({ ...p, deadline: p.deadline || null })),
     };
-  return { name, country, city, description, image, services: form.services.filter(filled) };
+  return { name, country, city, description, image, gallery: photos(form.gallery), services: form.services.filter(filled) };
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
   import { Download } from "lucide-svelte";
   import { api } from "$lib/api";
 
@@ -15,7 +16,7 @@
       window.location.href = url;
       started = true;
     } catch (e) {
-      error = e instanceof Error ? e.message : "The backup could not be prepared.";
+      error = problemText(e, "The backup could not be prepared.");
     } finally {
       preparing = false;
     }

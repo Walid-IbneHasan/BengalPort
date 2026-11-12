@@ -1,22 +1,29 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
   import { Star } from "lucide-svelte";
   import { api } from "$lib/api";
   import { toasts } from "$lib/toast";
   import { REVIEW_LENGTH, reviewProblem, reviewState, stars, type OwnReview } from "$lib/reviews";
   import StarInput from "./StarInput.svelte";
 
-  // Member dashboard: the review of one application that has been paid for.
-  // A member writes it, may change it while it waits for approval, and sees
-  // whether it has been published.
+  // Member dashboard: the review of one application that has been paid for,
+  // or, with `general`, of a service paid for at the office without an
+  // application (the member chooses which service). A member writes it, may
+  // change it while it waits for approval, and sees whether it has been
+  // published.
   // `avatarUrl` is the account's photo, which the member may choose to show.
   let {
-    applicationId,
+    applicationId = "",
+    general = false,
+    division = null,
     review,
     name: accountName = "",
     avatarUrl = null,
     onsaved,
   }: {
-    applicationId: string;
+    applicationId?: string;
+    general?: boolean;
+    division?: string | null;
     review: OwnReview | null;
     name?: string;
     avatarUrl?: string | null;
@@ -25,6 +32,9 @@
 
   let writing = $state(false), sending = $state(false), error = $state("");
   let rating = $state(0), name = $state(""), detail = $state(""), body = $state(""), showPhoto = $state(false);
+  // The service a general review is about.
+  let service = $state("");
+  const services = [["BUSINESS", "Global Business"], ["EDUCATION", "Global Education"], ["HEALTHCARE", "Global Healthcare"], ["UMRAH", "Global Umrah"]];
   let shown = $derived(review ? reviewState(review.status) : null);
 
   // A message about what is missing goes away once the member changes something.
@@ -39,16 +49,18 @@
     detail = review?.detail ?? "";
     body = review?.body ?? "";
     showPhoto = Boolean(review?.photoUrl);
+    service = review?.division ?? division ?? "";
     error = "";
     writing = true;
   }
 
   async function send() {
     error = reviewProblem({ rating, name, body });
+    if (!error && general && !service) error = "Choose the service you are reviewing.";
     if (error) return;
     sending = true;
     try {
-      const saved = await api<OwnReview>(`/reviews/application/${applicationId}`, {
+      const saved = await api<OwnReview>(general ? `/reviews/general/${service.toLowerCase()}` : `/reviews/application/${applicationId}`, {
         method: "PUT",
         body: JSON.stringify({ rating, name, detail, body, showPhoto: Boolean(avatarUrl) && showPhoto }),
       });
@@ -56,7 +68,7 @@
       onsaved(saved);
       writing = false;
     } catch (e) {
-      error = e instanceof Error ? e.message : "Your review could not be sent. Please try again.";
+      error = problemText(e, "Your review could not be sent. Please try again.");
     } finally {
       sending = false;
     }
@@ -66,14 +78,17 @@
 <div class="review-box">
   {#if writing}
     <form onsubmit={(e) => { e.preventDefault(); send(); }}>
-      <StarInput bind:value={rating} name={`rating-${applicationId}`} />
+      {#if general}
+        <label class="service"><span>Service you are reviewing</span><select bind:value={service} disabled={Boolean(review)} required><option value="" disabled>Choose a service</option>{#each services as [value, label]}<option {value}>{label}</option>{/each}</select></label>
+      {/if}
+      <StarInput bind:value={rating} name={`rating-${general ? `general-${division ?? "new"}` : applicationId}`} />
       <div class="fields">
         <label><span>Name to show</span><input bind:value={name} required minlength="2" maxlength="80" autocomplete="name" /></label>
         <label><span>What we helped you with <em>(optional)</em></span><input bind:value={detail} maxlength="80" placeholder="e.g. MBBS admission, Malaysia" /></label>
       </div>
       <label>
         <span>Your review</span>
-        <textarea bind:value={body} required minlength="10" maxlength={REVIEW_LENGTH} rows="5" placeholder="Tell others how it went."></textarea>
+        <textarea bind:value={body} required maxlength={REVIEW_LENGTH} rows="5" placeholder="Tell others how it went."></textarea>
         <small>{body.length} / {REVIEW_LENGTH}</small>
       </label>
       {#if avatarUrl}
@@ -121,10 +136,11 @@
   label{display:grid;gap:.35rem;min-width:0}
   label span{font-size:.75rem;font-weight:750;color:#29465f}
   label em{font-style:normal;font-weight:600;color:#7b8995}
-  input,textarea{width:100%;border:1px solid #d6dfe2;border-radius:.7rem;background:#fff;padding:.6rem .8rem;color:#263c50;outline:none;font:inherit;font-size:1rem}
+  input,textarea,select{width:100%;border:1px solid #d6dfe2;border-radius:.7rem;background:#fff;padding:.6rem .8rem;color:#263c50;outline:none;font:inherit;font-size:1rem}
+  select{min-height:2.85rem}
   input{min-height:2.85rem}
   textarea{resize:vertical;line-height:1.55}
-  input:focus,textarea:focus{border-color:#bf8e2d;box-shadow:0 0 0 .2rem rgba(199,152,54,.14)}
+  input:focus,textarea:focus,select:focus{border-color:#bf8e2d;box-shadow:0 0 0 .2rem rgba(199,152,54,.14)}
   label small{justify-self:end;font-size:.7rem;color:#7b8995}
   p{margin:0;font-size:.86rem;line-height:1.55;color:#687986}
   .problem{padding:.7rem .9rem;border-radius:.7rem;background:#fff0f0;color:#943d45}

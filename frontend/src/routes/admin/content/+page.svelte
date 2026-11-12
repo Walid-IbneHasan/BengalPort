@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { problemText, reportProblem } from "$lib/problem";
   import { onMount } from "svelte";
   import { api } from "$lib/api";
   import { invalidateAll } from "$app/navigation";
@@ -13,6 +14,8 @@
     Save,
   } from "lucide-svelte";
   import CmsImageField from "$lib/components/CmsImageField.svelte";
+  import { isImageField } from "$lib/content-fields";
+  import { cmsContent } from "$lib/cms";
   type Section = keyof HomeContent;
   type Field = {
     path: string;
@@ -22,6 +25,9 @@
     image: boolean;
   };
   const sections: Array<{ key: Section; label: string; hint: string }> = [
+    { key: "brand", label: "Logo and name", hint: "Header, footer, sign-in page and printed documents" },
+    { key: "navigation", label: "Menu", hint: "Menu words, the Services panel and the Apply button" },
+    { key: "whatsapp", label: "WhatsApp button", hint: "Leave the number blank to keep the current one" },
     {
       key: "utility",
       label: "Utility bar",
@@ -48,7 +54,7 @@
       hint: "Opportunity image cards",
     },
     { key: "closing", label: "Closing CTA", hint: "Final conversion panel" },
-    { key: "footer", label: "Footer", hint: "Address and copyright" },
+    { key: "footer", label: "Footer", hint: "Address, link words and copyright" },
   ];
   let draft: HomeContent = structuredClone(defaultHomeContent),
     selected: Section = "hero",
@@ -77,7 +83,7 @@
           label: title(path),
           value: v,
           long: v.length > 70 || /description|subtitle/i.test(path),
-          image: /(^|\.)image$/i.test(path),
+          image: isImageField(path),
         },
       ];
     if (!v || typeof v !== "object") return [];
@@ -86,6 +92,10 @@
     );
   }
   function recommendation(path: string) {
+    if (selected === "brand")
+      return "Square recommended · at least 192 × 192 pixels. A transparent background looks best.";
+    if (path === "mobileImage")
+      return "Portrait recommended · shown behind the title on phones.";
     if (selected === "divisions")
       return "Square or portrait recommended · approximately 1:1. Vertical and horizontal images are responsively cropped.";
     if (selected === "featured")
@@ -132,7 +142,7 @@
       revision = page.revision;
       published = page.published;
     } catch (e) {
-      error = e instanceof Error ? e.message : "Unable to load content";
+      error = problemText(e, "Unable to load content");
     } finally {
       loading = false;
     }
@@ -153,7 +163,7 @@
       await invalidateAll();
       success = `Homepage saved as revision ${revision}.`;
     } catch (e) {
-      error = e instanceof Error ? e.message : "Unable to save content";
+      error = reportProblem(e, "The changes could not be saved.");
     } finally {
       saving = false;
     }
@@ -166,7 +176,7 @@
   <aside>
     <a class="back" href="/admin"><ArrowLeft size={18} /> Dashboard</a>
     <div class="brand">
-      <img src="/images/logo-192.webp" alt="" />
+      <img src={$cmsContent.brand.logo} alt="" />
       <div><b>CONTENT STUDIO</b><span>Homepage CMS</span></div>
     </div>
     <nav>

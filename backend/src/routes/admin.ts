@@ -2,6 +2,7 @@ import type { FastifyPluginAsync } from "fastify";
 import { prisma } from "../lib/prisma.js";
 import {
   opportunitySchema,
+  opportunityCategorySchema,
   partnerSchema,
   institutionSchema,
   hospitalSchema,
@@ -17,6 +18,12 @@ import {
   aboutContentSchema,
   servicesContentSchema,
   contactContentSchema,
+  opportunitiesContentSchema,
+  applyContentSchema,
+  payContentSchema,
+  loginContentSchema,
+  legalContentSchema,
+  documentsContentSchema,
   amountDueSchema,
   applicationEditSchema,
   categorySchema,
@@ -50,7 +57,18 @@ import {
 import { z } from "zod";
 import sharp from "sharp";
 import { documentSummary } from "../lib/documents.js";
-import { balance } from "../lib/payment-rules.js";
+import { adminPermission, isStaff, refusal } from "../lib/permissions.js";
+import { allowed, staffOf } from "../lib/access.js";
+import { audit } from "../lib/audit.js";
+import { cancelInvoice, invoiceFigures, issueInvoice, OfficeError, payBill, postCashbookEntry, reviseInvoice, unpostCashbookEntry } from "../lib/office-service.js";
+import { PostingError, reverseJournal } from "../lib/accounting.js";
+import { doOrAsk } from "../lib/approvals.js";
+import { notify, staffWith } from "../lib/office-notifications.js";
+import { SHARE_DAYS } from "./share.js";
+import { siteUrl } from "../lib/email-layout.js";
+import { balance, taka } from "../lib/payment-rules.js";
+import { randomCode, receiptNumber } from "../lib/reference.js";
+import { businessToday, dayWindow } from "../lib/ledger.js";
 import {
   invoiceAmounts,
   invoiceNumber,
@@ -78,25 +96,29 @@ const userFields = {
   mustChangePassword: true,
 } as const;
 
+// The start of today, the last seven days, this month or this year, by the
+// calendar in Bangladesh whatever the server's own time zone is.
 function rangeStart(period: string) {
-  const now = new Date();
-  if (period === "day")
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  if (period === "week") {
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    start.setDate(start.getDate() - 6);
-    return start;
-  }
-  if (period === "year") return new Date(now.getFullYear(), 0, 1);
-  return new Date(now.getFullYear(), now.getMonth(), 1);
+  const today = businessToday();
+  const start = dayWindow(today)!.start;
+  if (period === "day") return start;
+  if (period === "week") return new Date(start.getTime() - 6 * 24 * 60 * 60 * 1000);
+  if (period === "year") return dayWindow(`${today.slice(0, 4)}-01-01`)!.start;
+  return dayWindow(`${today.slice(0, 7)}-01`)!.start;
 }
 
 const admin: FastifyPluginAsync = async (app) => {
   // On arrival, so that nothing a visitor sends is read before they are checked.
   app.addHook("onRequest", app.authenticate);
   app.addHook("onRequest", async (req, reply) => {
-    if ((req.user as any).role !== "ADMIN")
-      return reply.forbidden("Admin access required");
+    // The Super Admin may do everything; other staff what their role allows.
+    const role = (req.user as any).role;
+    if (role === "ADMIN") return;
+    if (!isStaff(role)) return reply.forbidden("Admin access required");
+    const path = req.url.split("?")[0].replace(/^\/api\/admin/, "");
+    const permission = adminPermission(req.method, path);
+    if (permission && (await allowed(role, permission))) return;
+    return reply.forbidden(refusal(req.method));
   });
 
   app.post("/media", async (req, reply) => {
@@ -277,6 +299,58 @@ const admin: FastifyPluginAsync = async (app) => {
     };
   });
 
+  // The kinds of opportunity, oldest first. The eight originals come with the
+  // database; the administrator can add more.
+  app.get("/opportunity-categories", async () => ({
+    data: await prisma.opportunityCategory.findMany({
+      orderBy: [{ createdAt: "asc" }, { label: "asc" }],
+      select: { value: true, label: true },
+    }),
+  }));
+
+  const opportunityCategoryTaken = (reply: any) =>
+    reply.code(409).send({
+      error: {
+        code: "CATEGORY_EXISTS",
+        message: "A category with this name already exists",
+      },
+    });
+
+  app.post("/opportunity-categories", async (req, reply) => {
+    const parsed = opportunityCategorySchema.safeParse(req.body);
+    // Stored as letters and numbers of any language, joined by underscores,
+    // because it travels in web addresses and is shown on the opportunity cards.
+    const value = parsed.success
+      ? parsed.data.label
+          .replace(/[^\p{L}\p{M}\p{N}]+/gu, "_")
+          .replace(/^_+|_+$/g, "")
+          .toUpperCase()
+      : "";
+    if (!parsed.success || !value)
+      return reply.badRequest("Give the category a name of 2 to 60 characters");
+    const { label } = parsed.data;
+    const taken = await prisma.opportunityCategory.count({
+      where: { OR: [{ value }, { label: { equals: label, mode: "insensitive" } }] },
+    });
+    if (taken) return opportunityCategoryTaken(reply);
+    try {
+      return reply.code(201).send({
+        data: await prisma.opportunityCategory.create({
+          data: { value, label },
+          select: { value: true, label: true },
+        }),
+      });
+    } catch (error) {
+      if (isUniqueViolation(error)) return opportunityCategoryTaken(reply);
+      throw error;
+    }
+  });
+
+  const knownOpportunityCategory = (value: string) =>
+    prisma.opportunityCategory.count({ where: { value } });
+  const unknownOpportunityCategory = (reply: any) =>
+    reply.badRequest("Choose one of the listed categories");
+
   app.post("/opportunities", async (req, reply) => {
     const parsed = opportunitySchema.safeParse(req.body);
     if (!parsed.success)
@@ -289,6 +363,8 @@ const admin: FastifyPluginAsync = async (app) => {
             details: parsed.error.flatten(),
           },
         });
+    if (!(await knownOpportunityCategory(parsed.data.category)))
+      return unknownOpportunityCategory(reply);
     try {
       const created = await prisma.opportunity.create({ data: parsed.data });
       return reply.code(201).send({ data: created });
@@ -460,6 +536,8 @@ const admin: FastifyPluginAsync = async (app) => {
     const body = (req.body ?? {}) as Record<string, unknown>;
     // What an application costs, set by staff after quoting the customer.
     if (resource === "applications" && body.amountDue !== undefined) {
+      if (!(await allowed((req.user as any).role, "payments.update")))
+        return reply.forbidden("Only an administrator or an accountant can set what an application costs.");
       const amountDue = amountDueSchema.safeParse(body.amountDue);
       if (!amountDue.success)
         return reply.badRequest("Enter the amount due as a positive number");
@@ -527,15 +605,24 @@ const admin: FastifyPluginAsync = async (app) => {
         }),
       };
     if (resource === "users") {
-      if (!["USER", "ADMIN"].includes(String(body.role)))
-        return reply.badRequest("Invalid user role");
-      return {
-        data: await prisma.user.update({
-          where: { id },
-          data: { role: body.role as any },
-          select: userFields,
-        }),
-      };
+      if (!["USER", "MODERATOR", "MANAGER", "ACCOUNTANT", "EMPLOYEE", "ADMIN"].includes(String(body.role)))
+        return reply.badRequest("Choose Member, Moderator, Employee, Accountant, Manager or Super Admin");
+      const actor = await staffOf(req);
+      const before = await prisma.user.findUnique({ where: { id }, select: { name: true, role: true } });
+      if (!before) return reply.notFound("User not found");
+      const changed = before.role !== body.role;
+      if (changed && id === actor.id) return reply.badRequest("You cannot change your own role.");
+      if (changed && (body.role === "ADMIN" || before.role === "ADMIN") && actor.role !== "ADMIN")
+        return reply.forbidden("Only a Super Admin can make or unmake a Super Admin.");
+      // A new role takes effect at once: the person signs in again.
+      const user = await prisma.user.update({
+        where: { id },
+        data: { role: body.role as any, ...(changed ? { tokenVersion: { increment: 1 } } : {}) },
+        select: userFields,
+      });
+      if (changed)
+        await audit(req, { action: "user.role", entityType: "user", entityId: id, summary: `${before.name}: ${before.role} → ${body.role}`, changes: { role: { from: before.role, to: body.role } } });
+      return { data: user };
     }
     return reply.badRequest("This resource cannot be updated here");
   });
@@ -558,6 +645,12 @@ const admin: FastifyPluginAsync = async (app) => {
       return reply.serviceUnavailable("Email is not set up, so the temporary password cannot be sent.");
     if (await prisma.user.findUnique({ where: { email: parsed.data.email }, select: { id: true } }))
       return reply.conflict("An account with this email already exists.");
+    // A staff role is given only by someone who may change roles; a Super
+    // Admin only by a Super Admin.
+    const actor = await staffOf(req);
+    if (parsed.data.role !== "USER" && !(await allowed(actor.role, "roles.update")))
+      return reply.forbidden("Only the Super Admin can give a staff role. Add the person as a member, and ask the Super Admin to change the role.");
+    if (parsed.data.role === "ADMIN" && actor.role !== "ADMIN") return reply.forbidden("Only a Super Admin can make another Super Admin.");
     const password = temporaryPassword();
     const user = await prisma.user.create({
       data: {
@@ -683,6 +776,8 @@ const admin: FastifyPluginAsync = async (app) => {
       if (resource === "opportunities") {
         if (!(await prisma.opportunity.count({ where })))
           return reply.notFound("Record not found");
+        if (!(await knownOpportunityCategory(data.category)))
+          return unknownOpportunityCategory(reply);
         return { data: await prisma.opportunity.update({ where, data }) };
       }
       if (resource === "suppliers" || resource === "factories") {
@@ -931,6 +1026,14 @@ const admin: FastifyPluginAsync = async (app) => {
       fallback: defaultContactContent,
       schema: contactContentSchema,
     },
+    // Empty until saved: the website holds these pages' built-in wording.
+    opportunities: { name: "Opportunities", fallback: {}, schema: opportunitiesContentSchema },
+    apply: { name: "Apply / Enquiry", fallback: {}, schema: applyContentSchema },
+    pay: { name: "Pay online", fallback: {}, schema: payContentSchema },
+    login: { name: "Sign-in", fallback: {}, schema: loginContentSchema },
+    privacy: { name: "Privacy Policy", fallback: {}, schema: legalContentSchema },
+    terms: { name: "Terms of Use", fallback: {}, schema: legalContentSchema },
+    documents: { name: "Documents and PDFs", fallback: {}, schema: documentsContentSchema },
   };
   for (const [division, { name, fallback, schema }] of Object.entries(
     editablePages,
@@ -1137,7 +1240,7 @@ const admin: FastifyPluginAsync = async (app) => {
     const parsed = adminReviewSchema.safeParse(req.body);
     if (!parsed.success)
       return reply.badRequest(
-        "Choose the service and a rating from 1 to 5, give the name to show, and write at least a sentence.",
+        "Choose the service and a rating from 1 to 5, give the name to show, and write the review.",
       );
     return reply.code(201).send({
       data: await prisma.review.create({
@@ -1236,12 +1339,22 @@ const admin: FastifyPluginAsync = async (app) => {
       },
     });
 
+  // "Visa Fees" and "visa fees" would be the same category twice.
+  const categoryNamed = (name: string, notId?: string) =>
+    prisma.financialCategory.count({
+      where: {
+        name: { equals: name, mode: "insensitive" },
+        ...(notId ? { id: { not: notId } } : {}),
+      },
+    });
+
   app.post("/accounts/categories", async (req, reply) => {
     const parsed = categorySchema.safeParse(req.body);
     if (!parsed.success)
       return reply.badRequest(
         "Give the category a name and choose income or expense",
       );
+    if (await categoryNamed(parsed.data.name)) return categoryNameTaken(reply);
     try {
       return reply.code(201).send({
         data: await prisma.financialCategory.create({ data: parsed.data }),
@@ -1260,6 +1373,8 @@ const admin: FastifyPluginAsync = async (app) => {
     if (!parsed.success) return reply.badRequest("Give the category a name");
     if (!(await prisma.financialCategory.count({ where })))
       return reply.notFound("Category not found");
+    if (await categoryNamed(parsed.data.name, where.id))
+      return categoryNameTaken(reply);
     try {
       return {
         data: await prisma.financialCategory.update({
@@ -1292,13 +1407,15 @@ const admin: FastifyPluginAsync = async (app) => {
     return reply.code(204).send();
   });
 
-  app.get("/accounts", async (req) => {
+  app.get("/accounts", async (req, reply) => {
     const query = req.query as {
       period?: string;
       type?: "INCOME" | "EXPENSE";
       search?: string;
       from?: string;
       to?: string;
+      // One day's records, YYYY-MM-DD, as kept for every day.
+      day?: string;
     };
     const where: any = {};
     if (query.type) where.type = query.type;
@@ -1307,17 +1424,30 @@ const admin: FastifyPluginAsync = async (app) => {
         { description: { contains: query.search, mode: "insensitive" } },
         { notes: { contains: query.search, mode: "insensitive" } },
         { customer: { contains: query.search, mode: "insensitive" } },
+        { user: { name: { contains: query.search, mode: "insensitive" } } },
+        { user: { email: { contains: query.search, mode: "insensitive" } } },
+        { application: { reference: { contains: query.search, mode: "insensitive" } } },
       ];
-    if (query.from || query.to)
-      where.date = {
-        ...(query.from && { gte: new Date(query.from) }),
-        ...(query.to && { lte: new Date(query.to) }),
-      };
-    else where.date = { gte: rangeStart(query.period || "month") };
+    if (query.day !== undefined) {
+      const window = dayWindow(String(query.day));
+      if (!window) return reply.badRequest("Choose the date to show, for example 2026-11-11.");
+      where.date = { gte: window.start, lte: window.end };
+    } else if (query.from || query.to) {
+      const from = query.from ? dayWindow(query.from)?.start ?? new Date(query.from) : null;
+      const to = query.to ? dayWindow(query.to)?.end ?? new Date(query.to) : null;
+      if ((from && Number.isNaN(from.getTime())) || (to && Number.isNaN(to.getTime())))
+        return reply.badRequest("Choose the dates to show, for example 2026-11-01 to 2026-11-30.");
+      where.date = { ...(from && { gte: from }), ...(to && { lte: to }) };
+    } else where.date = { gte: rangeStart(query.period || "month") };
     const rows = await prisma.financialTransaction.findMany({
       where,
-      include: { category: true },
-      orderBy: { date: "desc" },
+      include: {
+        category: true,
+        user: { select: { id: true, name: true, email: true, phone: true } },
+        application: { select: { id: true, reference: true, type: true } },
+        payment: { select: { id: true, method: true, transactionId: true, receipt: { select: { receiptNumber: true } } } },
+      },
+      orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     });
     const income = rows
       .filter((x) => x.type === "INCOME")
@@ -1374,54 +1504,254 @@ const admin: FastifyPluginAsync = async (app) => {
         "AMOUNT_METHOD_CONFLICT",
         "Use either a direct total or quantity with unit price, not both",
       );
+    // The customer: an account, one of its applications, or both.
+    const { userId, applicationId, paymentMethod, moneyAccount, ...fields } = rest;
+    let customerId = userId;
+    let application: { id: string; reference: string; type: string; fullName: string; amountDue: unknown; userId: string | null; payments: any[] } | null = null;
+    if (customerId && !(await prisma.user.count({ where: { id: customerId } })))
+      return problem("INVALID_CUSTOMER", "That customer's account no longer exists. Choose the customer again.");
+    if (applicationId) {
+      application = await prisma.application.findUnique({
+        where: { id: applicationId },
+        select: {
+          id: true, reference: true, type: true, fullName: true, amountDue: true, userId: true,
+          payments: { select: { amount: true, status: true, refunds: { select: { amount: true, status: true } } } },
+        },
+      });
+      if (!application)
+        return problem("INVALID_APPLICATION", "That application no longer exists. Choose it again.");
+      if (customerId && application.userId !== customerId)
+        return problem("APPLICATION_NOT_CUSTOMERS", `Application ${application.reference} is not this customer's. Choose one of their own applications.`);
+      customerId ??= application.userId;
+    }
+    // Where the money went in or out. A bill still to pay has none yet.
+    const unpaid = fields.type === "EXPENSE" && (fields.paymentStatus === "DUE" || fields.paymentStatus === "PENDING");
+    let moneyAccountId: string | null = null;
+    if (moneyAccount && !unpaid) {
+      const account = await prisma.ledgerAccount.findFirst({ where: { OR: [{ id: moneyAccount }, { code: moneyAccount }], subtype: { in: ["CASH", "BANK", "MOBILE"] }, active: true }, select: { id: true } });
+      if (!account) return problem("NOT_MONEY_ACCOUNT", "Choose cash, a bank account or a mobile wallet for where the money went.");
+      moneyAccountId = account.id;
+    }
+    const amount = total ?? Number(quantity) * Number(unitPrice);
     return {
-      ...rest,
-      quantity: quantity ?? null,
-      unitPrice: unitPrice ?? null,
-      total: total ?? Number(quantity) * Number(unitPrice),
+      fields: {
+        ...fields,
+        moneyAccountId,
+        quantity: quantity ?? null,
+        unitPrice: unitPrice ?? null,
+        total: amount,
+        userId: customerId ?? null,
+        applicationId: application?.id ?? null,
+      },
+      application,
+      paymentMethod,
     };
   }
 
+  const billPaid = async (id: string) => (await prisma.journalEntry.count({ where: { sourceType: "bill", sourceId: id, status: "POSTED" } })) > 0;
+
+  const linkedEntry = {
+    category: true,
+    user: { select: { id: true, name: true, email: true, phone: true } },
+    application: { select: { id: true, reference: true, type: true } },
+    payment: { select: { id: true, method: true, transactionId: true, receipt: { select: { receiptNumber: true } } } },
+  } as const;
+
   app.post("/accounts", async (req, reply) => {
-    const data = await ledgerEntry(req, reply);
-    if (!data) return reply;
-    return reply
-      .code(201)
-      .send({ data: await prisma.financialTransaction.create({ data }) });
+    const entry = await ledgerEntry(req, reply);
+    if (!entry) return reply;
+    const { fields, application, paymentMethod } = entry;
+    const by = await staffOf(req);
+    // Money received for an application is a payment on it too: it shows on
+    // the customer's dashboard with a receipt, and counts towards what they owe.
+    if (fields.type === "INCOME" && application) {
+      const amountDue = application.amountDue == null ? null : Number(application.amountDue);
+      const { remaining } = balance(amountDue, application.payments);
+      if (remaining !== null && Math.round(fields.total * 100) > Math.round(remaining * 100))
+        return reply.code(400).send({
+          error: {
+            code: "MORE_THAN_DUE",
+            message: remaining > 0
+              ? `Only ${taka(remaining)} is still due on application ${application.reference}. Enter that or less, or change what the application costs first.`
+              : `Nothing is due on application ${application.reference}. Change what the application costs first.`,
+          },
+        });
+      const previousDue = remaining ?? fields.total;
+      const remainingDue = Math.max(0, Math.round((previousDue - fields.total) * 100) / 100);
+      const created = await prisma.$transaction(async (tx) => {
+        const payment = await tx.payment.create({
+          data: {
+            userId: fields.userId,
+            applicationId: application.id,
+            service: fields.description,
+            amount: fields.total,
+            totalDue: previousDue,
+            method: paymentMethod,
+            status: remainingDue === 0 ? "PAID" : "PARTIALLY_PAID",
+            provider: "manual",
+            transactionId: `BP-PAY-${randomCode(10)}`,
+            paidAt: fields.date,
+            receipt: { create: { receiptNumber: receiptNumber(), previousDue, remainingDue } },
+          },
+        });
+        const row = await tx.financialTransaction.create({
+          data: { ...fields, paymentStatus: payment.status, customer: fields.customer || application.fullName, paymentId: payment.id },
+        });
+        await postCashbookEntry(tx, row.id, by);
+        return tx.financialTransaction.findUniqueOrThrow({ where: { id: row.id }, include: linkedEntry });
+      });
+      await audit(req, { action: "cashbook.create", entityType: "cashbook", entityId: created.id, summary: `Cash ${fields.type.toLowerCase()} ৳${fields.total} for application ${application.reference}` });
+      return reply.code(201).send({ data: created });
+    }
+    const created = await prisma.$transaction(async (tx) => {
+      const row = await tx.financialTransaction.create({ data: fields });
+      await postCashbookEntry(tx, row.id, by);
+      return tx.financialTransaction.findUniqueOrThrow({ where: { id: row.id }, include: linkedEntry });
+    });
+    await audit(req, { action: "cashbook.create", entityType: "cashbook", entityId: created.id, summary: `${fields.type === "INCOME" ? "Income" : "Expense"} ৳${fields.total}: ${fields.description}` });
+    return reply.code(201).send({ data: created });
   });
 
   app.put("/accounts/:id", async (req, reply) => {
     const where = { id: (req.params as { id: string }).id };
-    if (!(await prisma.financialTransaction.count({ where })))
-      return reply.notFound("Ledger entry not found");
-    const data = await ledgerEntry(req, reply);
-    if (!data) return reply;
-    return {
-      data: await prisma.financialTransaction.update({
-        where,
-        data,
-        include: { category: true },
-      }),
-    };
+    const before = await prisma.financialTransaction.findUnique({ where, select: { paymentId: true, refundId: true, type: true, moneyAccountId: true } });
+    if (!before) return reply.notFound("Ledger entry not found");
+    const entry = await ledgerEntry(req, reply);
+    if (!entry) return reply;
+    // An entry that records a payment or a refund keeps its amount, kind and
+    // customer: those belong to the payment. Its wording, date and category
+    // can still be corrected.
+    const { fields } = entry;
+    const linked = Boolean(before.paymentId || before.refundId);
+    // A bill already marked paid stays paid, from the account it was paid
+    // from: that payment is in the books on its own.
+    if (await billPaid(where.id)) Object.assign(fields, { paymentStatus: "PAID", moneyAccountId: before.moneyAccountId });
+    const data = linked
+      ? { description: fields.description, notes: fields.notes, date: fields.date, customer: fields.customer, ...(fields.type === before.type ? { categoryId: fields.categoryId } : {}) }
+      : fields;
+    const by = await staffOf(req);
+    // A changed entry is posted again: the old posting is reversed, never edited.
+    const updated = await prisma.$transaction(async (tx) => {
+      if (!linked) await unpostCashbookEntry(tx, where.id, by, "Hisab Kitab entry corrected");
+      await tx.financialTransaction.update({ where, data });
+      if (!linked) await postCashbookEntry(tx, where.id, by);
+      return tx.financialTransaction.findUniqueOrThrow({ where, include: linkedEntry });
+    });
+    await audit(req, { action: "cashbook.update", entityType: "cashbook", entityId: where.id, summary: `Corrected: ${updated.description}` });
+    return { data: updated };
+  });
+
+  // A bill entered as still due, now paid.
+  app.post("/accounts/:id/pay", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const body = (req.body ?? {}) as { moneyAccount?: string };
+    try {
+      const by = await staffOf(req);
+      const paid = await prisma.$transaction((tx) => payBill(tx, id, body.moneyAccount ?? null, by));
+      await audit(req, { action: "cashbook.pay", entityType: "cashbook", entityId: id, summary: `Paid bill: ${paid.description}` });
+      return { data: await prisma.financialTransaction.findUniqueOrThrow({ where: { id }, include: linkedEntry }) };
+    } catch (error) {
+      if (error instanceof OfficeError) return reply.code(error.statusCode).send({ error: { code: error.code, message: error.message } });
+      throw error;
+    }
   });
 
   app.delete("/accounts/:id", async (req, reply) => {
     const where = { id: (req.params as { id: string }).id };
-    const { count } = await prisma.financialTransaction.deleteMany({ where });
-    return count
-      ? reply.code(204).send()
-      : reply.notFound("Ledger entry not found");
+    const entry = await prisma.financialTransaction.findUnique({ where, select: { paymentId: true, refundId: true } });
+    if (!entry) return reply.notFound("Ledger entry not found");
+    if (entry.paymentId || entry.refundId)
+      return reply.code(409).send({
+        error: {
+          code: "RECORDS_PAYMENT",
+          message: entry.paymentId
+            ? "This entry records a payment that was received, so it stays in the books. If the money went back, record a refund on the payment instead."
+            : "This entry records a refund that was made, so it stays in the books.",
+        },
+      });
+    const by = await staffOf(req);
+    await prisma.$transaction(async (tx) => {
+      await unpostCashbookEntry(tx, where.id, by, "Hisab Kitab entry deleted");
+      // A bill paid later had its own posting: undo that too.
+      for (const paid of await tx.journalEntry.findMany({ where: { sourceType: "bill", sourceId: where.id, status: "POSTED" }, select: { id: true } }))
+        await reverseJournal(tx, paid.id, by, "Hisab Kitab entry deleted");
+      await tx.financialTransaction.delete({ where });
+    });
+    await audit(req, { action: "cashbook.delete", entityType: "cashbook", entityId: where.id, summary: "Deleted a Hisab Kitab entry; its posting was reversed" });
+    return reply.code(204).send();
+  });
+
+  // One entry, whole, for the page that prints it.
+  app.get("/accounts/:id", async (req, reply) => {
+    const row = await prisma.financialTransaction.findUnique({
+      where: { id: (req.params as { id: string }).id },
+      include: linkedEntry,
+    });
+    return row ? { data: row } : reply.notFound("Ledger entry not found");
+  });
+
+  // Customers to choose for an entry: accounts matching the search, each
+  // with its applications and what is left to pay on them.
+  app.get("/accounts/customers", async (req) => {
+    const search = String((req.query as { search?: string }).search || "").trim();
+    if (search.length < 2) return { data: [] };
+    const users = await prisma.user.findMany({
+      where: {
+        OR: ["name", "email", "phone"].map((field) => ({ [field]: { contains: search, mode: "insensitive" as const } })),
+      },
+      select: {
+        id: true, name: true, email: true, phone: true,
+        applications: {
+          select: {
+            id: true, reference: true, type: true, amountDue: true, createdAt: true,
+            payments: { select: { amount: true, status: true, refunds: { select: { amount: true, status: true } } } },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        },
+      },
+      orderBy: { name: "asc" },
+      take: 12,
+    });
+    return {
+      data: users.map(({ applications, ...user }) => ({
+        ...user,
+        applications: applications.map(({ payments, amountDue, ...item }) => {
+          const owed = amountDue === null ? null : Number(amountDue);
+          const { paid, remaining } = balance(owed, payments);
+          return { ...item, amountDue: owed, paid, remaining };
+        }),
+      })),
+    };
   });
 
   // Invoices. The total is always worked out here from the invoice's lines.
+  // A draft can be changed or deleted; an issued invoice cannot: it is
+  // revised (the old version kept), credited or cancelled instead.
   const invoiceDetails = {
     application: { select: { reference: true, type: true } },
+    creditNotes: { select: { id: true, number: true, amount: true, reason: true, byName: true, createdAt: true }, orderBy: { number: "asc" as const } },
+    signature: { select: { id: true, ownerName: true, ownerTitle: true, label: true } },
+    customer: { select: { id: true, code: true, name: true } },
+    deal: { select: { id: true, number: true, title: true } },
   };
-  const invoiceView = (row: any) => ({
-    ...row,
-    number: invoiceNumber(row.serial),
-    ...invoiceAmounts(row.items as InvoiceLine[], Number(row.paid)),
-  });
+  const invoiceView = (row: any) => {
+    const figures = invoiceFigures(row);
+    return {
+      ...row,
+      number: invoiceNumber(row.serial),
+      exchangeRate: Number(row.exchangeRate),
+      ...figures,
+      // What has been paid against the total, as before the lifecycle.
+      paymentStatus: invoiceAmounts(row.items as InvoiceLine[], figures.paid + figures.credited).status,
+      creditNotes: (row.creditNotes ?? []).map((note: any) => ({ ...note, amount: Number(note.amount), reference: `CN-${String(note.number).padStart(6, "0")}` })),
+    };
+  };
+  const officeFailure = (reply: any, error: unknown) => {
+    if (error instanceof OfficeError || error instanceof PostingError) return reply.code((error as any).statusCode).send({ error: { code: (error as any).code, message: error.message } });
+    if ((error as any)?.statusCode && (error as any).statusCode < 500) return reply.code((error as any).statusCode).send({ error: { code: "REFUSED", message: (error as Error).message } });
+    throw error;
+  };
 
   // Checks an invoice. When it is not acceptable the problem is sent as the
   // reply and null is returned.
@@ -1437,7 +1767,7 @@ const admin: FastifyPluginAsync = async (app) => {
         "Check the customer's name, the invoice date and every line of the invoice",
         parsed.error.flatten(),
       );
-    const { paid, applicationId, transactionId, ...rest } = parsed.data;
+    const { paid, applicationId, transactionId, issue, ...rest } = parsed.data;
     const amounts = invoiceAmounts(rest.items, paid);
     if (amounts.total <= 0)
       return problem("INVOICE_EMPTY", "An invoice must be for more than ৳0");
@@ -1448,6 +1778,7 @@ const admin: FastifyPluginAsync = async (app) => {
         "INVOICE_OVERPAID",
         "The amount paid cannot be more than the total",
       );
+    if (rest.currency === "BDT") rest.exchangeRate = 1;
     if (
       applicationId &&
       !(await prisma.application.count({ where: { id: applicationId } }))
@@ -1460,13 +1791,27 @@ const admin: FastifyPluginAsync = async (app) => {
       }))
     )
       return problem("INVALID_LEDGER_ENTRY", "That ledger entry no longer exists");
+    if (rest.customerId && !(await prisma.customer.count({ where: { id: rest.customerId } })))
+      return problem("INVALID_CUSTOMER", "That customer no longer exists");
+    if (rest.dealId && !(await prisma.deal.count({ where: { id: rest.dealId, ...(rest.customerId ? { customerId: rest.customerId } : {}) } })))
+      return problem("INVALID_DEAL", "That deal does not exist or belongs to another customer");
     return {
-      ...rest,
-      total: amounts.total,
-      paid: amounts.paid,
-      applicationId: applicationId ?? null,
-      transactionId: transactionId ?? null,
+      fields: {
+        ...rest,
+        total: amounts.total,
+        paid: amounts.paid,
+        applicationId: applicationId ?? null,
+        transactionId: transactionId ?? null,
+      },
+      issue: Boolean(issue),
     };
+  }
+
+  // The signature an invoice is issued with: the active one, when the person
+  // issuing may use it.
+  async function issuingSignature(req: any) {
+    if (!(await allowed(req.user.role, "signature.use"))) return null;
+    return (await prisma.signatureAsset.findFirst({ where: { active: true }, orderBy: { createdAt: "desc" }, select: { id: true } }))?.id ?? null;
   }
 
   app.get("/invoices", async (req) => {
@@ -1474,21 +1819,27 @@ const admin: FastifyPluginAsync = async (app) => {
       search?: string;
       page?: string;
       pageSize?: string;
+      state?: string;
+      customerId?: string;
     };
     const search = String(query.search || "").trim();
     const serial = serialFromSearch(search);
-    const where = search
-      ? {
-          OR: [
-            ...["customerName", "customerPhone", "customerEmail", "notes"].map(
-              (field) => ({
-                [field]: { contains: search, mode: "insensitive" as const },
-              }),
-            ),
-            ...(serial === null ? [] : [{ serial }]),
-          ],
-        }
-      : {};
+    const where: any = {
+      ...(query.state ? { state: query.state } : {}),
+      ...(query.customerId ? { customerId: query.customerId } : {}),
+      ...(search
+        ? {
+            OR: [
+              ...["customerName", "customerPhone", "customerEmail", "notes"].map(
+                (field) => ({
+                  [field]: { contains: search, mode: "insensitive" as const },
+                }),
+              ),
+              ...(serial === null ? [] : [{ serial }]),
+            ],
+          }
+        : {}),
+    };
     const pageSize = Math.min(100, Math.max(1, Number(query.pageSize) || 25));
     const page = Math.max(1, Number(query.page) || 1);
     const [rows, total] = await Promise.all([
@@ -1507,38 +1858,153 @@ const admin: FastifyPluginAsync = async (app) => {
   app.get("/invoices/:id", async (req, reply) => {
     const row = await prisma.invoice.findUnique({
       where: { id: (req.params as { id: string }).id },
-      include: invoiceDetails,
+      include: { ...invoiceDetails, allocations: { include: { payment: { select: { id: true, transactionId: true, method: true, paidAt: true } } } } },
     });
-    return row ? { data: invoiceView(row) } : reply.notFound("Invoice not found");
+    if (!row) return reply.notFound("Invoice not found");
+    return { data: { ...invoiceView(row), allocations: row.allocations.map((a) => ({ ...a, amount: Number(a.amount) })) } };
   });
 
   app.post("/invoices", async (req, reply) => {
-    const data = await invoiceData(req, reply);
-    if (!data) return reply;
-    const row = await prisma.invoice.create({ data, include: invoiceDetails });
-    return reply.code(201).send({ data: invoiceView(row) });
+    const checked = await invoiceData(req, reply);
+    if (!checked) return reply;
+    const { fields: data, issue } = checked;
+    // Only someone who can open Hisab Kitab can tie a bill to its entries.
+    if (!(await allowed((req.user as any).role, "hisab.read"))) data.transactionId = null;
+    const staff = await staffOf(req);
+    try {
+      const row = await prisma.$transaction(async (tx) => {
+        const created = await tx.invoice.create({ data: { ...data, state: "DRAFT", branchId: staff.branchId } as any });
+        if (issue) await issueInvoice(tx, created.id, staff, await issuingSignature(req));
+        return tx.invoice.findUniqueOrThrow({ where: { id: created.id }, include: invoiceDetails });
+      });
+      await audit(req, { action: issue ? "invoice.issue" : "invoice.create", entityType: "invoice", entityId: row.id, summary: `${issue ? "Issued" : "Draft"} ${invoiceNumber(row.serial)} for ${row.customerName}: ${row.currency} ${Number(row.total)}` });
+      if (issue) await announceInvoice(row);
+      return reply.code(201).send({ data: invoiceView(row) });
+    } catch (error) {
+      return officeFailure(reply, error);
+    }
   });
+
+  // A new invoice for the customer's assigned employee and the accountants.
+  async function announceInvoice(row: any) {
+    const recipients = [...(row.customerId ? [(await prisma.customer.findUnique({ where: { id: row.customerId }, select: { assignedToId: true } }))?.assignedToId] : []), ...(await staffWith("payments.create"))];
+    await notify(app, recipients, {
+      type: "NEW_INVOICE",
+      title: `New invoice ${invoiceNumber(row.serial)}`,
+      body: `${invoiceNumber(row.serial)} for ${row.customerName}: ${row.currency} ${Number(row.total).toLocaleString("en-US")}.`,
+      link: `/admin/print/invoice/${row.id}`,
+      relatedType: "invoice",
+      relatedId: row.id,
+      key: `invoice-issued:${row.id}`,
+    });
+  }
 
   app.put("/invoices/:id", async (req, reply) => {
     const where = { id: (req.params as { id: string }).id };
-    if (!(await prisma.invoice.count({ where })))
-      return reply.notFound("Invoice not found");
-    const data = await invoiceData(req, reply);
-    if (!data) return reply;
-    const row = await prisma.invoice.update({
-      where,
-      data,
-      include: invoiceDetails,
-    });
+    const before = await prisma.invoice.findUnique({ where, select: { state: true } });
+    if (!before) return reply.notFound("Invoice not found");
+    if (before.state !== "DRAFT")
+      return reply.code(409).send({ error: { code: "ISSUED", message: "An issued invoice is not changed in place. Make a revision (the old version is kept), add a credit note, or cancel it." } });
+    const checked = await invoiceData(req, reply);
+    if (!checked) return reply;
+    const row = await prisma.invoice.update({ where, data: checked.fields as any, include: invoiceDetails });
+    await audit(req, { action: "invoice.update", entityType: "invoice", entityId: row.id, summary: `Draft ${invoiceNumber(row.serial)} changed` });
     return { data: invoiceView(row) };
   });
 
+  // Only a draft can be deleted; its number is never used again.
   app.delete("/invoices/:id", async (req, reply) => {
     const where = { id: (req.params as { id: string }).id };
-    const { count } = await prisma.invoice.deleteMany({ where });
-    return count
-      ? reply.code(204).send()
-      : reply.notFound("Invoice not found");
+    const invoice = await prisma.invoice.findUnique({ where, select: { state: true, serial: true } });
+    if (!invoice) return reply.notFound("Invoice not found");
+    if (invoice.state !== "DRAFT")
+      return reply.code(409).send({ error: { code: "ISSUED", message: "An issued invoice is kept for the accounts. Cancel it or add a credit note instead." } });
+    await prisma.invoice.delete({ where });
+    await audit(req, { action: "invoice.delete", entityType: "invoice", entityId: where.id, summary: `Draft ${invoiceNumber(invoice.serial)} deleted` });
+    return reply.code(204).send();
+  });
+
+  app.post("/invoices/:id/issue", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const staff = await staffOf(req);
+    try {
+      await prisma.$transaction(async (tx) => issueInvoice(tx, id, staff, await issuingSignature(req)));
+    } catch (error) {
+      return officeFailure(reply, error);
+    }
+    const row = await prisma.invoice.findUniqueOrThrow({ where: { id }, include: invoiceDetails });
+    await audit(req, { action: "invoice.issue", entityType: "invoice", entityId: id, summary: `Issued ${invoiceNumber(row.serial)}${row.signature ? ` with ${row.signature.ownerName}'s signature` : " without a signature"}` });
+    await announceInvoice(row);
+    return { data: invoiceView(row) };
+  });
+
+  app.post("/invoices/:id/revise", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const reason = String((req.body as { reason?: unknown })?.reason ?? "").trim();
+    if (reason.length < 3) return reply.code(400).send({ error: { code: "VALIDATION_ERROR", message: "Say why the invoice is being revised.", details: { fieldErrors: { reason: ["This is required"] } } } });
+    const checked = await invoiceData(req, reply);
+    if (!checked) return reply;
+    const { paid: _paid, applicationId: _a, transactionId: _t, ...changes } = checked.fields as any;
+    const staff = await staffOf(req);
+    try {
+      await prisma.$transaction((tx) => reviseInvoice(tx, id, staff, changes, reason));
+    } catch (error) {
+      return officeFailure(reply, error);
+    }
+    const row = await prisma.invoice.findUniqueOrThrow({ where: { id }, include: invoiceDetails });
+    await audit(req, { action: "invoice.revise", entityType: "invoice", entityId: id, summary: `${invoiceNumber(row.serial)} revised to version ${row.version}: ${reason}` });
+    return { data: invoiceView(row) };
+  });
+
+  app.get("/invoices/:id/revisions", async (req) => ({
+    data: await prisma.invoiceRevision.findMany({ where: { invoiceId: (req.params as { id: string }).id }, orderBy: { version: "desc" } }),
+  }));
+
+  // Cancellation and credit notes are high-risk: without the approve
+  // permission they wait for an approver.
+  async function highRisk(req: any, reply: any, kind: "INVOICE_CANCEL" | "CREDIT_NOTE") {
+    const { id } = req.params as { id: string };
+    const body = (req.body ?? {}) as { reason?: string; amount?: number };
+    const reason = String(body.reason ?? "").trim();
+    if (reason.length < 3) return reply.code(400).send({ error: { code: "VALIDATION_ERROR", message: "Give the reason.", details: { fieldErrors: { reason: ["This is required"] } } } });
+    const amount = Number(body.amount);
+    if (kind === "CREDIT_NOTE" && !(amount > 0)) return reply.code(400).send({ error: { code: "VALIDATION_ERROR", message: "Enter the amount of the credit note.", details: { fieldErrors: { amount: ["Enter more than 0"] } } } });
+    const invoice = await prisma.invoice.findUnique({ where: { id }, select: { serial: true, state: true, currency: true, customerName: true } });
+    if (!invoice) return reply.notFound("Invoice not found");
+    const staff = await staffOf(req);
+    try {
+      // A draft is simply withdrawn.
+      if (kind === "INVOICE_CANCEL" && invoice.state === "DRAFT") {
+        await prisma.$transaction((tx) => cancelInvoice(tx, id, staff, reason));
+        await audit(req, { action: "invoice.cancel", entityType: "invoice", entityId: id, summary: `Draft ${invoiceNumber(invoice.serial)} cancelled: ${reason}` });
+        return { data: invoiceView(await prisma.invoice.findUniqueOrThrow({ where: { id }, include: invoiceDetails })) };
+      }
+      const summary = kind === "INVOICE_CANCEL" ? `Cancel ${invoiceNumber(invoice.serial)} for ${invoice.customerName}: ${reason}` : `Credit note of ${invoice.currency} ${amount} on ${invoiceNumber(invoice.serial)}: ${reason}`;
+      const outcome = await doOrAsk(app, { role: staff.role, by: { id: staff.id, name: staff.name } }, kind, { type: "invoice", id, summary }, { reason, amount });
+      await audit(req, { action: outcome.done ? (kind === "INVOICE_CANCEL" ? "invoice.cancel" : "invoice.credit") : "approval.request", entityType: "invoice", entityId: id, summary: `${outcome.done ? "" : "Asked: "}${summary}` });
+      if (!outcome.done) return reply.code(202).send({ data: { done: false, approvalId: outcome.approval.id, message: "Your request is waiting for an approver." } });
+      return { data: invoiceView(await prisma.invoice.findUniqueOrThrow({ where: { id }, include: invoiceDetails })) };
+    } catch (error) {
+      return officeFailure(reply, error);
+    }
+  }
+  app.post("/invoices/:id/cancel", (req, reply) => highRisk(req, reply, "INVOICE_CANCEL"));
+  app.post("/invoices/:id/credit-notes", (req, reply) => highRisk(req, reply, "CREDIT_NOTE"));
+
+  // A link the customer can open for 30 days, and a WhatsApp message with it.
+  app.post("/invoices/:id/share", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const invoice = await prisma.invoice.findUnique({ where: { id }, include: { creditNotes: { select: { amount: true } } } });
+    if (!invoice) return reply.notFound("Invoice not found");
+    if (invoice.state === "DRAFT") return reply.code(409).send({ error: { code: "DRAFT", message: "Issue the invoice before sharing it." } });
+    const key = app.jwt.sign({ sub: id, purpose: "invoice-share" }, { expiresIn: `${SHARE_DAYS}d` });
+    const url = `${siteUrl()}/share/invoice/${id}?key=${encodeURIComponent(key)}`;
+    const figures = invoiceFigures(invoice);
+    const message = `Dear ${invoice.customerName}, here is your invoice ${invoiceNumber(invoice.serial)} from Bengal Port: ${invoice.currency} ${figures.total.toLocaleString("en-US")}${figures.due > 0 ? `, of which ${invoice.currency} ${figures.due.toLocaleString("en-US")} is due` : ", paid in full"}. View or download it here: ${url}`;
+    const phone = String(invoice.customerPhone ?? "").replace(/\D/g, "").replace(/^0/, "880");
+    await prisma.invoice.update({ where: { id }, data: { sentAt: new Date() } });
+    await audit(req, { action: "invoice.share", entityType: "invoice", entityId: id, summary: `Share link made for ${invoiceNumber(invoice.serial)}` });
+    return { data: { url, message, whatsapp: `https://wa.me/${phone}?text=${encodeURIComponent(message)}` } };
   });
 };
 

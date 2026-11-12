@@ -1,10 +1,13 @@
 import type { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
-import { randomCode } from "../lib/reference.js";
+import { randomCode, receiptNumber } from "../lib/reference.js";
 import { balance, paymentProblem, received, refundProblem, refundable, refundedInFull } from "../lib/payment-rules.js";
 import { notifyPayment, notifyRefund } from "../lib/notifications.js";
 import { findApplication } from "../lib/application-lookup.js";
+import { enterPayment, enterRefund } from "../lib/ledger.js";
+import { isStaff } from "../lib/permissions.js";
+import { allowed } from "../lib/access.js";
 import { GatewayError, isProvider, providerKeys, providers, type Gateway, type GatewayRefund, type GatewayStatus } from "../lib/gateway.js";
 
 const manualPaymentSchema = z
@@ -41,7 +44,7 @@ const routes: FastifyPluginAsync = async (app) => {
   const nameOf = (provider: string) => (isProvider(provider) ? providers[provider].name : provider);
   const configuredProviders = () => providerKeys.filter((provider) => app.gateways[provider].configured);
   const anyConfigured = () => configuredProviders().length > 0;
-  const receiptNumber = () => `BPR-${new Date().getFullYear()}-${randomCode(7)}`;
+  // receiptNumber comes from lib/reference.ts, shared with Hisab Kitab.
   // Lets someone without an account open one receipt: sent to the payer by
   // email and in the address they land on after paying.
   const receiptKey = (number: string) => app.jwt.sign({ sub: number, purpose: "receipt" }, { expiresIn: "90d" });
@@ -58,7 +61,7 @@ const routes: FastifyPluginAsync = async (app) => {
     }
     if (token.purpose === "pay") return token.sub === applicationId ? "payer" : null;
     await app.authenticate(req, undefined);
-    if (req.user.role === "ADMIN") return "admin";
+    if (isStaff(req.user.role)) return "admin";
     const application = await prisma.application.findUnique({ where: { id: applicationId }, select: { userId: true } });
     return application?.userId === req.user.sub ? "owner" : null;
   }
@@ -91,6 +94,7 @@ const routes: FastifyPluginAsync = async (app) => {
         },
         include: { receipt: true, application: true },
       });
+      await enterPayment(tx, payment.id);
       return { payment, created: true };
     });
     if (created && payment.application && payment.receipt)
@@ -328,7 +332,7 @@ const routes: FastifyPluginAsync = async (app) => {
   // by an administrator.
   app.post("/", async (req: any, reply) => {
     await app.authenticate(req, reply);
-    if (req.user.role !== "ADMIN") return reply.forbidden("Admin access required");
+    if (!(await allowed(req.user.role, "payments.create"))) return reply.forbidden("You do not have permission to record payments.");
     const parsed = manualPaymentSchema.safeParse(req.body);
     if (!parsed.success)
       return reply.code(400).send({ error: { code: "VALIDATION_ERROR", message: "Check the payment details. The amount paid cannot be more than the total due." } });
@@ -343,18 +347,22 @@ const routes: FastifyPluginAsync = async (app) => {
     }
     const remaining = fields.totalDue - fields.amount;
     try {
-      const payment = await prisma.payment.create({
-        data: {
-          ...fields,
-          userId,
-          applicationId,
-          status: remaining === 0 ? "PAID" : "PARTIALLY_PAID",
-          provider: "manual",
-          transactionId: transactionId ?? `BP-PAY-${randomCode(10)}`,
-          paidAt: new Date(),
-          receipt: { create: { receiptNumber: receiptNumber(), previousDue: fields.totalDue, remainingDue: remaining } },
-        },
-        include: { receipt: true },
+      const payment = await prisma.$transaction(async (tx) => {
+        const created = await tx.payment.create({
+          data: {
+            ...fields,
+            userId,
+            applicationId,
+            status: remaining === 0 ? "PAID" : "PARTIALLY_PAID",
+            provider: "manual",
+            transactionId: transactionId ?? `BP-PAY-${randomCode(10)}`,
+            paidAt: new Date(),
+            receipt: { create: { receiptNumber: receiptNumber(), previousDue: fields.totalDue, remainingDue: remaining } },
+          },
+          include: { receipt: true },
+        });
+        await enterPayment(tx, created.id);
+        return created;
       });
       return reply.code(201).send({ data: payment });
     } catch (error) {
@@ -369,7 +377,7 @@ const routes: FastifyPluginAsync = async (app) => {
   app.get("/receipt/:number", async (req: any, reply) => {
     const number = req.params.number as string;
     const key = (req.query as { key?: string }).key;
-    let allowed: (payment: { userId: string | null }) => boolean;
+    let mayView: (payment: { userId: string | null }) => boolean;
     if (key) {
       let token: { sub?: string; purpose?: string } | null = null;
       try {
@@ -378,10 +386,11 @@ const routes: FastifyPluginAsync = async (app) => {
         // An expired or altered link opens nothing.
       }
       const valid = token?.purpose === "receipt" && token.sub === number;
-      allowed = () => valid;
+      mayView = () => valid;
     } else {
       await app.authenticate(req, reply);
-      allowed = (payment) => req.user.role === "ADMIN" || payment.userId === req.user.sub;
+      const staffMay = await allowed(req.user.role, "payments.read");
+      mayView = (payment) => staffMay || payment.userId === req.user.sub;
     }
     const receipt = await prisma.receipt.findUnique({
       where: { receiptNumber: number },
@@ -390,14 +399,14 @@ const routes: FastifyPluginAsync = async (app) => {
           omit: { gatewaySignature: true, gatewayPaymentId: true },
           include: {
             user: { select: { name: true } },
-            application: { select: { reference: true, fullName: true } },
+            application: { select: { reference: true, fullName: true, amountDue: true } },
             // Money sent back, so that the receipt tells the whole story.
             refunds: { where: { status: "COMPLETED" }, select: { amount: true, method: true, createdAt: true }, orderBy: { createdAt: "asc" } },
           },
         },
       },
     });
-    if (!receipt || !allowed(receipt.payment)) return reply.notFound("Receipt not found");
+    if (!receipt || !mayView(receipt.payment)) return reply.notFound("Receipt not found");
     return { data: receipt };
   });
 
@@ -410,6 +419,7 @@ const routes: FastifyPluginAsync = async (app) => {
       include: { payment: { include: { refunds: true, application: true } } },
     });
     if (refundedInFull(refund.payment)) await prisma.payment.update({ where: { id: refund.paymentId }, data: { status: "REFUNDED" } });
+    await enterRefund(prisma, refund.id);
     if (refund.payment.application)
       notifyRefund(app, { application: refund.payment.application, amount: Number(refund.amount), method: refund.method, transactionId: gatewayRefundId });
   }
@@ -440,7 +450,7 @@ const routes: FastifyPluginAsync = async (app) => {
 
   const adminOnly = async (req: any, reply: any) => {
     await app.authenticate(req, reply);
-    if (req.user.role !== "ADMIN") throw app.httpErrors.forbidden("Admin access required");
+    if (!(await allowed(req.user.role, "payments.approve"))) throw app.httpErrors.forbidden("Only an administrator or an accountant can refund payments.");
   };
 
   // The refunds of one payment and how much of it can still be sent back.

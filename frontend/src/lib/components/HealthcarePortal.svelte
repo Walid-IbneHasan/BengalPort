@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { fade } from "svelte/transition";
   import {
     Activity,
@@ -20,13 +19,14 @@
   import type { PublicReview } from "$lib/reviews";
   import { applyHref } from "$lib/apply-route";
   import { reveal } from "$lib/reveal";
-  import { countryOf, flagCode } from "$lib/flags";
+  import { countrySlug, destinations } from "$lib/healthcare-places";
+  import { flagCode } from "$lib/flags";
+  import { onMount } from "svelte";
   import { distinct, liveStats } from "$lib/live-stats";
-  import RotatingWord from "./RotatingWord.svelte";
   import Testimonials from "./Testimonials.svelte";
 
-  // The Global Healthcare page: a calm hero that names the specialty and the
-  // three-step pathway, the treatments index, the live hospital directory,
+  // The Global Healthcare page: a hero of the destinations (each country
+  // leads to its own page), the treatments index, the live hospital directory,
   // the pathway timeline, the clarity panel, patient stories and the closing
   // panel. `records` are the live partner hospitals with their services.
   let {
@@ -48,27 +48,23 @@
     globe: Globe2,
   };
 
-  // The pathway lights one step at a time; everything is lit for people who
-  // asked for less motion.
-  let lit = $state(0);
+  // Less motion for people who asked for it.
   let reduced = $state(false);
-  onMount(() => {
-    reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
-    const timer = setInterval(() => (lit = (lit + 1) % 3), 2000);
-    return () => clearInterval(timer);
-  });
-
-  // Destination chips: the cities of the live hospitals, topped up from the
-  // page's own list so there are always four.
-  let places = $derived.by(() => {
-    const live = records.map((record) => `${record.city}, ${record.country}`);
-    return [...new Set([...live, ...content.hero.cities])].slice(0, 4);
-  });
-  const flagSrc = (place: string) => {
-    const code = flagCode(countryOf(place));
+  onMount(() => (reduced = matchMedia("(prefers-reduced-motion: reduce)").matches));
+  const flagOf = (country: string) => {
+    const code = flagCode(country);
     return code ? `https://flagcdn.com/w40/${code}.png` : "";
   };
+
+  // The hero: one tile per country, each leading to that country's page.
+  // The countries of the partner hospitals come first, then the page's own
+  // list of destinations.
+  let places = $derived(
+    destinations(records, content.hero.cities).map((land) => ({
+      ...land,
+      city: land.place.includes(",") ? land.place.split(",")[0].trim() : "",
+    })),
+  );
 
   // The treatments index: the hospitals offering a treatment are the ones
   // whose services mention its first word.
@@ -107,34 +103,19 @@
 </script>
 
 <div class="care">
-  <section class="hero">
-    <div class="chips" aria-hidden="true">
-      {#each places as place, i}
-        <span class={`place place-${i}`}>
-          <MapPin size={13} />{place}{#if flagSrc(place)}<img src={flagSrc(place)} alt="" width="40" height="30" loading="lazy" referrerpolicy="no-referrer" />{/if}
-        </span>
-      {/each}
-    </div>
-    <span class="eyebrow">{content.hero.eyebrow}</span>
-    <h1>{content.hero.title}</h1>
-    <p class="specialty"><RotatingWord words={content.hero.specialties} prefix={`${content.hero.title} `} interval={2600} /></p>
-    <p class="tagline">{content.hero.tagline}</p>
-    <ol class="pathway" aria-label="How treatment abroad is arranged">
-      {#each content.hero.pathway as node, i}{@const Icon = icons[node.icon] || Check}
-        <li class:lit={reduced || i <= lit}>
-          <i><Icon size={18} /></i>
-          <b>{node.title}</b>
-          <small>{node.description}</small>
+  <section class="hero" aria-labelledby="care-title">
+    <h1 id="care-title" class="sr">{content.hero.title}</h1>
+    <ul class="lands">
+      {#each places as land (land.slug)}
+        <li>
+          <a href={`/healthcare/${land.slug}`}>
+            {#if land.flag}<img src={`https://flagcdn.com/w320/${land.flag}.png`} alt="" width="320" height="213" decoding="async" referrerpolicy="no-referrer" />{:else}<span class="no-flag"><MapPin size={30} /></span>{/if}
+            <b>{land.country}</b>
+            {#if land.city}<small>{land.city}</small>{/if}
+          </a>
         </li>
       {/each}
-    </ol>
-    <div class="lede">
-      <p>{content.hero.description}</p>
-      <div>
-        <a class="primary" href={applyHref("HEALTHCARE")}>{content.hero.primary}<ArrowRight size={18} /></a>
-        <a class="ghost" href="#hospitals">{content.hero.secondary}</a>
-      </div>
-    </div>
+    </ul>
   </section>
 
   <section class="section index" id="treatments" use:reveal>
@@ -167,12 +148,12 @@
             <div class="panel-copy">
               <h3>{treatment.title}</h3>
               <p>{treatment.description}</p>
-              <small>USUAL PROCEDURES</small>
+              <small>{content.labels.usualProcedures}</small>
               <ul class="procedures">
                 {#each treatment.procedures as procedure}<li>{procedure}</li>{/each}
               </ul>
               {#if offering.length}
-                <small>AVAILABLE AT</small>
+                <small>{content.labels.availableAt}</small>
                 <ul class="offering">
                   {#each offering as hospital}<li><a href="#hospitals"><Hospital size={14} />{hospital.name}<span>{hospital.city}</span></a></li>{/each}
                 </ul>
@@ -194,30 +175,30 @@
       </header>
       {#if records.length}
         <div class="filters">
-          <label><Search size={18} /><input bind:value={query} placeholder="Search hospitals or services" aria-label="Search hospitals or services" /></label>
-          <select bind:value={country} aria-label="Filter by country">{#each countries as item}<option>{item}</option>{/each}</select>
+          <label><Search size={18} /><input bind:value={query} placeholder={content.labels.searchPlaceholder} aria-label="Search hospitals or services" /></label>
+          <select bind:value={country} aria-label="Filter by country">{#each countries as item}<option value={item}>{item === "All" ? content.labels.all : item}</option>{/each}</select>
         </div>
         <div class="hospital-grid">
           {#each filtered as record (record.id ?? record.name)}
             <article class="hospital">
               <header>
                 <b>{record.name}</b>
-                <span>{#if flagSrc(`${record.city}, ${record.country}`)}<img src={flagSrc(`${record.city}, ${record.country}`)} alt="" width="40" height="30" loading="lazy" referrerpolicy="no-referrer" />{/if}{record.city}, {record.country}</span>
+                <a class="land" href={`/healthcare/${countrySlug(record.country)}`}>{#if flagOf(record.country)}<img src={flagOf(record.country)} alt="" width="40" height="30" loading="lazy" referrerpolicy="no-referrer" />{/if}{record.city}, {record.country}</a>
               </header>
               {#if record.image}<img class="hospital-photo" src={record.image} alt={record.name} loading="lazy" decoding="async" />{/if}
               <div class="hospital-copy">
                 <p>{record.description}</p>
                 {#if record.services?.length}<ul class="tags">{#each record.services.slice(0, 3) as service}<li>{service.title}</li>{/each}</ul>{/if}
-                <a href={applyHref("HEALTHCARE", "enquiry", record.name)}>Request hospital connection <ArrowRight size={15} /></a>
+                <a href={applyHref("HEALTHCARE", "enquiry", record.name)}>{content.labels.requestConnection} <ArrowRight size={15} /></a>
               </div>
             </article>
           {/each}
         </div>
-        {#if !filtered.length}<div class="none"><p>No hospitals match that search. Try another country or a different word.</p></div>{/if}
+        {#if !filtered.length}<div class="none"><p>{content.labels.noMatches}</p></div>{/if}
       {:else}
         <div class="none">
-          <p>Our hospital list is being updated. Tell us what treatment you need and we will suggest suitable hospitals.</p>
-          <a class="pill" href={applyHref("HEALTHCARE", "enquiry", content.directory.title)}>Ask about hospitals<ArrowRight size={17} /></a>
+          <p>{content.labels.listUpdating}</p>
+          <a class="pill" href={applyHref("HEALTHCARE", "enquiry", content.directory.title)}>{content.labels.askAboutHospitals}<ArrowRight size={17} /></a>
         </div>
       {/if}
     </div>
@@ -352,124 +333,80 @@
     color: var(--accent-text);
   }
 
-  /* Hero: a light panel with the specialty in gold and the pathway under it. */
+  /* Hero: only the destinations, each a flag and its country, leading to
+     the hospitals and services there. */
   .hero {
-    position: relative;
-    isolation: isolate;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     border-radius: 1.25rem;
     background: #fdfdfb;
     background-image: radial-gradient(#d8dfe6 2px, transparent 2px);
     background-size: 32px 32px;
-    background-position: center;
     box-shadow: inset 0 0 100px 80px #fdfdfb;
-    color: var(--ink);
-    text-align: center;
-    padding: 1.65rem 0.75rem 1.75rem;
+    padding: 1.25rem 0.75rem;
   }
-  .hero > :not(.chips) {
-    position: relative;
-    z-index: 1;
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
-  .chips {
+  .lands {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    max-width: 72rem;
+  }
+  .lands a {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-    width: 100%;
-    margin-bottom: 1.1rem;
-    pointer-events: none;
-  }
-  .place {
-    --drift: 5px;
-    position: relative;
-    display: inline-flex;
+    flex-direction: column;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.4rem 0.7rem;
-    border: 1px solid #d7dce3;
-    border-radius: 99rem;
+    height: 100%;
+    padding: 1rem 0.75rem 1.1rem;
+    border-radius: 1rem;
     background: #fff;
+    box-shadow: 0 0.5rem 1.4rem #17304f14, 0 0 0 1px #17304f0f;
     color: var(--ink);
-    font-size: 0.72rem;
-    font-weight: 750;
-    white-space: nowrap;
-    box-shadow: 0 0.4rem 1rem #17304f1a;
+    text-align: center;
+    text-decoration: none;
+    transition: transform 220ms var(--ease-out), box-shadow 220ms ease;
   }
-  .place :global(svg) {
-    color: var(--accent-deep);
-  }
-  .place img {
-    width: 1.1rem;
-    height: 0.8rem;
-    border-radius: 0.15rem;
+  .lands img,
+  .no-flag {
+    width: min(100%, 9rem);
+    aspect-ratio: 3 / 2;
+    margin-bottom: 0.45rem;
+    border-radius: 0.5rem;
     object-fit: cover;
+    box-shadow: 0 0.3rem 0.9rem #17304f26, 0 0 0 1px #17304f14;
   }
-  .place-0 { animation: float-a 8s ease-in-out infinite; }
-  .place-1 { animation: float-b 9s ease-in-out infinite; }
-  .place-2,
-  .place-3 { display: none; }
-  @keyframes float-a {
-    50% { transform: translate(var(--drift), calc(var(--drift) * -1.3)); }
-  }
-  @keyframes float-b {
-    50% { transform: translate(calc(var(--drift) * -1.3), var(--drift)); }
-  }
-  .hero h1 {
-    font-size: clamp(1.9rem, 7vw, 4rem);
-    line-height: 1.05;
-    letter-spacing: -0.04em;
-    margin: 0.5rem 0 0;
-    font-weight: 800;
-    text-wrap: balance;
-  }
-  .specialty {
-    margin: 0;
-    font-size: clamp(2rem, 8.5vw, 4.8rem);
-    line-height: 1.12;
-    font-weight: 900;
-    letter-spacing: -0.02em;
+  .no-flag {
+    display: grid;
+    place-items: center;
+    background: #eef2f4;
     color: var(--accent-deep);
   }
-  .tagline {
-    margin: 0.7rem 0 0;
-    font-size: clamp(1rem, 3.7vw, 1.4rem);
-    font-weight: 600;
+  .lands b {
+    font-size: clamp(1rem, 2.4vw, 1.2rem);
+    letter-spacing: -0.01em;
+  }
+  .lands small {
     color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 650;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .lands a:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 1rem 2.2rem #17304f24, 0 0 0 1px #17304f1a;
+    }
   }
 
   /* The pathway: three steps on a line that fills from left to right. */
-  .pathway {
-    position: relative;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.4rem;
-    width: 100%;
-    max-width: 52rem;
-    margin: 1.6rem auto 0;
-    padding: 0;
-    list-style: none;
-    counter-reset: none;
-  }
-  .pathway::before,
-  .pathway::after {
-    content: "";
-    position: absolute;
-    top: 1.35rem;
-    left: 16.6%;
-    right: 16.6%;
-    height: 2px;
-    border-radius: 2px;
-    background: var(--line);
-  }
-  .pathway::after {
-    right: auto;
-    width: 0;
-    background: var(--accent);
-    animation: fill 6s linear infinite;
-  }
   @keyframes fill {
     0% { width: 0; }
     30% { width: 0; }
@@ -477,59 +414,6 @@
     96% { width: 66.8%; }
     100% { width: 66.8%; }
   }
-  .pathway li {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    justify-items: center;
-    gap: 0.35rem;
-    text-align: center;
-  }
-  .pathway i {
-    width: 2.75rem;
-    height: 2.75rem;
-    display: grid;
-    place-items: center;
-    border: 2px solid var(--line);
-    border-radius: 50%;
-    background: #fff;
-    color: var(--muted);
-    transition:
-      background-color 400ms ease,
-      color 400ms ease,
-      border-color 400ms ease,
-      box-shadow 400ms ease;
-  }
-  .pathway li.lit i {
-    border-color: var(--ink);
-    background: var(--ink);
-    color: var(--on-ink-gold);
-    box-shadow: 0 0.4rem 1rem #17304f33;
-  }
-  .pathway b {
-    font-size: 0.86rem;
-    color: var(--ink);
-    line-height: 1.2;
-  }
-  .pathway small {
-    display: none;
-    font-size: 0.74rem;
-    line-height: 1.45;
-    color: var(--muted);
-    max-width: 14rem;
-  }
-  .lede {
-    width: 100%;
-    max-width: 40rem;
-    margin: 0 auto;
-    padding: 1.4rem 0.25rem 0;
-  }
-  .lede p {
-    margin: 0;
-    line-height: 1.7;
-    color: var(--muted);
-  }
-  .lede > div,
   .closing > div:last-child {
     display: flex;
     flex-direction: column;
@@ -539,7 +423,6 @@
 
   /* Buttons, as on the Education page. */
   .primary,
-  .ghost,
   .outline,
   .pill {
     min-height: 3rem;
@@ -561,11 +444,6 @@
     background: var(--accent);
     color: var(--ink);
     box-shadow: 0 0.6rem 1.4rem rgba(167, 117, 23, 0.22);
-  }
-  .ghost {
-    border: 1px solid #d7dce3;
-    color: var(--ink);
-    background: #fff;
   }
   .outline {
     border: 1px solid #ffffff55;
@@ -826,12 +704,16 @@
     font-size: 1.05rem;
     line-height: 1.25;
   }
-  .hospital > header span {
+  .hospital > header .land {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
     font-size: 0.76rem;
     color: var(--on-ink);
+    text-decoration: none;
+  }
+  .hospital > header .land:hover {
+    text-decoration: underline;
   }
   .hospital > header img {
     width: 1.1rem;
@@ -1076,7 +958,6 @@
   }
 
   .primary:active,
-  .ghost:active,
   .outline:active,
   .pill:active,
   .tabs button:active {
@@ -1092,10 +973,6 @@
       transform: translateY(-2px);
       background: #203d5d;
       box-shadow: 0 0.9rem 1.7rem #17304f33;
-    }
-    .ghost:hover {
-      background: var(--accent-soft);
-      transform: translateY(-2px);
     }
     .outline:hover {
       background: #ffffff14;
@@ -1123,9 +1000,6 @@
     }
   }
   @media (min-width: 40rem) {
-    .pathway small {
-      display: block;
-    }
     .filters {
       grid-template-columns: 1fr 14rem;
     }
@@ -1142,40 +1016,18 @@
     }
     /* The hero fills what is left of the first screen below the fixed header, never more. */
     .hero {
-      justify-content: center;
-      min-height: min(calc(100svh - 11rem), 46rem);
-      padding: 2.6rem 2rem 2.8rem;
+      display: grid;
+      align-content: center;
+      min-height: min(calc(100svh - 14rem), 26rem);
+      padding: 2.4rem 2rem;
     }
-    .chips {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      display: block;
-      margin: 0;
+    .lands {
+      grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+      gap: 1rem;
     }
-    .place {
-      --drift: 14px;
-      position: absolute;
-      font-size: 0.8rem;
-      padding: 0.5rem 0.9rem;
+    .lands a {
+      padding: 1.5rem 1rem 1.4rem;
     }
-    .place-0 { top: 14%; left: 8%; }
-    .place-1 { top: 11%; right: 8%; }
-    .place-2 { display: inline-flex; top: 36%; left: 5%; animation: float-b 7s ease-in-out infinite; }
-    .place-3 { display: inline-flex; top: 38%; right: 5%; animation: float-a 8.5s ease-in-out infinite; }
-    .hero h1 {
-      margin-top: 0.8rem;
-    }
-    .tagline {
-      margin-top: 1rem;
-    }
-    .pathway {
-      margin-top: 2.2rem;
-    }
-    .lede {
-      padding-top: 2rem;
-    }
-    .lede > div,
     .closing > div:last-child {
       flex-direction: row;
       justify-content: center;
@@ -1289,17 +1141,9 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .place {
-      animation: none;
-    }
-    .pathway::after {
-      animation: none;
-      width: 66.8%;
-    }
-    .pathway i,
+    .lands a,
     .hospital,
     .primary,
-    .ghost,
     .outline,
     .pill,
     .tabs button {

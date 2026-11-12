@@ -1,19 +1,22 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import { api, ApiError } from "$lib/api";
   import { googleClientId as publicGoogleClientId } from "$lib/config";
   import { afterLogin } from "$lib/safe-next";
+  import PasswordInput from "$lib/components/PasswordInput.svelte";
+  import { cmsContent } from "$lib/cms";
+  import type { LoginContent } from "$lib/site-pages";
   import {
     ArrowRight,
     Check,
-    Eye,
-    EyeOff,
     KeyRound,
     Mail,
     ShieldCheck,
   } from "lucide-svelte";
+  export let data: { content: LoginContent };
   type Mode =
     "login" | "register" | "verify" | "twoFactor" | "forgot" | "reset";
   let mode: Mode = "login",
@@ -27,18 +30,24 @@
     developmentCode = "",
     error = "",
     notice = "",
-    loading = false,
-    showPassword = false;
+    loading = false;
   const googleClientId = publicGoogleClientId();
-  const heading = () =>
-    ({
-      login: "Welcome back",
-      register: "Create your account",
-      verify: "Verify your email",
-      twoFactor: "Confirm it’s you",
-      forgot: "Reset your password",
-      reset: "Choose a new password",
-    })[mode];
+  // A notice sits above the form, so bring it into view if the button pressed
+  // was further down the page.
+  const reveal = (node: HTMLElement) => node.scrollIntoView({ block: "nearest" });
+  // Moving between forms carries the email across, never a password or a code.
+  const changeMode = (next: Mode) => {
+    mode = next;
+    password = confirm = code = developmentCode = error = notice = "";
+  };
+  $: heading = {
+    login: "Welcome back",
+    register: "Create your account",
+    verify: "Verify your email",
+    twoFactor: "Confirm it’s you",
+    forgot: "Reset your password",
+    reset: "Choose a new password",
+  }[mode];
   const save = (data: any) => {
     localStorage.setItem("bp_token", data.token);
     localStorage.setItem("bp_user", JSON.stringify(data.user));
@@ -57,13 +66,14 @@
       if (data.challengeId) setChallenge(reset ? "reset" : "verify", data);
       else notice = "If this code is still needed, a new one has been sent.";
     } catch (e) {
-      error = e instanceof Error ? e.message : "A new code could not be sent";
+      error = problemText(e, "A new code could not be sent");
     } finally {
       loading = false;
     }
   }
   const setChallenge = (next: Mode, data: any) => {
     mode = next;
+    code = "";
     challengeId = data.challengeId;
     developmentCode = data.developmentCode || "";
     notice = data.delivered
@@ -122,8 +132,7 @@
           method: "POST",
           body: JSON.stringify({ challengeId, code, password }),
         });
-        mode = "login";
-        password = confirm = code = "";
+        changeMode("login");
         notice = "Password updated. You can now sign in.";
       }
     } catch (e) {
@@ -134,7 +143,7 @@
       ) {
         email = e.details.email;
         setChallenge("verify", e.details);
-      } else error = e instanceof Error ? e.message : "Unable to continue";
+      } else error = problemText(e, "Unable to continue");
     } finally {
       loading = false;
     }
@@ -150,7 +159,7 @@
         }),
       );
     } catch (e) {
-      error = e instanceof Error ? e.message : "Google sign-in failed";
+      error = problemText(e, "Google sign-in failed");
     } finally {
       loading = false;
     }
@@ -181,24 +190,21 @@
   });
 </script>
 
-<svelte:head><title>{heading()} — Bengal Port</title></svelte:head>
+<svelte:head><title>{heading} — Bengal Port</title></svelte:head>
 <section class="auth-shell">
   <div class="story">
     <a href="/" class="brand"
-      ><img src="/images/logo-192.webp" alt="Bengal Port" /><span>BENGAL PORT</span
+      ><img src={$cmsContent.brand.logo} alt={$cmsContent.brand.name} /><span>{$cmsContent.brand.name}</span
       ></a
     >
     <div>
-      <span class="eyebrow">OPTIONAL MEMBER ACCOUNT</span>
-      <h1>Your global journey,<br />kept in one secure place.</h1>
+      <span class="eyebrow">{data.content.story.eyebrow}</span>
+      <h1>{data.content.story.titleLine1}<br />{data.content.story.titleLine2}</h1>
       <p>
-        Track applications, enquiries, payments and receipts. You can still
-        browse and enquire without creating an account.
+        {data.content.story.description}
       </p>
       <ul>
-        <li><Check /> Email-verified access</li>
-        <li><Check /> Optional two-factor protection</li>
-        <li><Check /> One profile across all four services</li>
+        {#each data.content.story.points as point}<li><Check /> {point}</li>{/each}
       </ul>
     </div>
   </div>
@@ -220,7 +226,7 @@
             ? "CREATE ACCOUNT"
             : "SECURE VERIFICATION"}</span
       >
-      <h2>{heading()}</h2>
+      <h2>{heading}</h2>
       <p>
         {mode === "verify" || mode === "twoFactor"
           ? "Enter the six-digit code. It expires in 10 minutes."
@@ -228,14 +234,12 @@
             ? "We’ll email you a secure six-digit reset code."
             : mode === "reset"
               ? "Enter your code and a strong new password."
-              : "Registration is optional and enquiries remain open to everyone."}
+              : data.content.intro}
       </p>
-      {#if notice}<div class="notice success" role="status">
+      {#if notice}<div class="notice success" role="status" use:reveal>
           {notice}
         </div>{/if}{#if developmentCode}<div class="dev-code">
           Development code: <b>{developmentCode}</b>
-        </div>{/if}{#if error}<div class="notice error" role="alert">
-          {error}
         </div>{/if}
       <form
         onsubmit={(e) => {
@@ -281,30 +285,21 @@
           >{/if}
         {#if ["login", "register", "reset"].includes(mode)}<label
             ><span>{mode === "reset" ? "New password" : "Password"}</span>
-            <div class="password">
-              <input
-                bind:value={password}
-                type={showPassword ? "text" : "password"}
-                autocomplete={mode === "login"
-                  ? "current-password"
-                  : "new-password"}
-                minlength="8"
-                required
-              /><button
-                type="button"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                onclick={() => (showPassword = !showPassword)}
-                >{#if showPassword}<EyeOff />{:else}<Eye />{/if}</button
-              >
-            </div>
+            <PasswordInput
+              bind:value={password}
+              autocomplete={mode === "login"
+                ? "current-password"
+                : "new-password"}
+              minlength={8}
+              required
+            />
             {#if mode !== "login"}<small
                 >8+ characters with uppercase, lowercase and a number.</small
               >{/if}</label
           >{/if}
         {#if mode === "register" || mode === "reset"}<label
-            ><span>Confirm password</span><input
+            ><span>Confirm password</span><PasswordInput
               bind:value={confirm}
-              type="password"
               autocomplete="new-password"
               required
             /></label
@@ -318,11 +313,11 @@
         {#if mode === "login"}<button
             type="button"
             class="forgot"
-            onclick={() => {
-              mode = "forgot";
-              error = notice = "";
-            }}>Forgot password?</button
+            onclick={() => changeMode("forgot")}>Forgot password?</button
           >{/if}
+        {#if error}<div class="notice error" role="alert">
+            {error}
+          </div>{/if}
         <button class="primary" disabled={loading}
           ><span
             >{loading
@@ -345,16 +340,10 @@
         <div id="google-button" class="google"></div>{/if}
       <div class="switches">
         {#if mode === "login"}<button
-            onclick={() => {
-              mode = "register";
-              error = notice = "";
-            }}>New here? <b>Create an account</b></button
+            onclick={() => changeMode("register")}>New here? <b>Create an account</b></button
           >{:else}<button
-            onclick={() => {
-              mode = "login";
-              error = notice = "";
-            }}>← Back to sign in</button
-          >{/if}<a href="/apply">Continue without an account</a>
+            onclick={() => changeMode("login")}>← Back to sign in</button
+          >{/if}<a href="/apply">{data.content.withoutAccount}</a>
       </div>
     </div>
   </div>
@@ -417,10 +406,13 @@
     font-size: 0.86rem;
   }
   .notice.error {
+    margin: 0;
     background: #fff0f0;
     color: #942d35;
   }
   .notice.success {
+    /* Clears the sticky header when it is scrolled into view. */
+    scroll-margin-top: 10rem;
     background: #edf8f1;
     color: #286542;
   }
@@ -466,23 +458,6 @@
   input:focus {
     border-color: #bd8b29;
     box-shadow: 0 0 0 0.22rem rgba(198, 150, 54, 0.14);
-  }
-  .password {
-    position: relative;
-  }
-  .password input {
-    padding-right: 3.2rem;
-  }
-  .password button {
-    position: absolute;
-    right: 0.2rem;
-    top: 0.2rem;
-    width: 2.6rem;
-    height: 2.6rem;
-    border: 0;
-    background: transparent;
-    color: #6d7c89;
-    border-radius: 0.55rem;
   }
   .otp {
     text-align: center;
@@ -660,9 +635,6 @@
     .primary:hover {
       background: #204663;
       transform: translateY(-0.08rem);
-    }
-    .password button:hover {
-      background: #f0f3f4;
     }
   }
   @media (prefers-reduced-motion: reduce) {

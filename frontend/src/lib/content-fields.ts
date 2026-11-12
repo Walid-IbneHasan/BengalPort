@@ -15,10 +15,13 @@ const words = (path: string) =>
     .toLowerCase();
 const capital = (value: string) => value.replace(/^./, (c) => c.toUpperCase());
 
+// "hero.image", "hero.backgroundImage", "fields.medical.photo", "brand.logo"
+export const isImageField = (path: string) => /(image|photo|logo)$/i.test(path);
+
 // With `lists`, items can be added to and removed from every list.
 export function contentRows(value: unknown, options: { lists?: boolean } = {}, path = "", remove?: { list: string; index: number }): ContentRow[] {
   if (typeof value === "string")
-    return [{ kind: "field", path, label: capital(words(path)), value, long: value.length > 75 || /description/i.test(path), image: /(^|\.)(image|photo)$/i.test(path), ...(remove ? { remove } : {}) }];
+    return [{ kind: "field", path, label: capital(words(path)), value, long: value.length > 75 || /description|body/i.test(path), image: isImageField(path), ...(remove ? { remove } : {}) }];
   if (Array.isArray(value)) {
     const removable = Boolean(options.lists) && value.length > 1;
     const rows = value.flatMap((item, index): ContentRow[] => {

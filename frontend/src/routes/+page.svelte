@@ -20,6 +20,7 @@
     Users,
   } from "lucide-svelte";
   import { cmsContent } from "$lib/cms";
+  import { whatsappDigits } from "$lib/home-content";
   import { whatsappNumber } from "$lib/config";
 
   const divisionIcons = {
@@ -142,13 +143,12 @@
   <div class="wrap hero-wrap">
     <div class="mobile-journey" aria-label="Bengal Port global services">
       <picture>
-        <source srcset="/images/mobile-global-journey-v1.webp" type="image/webp" />
-        <img src="/images/mobile-global-journey-v1.webp" alt="A graduate overlooking an interconnected world of international destinations" />
+        <img src={content.hero.mobileImage} alt="" />
       </picture>
       <div class="mobile-journey-shade"></div>
       <div class="mobile-journey-copy">
-        <span>Your global journey</span>
-        <strong>Starts <em>Here</em></strong>
+        <span>{content.hero.mobileLine1}</span>
+        <strong>{content.hero.mobileLine2} <em>{content.hero.mobileLine3}</em></strong>
         <i></i>
       </div>
     </div>
@@ -161,7 +161,7 @@
       </div>
       <p>{content.hero.description1} <br />{content.hero.description2}</p>
     </div>
-    <div class="mobile-services-heading"><i></i><h2>Our Global Services</h2><i></i></div>
+    <div class="mobile-services-heading"><i></i><h2>{content.hero.servicesHeading}</h2><i></i></div>
     <div class="division-grid">
       {#each divisions as division, index}<a
           class="division {division.class}"
@@ -197,8 +197,8 @@
         {#if index < stats.length - 1}<em></em>{/if}{/each}
     </div>
     <div class="mobile-hero-actions">
-      <a class="mobile-whatsapp" href={`https://wa.me/${whatsappNumber()}`} target="_blank" rel="noreferrer"><MessageCircle size={21}/><span><b>+{whatsappNumber()}</b><small>Chat with us on WhatsApp</small></span></a>
-      <a class="mobile-apply" href="/apply"><span>APPLY / ENQUIRY</span><ArrowRight size={18}/></a>
+      <a class="mobile-whatsapp" href={`https://wa.me/${whatsappDigits(content, whatsappNumber())}`} target="_blank" rel="noreferrer"><MessageCircle size={21}/><span><b>+{whatsappDigits(content, whatsappNumber())}</b><small>{content.whatsapp.callToAction}</small></span></a>
+      <a class="mobile-apply" href="/apply"><span>{content.navigation.apply}</span><ArrowRight size={18}/></a>
     </div>
   </div>
 </section>

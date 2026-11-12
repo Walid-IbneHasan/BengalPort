@@ -1,9 +1,14 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
   import { page } from "$app/state";
   import { onMount } from "svelte";
   import { api } from "$lib/api";
   import PaymentPanel from "$lib/components/PaymentPanel.svelte";
   import { paymentProviders, type PaymentProvider, type PaymentSummary } from "$lib/payment-rules";
+  import type { PayContent } from "$lib/site-pages";
+
+  let { data }: { data: { content: PayContent } } = $props();
+  let content = $derived(data.content);
 
   // Pay for an application without an account: the reference number plus the
   // phone number or email it was submitted with.
@@ -28,7 +33,7 @@
     try {
       found = await api("/payments/lookup", { method: "POST", body: JSON.stringify({ reference, contact }) });
     } catch (e) {
-      error = e instanceof Error ? e.message : "We could not look up that application.";
+      error = problemText(e, "We could not look up that application.");
     } finally {
       finding = false;
     }
@@ -43,9 +48,9 @@
 
 <section class="page-hero pay-hero">
   <div class="wrap">
-    <span class="eyebrow">PAY ONLINE</span>
-    <h1>Pay for your application.</h1>
-    <p>{methods ? `Pay in full or in part with ${methods}.` : "Find your application to see what is due."} Members can also pay from their <a href="/dashboard">dashboard</a>.</p>
+    <span class="eyebrow">{content.hero.eyebrow}</span>
+    <h1>{content.hero.title}</h1>
+    <p>{methods ? `${content.hero.payWith} ${methods}.` : content.hero.findFirst} {content.hero.members} <a href="/dashboard">{content.hero.dashboard}</a>.</p>
   </div>
 </section>
 
@@ -58,12 +63,12 @@
       </div>
     {:else}
       <form class="card" onsubmit={(e) => { e.preventDefault(); find(); }}>
-        <h2>Find your application</h2>
-        <p>Your reference number was shown when you applied and sent to your email. It starts with BP-.</p>
+        <h2>{content.card.title}</h2>
+        <p>{content.card.description}</p>
         {#if error}<p class="problem" role="alert">{error}</p>{/if}
         <label><span>Reference number</span><input bind:value={reference} placeholder="BP-XXXXXXXX" autocapitalize="characters" required minlength="3" maxlength="40" /></label>
         <label><span>Phone number or email you applied with</span><input bind:value={contact} required minlength="5" maxlength="160" autocomplete="tel" /></label>
-        <button class="btn" disabled={finding}>{finding ? "LOOKING…" : "CONTINUE"}</button>
+        <button class="btn" disabled={finding}>{finding ? "LOOKING…" : content.card.submit}</button>
       </form>
     {/if}
   </div>

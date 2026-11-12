@@ -1,5 +1,6 @@
 import type { FastifyPluginAsync } from "fastify";
 import { prisma } from "../lib/prisma.js";
+import { allowed } from "../lib/access.js";
 import {
   MAX_DOCUMENT_BYTES,
   MAX_APPLICATION_BYTES,
@@ -23,6 +24,10 @@ const routes: FastifyPluginAsync = async (app) => {
       return token.sub === applicationId ? ("uploader" as const) : null;
     await app.authenticate(req, undefined);
     if (req.user.role === "ADMIN") return "admin" as const;
+    // Staff whose role works on applications may add documents and read
+    // them; removing one needs the delete permission.
+    if (await allowed(req.user.role, "applications.read"))
+      return (await allowed(req.user.role, "applications.delete")) ? ("admin" as const) : ("staff" as const);
     const application = await prisma.application.findUnique({
       where: { id: applicationId },
       select: { userId: true },
@@ -95,7 +100,7 @@ const routes: FastifyPluginAsync = async (app) => {
     });
     if (
       !document ||
-      (req.user.role !== "ADMIN" && document.application.userId !== req.user.sub)
+      (!(await allowed(req.user.role, "applications.read")) && document.application.userId !== req.user.sub)
     )
       return reply.notFound("Document not found");
     const plainName = document.name.replace(/[^\x20-\x7e]|["\\]/g, "_");
@@ -115,8 +120,9 @@ const routes: FastifyPluginAsync = async (app) => {
       where: { id: req.params.documentId },
       select: { id: true, applicationId: true },
     });
-    if (!(await access(req, document?.applicationId ?? "")) || !document)
-      return reply.notFound("Document not found");
+    const who = await access(req, document?.applicationId ?? "");
+    if (!who || !document) return reply.notFound("Document not found");
+    if (who === "staff") return reply.forbidden("Only an administrator can delete this.");
     await prisma.applicationDocument.delete({ where: { id: document.id } });
     return reply.code(204).send();
   });

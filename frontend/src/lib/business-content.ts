@@ -4,6 +4,7 @@ import { fillMissing } from "./content-fields.js";
 // `hero.markets` are the places the hero's map draws trade routes to, and
 // `hero.categories` the product chips that drift around the title.
 export type BusinessContent = {
+  labels: { allPartners: string; suppliers: string; factories: string; all: string; featured: string; supplier: string; factory: string; requestConnection: string; noMatches: string; askAboutSourcing: string; unavailable: string };
   hero: {
     eyebrow: string;
     // The words before the rotating market name.
@@ -169,6 +170,19 @@ export const defaultBusinessContent: BusinessContent = {
     primaryHref: "/apply?tab=business",
     secondary: "Contact our experts",
     secondaryHref: "/contact",
+  },
+  labels: {
+    allPartners: "All partners",
+    suppliers: "Suppliers",
+    factories: "Factories",
+    all: "All",
+    featured: "Featured",
+    supplier: "Supplier",
+    factory: "Factory",
+    requestConnection: "Request connection",
+    noMatches: "No partners match these filters.",
+    askAboutSourcing: "Ask about sourcing",
+    unavailable: "Live partner records are temporarily unavailable.",
   },
 };
 

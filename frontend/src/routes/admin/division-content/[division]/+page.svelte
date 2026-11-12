@@ -25,7 +25,7 @@
       fallback: defaultHealthcareContent,
       prepare: healthcareContentFrom,
       lists: true,
-      note: 'Hero · specialties are the words that take turns in the title; Hero · pathway is the three-step line under it and keeps exactly three steps. Hero · cities are the destination chips shown when the hospital directory is empty. Stats: a figure about hospitals, destinations or treatment categories shows the live count from the page, whatever value is typed here; other figures show as written. Reviews: the section appears only once a review is approved under Reviews in the menu.',
+      note: 'Hero · specialties are the words that take turns in the title; Hero · pathway is the three-step line under it and keeps exactly three steps. Hero · destinations are the country chips at the top of the page, each with its flag and its own page. Countries that have partner hospitals show by themselves; add a destination here to show a country before its hospitals are listed, or to name its city. Choose the country from the list, then type the city yourself (or leave the city empty). Stats: a figure about hospitals, destinations or treatment categories shows the live count from the page, whatever value is typed here; other figures show as written. Reviews: the section appears only once a review is approved under Reviews in the menu.',
     },
     umrah: {
       title: 'Umrah',

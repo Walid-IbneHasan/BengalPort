@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
+  import { confirmAction } from "$lib/confirm";
   import { Check, Pencil, Plus, Trash2, X } from "lucide-svelte";
   import { api } from "$lib/api";
 
@@ -17,7 +19,7 @@
       await onchange();
       return true;
     } catch (e) {
-      error = e instanceof Error ? e.message : fallback;
+      error = problemText(e, fallback);
       return false;
     } finally {
       busy = false;
@@ -31,7 +33,7 @@
     if (await run(() => api(`/admin/accounts/categories/${category.id}`, { method: "PUT", body: JSON.stringify({ name: renamed }) }), "The category could not be renamed.")) renaming = "";
   }
   async function remove(category: Category) {
-    if (!confirm(`Delete the category “${category.name}”?`)) return;
+    if (!(await confirmAction({ title: `Delete the category “${category.name}”?`, message: "This cannot be undone." }))) return;
     await run(() => api(`/admin/accounts/categories/${category.id}`, { method: "DELETE" }), "The category could not be deleted.");
   }
   const groups = [

@@ -79,6 +79,8 @@ const rootPackage = JSON.parse(readFileSync(path.join(root, "package.json"), "ut
 cpSync(path.join(backend, "dist"), path.join(api, "dist"), { recursive: true });
 cpSync(path.join(backend, "prisma", "schema.prisma"), path.join(api, "prisma", "schema.prisma"));
 cpSync(path.join(backend, "prisma", "migrations"), path.join(api, "prisma", "migrations"), { recursive: true });
+// The admin guide, shown to the Super Admin inside the admin.
+cpSync(path.join(root, "docs", "ADMIN-GUIDE.md"), path.join(api, "docs", "ADMIN-GUIDE.md"));
 // The seed is compiled next to the schema so the server needs no TypeScript tooling.
 run(
   `npx tsc prisma/seed.ts --outDir "${api}" --rootDir . --module NodeNext --moduleResolution NodeNext --target ES2022 --esModuleInterop --skipLibCheck`,
@@ -118,6 +120,12 @@ FRONTEND_URL="https://example.com,https://www.example.com"
 # The public address of this API, used in uploaded image links.
 API_PUBLIC_URL="https://api.example.com"
 TRUST_PROXY="true"
+# Shared hosting allows only a few processes (HostNil: 100). Keep the database
+# engine, file work and image work to two threads each, and end DATABASE_URL
+# with "&connection_limit=5".
+TOKIO_WORKER_THREADS="2"
+UV_THREADPOOL_SIZE="2"
+VIPS_CONCURRENCY="2"
 
 # Gmail: use an app password, or the three OAuth keys instead of SMTP_PASS.
 SMTP_HOST="smtp.gmail.com"
@@ -196,4 +204,13 @@ if (process.platform === "win32") {
     }
 }
 
-console.log(`\nReady to upload: deploy/api and deploy/web${zipped.length ? ` (also zipped: ${zipped.join(", ")})` : ""}`);
+// HostNil's upload scanner refuses JavaScript inside .zip files, so the same
+// folders also go out as .tar.gz (GNU tar from Git for Windows, or the system's).
+const gnuTar = ["C:/Program Files/Git/usr/bin/tar.exe", "/usr/bin/tar"].find((candidate) => existsSync(candidate));
+if (gnuTar)
+  for (const name of ["api", "web"]) {
+    run(`"${gnuTar}" --force-local --mode="u+rwX,go+rX,go-w" -czf "${path.join(out, `bengal-port-${name}.tar.gz`)}" -C "${path.join(out, name)}" .`);
+    zipped.push(`deploy/bengal-port-${name}.tar.gz`);
+  }
+
+console.log(`\nReady to upload: deploy/api and deploy/web${zipped.length ? ` (also packed: ${zipped.join(", ")})` : ""}`);

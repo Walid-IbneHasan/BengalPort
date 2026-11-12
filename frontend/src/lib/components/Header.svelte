@@ -19,6 +19,7 @@
   import { page } from "$app/state";
   import { afterNavigate } from "$app/navigation";
   import { cmsContent } from "$lib/cms";
+  import type { HomeContent } from "$lib/home-content";
   let open = false;
   let servicesOpen = false;
   // A mouse opens the Services panel by pointing at it. Leaving closes it after
@@ -58,18 +59,21 @@
   function onPointerDown(event: PointerEvent) {
     if ((open || servicesOpen) && headerEl && !headerEl.contains(event.target as Node)) closeMenus();
   }
-  const links = [
-    ["HOME", "/"],
-    ["ABOUT US", "/about"],
-    ["SERVICES", "/services"],
-    ["OPPORTUNITIES", "/opportunities"],
-    ["CONTACT US", "/contact"],
+  // Plain functions on purpose: a "$:" here would change how this component is
+  // compiled, and active() below would stop following page changes.
+  type Navigation = HomeContent["navigation"];
+  const linksIn = (nav: Navigation) => [
+    [nav.home, "/"],
+    [nav.about, "/about"],
+    [nav.services, "/services"],
+    [nav.opportunities, "/opportunities"],
+    [nav.contact, "/contact"],
   ];
-  const divisions = [
-    { title: "Global Business", text: "Trade, sourcing and business tours", href: "/business", icon: BriefcaseBusiness, tone: "business" },
-    { title: "Global Education", text: "Study abroad and admissions", href: "/education", icon: GraduationCap, tone: "education" },
-    { title: "Global Healthcare", text: "Treatment and patient support", href: "/healthcare", icon: HeartPulse, tone: "healthcare" },
-    { title: "Global Umrah", text: "Pilgrimage travel and on-ground support", href: "/umrah", icon: MoonStar, tone: "umrah" },
+  const divisionsIn = (nav: Navigation) => [
+    { ...nav.business, href: "/business", icon: BriefcaseBusiness, tone: "business" },
+    { ...nav.education, href: "/education", icon: GraduationCap, tone: "education" },
+    { ...nav.healthcare, href: "/healthcare", icon: HeartPulse, tone: "healthcare" },
+    { ...nav.umrah, href: "/umrah", icon: MoonStar, tone: "umrah" },
   ];
   const active = (href: string) =>
     href === "/"
@@ -94,28 +98,28 @@
   </div>
   <nav class="nav" aria-label="Main navigation">
     <a class="brand" href="/"
-      ><img src="/images/logo-192.webp" alt="Bengal Port official logo" /><span
-        ><b>BENGAL PORT</b><small>Connecting Bengal to the World</small></span
+      ><img src={$cmsContent.brand.logo} alt={`${$cmsContent.brand.name} logo`} /><span
+        ><b>{$cmsContent.brand.name}</b><small>{$cmsContent.brand.tagline}</small></span
       ></a
     >
     <div class:show={open} class="links">
-      {#each links as link}
-        {#if link[0] === "SERVICES"}
+      {#each linksIn($cmsContent.navigation) as link}
+        {#if link[1] === "/services"}
           <div class:open={servicesOpen} class="services-nav" role="presentation" onpointerenter={servicesEnter} onpointerleave={servicesLeave}>
-            <button class:active={active(link[1]) || ["/business","/education","/healthcare","/umrah"].some(active)} aria-expanded={servicesOpen} aria-controls="services-menu" onclick={toggleServices}>SERVICES <ChevronDown size={15}/></button>
+            <button class:active={active(link[1]) || ["/business","/education","/healthcare","/umrah"].some(active)} aria-expanded={servicesOpen} aria-controls="services-menu" onclick={toggleServices}>{link[0]} <ChevronDown size={15}/></button>
             <div id="services-menu" class="services-menu" inert={!servicesOpen}>
-              <div class="services-heading"><span>OUR GLOBAL DIVISIONS</span><a href="/services" onclick={() => { open=false; servicesOpen=false }}>View all services <ArrowRight size={14}/></a></div>
-              <div class="division-links">{#each divisions as division}<a class={division.tone} href={division.href} onclick={() => { open=false; servicesOpen=false }}><i><svelte:component this={division.icon} size={20}/></i><span><b>{division.title}</b><small>{division.text}</small></span><ArrowRight class="card-arrow" size={16}/></a>{/each}</div>
+              <div class="services-heading"><span>{$cmsContent.navigation.menuHeading}</span><a href="/services" onclick={() => { open=false; servicesOpen=false }}>{$cmsContent.navigation.menuViewAll} <ArrowRight size={14}/></a></div>
+              <div class="division-links">{#each divisionsIn($cmsContent.navigation) as division}<a class={division.tone} href={division.href} onclick={() => { open=false; servicesOpen=false }}><i><svelte:component this={division.icon} size={20}/></i><span><b>{division.title}</b><small>{division.text}</small></span><ArrowRight class="card-arrow" size={16}/></a>{/each}</div>
             </div>
           </div>
         {:else}<a class:active={active(link[1])} href={link[1]} onclick={() => (open = false)}>{link[0]}</a>{/if}
       {/each}
       <a class="mobile-menu-apply" href="/apply" onclick={() => (open = false)}
-        ><span>APPLY / ENQUIRY</span><ArrowRight size={18} /></a
+        ><span>{$cmsContent.navigation.apply}</span><ArrowRight size={18} /></a
       >
     </div>
     <a class="apply" href="/apply"
-      ><span>APPLY / ENQUIRY</span><i><ArrowRight size={20} /></i></a
+      ><span data-short={$cmsContent.navigation.applyShort}>{$cmsContent.navigation.apply}</span><i><ArrowRight size={20} /></i></a
     ><a class="account" href={accountHref} aria-label="Member account"><UserRound size={19}/></a><button
       class="menu"
       aria-label={open ? "Close navigation" : "Open navigation"}
@@ -360,7 +364,7 @@
       font-size: 0;
     }
     .apply span::after {
-      content: "APPLY";
+      content: attr(data-short);
       font-size: 0.85rem;
     }
   }
@@ -461,7 +465,7 @@
       font-size: 0;
     }
     .apply span:after {
-      content: "APPLY";
+      content: attr(data-short);
       font-size: 0.75rem;
       margin-left: 0.65rem;
     }

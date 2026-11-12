@@ -17,8 +17,9 @@ describe("checking a review before it is sent", () => {
     assert.equal(reviewProblem({ ...review, name: "  " }), "Enter the name to show with your review.");
   });
 
-  test("the review needs at least a sentence", () => {
-    assert.equal(reviewProblem({ ...review, body: "Good" }), "Write at least a sentence about your experience.");
+  test("a review of any length is fine, but not an empty one", () => {
+    assert.equal(reviewProblem({ ...review, body: "Good" }), "");
+    assert.equal(reviewProblem({ ...review, body: "   " }), "Write a few words about your experience.");
   });
 
   test("a very long review is turned back with the limit", () => {

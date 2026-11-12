@@ -102,6 +102,22 @@ describe("the ledger's categories", () => {
     await prisma.financialCategory.deleteMany({ where: { id: { in: created } } });
   });
 
+  test("a name that differs only in its capitals counts as the same category", async () => {
+    assert.equal((await add({ name: `${tag} Customs Duty`, type: "EXPENSE" })).statusCode, 201);
+    assert.equal((await add({ name: `${tag} CUSTOMS duty`, type: "EXPENSE" })).statusCode, 409);
+  });
+
+  test("a category cannot be renamed to another's name, whatever its capitals", async () => {
+    await add({ name: `${tag} Freight`, type: "EXPENSE" });
+    const other = (await add({ name: `${tag} Postage`, type: "EXPENSE" })).json().data.id;
+    assert.equal((await call("PUT", `/api/admin/accounts/categories/${other}`, { name: `${tag} FREIGHT` })).statusCode, 409);
+  });
+
+  test("a category can have the capitals of its own name corrected", async () => {
+    const id = (await add({ name: `${tag} stationery`, type: "EXPENSE" })).json().data.id;
+    assert.equal((await call("PUT", `/api/admin/accounts/categories/${id}`, { name: `${tag} Stationery` })).statusCode, 200);
+  });
+
   test("an admin can add a category for income or for expenses", async () => {
     const res = await add({ name: `${tag} visa fees`, type: "INCOME" });
     assert.equal(res.statusCode, 201);

@@ -63,11 +63,11 @@
   let industry = $state("All");
   let groups = $derived(groupPartners(partners, kind, industry));
   let industryChoices = $derived(industries(partners));
-  const kinds: { key: PartnerKind; label: string }[] = [
-    { key: "all", label: "All partners" },
-    { key: "Supplier", label: "Suppliers" },
-    { key: "Factory", label: "Factories" },
-  ];
+  let kinds = $derived<{ key: PartnerKind; label: string }[]>([
+    { key: "all", label: content.labels.allPartners },
+    { key: "Supplier", label: content.labels.suppliers },
+    { key: "Factory", label: content.labels.factories },
+  ]);
   const flagSrc = (country: string) => {
     const code = flagCode(country);
     return code ? `https://flagcdn.com/w40/${code}.png` : "";
@@ -122,7 +122,7 @@
       <h2>{content.partners.title}</h2>
       <p>{content.partners.description}</p>
     </header>
-    {#if partnersUnavailable}<p class="notice">Live partner records are temporarily unavailable.</p>{/if}
+    {#if partnersUnavailable}<p class="notice">{content.labels.unavailable}</p>{/if}
     {#if partners.length}
       <div class="filters">
         <div class="kinds" role="group" aria-label="Show">
@@ -131,7 +131,7 @@
           {/each}
         </div>
         <select bind:value={industry} aria-label="Filter by industry">
-          {#each industryChoices as item}<option>{item}</option>{/each}
+          {#each industryChoices as item}<option value={item}>{item === "All" ? content.labels.all : item}</option>{/each}
         </select>
       </div>
       <div class="groups">
@@ -148,22 +148,22 @@
                     {#if partner.image}<img src={partner.image} alt="" loading="lazy" decoding="async" />{:else if partner.kind === "Factory"}<Factory size={20} />{:else}<Store size={20} />{/if}
                   </span>
                   <span class="who">
-                    <b>{partner.name}{#if partner.featured}<em>Featured</em>{/if}</b>
-                    <small>{partner.kind} · {partner.industry} · {partner.product}</small>
+                    <b>{partner.name}{#if partner.featured}<em>{content.labels.featured}</em>{/if}</b>
+                    <small>{partner.kind === "Factory" ? content.labels.factory : content.labels.supplier} · {partner.industry} · {partner.product}</small>
                   </span>
-                  <a href={applyHref("BUSINESS", "enquiry", partner.name)}>Request connection <ArrowRight size={15} /></a>
+                  <a href={applyHref("BUSINESS", "enquiry", partner.name)}>{content.labels.requestConnection} <ArrowRight size={15} /></a>
                 </li>
               {/each}
             </ul>
           </section>
         {:else}
-          <div class="none"><p>No partners match these filters.</p></div>
+          <div class="none"><p>{content.labels.noMatches}</p></div>
         {/each}
       </div>
     {:else if !partnersUnavailable}
       <div class="none">
         <p>{content.partners.empty}</p>
-        <a class="pill" href={applyHref("BUSINESS", "enquiry", content.partners.title)}>Ask about sourcing<ArrowRight size={17} /></a>
+        <a class="pill" href={applyHref("BUSINESS", "enquiry", content.partners.title)}>{content.labels.askAboutSourcing}<ArrowRight size={17} /></a>
       </div>
     {/if}
   </section>

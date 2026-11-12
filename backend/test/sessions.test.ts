@@ -75,6 +75,50 @@ describe("ending sessions when a password changes", () => {
   });
 });
 
+describe("resetting a forgotten password", () => {
+  const forgotten = async (email: string) =>
+    (await app.inject({ method: "POST", url: "/api/auth/forgot-password", payload: { email } })).json().data;
+  const reset = (payload: Record<string, unknown>) =>
+    app.inject({ method: "POST", url: "/api/auth/reset-password", payload });
+
+  test("a weak new password is refused with the rule it broke, and the code still works", async () => {
+    const user = await account();
+    const { challengeId, developmentCode: code } = await forgotten(user.email);
+    const weak = await reset({ challengeId, code, password: "alllowercase" });
+    assert.equal(weak.statusCode, 400);
+    assert.match(weak.json().error.message, /uppercase, lowercase and a number/);
+    assert.equal((await reset({ challengeId, code, password: "Recovered789" })).statusCode, 200);
+  });
+
+  test("a malformed code is still reported as bad reset details", async () => {
+    const user = await account();
+    const { challengeId } = await forgotten(user.email);
+    const res = await reset({ challengeId, code: "12", password: "Recovered789" });
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.json().error.message, "Invalid reset details");
+  });
+});
+
+describe("how an account signs in", () => {
+  const provider = async (data: { googleId?: string; passwordHash?: null }) => {
+    const user = await account();
+    await prisma.user.update({ where: { id: user.id }, data });
+    return (await me(app.jwt.sign({ sub: user.id, role: user.role, v: user.tokenVersion }))).json().data.provider;
+  };
+
+  test("a password account is a password account", async () => {
+    assert.equal(await provider({}), "password");
+  });
+
+  test("a password account that later used Google still has its password to manage", async () => {
+    assert.equal(await provider({ googleId: `password-and-google-${crypto.randomUUID()}` }), "password");
+  });
+
+  test("an account with only Google is a Google account", async () => {
+    assert.equal(await provider({ googleId: `only-google-${crypto.randomUUID()}`, passwordHash: null }), "google");
+  });
+});
+
 describe("sessions follow the account", () => {
   test("an admin who is made a regular user loses admin access at once", async () => {
     const admin = await account("ADMIN");

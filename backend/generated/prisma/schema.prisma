@@ -8,9 +8,82 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// A moderator adds and edits content and makes invoices. Only an admin
+// deletes anything, sees the accounts and manages people.
 enum Role {
   USER
   ADMIN
+  MODERATOR
+  MANAGER
+  ACCOUNTANT
+  EMPLOYEE
+}
+
+enum CustomerStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+}
+
+enum DealStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+// An invoice's own life. Partial, paid and overdue follow from what has been
+// received and its due date, so they are worked out rather than stored.
+enum InvoiceState {
+  DRAFT
+  ISSUED
+  CANCELLED
+  REFUNDED
+}
+
+enum TaskStatus {
+  OPEN
+  DONE
+  CANCELLED
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  INCOME
+  EXPENSE
+}
+
+enum JournalStatus {
+  POSTED
+  REVERSED
+}
+
+enum DocumentCategory {
+  EMPLOYEE
+  CLIENT
+  VISA
+  COMPANY
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
 }
 
 enum EnquiryType {
@@ -35,17 +108,6 @@ enum RecordStatus {
   APPROVED
   REJECTED
   CANCELLED
-}
-
-enum OpportunityCategory {
-  BUSINESS
-  EDUCATION
-  HEALTHCARE
-  UMRAH
-  FACTORY_VISIT
-  BUSINESS_TOUR
-  SCHOLARSHIP
-  EVENT
 }
 
 enum PaymentStatus {
@@ -81,31 +143,43 @@ enum AuthCodePurpose {
 }
 
 model User {
-  id                 String        @id @default(cuid())
-  name               String
-  email              String        @unique
-  phone              String?
-  passwordHash       String?
-  googleId           String?       @unique
-  avatarUrl          String?
-  emailVerifiedAt    DateTime?
-  twoFactorEnabled   Boolean       @default(false)
+  id                      String                   @id @default(cuid())
+  name                    String
+  email                   String                   @unique
+  phone                   String?
+  passwordHash            String?
+  googleId                String?                  @unique
+  avatarUrl               String?
+  emailVerifiedAt         DateTime?
+  twoFactorEnabled        Boolean                  @default(false)
   // Raised when the password changes; sessions issued for an older value stop working.
-  tokenVersion       Int           @default(0)
+  tokenVersion            Int                      @default(0)
   // An administrator made this account: its owner must choose a password first.
-  mustChangePassword Boolean       @default(false)
+  mustChangePassword      Boolean                  @default(false)
   // Set while the account is blocked. Its applications and payments are kept.
-  blockedAt          DateTime?
-  lastLoginAt        DateTime?
-  role               Role          @default(USER)
-  staffNotes         StaffNote[]
-  reviews            Review[]
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  enquiries          Enquiry[]
-  applications       Application[]
-  payments           Payment[]
-  authCodes          AuthCode[]
+  blockedAt               DateTime?
+  lastLoginAt             DateTime?
+  role                    Role                     @default(USER)
+  staffNotes              StaffNote[]
+  reviews                 Review[]
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  enquiries               Enquiry[]
+  applications            Application[]
+  payments                Payment[]
+  authCodes               AuthCode[]
+  ledgerEntries           FinancialTransaction[]
+  // Staff: the branch they work in. Without `allBranches` they see only it.
+  branchId                String?
+  branch                  Branch?                  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  allBranches             Boolean                  @default(false)
+  customerAccount         Customer?                @relation("CustomerAccount")
+  assignedCustomers       Customer[]               @relation("CustomerAssignee")
+  assignedDeals           Deal[]                   @relation("DealAssignee")
+  tasks                   Task[]                   @relation("TaskAssignee")
+  employeeDocuments       ManagedDocument[]        @relation("EmployeeDocuments")
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
 }
 
 model AuthCode {
@@ -139,26 +213,30 @@ model Enquiry {
 }
 
 model Application {
-  id        String                @id @default(cuid())
-  reference String                @unique
-  type      ApplicationType
-  status    RecordStatus          @default(SUBMITTED)
-  fullName  String
-  email     String
-  phone     String
-  details   Json
+  id            String                 @id @default(cuid())
+  reference     String                 @unique
+  type          ApplicationType
+  status        RecordStatus           @default(SUBMITTED)
+  fullName      String
+  email         String
+  phone         String
+  details       Json
   // What the application costs: the division's service fee when submitted,
   // or a quotation set by an administrator. Null until one is known.
-  amountDue Decimal?              @db.Decimal(12, 2)
-  userId    String?
-  user      User?                 @relation(fields: [userId], references: [id])
-  payments  Payment[]
-  documents ApplicationDocument[]
-  notes     StaffNote[]
-  review    Review?
-  invoices  Invoice[]
-  createdAt DateTime              @default(now())
-  updatedAt DateTime              @updatedAt
+  amountDue     Decimal?               @db.Decimal(12, 2)
+  userId        String?
+  user          User?                  @relation(fields: [userId], references: [id])
+  payments      Payment[]
+  documents     ApplicationDocument[]
+  notes         StaffNote[]
+  review        Review?
+  invoices      Invoice[]
+  ledgerEntries FinancialTransaction[]
+  // The CRM customer this application belongs to, once linked.
+  customerId    String?
+  customer      Customer?              @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
 }
 
 // What staff write to each other about an application or an enquiry. Never
@@ -218,18 +296,25 @@ model ApplicationDocument {
 }
 
 model Opportunity {
-  id          String              @id @default(cuid())
-  slug        String              @unique
-  category    OpportunityCategory
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  category    String
   title       String
   description String
   country     String
   location    String
   deadline    DateTime?
   image       String
-  published   Boolean             @default(true)
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
+  published   Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// The kinds of opportunity. The administrator can add to this list.
+model OpportunityCategory {
+  value     String   @id
+  label     String   @unique
+  createdAt DateTime @default(now())
 }
 
 model Supplier {
@@ -262,6 +347,11 @@ model Institution {
   country     String
   description String
   image       String
+  // More photos, shown after `image` as a slideshow.
+  gallery     String[]           @default([])
+  // The Education pages it is listed on: medical, engineering, general.
+  // Empty means worked out from its programmes.
+  fields      String[]           @default([])
   programs    EducationProgram[]
 }
 
@@ -282,6 +372,8 @@ model Hospital {
   city        String
   description String
   image       String
+  // More photos, shown after `image` as a slideshow.
+  gallery     String[]            @default([])
   services    HealthcareService[]
 }
 
@@ -295,28 +387,38 @@ model HealthcareService {
 }
 
 model Payment {
-  id                   String        @id @default(cuid())
+  id                   String                @id @default(cuid())
   userId               String?
-  user                 User?         @relation(fields: [userId], references: [id])
+  user                 User?                 @relation(fields: [userId], references: [id])
   applicationId        String?
-  application          Application?  @relation(fields: [applicationId], references: [id])
+  application          Application?          @relation(fields: [applicationId], references: [id])
   service              String
-  amount               Decimal       @db.Decimal(12, 2)
-  totalDue             Decimal       @db.Decimal(12, 2)
+  amount               Decimal               @db.Decimal(12, 2)
+  totalDue             Decimal               @db.Decimal(12, 2)
   method               String
-  transactionId        String        @unique
+  transactionId        String                @unique
   status               PaymentStatus
-  provider             String        @default("mock")
+  provider             String                @default("mock")
   // Online (bKash) payments: the gateway's identifiers and progress.
-  gatewayPaymentId     String?       @unique
+  gatewayPaymentId     String?               @unique
   gatewayTransactionId String?
   gatewayStatus        String?
   gatewaySignature     String?
   payerAccount         String?
   paidAt               DateTime?
-  createdAt            DateTime      @default(now())
+  createdAt            DateTime              @default(now())
   receipt              Receipt?
   refunds              Refund[]
+  ledgerEntry          FinancialTransaction?
+  // Office payments: the CRM customer, the currency and rate, the cash or
+  // bank account the money went into, and the invoices it pays.
+  customerId           String?
+  customer             Customer?             @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  currency             String                @default("BDT")
+  exchangeRate         Decimal               @default(1) @db.Decimal(14, 6)
+  moneyAccountId       String?
+  journalEntryId       String?
+  allocations          PaymentAllocation[]
 }
 
 // Money returned to a customer for a payment. A bKash payment is refunded
@@ -324,16 +426,17 @@ model Payment {
 // staff record how they returned the money. A refund is PENDING while bKash
 // has not answered, and FAILED when bKash refused it or never made it.
 model Refund {
-  id              String       @id @default(cuid())
+  id              String                @id @default(cuid())
   paymentId       String
-  payment         Payment      @relation(fields: [paymentId], references: [id])
-  amount          Decimal      @db.Decimal(12, 2)
+  payment         Payment               @relation(fields: [paymentId], references: [id])
+  amount          Decimal               @db.Decimal(12, 2)
   reason          String
   method          String
   status          RefundStatus
-  gatewayRefundId String?      @unique
+  gatewayRefundId String?               @unique
   recordedBy      String
-  createdAt       DateTime     @default(now())
+  ledgerEntry     FinancialTransaction?
+  createdAt       DateTime              @default(now())
 
   @@index([paymentId])
 }
@@ -371,52 +474,102 @@ model FinancialCategory {
   name         String                 @unique
   type         TransactionType
   transactions FinancialTransaction[]
+  // The income or expense account its entries are posted to.
+  accountId    String?
 }
 
 model FinancialTransaction {
-  id            String            @id @default(cuid())
-  type          TransactionType
-  date          DateTime
-  description   String
-  notes         String?
-  customer      String?
-  quantity      Decimal?          @db.Decimal(10, 2)
-  unitPrice     Decimal?          @db.Decimal(12, 2)
-  total         Decimal           @db.Decimal(12, 2)
-  paymentStatus PaymentStatus?
-  categoryId    String
-  category      FinancialCategory @relation(fields: [categoryId], references: [id])
-  invoices      Invoice[]
-  createdAt     DateTime          @default(now())
+  id             String            @id @default(cuid())
+  type           TransactionType
+  date           DateTime
+  description    String
+  notes          String?
+  customer       String?
+  quantity       Decimal?          @db.Decimal(10, 2)
+  unitPrice      Decimal?          @db.Decimal(12, 2)
+  total          Decimal           @db.Decimal(12, 2)
+  paymentStatus  PaymentStatus?
+  categoryId     String
+  category       FinancialCategory @relation(fields: [categoryId], references: [id])
+  invoices       Invoice[]
+  // The customer's account and application, when the entry is about one.
+  userId         String?
+  user           User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  applicationId  String?
+  application    Application?      @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  // The payment or refund this entry records. Every payment received and
+  // every refund completed is entered in the ledger by itself.
+  paymentId      String?           @unique
+  payment        Payment?          @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  refundId       String?           @unique
+  refund         Refund?           @relation(fields: [refundId], references: [id], onDelete: SetNull)
+  // The journal entry it is posted as, and the cash or bank account used.
+  journalEntryId String?
+  moneyAccountId String?
+  createdAt      DateTime          @default(now())
+
+  @@index([date])
+  @@index([userId])
 }
 
 // A bill given to a customer. The customer's details and the amounts are kept
 // on the invoice itself, so that a printed copy stays true after the
 // application or ledger entry it came from changes or is removed.
 model Invoice {
-  id              String                @id @default(cuid())
+  id                 String                @id @default(cuid())
   // The invoice number is made from this: INV-000123. Deleting an invoice
   // never frees its number.
-  serial          Int                   @unique @default(autoincrement())
-  issuedAt        DateTime
-  dueAt           DateTime?
-  customerName    String
-  customerPhone   String?
-  customerEmail   String?
-  customerAddress String?
+  serial             Int                   @unique @default(autoincrement())
+  issuedAt           DateTime
+  dueAt              DateTime?
+  customerName       String
+  customerPhone      String?
+  customerEmail      String?
+  customerAddress    String?
   // [{ description, quantity, unitPrice }]
-  items           Json
-  total           Decimal               @db.Decimal(12, 2)
-  paid            Decimal               @default(0) @db.Decimal(12, 2)
-  notes           String?
-  applicationId   String?
-  application     Application?          @relation(fields: [applicationId], references: [id], onDelete: SetNull)
-  transactionId   String?
-  transaction     FinancialTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
+  items              Json
+  total              Decimal               @db.Decimal(12, 2)
+  paid               Decimal               @default(0) @db.Decimal(12, 2)
+  notes              String?
+  applicationId      String?
+  application        Application?          @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  transactionId      String?
+  transaction        FinancialTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  // The office workflow: the customer and deal it bills, its life, currency,
+  // version and the signature it was issued with. An issued invoice is never
+  // changed in place: a revision keeps the old version, a credit note lowers
+  // what is owed, and a cancellation ends it.
+  customerId         String?
+  customer           Customer?             @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  dealId             String?
+  deal               Deal?                 @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  state              InvoiceState          @default(ISSUED)
+  currency           String                @default("BDT")
+  exchangeRate       Decimal               @default(1) @db.Decimal(14, 6)
+  version            Int                   @default(1)
+  templateVersion    String                @default("2026-11")
+  signatureId        String?
+  signature          SignatureAsset?       @relation(fields: [signatureId], references: [id], onDelete: SetNull)
+  issuedByName       String?
+  sentAt             DateTime?
+  cancelledAt        DateTime?
+  cancelReason       String?
+  terms              String?
+  companyCommitments String?
+  clientCommitments  String?
+  startDate          DateTime?
+  endDate            DateTime?
+  branchId           String?
+  branch             Branch?               @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  journalEntryId     String?
+  revisions          InvoiceRevision[]
+  creditNotes        CreditNote[]
+  allocations        PaymentAllocation[]
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
 
   @@index([issuedAt])
+  @@index([customerId])
 }
 
 model PageContent {
@@ -445,4 +598,452 @@ model MediaAsset {
   createdAt    DateTime @default(now())
 
   @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Business management: branches, CRM, deals, accounts, documents,
+// notifications, approvals and the audit log.
+
+model Company {
+  id           String   @id @default(cuid())
+  name         String
+  baseCurrency String   @default("BDT")
+  branches     Branch[]
+  createdAt    DateTime @default(now())
+}
+
+model Branch {
+  id             String            @id @default(cuid())
+  companyId      String
+  company        Company           @relation(fields: [companyId], references: [id])
+  code           String            @unique
+  name           String
+  address        String?
+  phone          String?
+  active         Boolean           @default(true)
+  users          User[]
+  customers      Customer[]
+  deals          Deal[]
+  invoices       Invoice[]
+  journalEntries JournalEntry[]
+  documents      ManagedDocument[]
+  createdAt      DateTime          @default(now())
+}
+
+// A client in the CRM. C-000123 is made from `code`.
+model Customer {
+  id              String             @id @default(cuid())
+  code            Int                @unique @default(autoincrement())
+  name            String
+  phone           String
+  whatsapp        String?
+  email           String?
+  address         String?
+  // Seen only with the passport permission.
+  passportNumber  String?
+  passportCountry String?
+  passportExpiry  DateTime?
+  category        String?
+  leadSource      String?
+  status          CustomerStatus     @default(LEAD)
+  notes           String?
+  nextFollowUpAt  DateTime?
+  assignedToId    String?
+  assignedTo      User?              @relation("CustomerAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  branchId        String?
+  branch          Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  // The member's website account, when they have one.
+  userId          String?            @unique
+  user            User?              @relation("CustomerAccount", fields: [userId], references: [id], onDelete: SetNull)
+  createdById     String?
+  activities      CustomerActivity[]
+  tasks           Task[]
+  deals           Deal[]
+  invoices        Invoice[]
+  payments        Payment[]
+  applications    Application[]
+  documents       ManagedDocument[]
+  journalLines    JournalLine[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([phone])
+  @@index([email])
+  @@index([assignedToId])
+  @@index([branchId])
+}
+
+// Calls, WhatsApp messages, emails, meetings and notes with a customer, and
+// what changed on their record.
+model CustomerActivity {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  kind       String
+  summary    String
+  at         DateTime @default(now())
+  byId       String?
+  byName     String
+  createdAt  DateTime @default(now())
+
+  @@index([customerId, at])
+}
+
+// Work for a member of staff: a task, a follow-up with a customer or a deadline.
+model Task {
+  id            String     @id @default(cuid())
+  title         String
+  notes         String?
+  kind          String     @default("TASK")
+  status        TaskStatus @default(OPEN)
+  dueAt         DateTime?
+  assigneeId    String?
+  assignee      User?      @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  customerId    String?
+  customer      Customer?  @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  dealId        String?
+  deal          Deal?      @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  createdById   String?
+  createdByName String?
+  completedAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([assigneeId, status])
+  @@index([dueAt])
+}
+
+// A service agreement with a customer: what will be done, by when, for how
+// much, and what each side commits to. D-000123 is made from `number`.
+model Deal {
+  id                 String     @id @default(cuid())
+  number             Int        @unique @default(autoincrement())
+  customerId         String
+  customer           Customer   @relation(fields: [customerId], references: [id])
+  title              String
+  serviceLine        String?
+  description        String?
+  status             DealStatus @default(DRAFT)
+  currency           String     @default("BDT")
+  // [{ description, serviceLine, quantity, unitPrice }]
+  items              Json
+  total              Decimal    @db.Decimal(14, 2)
+  startDate          DateTime?
+  endDate            DateTime?
+  companyCommitments String?
+  clientCommitments  String?
+  terms              String?
+  assignedToId       String?
+  assignedTo         User?      @relation("DealAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  branchId           String?
+  branch             Branch?    @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  // Revenue recognised so far, in taka.
+  recognized         Decimal    @default(0) @db.Decimal(14, 2)
+  createdById        String?
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+  invoices           Invoice[]
+  tasks              Task[]
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model InvoiceRevision {
+  id        String   @id @default(cuid())
+  invoiceId String
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  version   Int
+  snapshot  Json
+  reason    String
+  byName    String
+  createdAt DateTime @default(now())
+
+  @@unique([invoiceId, version])
+}
+
+// Lowers what an issued invoice asks for. CN-000123 is made from `number`.
+model CreditNote {
+  id             String   @id @default(cuid())
+  number         Int      @unique @default(autoincrement())
+  invoiceId      String
+  invoice        Invoice  @relation(fields: [invoiceId], references: [id])
+  amount         Decimal  @db.Decimal(14, 2)
+  reason         String
+  journalEntryId String?
+  byName         String
+  createdAt      DateTime @default(now())
+}
+
+// How much of a payment goes to which invoice, in the invoice's currency.
+model PaymentAllocation {
+  id             String   @id @default(cuid())
+  paymentId      String
+  payment        Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  invoiceId      String
+  invoice        Invoice  @relation(fields: [invoiceId], references: [id])
+  amount         Decimal  @db.Decimal(14, 2)
+  journalEntryId String?
+  createdAt      DateTime @default(now())
+
+  @@index([invoiceId])
+}
+
+// The chart of accounts.
+model LedgerAccount {
+  id          String        @id @default(cuid())
+  code        String        @unique
+  name        String
+  type        AccountType
+  // CASH, BANK, MOBILE, RECEIVABLE, PAYABLE, ADVANCE, DEFERRED, REVENUE, FX
+  subtype     String?
+  currency    String        @default("BDT")
+  description String?
+  active      Boolean       @default(true)
+  // Built in; the website posts to it and it cannot be removed.
+  system      Boolean       @default(false)
+  lines       JournalLine[]
+  budgetLines BudgetLine[]
+  createdAt   DateTime      @default(now())
+}
+
+// One double-entry posting. JE-000123 is made from `number`. A posted
+// entry is never changed or deleted; a reversal undoes it.
+model JournalEntry {
+  id            String        @id @default(cuid())
+  number        Int           @unique @default(autoincrement())
+  date          DateTime
+  memo          String
+  sourceType    String?
+  sourceId      String?
+  status        JournalStatus @default(POSTED)
+  reversalOfId  String?       @unique
+  reversalOf    JournalEntry? @relation("Reversal", fields: [reversalOfId], references: [id])
+  reversedBy    JournalEntry? @relation("Reversal")
+  branchId      String?
+  branch        Branch?       @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  createdById   String?
+  createdByName String
+  lines         JournalLine[]
+  createdAt     DateTime      @default(now())
+
+  @@index([date])
+  @@index([sourceType, sourceId])
+}
+
+// Debit and credit are in taka; `amount` is in the transaction's currency.
+model JournalLine {
+  id           String        @id @default(cuid())
+  entryId      String
+  entry        JournalEntry  @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  accountId    String
+  account      LedgerAccount @relation(fields: [accountId], references: [id])
+  debit        Decimal       @default(0) @db.Decimal(14, 2)
+  credit       Decimal       @default(0) @db.Decimal(14, 2)
+  currency     String        @default("BDT")
+  amount       Decimal       @default(0) @db.Decimal(14, 2)
+  exchangeRate Decimal       @default(1) @db.Decimal(14, 6)
+  customerId   String?
+  customer     Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  memo         String?
+
+  @@index([accountId])
+  @@index([entryId])
+}
+
+model Budget {
+  id          String       @id @default(cuid())
+  name        String
+  periodStart DateTime
+  periodEnd   DateTime
+  branchId    String?
+  createdById String?
+  lines       BudgetLine[]
+  createdAt   DateTime     @default(now())
+}
+
+model BudgetLine {
+  id        String        @id @default(cuid())
+  budgetId  String
+  budget    Budget        @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  accountId String
+  account   LedgerAccount @relation(fields: [accountId], references: [id])
+  amount    Decimal       @db.Decimal(14, 2)
+
+  @@unique([budgetId, accountId])
+}
+
+// Taka for one unit of a currency on a day.
+model ExchangeRate {
+  id        String   @id @default(cuid())
+  currency  String
+  rate      Decimal  @db.Decimal(14, 6)
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([currency, date])
+}
+
+// A client's, an employee's, a visa or a company document, with its versions.
+model ManagedDocument {
+  id             String             @id @default(cuid())
+  category       DocumentCategory
+  docType        String
+  name           String
+  number         String?
+  customerId     String?
+  customer       Customer?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  employeeId     String?
+  employee       User?              @relation("EmployeeDocuments", fields: [employeeId], references: [id], onDelete: SetNull)
+  issueDate      DateTime?
+  expiryDate     DateTime?
+  verification   VerificationStatus @default(PENDING)
+  verifiedByName String?
+  verifiedAt     DateTime?
+  notes          String?
+  // Roles allowed to open it besides administrators; empty means everyone
+  // with the documents permission.
+  restrictedTo   String[]           @default([])
+  branchId       String?
+  branch         Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  uploadedById   String?
+  uploadedByName String
+  files          DocumentFile[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([expiryDate])
+  @@index([customerId])
+}
+
+model DocumentFile {
+  id             String          @id @default(cuid())
+  documentId     String
+  document       ManagedDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  version        Int
+  fileName       String
+  mimeType       String
+  byteSize       Int
+  data           Bytes
+  uploadedByName String
+  createdAt      DateTime        @default(now())
+
+  @@unique([documentId, version])
+}
+
+// A message to a member of staff, in the admin and by email. `dedupeKey`
+// keeps the same reminder from being sent twice.
+model Notification {
+  id           String             @id @default(cuid())
+  userId       String
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         String
+  title        String
+  body         String
+  link         String?
+  relatedType  String?
+  relatedId    String?
+  channel      String             @default("IN_APP")
+  status       NotificationStatus @default(PENDING)
+  scheduledFor DateTime           @default(now())
+  sentAt       DateTime?
+  readAt       DateTime?
+  error        String?
+  dedupeKey    String             @unique
+  createdAt    DateTime           @default(now())
+
+  @@index([userId, readAt])
+}
+
+model NotificationPreference {
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type   String
+  inApp  Boolean @default(true)
+  email  Boolean @default(false)
+
+  @@id([userId, type])
+}
+
+// A high-risk action waiting for a second person.
+model ApprovalRequest {
+  id              String         @id @default(cuid())
+  kind            String
+  entityType      String
+  entityId        String
+  summary         String
+  payload         Json
+  status          ApprovalStatus @default(PENDING)
+  requestedById   String
+  requestedByName String
+  decidedById     String?
+  decidedByName   String?
+  decisionNote    String?
+  decidedAt       DateTime?
+  createdAt       DateTime       @default(now())
+
+  @@index([status])
+}
+
+// Who did what, when, to which record.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorName  String
+  actorRole  String?
+  action     String
+  entityType String
+  entityId   String?
+  summary    String
+  changes    Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([actorId])
+}
+
+// A change to a role's default permissions, made by the Super Admin.
+model RolePermission {
+  role       Role
+  permission String
+  allowed    Boolean
+
+  @@id([role, permission])
+}
+
+// An authority signature. A new picture makes a new version; invoices keep
+// the version they were issued with.
+model SignatureAsset {
+  id             String    @id @default(cuid())
+  label          String
+  ownerName      String
+  ownerTitle     String?
+  mimeType       String
+  data           Bytes
+  active         Boolean   @default(true)
+  uploadedByName String
+  invoices       Invoice[]
+  createdAt      DateTime  @default(now())
+  retiredAt      DateTime?
+}
+
+// Settings for the office: reminder days, default terms and the like.
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+// Lists the staff can add to: customer categories, lead sources, service lines, document types.
+model Lookup {
+  id        String   @id @default(cuid())
+  kind      String
+  value     String
+  createdAt DateTime @default(now())
+
+  @@unique([kind, value])
 }

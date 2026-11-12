@@ -4,8 +4,9 @@
   import { afterNavigate } from "$app/navigation";
   import { onDestroy } from "svelte";
   import { whatsappNumber } from "$lib/config";
+  import { cmsContent } from "$lib/cms";
+  import { whatsappDigits } from "$lib/home-content";
 
-  const number = whatsappNumber();
   let heroVisible = false;
   let observer: IntersectionObserver | undefined;
 
@@ -30,13 +31,13 @@
   class:hero-hidden={page.url.pathname === "/" && heroVisible}
   class:home-page={page.url.pathname === "/"}
   class="wa"
-  href={`https://wa.me/${number}`}
+  href={`https://wa.me/${whatsappDigits($cmsContent, whatsappNumber())}`}
   target="_blank"
   rel="noreferrer"
-  aria-label="Chat with us on WhatsApp"
+  aria-label={$cmsContent.whatsapp.callToAction}
   aria-hidden={page.url.pathname === "/" && heroVisible}
   tabindex={page.url.pathname === "/" && heroVisible ? -1 : undefined}
-><span>Chat with us</span><MessageCircle size={27} /></a>
+><span>{$cmsContent.whatsapp.label}</span><MessageCircle size={27} /></a>
 
 <style>
   .wa { position: fixed; right: 24px; bottom: 24px; z-index: 50; width: 58px; height: 58px; border-radius: 50%; background: #259f58; color: white; display: grid; place-items: center; box-shadow: 0 10px 28px #14763d40, inset 0 1px #ffffff4d; transition: transform 160ms var(--ease-out), background-color 180ms ease, box-shadow 180ms ease, opacity 160ms ease, visibility 160ms ease; }

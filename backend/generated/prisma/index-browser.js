@@ -137,7 +137,9 @@ exports.Prisma.UserScalarFieldEnum = {
   lastLoginAt: 'lastLoginAt',
   role: 'role',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  branchId: 'branchId',
+  allBranches: 'allBranches'
 };
 
 exports.Prisma.AuthCodeScalarFieldEnum = {
@@ -176,6 +178,7 @@ exports.Prisma.ApplicationScalarFieldEnum = {
   details: 'details',
   amountDue: 'amountDue',
   userId: 'userId',
+  customerId: 'customerId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -230,6 +233,12 @@ exports.Prisma.OpportunityScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.OpportunityCategoryScalarFieldEnum = {
+  value: 'value',
+  label: 'label',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SupplierScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -259,7 +268,9 @@ exports.Prisma.InstitutionScalarFieldEnum = {
   name: 'name',
   country: 'country',
   description: 'description',
-  image: 'image'
+  image: 'image',
+  gallery: 'gallery',
+  fields: 'fields'
 };
 
 exports.Prisma.EducationProgramScalarFieldEnum = {
@@ -277,7 +288,8 @@ exports.Prisma.HospitalScalarFieldEnum = {
   country: 'country',
   city: 'city',
   description: 'description',
-  image: 'image'
+  image: 'image',
+  gallery: 'gallery'
 };
 
 exports.Prisma.HealthcareServiceScalarFieldEnum = {
@@ -305,7 +317,12 @@ exports.Prisma.PaymentScalarFieldEnum = {
   gatewaySignature: 'gatewaySignature',
   payerAccount: 'payerAccount',
   paidAt: 'paidAt',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  customerId: 'customerId',
+  currency: 'currency',
+  exchangeRate: 'exchangeRate',
+  moneyAccountId: 'moneyAccountId',
+  journalEntryId: 'journalEntryId'
 };
 
 exports.Prisma.RefundScalarFieldEnum = {
@@ -348,7 +365,8 @@ exports.Prisma.GatewayTokenScalarFieldEnum = {
 exports.Prisma.FinancialCategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  type: 'type'
+  type: 'type',
+  accountId: 'accountId'
 };
 
 exports.Prisma.FinancialTransactionScalarFieldEnum = {
@@ -363,6 +381,12 @@ exports.Prisma.FinancialTransactionScalarFieldEnum = {
   total: 'total',
   paymentStatus: 'paymentStatus',
   categoryId: 'categoryId',
+  userId: 'userId',
+  applicationId: 'applicationId',
+  paymentId: 'paymentId',
+  refundId: 'refundId',
+  journalEntryId: 'journalEntryId',
+  moneyAccountId: 'moneyAccountId',
   createdAt: 'createdAt'
 };
 
@@ -381,6 +405,25 @@ exports.Prisma.InvoiceScalarFieldEnum = {
   notes: 'notes',
   applicationId: 'applicationId',
   transactionId: 'transactionId',
+  customerId: 'customerId',
+  dealId: 'dealId',
+  state: 'state',
+  currency: 'currency',
+  exchangeRate: 'exchangeRate',
+  version: 'version',
+  templateVersion: 'templateVersion',
+  signatureId: 'signatureId',
+  issuedByName: 'issuedByName',
+  sentAt: 'sentAt',
+  cancelledAt: 'cancelledAt',
+  cancelReason: 'cancelReason',
+  terms: 'terms',
+  companyCommitments: 'companyCommitments',
+  clientCommitments: 'clientCommitments',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  branchId: 'branchId',
+  journalEntryId: 'journalEntryId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -408,6 +451,321 @@ exports.Prisma.MediaAssetScalarFieldEnum = {
   orientation: 'orientation',
   purpose: 'purpose',
   altText: 'altText',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.CompanyScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  baseCurrency: 'baseCurrency',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.BranchScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  code: 'code',
+  name: 'name',
+  address: 'address',
+  phone: 'phone',
+  active: 'active',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.CustomerScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  phone: 'phone',
+  whatsapp: 'whatsapp',
+  email: 'email',
+  address: 'address',
+  passportNumber: 'passportNumber',
+  passportCountry: 'passportCountry',
+  passportExpiry: 'passportExpiry',
+  category: 'category',
+  leadSource: 'leadSource',
+  status: 'status',
+  notes: 'notes',
+  nextFollowUpAt: 'nextFollowUpAt',
+  assignedToId: 'assignedToId',
+  branchId: 'branchId',
+  userId: 'userId',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CustomerActivityScalarFieldEnum = {
+  id: 'id',
+  customerId: 'customerId',
+  kind: 'kind',
+  summary: 'summary',
+  at: 'at',
+  byId: 'byId',
+  byName: 'byName',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.TaskScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  notes: 'notes',
+  kind: 'kind',
+  status: 'status',
+  dueAt: 'dueAt',
+  assigneeId: 'assigneeId',
+  customerId: 'customerId',
+  dealId: 'dealId',
+  createdById: 'createdById',
+  createdByName: 'createdByName',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DealScalarFieldEnum = {
+  id: 'id',
+  number: 'number',
+  customerId: 'customerId',
+  title: 'title',
+  serviceLine: 'serviceLine',
+  description: 'description',
+  status: 'status',
+  currency: 'currency',
+  items: 'items',
+  total: 'total',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  companyCommitments: 'companyCommitments',
+  clientCommitments: 'clientCommitments',
+  terms: 'terms',
+  assignedToId: 'assignedToId',
+  branchId: 'branchId',
+  recognized: 'recognized',
+  createdById: 'createdById',
+  completedAt: 'completedAt',
+  cancelledAt: 'cancelledAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.InvoiceRevisionScalarFieldEnum = {
+  id: 'id',
+  invoiceId: 'invoiceId',
+  version: 'version',
+  snapshot: 'snapshot',
+  reason: 'reason',
+  byName: 'byName',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.CreditNoteScalarFieldEnum = {
+  id: 'id',
+  number: 'number',
+  invoiceId: 'invoiceId',
+  amount: 'amount',
+  reason: 'reason',
+  journalEntryId: 'journalEntryId',
+  byName: 'byName',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.PaymentAllocationScalarFieldEnum = {
+  id: 'id',
+  paymentId: 'paymentId',
+  invoiceId: 'invoiceId',
+  amount: 'amount',
+  journalEntryId: 'journalEntryId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.LedgerAccountScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  type: 'type',
+  subtype: 'subtype',
+  currency: 'currency',
+  description: 'description',
+  active: 'active',
+  system: 'system',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.JournalEntryScalarFieldEnum = {
+  id: 'id',
+  number: 'number',
+  date: 'date',
+  memo: 'memo',
+  sourceType: 'sourceType',
+  sourceId: 'sourceId',
+  status: 'status',
+  reversalOfId: 'reversalOfId',
+  branchId: 'branchId',
+  createdById: 'createdById',
+  createdByName: 'createdByName',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.JournalLineScalarFieldEnum = {
+  id: 'id',
+  entryId: 'entryId',
+  accountId: 'accountId',
+  debit: 'debit',
+  credit: 'credit',
+  currency: 'currency',
+  amount: 'amount',
+  exchangeRate: 'exchangeRate',
+  customerId: 'customerId',
+  memo: 'memo'
+};
+
+exports.Prisma.BudgetScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  periodStart: 'periodStart',
+  periodEnd: 'periodEnd',
+  branchId: 'branchId',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.BudgetLineScalarFieldEnum = {
+  id: 'id',
+  budgetId: 'budgetId',
+  accountId: 'accountId',
+  amount: 'amount'
+};
+
+exports.Prisma.ExchangeRateScalarFieldEnum = {
+  id: 'id',
+  currency: 'currency',
+  rate: 'rate',
+  date: 'date',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.ManagedDocumentScalarFieldEnum = {
+  id: 'id',
+  category: 'category',
+  docType: 'docType',
+  name: 'name',
+  number: 'number',
+  customerId: 'customerId',
+  employeeId: 'employeeId',
+  issueDate: 'issueDate',
+  expiryDate: 'expiryDate',
+  verification: 'verification',
+  verifiedByName: 'verifiedByName',
+  verifiedAt: 'verifiedAt',
+  notes: 'notes',
+  restrictedTo: 'restrictedTo',
+  branchId: 'branchId',
+  uploadedById: 'uploadedById',
+  uploadedByName: 'uploadedByName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DocumentFileScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  version: 'version',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  byteSize: 'byteSize',
+  data: 'data',
+  uploadedByName: 'uploadedByName',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  title: 'title',
+  body: 'body',
+  link: 'link',
+  relatedType: 'relatedType',
+  relatedId: 'relatedId',
+  channel: 'channel',
+  status: 'status',
+  scheduledFor: 'scheduledFor',
+  sentAt: 'sentAt',
+  readAt: 'readAt',
+  error: 'error',
+  dedupeKey: 'dedupeKey',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.NotificationPreferenceScalarFieldEnum = {
+  userId: 'userId',
+  type: 'type',
+  inApp: 'inApp',
+  email: 'email'
+};
+
+exports.Prisma.ApprovalRequestScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  summary: 'summary',
+  payload: 'payload',
+  status: 'status',
+  requestedById: 'requestedById',
+  requestedByName: 'requestedByName',
+  decidedById: 'decidedById',
+  decidedByName: 'decidedByName',
+  decisionNote: 'decisionNote',
+  decidedAt: 'decidedAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.AuditLogScalarFieldEnum = {
+  id: 'id',
+  actorId: 'actorId',
+  actorName: 'actorName',
+  actorRole: 'actorRole',
+  action: 'action',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  summary: 'summary',
+  changes: 'changes',
+  ip: 'ip',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.RolePermissionScalarFieldEnum = {
+  role: 'role',
+  permission: 'permission',
+  allowed: 'allowed'
+};
+
+exports.Prisma.SignatureAssetScalarFieldEnum = {
+  id: 'id',
+  label: 'label',
+  ownerName: 'ownerName',
+  ownerTitle: 'ownerTitle',
+  mimeType: 'mimeType',
+  data: 'data',
+  active: 'active',
+  uploadedByName: 'uploadedByName',
+  createdAt: 'createdAt',
+  retiredAt: 'retiredAt'
+};
+
+exports.Prisma.SettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.LookupScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  value: 'value',
   createdAt: 'createdAt'
 };
 
@@ -442,7 +800,11 @@ exports.Prisma.JsonNullValueFilter = {
 };
 exports.Role = exports.$Enums.Role = {
   USER: 'USER',
-  ADMIN: 'ADMIN'
+  ADMIN: 'ADMIN',
+  MODERATOR: 'MODERATOR',
+  MANAGER: 'MANAGER',
+  ACCOUNTANT: 'ACCOUNTANT',
+  EMPLOYEE: 'EMPLOYEE'
 };
 
 exports.AuthCodePurpose = exports.$Enums.AuthCodePurpose = {
@@ -481,17 +843,6 @@ exports.ReviewStatus = exports.$Enums.ReviewStatus = {
   HIDDEN: 'HIDDEN'
 };
 
-exports.OpportunityCategory = exports.$Enums.OpportunityCategory = {
-  BUSINESS: 'BUSINESS',
-  EDUCATION: 'EDUCATION',
-  HEALTHCARE: 'HEALTHCARE',
-  UMRAH: 'UMRAH',
-  FACTORY_VISIT: 'FACTORY_VISIT',
-  BUSINESS_TOUR: 'BUSINESS_TOUR',
-  SCHOLARSHIP: 'SCHOLARSHIP',
-  EVENT: 'EVENT'
-};
-
 exports.PaymentStatus = exports.$Enums.PaymentStatus = {
   PAID: 'PAID',
   PARTIALLY_PAID: 'PARTIALLY_PAID',
@@ -512,6 +863,71 @@ exports.TransactionType = exports.$Enums.TransactionType = {
   EXPENSE: 'EXPENSE'
 };
 
+exports.InvoiceState = exports.$Enums.InvoiceState = {
+  DRAFT: 'DRAFT',
+  ISSUED: 'ISSUED',
+  CANCELLED: 'CANCELLED',
+  REFUNDED: 'REFUNDED'
+};
+
+exports.CustomerStatus = exports.$Enums.CustomerStatus = {
+  LEAD: 'LEAD',
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE'
+};
+
+exports.TaskStatus = exports.$Enums.TaskStatus = {
+  OPEN: 'OPEN',
+  DONE: 'DONE',
+  CANCELLED: 'CANCELLED'
+};
+
+exports.DealStatus = exports.$Enums.DealStatus = {
+  DRAFT: 'DRAFT',
+  ACTIVE: 'ACTIVE',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+};
+
+exports.AccountType = exports.$Enums.AccountType = {
+  ASSET: 'ASSET',
+  LIABILITY: 'LIABILITY',
+  EQUITY: 'EQUITY',
+  INCOME: 'INCOME',
+  EXPENSE: 'EXPENSE'
+};
+
+exports.JournalStatus = exports.$Enums.JournalStatus = {
+  POSTED: 'POSTED',
+  REVERSED: 'REVERSED'
+};
+
+exports.DocumentCategory = exports.$Enums.DocumentCategory = {
+  EMPLOYEE: 'EMPLOYEE',
+  CLIENT: 'CLIENT',
+  VISA: 'VISA',
+  COMPANY: 'COMPANY'
+};
+
+exports.VerificationStatus = exports.$Enums.VerificationStatus = {
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED'
+};
+
+exports.NotificationStatus = exports.$Enums.NotificationStatus = {
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  FAILED: 'FAILED',
+  SKIPPED: 'SKIPPED'
+};
+
+exports.ApprovalStatus = exports.$Enums.ApprovalStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   AuthCode: 'AuthCode',
@@ -521,6 +937,7 @@ exports.Prisma.ModelName = {
   Review: 'Review',
   ApplicationDocument: 'ApplicationDocument',
   Opportunity: 'Opportunity',
+  OpportunityCategory: 'OpportunityCategory',
   Supplier: 'Supplier',
   Factory: 'Factory',
   Institution: 'Institution',
@@ -536,7 +953,32 @@ exports.Prisma.ModelName = {
   FinancialTransaction: 'FinancialTransaction',
   Invoice: 'Invoice',
   PageContent: 'PageContent',
-  MediaAsset: 'MediaAsset'
+  MediaAsset: 'MediaAsset',
+  Company: 'Company',
+  Branch: 'Branch',
+  Customer: 'Customer',
+  CustomerActivity: 'CustomerActivity',
+  Task: 'Task',
+  Deal: 'Deal',
+  InvoiceRevision: 'InvoiceRevision',
+  CreditNote: 'CreditNote',
+  PaymentAllocation: 'PaymentAllocation',
+  LedgerAccount: 'LedgerAccount',
+  JournalEntry: 'JournalEntry',
+  JournalLine: 'JournalLine',
+  Budget: 'Budget',
+  BudgetLine: 'BudgetLine',
+  ExchangeRate: 'ExchangeRate',
+  ManagedDocument: 'ManagedDocument',
+  DocumentFile: 'DocumentFile',
+  Notification: 'Notification',
+  NotificationPreference: 'NotificationPreference',
+  ApprovalRequest: 'ApprovalRequest',
+  AuditLog: 'AuditLog',
+  RolePermission: 'RolePermission',
+  SignatureAsset: 'SignatureAsset',
+  Setting: 'Setting',
+  Lookup: 'Lookup'
 };
 
 /**

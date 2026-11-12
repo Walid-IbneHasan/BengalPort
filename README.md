@@ -120,13 +120,13 @@ Vercel hosts the website only. The API and its PostgreSQL database must run some
 
 The API and the website each run as a cPanel **Node.js App** (Node 20.12 or newer), and the API needs a **PostgreSQL** database, either from cPanel or an external provider. These steps were tested by running both bundles standalone on a development machine, not on a cPanel server.
 
-1. On your computer run `npm run package:cpanel`. It builds everything and writes `deploy/bengal-port-api.zip` and `deploy/bengal-port-web.zip`.
+1. On your computer run `npm run package:cpanel`. It builds everything and writes `deploy/bengal-port-api.tar.gz` and `deploy/bengal-port-web.tar.gz` (and the same as `.zip`; some hosts, such as HostNil, refuse the zips, so upload the `.tar.gz`).
 2. In cPanel create a PostgreSQL database and user, and two addresses, for example `example.com` for the website and `api.example.com` for the API.
 3. **API.** Upload and extract `bengal-port-api.zip` into a folder outside `public_html`, such as `bengal-port-api`. Copy `.env.example` to `.env` in that folder and fill it in. In *Setup Node.js App* create an app with that folder as the application root, `api.example.com` as the URL and `server.cjs` as the startup file. Click *Run NPM Install*, then *Run JS script* → `setup` (creates the database tables), then `db:seed` (creates the admin account), then restart the app. `https://api.example.com/api/health` should answer `{"data":{"status":"ok"}}`.
 4. **Website.** Upload and extract `bengal-port-web.zip` into another folder, such as `bengal-port-web`. Copy `.env.example` to `.env` and fill it in. Create a second Node.js App with that folder as the application root, `example.com` as the URL and `server.cjs` as the startup file, then start it. It has no packages to install.
 5. Sign in at `/login` with the seed admin account and replace the starter content.
 
-To update later, run `npm run package:cpanel` again, upload and extract the new zips over the old folders (your `.env` files are not in the zips), run `setup` for the API if there are new database changes, and restart both apps.
+To update later, run `npm run package:cpanel` again (with the dev servers stopped), upload and extract the new bundles over the old folders (your `.env` files are not in the zips), run `setup` for the API if there are new database changes, and restart both apps. Step-by-step instructions for bengalport.com on HostNil, in English and Bangla, are in `docs/DEPLOY.md`; the admin guide is `docs/ADMIN-GUIDE.md`.
 
 ## Editing the website
 

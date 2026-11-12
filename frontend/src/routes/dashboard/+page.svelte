@@ -14,14 +14,16 @@
 
   type Activity = { enquiries: any[]; applications: any[]; payments: any[] };
   // The applications that have been paid for, which the member may review.
-  type Reviewable = { applicationId: string; reference: string; division: string; review: OwnReview | null };
+  // `general` ones are services paid for at the office without an application.
+  type Reviewable = { applicationId: string | null; reference: string | null; division: string | null; general?: boolean; review: OwnReview | null };
   let user = $state<any>(null),
     activity = $state<Activity | null>(null),
     loading = $state(true),
     error = $state(""),
     open = $state(""),
     reviewable = $state<Reviewable[]>([]);
-  let unreviewed = $derived(reviewable.filter((item) => !item.review));
+  let unreviewed = $derived(reviewable.filter((item) => !item.review && !item.general));
+  let generalReviews = $derived(reviewable.filter((item) => item.general));
   const reviewOf = (applicationId: string) => reviewable.find((item) => item.applicationId === applicationId);
   // The review list is an extra: the dashboard still opens without it.
   const loadReviews = async () => {
@@ -75,7 +77,7 @@
     <div class="hero-actions">
       <a class="primary" href="/apply">New application or enquiry <ArrowRight size={17} /></a>
       <a class="ghost" href="/profile">Account &amp; security</a>
-      {#if user?.role === "ADMIN"}<a class="ghost" href="/admin">Admin workspace</a>{/if}
+      {#if user?.role === "ADMIN" || user?.role === "MODERATOR"}<a class="ghost" href={user.role === "ADMIN" ? "/admin" : "/admin/enquiries"}>Admin workspace</a>{/if}
     </div>
   </div>
 </section>
@@ -99,7 +101,7 @@
           <div class="review-prompt">
             <Star size={18} />
             <p>{unreviewed.length === 1 ? `You can review the service you paid for (${unreviewed[0].reference}).` : `You can review ${unreviewed.length} services you paid for.`}</p>
-            <button type="button" onclick={() => writeReview(unreviewed[0].applicationId)}>Write a review <ArrowRight size={15} /></button>
+            <button type="button" onclick={() => writeReview(unreviewed[0].applicationId ?? "")}>Write a review <ArrowRight size={15} /></button>
           </div>
         {/if}
         {#each activity.applications as item}
@@ -135,6 +137,15 @@
         {/each}
         <ClaimApplication onclaimed={claimed} />
       </article>
+
+      {#if generalReviews.length}
+        <article id="reviews">
+          <header><h2>Review our service</h2><p>You paid us at the office. Tell others how it went; your review appears once our team approves it.</p></header>
+          {#each generalReviews as item (item.division ?? "new")}
+            <ReviewForm general division={item.division} review={item.review} name={user?.name ?? ""} avatarUrl={user?.avatarUrl ?? null} onsaved={loadReviews} />
+          {/each}
+        </article>
+      {/if}
 
       <article id="enquiries">
         <header><h2>My enquiries</h2><p>Questions you sent to the Bengal Port team.</p></header>

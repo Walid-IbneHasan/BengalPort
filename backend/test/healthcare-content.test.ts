@@ -38,13 +38,20 @@ after(async () => {
 });
 
 describe("the Global Healthcare page before anyone edits it", () => {
-  test("names six treatments and a three-step pathway", async () => {
+  test("names six treatments", async () => {
     const content = await live();
     assert.equal(content.treatments.length, 6);
     assert.equal(content.treatments[0].title, "Cardiology");
-    assert.deepEqual(content.hero.pathway.map((node: any) => node.title), ["Diagnosis review", "Hospital match", "Travel and care"]);
-    assert.ok(content.hero.specialties.includes("Oncology"));
     assert.equal("shortcuts" in content, false);
+  });
+
+  test("the hero lists only destinations: Delhi and Beijing, no longer Chennai or Istanbul", async () => {
+    const content = await live();
+    assert.ok(content.hero.cities.includes("Delhi, India"));
+    assert.ok(content.hero.cities.includes("Beijing, China"));
+    assert.equal(content.hero.cities.some((city: string) => /Chennai|Istanbul|Turkey/.test(city)), false);
+    assert.equal("pathway" in content.hero, false);
+    assert.equal("specialties" in content.hero, false);
   });
 });
 
@@ -60,10 +67,10 @@ describe("editing the Global Healthcare page", () => {
     assert.deepEqual(shown.treatments[1].procedures, ["Chemotherapy", "Radiotherapy"]);
   });
 
-  test("the pathway keeps exactly three steps", async () => {
+  test("the hero keeps at least one destination", async () => {
     await clear();
     const content = draft();
-    content.hero.pathway.pop();
+    content.hero.cities = [];
     assert.equal((await save(content)).statusCode, 400);
   });
 

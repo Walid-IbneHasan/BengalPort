@@ -8,6 +8,7 @@
   import RotatingWord from "./RotatingWord.svelte";
   import Testimonials from "./Testimonials.svelte";
   import JumpStrip from "./JumpStrip.svelte";
+  import { onMount } from "svelte";
 
   // The Global Umrah page: a night-sky hero with the two holy mosques and the
   // route between them, the next group departures, the packages, the four
@@ -18,6 +19,19 @@
   const icons: Record<string, any> = { shield: ShieldCheck, headset: Headphones, building: Hotel, hotel: Hotel, bus: Bus, globe: Globe2, calendar: CalendarDays, route: Route };
   let departures = $derived(upcomingDepartures(content.hero.departures));
   let quickLinks = $derived(content.shortcuts.map((item) => ({ ...item, icon: icons[item.icon] || ArrowRight })));
+
+  // Photos on both sides of the hero, taking turns every three and a half
+  // seconds: the right one is always a step ahead of the left. They stay still
+  // for people who asked for less motion.
+  let sidePhotos = $derived((content.hero.sideImages ?? []).filter(Boolean));
+  let turn = $state(0);
+  onMount(() => {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") turn += 1;
+    }, 3500);
+    return () => clearInterval(timer);
+  });
 </script>
 
 {#snippet haram(cls: string)}
@@ -45,6 +59,17 @@
 <div class="umrah">
   <section class="hero">
     <div class="sky" aria-hidden="true"><span class="stars"></span><span class="stars twinkle"></span></div>
+    {#if sidePhotos.length}
+      <div class="side-photos" aria-hidden="true">
+        {#each [0, 1] as side}
+          <div class="side" class:right={side === 1}>
+            {#each sidePhotos as photo, i (photo + i)}
+              <img src={photo} alt="" class:on={i === (turn + side) % sidePhotos.length} loading={i < 2 ? "eager" : "lazy"} decoding="async" />
+            {/each}
+          </div>
+        {/each}
+      </div>
+    {/if}
     <div class="skyline" aria-hidden="true">
       {@render haram("mosque left")}
       <svg class="route" viewBox="0 0 1000 220" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
@@ -59,7 +84,7 @@
     <p class="tagline">{content.hero.tagline}</p>
     {#if departures.length}
       <div class="departures">
-        <span class="departures-label">Next group departures</span>
+        <span class="departures-label">{content.labels.nextDepartures}</span>
         <ul>
           {#each departures as departure (departure.date + departure.label)}
             <li><b>{departure.day}</b><small>{departure.month}</small><span>{departure.label}</span></li>
@@ -90,8 +115,8 @@
           <h3>{pkg.name}</h3>
           <p class="nights">{pkg.nights}</p>
           <ul class="hotels">
-            <li><Hotel size={15} /><span><b>Makkah</b> {pkg.makkahHotel}</span></li>
-            <li><Hotel size={15} /><span><b>Madinah</b> {pkg.madinahHotel}</span></li>
+            <li><Hotel size={15} /><span><b>{content.labels.makkah}</b> {pkg.makkahHotel}</span></li>
+            <li><Hotel size={15} /><span><b>{content.labels.madinah}</b> {pkg.madinahHotel}</span></li>
           </ul>
           <p class="distance">{pkg.distance}</p>
           <p class="price">{pkg.price}</p>
@@ -280,7 +305,7 @@
     padding: 1.8rem 1rem 8rem;
     box-shadow: 0 1rem 2.6rem #17304f30;
   }
-  .hero > :not(.sky, .skyline) {
+  .hero > :not(.sky, .skyline, .side-photos) {
     position: relative;
     z-index: 1;
   }
@@ -290,6 +315,64 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
+  }
+  /* The photos on both sides of the hero. On a narrow screen there is no room
+     beside the text, so one of them lies faintly behind it instead. */
+  .side-photos {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .side {
+    position: absolute;
+    inset: 0;
+    opacity: 0.2;
+  }
+  .side.right {
+    display: none;
+  }
+  .side img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1.2s var(--ease-out, ease-out);
+  }
+  .side img.on {
+    opacity: 1;
+  }
+  .side::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(11, 27, 49, 0.35), rgba(11, 27, 49, 0.85));
+  }
+  @media (min-width: 80rem) {
+    .side,
+    .side.right {
+      display: block;
+      inset: 2.2rem auto auto 2.2rem;
+      width: clamp(10rem, 16vw, 15.5rem);
+      aspect-ratio: 3 / 4;
+      border-radius: 1.1rem;
+      overflow: hidden;
+      opacity: 0.62;
+      box-shadow: 0 1.4rem 3rem rgba(3, 10, 22, 0.45), 0 0 0 1px rgba(225, 179, 74, 0.22);
+    }
+    .side.right {
+      inset: 2.2rem 2.2rem auto auto;
+    }
+    .side::after {
+      background: linear-gradient(180deg, rgba(11, 27, 49, 0.08) 30%, rgba(11, 27, 49, 0.7));
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .side img {
+      transition: none;
+    }
   }
   .stars {
     position: absolute;
@@ -1108,7 +1191,7 @@
       display: none;
     }
   }
-  @media (min-width: 64rem) {
+  @media (min-width: 80rem) {
     .umrah {
       padding-inline: clamp(2rem, 5vw, 5rem);
     }

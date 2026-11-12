@@ -54,8 +54,14 @@ describe("what a visitor sees when a request goes wrong", () => {
     assertNothingInternal(res.body);
   });
 
-  test("a filter value that does not exist is a bad request, not a crash", async () => {
+  test("a category nobody has made simply finds nothing", async () => {
     const res = await app.inject({ method: "GET", url: "/api/opportunities?category=NOPE" });
+    assert.equal(res.statusCode, 200);
+    assert.deepEqual(res.json().data, []);
+  });
+
+  test("a filter sent twice is a bad request, not a crash", async () => {
+    const res = await app.inject({ method: "GET", url: "/api/opportunities?category=A&category=B" });
     assert.equal(res.statusCode, 400);
     assertNothingInternal(res.body);
   });

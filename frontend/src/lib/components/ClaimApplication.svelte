@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
   import { api } from "$lib/api";
 
   // Member dashboard: add an application made without signing in, using its
@@ -17,7 +18,7 @@
       added = linked.reference;
       reference = contact = "";
     } catch (e) {
-      error = e instanceof Error ? e.message : "The application could not be added. Please try again.";
+      error = problemText(e, "The application could not be added. Please try again.");
     } finally {
       sending = false;
     }

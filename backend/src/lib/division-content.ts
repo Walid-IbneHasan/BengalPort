@@ -67,6 +67,20 @@ export const defaultEducationContent = {
       ],
       subjects: ["MBBS", "Dentistry (BDS)", "Nursing", "Pharmacy", "Public Health"],
       cta: "Apply for medical admission",
+      info: [
+        {
+          title: "Entry requirements",
+          body: "Usually HSC or A levels with Biology, Chemistry and Physics, at the grades each university sets. Some universities also hold an entrance test or an interview.",
+        },
+        {
+          title: "Course length",
+          body: "MBBS takes five to six years including the clinical internship. Dentistry, nursing and pharmacy take four to five years.",
+        },
+        {
+          title: "Recognition",
+          body: "Before you apply we help you check that the degree is recognised by the Bangladesh Medical and Dental Council (BMDC) and listed in the World Directory of Medical Schools.",
+        },
+      ],
       image: "/images/icon-medical.webp",
       photo: "/images/edu-card-medical.webp",
     },
@@ -83,6 +97,20 @@ export const defaultEducationContent = {
       ],
       subjects: ["Civil", "Mechanical", "Electrical and Electronic", "Computer Science", "Software Engineering"],
       cta: "Apply for engineering admission",
+      info: [
+        {
+          title: "Entry requirements",
+          body: "HSC or A levels with Mathematics and Physics for a bachelor's degree, and a related bachelor's degree for a master's. Most programs taught in English ask for IELTS or a similar test.",
+        },
+        {
+          title: "Course length",
+          body: "A bachelor's degree takes three to four years and a master's one to two years, depending on the country.",
+        },
+        {
+          title: "Scholarships",
+          body: "Many universities offer merit scholarships that reduce tuition. We tell you which ones you can apply for and when they close.",
+        },
+      ],
       image: "/images/icon-engineering.webp",
       photo: "/images/edu-card-engineering.webp",
     },
@@ -106,6 +134,20 @@ export const defaultEducationContent = {
         "Language and Foundation",
       ],
       cta: "Apply for admission",
+      info: [
+        {
+          title: "Who it is for",
+          body: "Students looking at business, economics, the sciences, the humanities, or a foundation year before a degree.",
+        },
+        {
+          title: "Entry requirements",
+          body: "HSC or A level results and, for most programs taught in English, an IELTS or similar score.",
+        },
+        {
+          title: "Intakes",
+          body: "Most universities take new students in September or January, and some in May. We plan your application around the intake you choose.",
+        },
+      ],
       image: "/images/icon-general.webp",
       photo: "/images/edu-card-general.webp",
     },
@@ -210,46 +252,37 @@ export const defaultEducationContent = {
     primary: "Start education enquiry",
     secondary: "Speak with an adviser",
   },
+  labels: {
+    askQuestion: "Ask a question",
+    popularSubjects: "POPULAR SUBJECTS",
+    inDirectory: "IN OUR DIRECTORY",
+    seeInstitutions: "See {field} institutions",
+    reviewsEmpty: "Reviews from our students will appear here once they have shared their experience.",
+    explore: "Explore",
+    allFields: "All fields",
+    all: "All",
+    searchPlaceholder: "Search institutions or programs",
+    institution: "INSTITUTION",
+    viewPrograms: "View programs & enquire",
+    noMatches: "No matching institutions. Try a different field, country or search.",
+    listUpdating: "Our list of institutions is being updated. Tell us what you want to study and we will suggest suitable options.",
+    askAboutInstitutions: "Ask about institutions",
+  },
 };
 export const defaultHealthcareContent = {
   hero: {
     eyebrow: "GLOBAL HEALTHCARE",
-    title: "Treatment abroad for",
-    specialties: [
-      "Cardiology",
-      "Oncology",
-      "Orthopaedics",
-      "Fertility",
-      "Dental care",
-      "Health check-ups"
-    ],
+    title: "Treatment abroad",
     tagline: "Trusted direction. Human support.",
     description: "Connect with international hospitals, specialists and treatment pathways while Bengal Port coordinates the practical details around your care.",
     image: "/images/global-healthcare.webp",
     primary: "Request healthcare support",
     secondary: "See partner hospitals",
-    pathway: [
-      {
-        icon: "file",
-        title: "Diagnosis review",
-        description: "Your reports read and your options explained."
-      },
-      {
-        icon: "hospital",
-        title: "Hospital match",
-        description: "Suitable hospitals and specialists, with costs."
-      },
-      {
-        icon: "plane",
-        title: "Travel and care",
-        description: "Appointments, travel and a coordinator throughout."
-      }
-    ],
     cities: [
       "Bangkok, Thailand",
       "Kuala Lumpur, Malaysia",
-      "Chennai, India",
-      "Istanbul, Turkey",
+      "Delhi, India",
+      "Beijing, China",
       "Singapore"
     ]
   },
@@ -418,7 +451,17 @@ export const defaultHealthcareContent = {
     description: "Tell us what support you need and our healthcare coordination team will respond.",
     primary: "Request healthcare support",
     secondary: "Contact patient support"
-  }
+  },
+  labels: {
+    usualProcedures: "USUAL PROCEDURES",
+    availableAt: "AVAILABLE AT",
+    searchPlaceholder: "Search hospitals or services",
+    all: "All",
+    requestConnection: "Request hospital connection",
+    noMatches: "No hospitals match that search. Try another country or a different word.",
+    listUpdating: "Our hospital list is being updated. Tell us what treatment you need and we will suggest suitable hospitals.",
+    askAboutHospitals: "Ask about hospitals",
+  },
 };
 export const defaultUmrahContent = {
   hero: {
@@ -448,6 +491,12 @@ export const defaultUmrahContent = {
         date: "2027-02-20",
         label: "Ramadan group · early booking"
       }
+    ],
+    sideImages: [
+      "/images/divisions/umrah-makkah.webp",
+      "/images/divisions/umrah-madinah.webp",
+      "/images/divisions/umrah-ziyarat.webp",
+      "/images/global-umrah.webp"
     ]
   },
   shortcuts: [
@@ -644,5 +693,10 @@ export const defaultUmrahContent = {
     description: "Start with a simple enquiry. Our coordinators will handle the rest.",
     primary: "Start Umrah Enquiry",
     secondary: "Speak to our team"
-  }
+  },
+  labels: {
+    nextDepartures: "Next group departures",
+    makkah: "Makkah",
+    madinah: "Madinah",
+  },
 };

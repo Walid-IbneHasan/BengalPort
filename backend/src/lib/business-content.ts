@@ -122,4 +122,17 @@ export const defaultBusinessContent = {
     secondary: "Contact our experts",
     secondaryHref: "/contact",
   },
+  labels: {
+    allPartners: "All partners",
+    suppliers: "Suppliers",
+    factories: "Factories",
+    all: "All",
+    featured: "Featured",
+    supplier: "Supplier",
+    factory: "Factory",
+    requestConnection: "Request connection",
+    noMatches: "No partners match these filters.",
+    askAboutSourcing: "Ask about sourcing",
+    unavailable: "Live partner records are temporarily unavailable.",
+  },
 };

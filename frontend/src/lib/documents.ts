@@ -1,5 +1,6 @@
 import { ApiError } from "./api";
 import { apiUrl } from "./config";
+import { shrinkImage } from "./image-resize";
 
 export type DocumentInfo = { id: string; name: string; mimeType: string; byteSize: number; createdAt: string };
 
@@ -16,7 +17,10 @@ async function failure(response: Response): Promise<ApiError> {
 
 export async function uploadDocument(applicationId: string, file: File, uploadToken?: string): Promise<DocumentInfo> {
   const body = new FormData();
-  body.append("file", file, file.name);
+  // A photo of a document straight from a phone is made smaller first: it
+  // stays sharp enough to read, uploads in seconds and fits the size limit.
+  const ready = await shrinkImage(file);
+  body.append("file", ready, ready.name);
   const response = await fetch(`${apiUrl()}/applications/${applicationId}/documents`, { method: "POST", headers: authorization(uploadToken), body });
   if (!response.ok) throw await failure(response);
   return (await response.json()).data;

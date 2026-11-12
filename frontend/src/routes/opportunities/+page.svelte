@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { problemText } from "$lib/problem";
   import { api } from "$lib/api";
   import { shortDate } from "$lib/datetime";
   import { Search, MapPin, Calendar } from "lucide-svelte";
-  const categories = [["BUSINESS", "Business"], ["EDUCATION", "Education"], ["HEALTHCARE", "Healthcare"], ["UMRAH", "Umrah"], ["FACTORY_VISIT", "Factory visit"], ["BUSINESS_TOUR", "Business tour"], ["SCHOLARSHIP", "Scholarship"], ["EVENT", "Event"]];
+  import type { OpportunitiesContent } from "$lib/site-pages";
   // The first list is loaded on the server by +page.ts; searches run here.
-  export let data: { items: any[] | null };
+  export let data: { items: any[] | null; categories: Array<{ value: string; label: string }>; content: OpportunitiesContent };
+  $: content = data.content;
   let items: any[] = data.items ?? [];
   let loading = false,
     error = data.items ? "" : "Opportunities could not be loaded.",
@@ -15,10 +17,10 @@
     error = "";
     try {
       items = await api(
-        `/opportunities?search=${encodeURIComponent(search)}&category=${category}`,
+        `/opportunities?search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`,
       );
     } catch (e) {
-      error = e instanceof Error ? e.message : "Unable to load";
+      error = problemText(e, "Unable to load");
     } finally {
       loading = false;
     }
@@ -28,12 +30,9 @@
 <svelte:head><title>Opportunities — Bengal Port</title><meta name="description" content="Current business delegations, factory visits, scholarships and events from Bengal Port." /></svelte:head>
 <section class="page-hero">
   <div class="wrap">
-    <span class="eyebrow">OPPORTUNITIES</span>
-    <h1>Find your next opening.</h1>
-    <p>
-      Current business, education, healthcare, visit, scholarship and event
-      opportunities.
-    </p>
+    <span class="eyebrow">{content.hero.eyebrow}</span>
+    <h1>{content.hero.title}</h1>
+    <p>{content.hero.description}</p>
   </div>
 </section>
 <section class="section">
@@ -48,19 +47,19 @@
       <label
         ><Search size={18} /><input
           bind:value={search}
-          placeholder="Search opportunities"
+          placeholder={content.list.searchPlaceholder}
           aria-label="Search opportunities"
         /></label
       ><select bind:value={category} aria-label="Category"
-        ><option value="">All categories</option>{#each categories as [value, name]}<option {value}>{name}</option>{/each}</select
-      ><button class="btn">SEARCH</button>
+        ><option value="">{content.list.allCategories}</option>{#each data.categories as option (option.value)}<option value={option.value}>{option.label}</option>{/each}</select
+      ><button class="btn">{content.list.search}</button>
     </form>
     {#if loading}<div class="state">
         Loading opportunities…
       </div>{:else if error}<div class="state error">
         {error}<button onclick={load}>Try again</button>
       </div>{:else if !items.length}<div class="state">
-        {search || category ? "No opportunities match your filters." : "No opportunities are open right now. Please check back soon."}
+        {search || category ? content.list.noMatch : content.list.empty}
       </div>{:else}<div class="grid-3">
         {#each items as o}<article class="opp">
             <img src={o.image} alt={o.title} loading="lazy" decoding="async" />
@@ -70,8 +69,8 @@
               <p>{o.description}</p>
               <span><MapPin size={15} />{o.location}, {o.country}</span
               >{#if o.deadline}<span
-                  ><Calendar size={15} />Apply by {shortDate(o.deadline)}</span
-                >{/if}<a href={`/opportunities/${o.slug}`}>VIEW DETAILS →</a>
+                  ><Calendar size={15} />{content.list.applyBy} {shortDate(o.deadline)}</span
+                >{/if}<a href={`/opportunities/${o.slug}`}>{content.list.viewDetails}</a>
             </div>
           </article>{/each}
       </div>{/if}

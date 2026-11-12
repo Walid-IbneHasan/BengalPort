@@ -1,12 +1,14 @@
 import { apiUrl } from '$lib/config';
 import { fetchData } from '$lib/fetch-data';
+import { fillMissing } from '$lib/content-fields';
 import { defaultServicesContent, type ServicesContent } from '$lib/site-pages';
 import type { PageLoad } from './$types';
 
 // Until October 2026 the service cards reused the home hero's pictures; a
 // saved page that still names them gets each card's own picture instead.
 function servicesContentFrom(saved: ServicesContent | undefined): ServicesContent {
-  const content = structuredClone(saved ?? defaultServicesContent);
+  // A page saved before a text was added still gets that text.
+  const content = fillMissing(defaultServicesContent, saved);
   for (const key of Object.keys(content.groups) as Array<keyof ServicesContent["groups"]>) {
     if (content.groups[key].image === `/images/global-${key}.webp`) content.groups[key].image = defaultServicesContent.groups[key].image;
   }

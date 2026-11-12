@@ -175,7 +175,7 @@
     </p>
     <p class="tagline">{content.hero.tagline}</p>
     <nav class="options" aria-label="Education options">
-      {#each options as option}<a class="option" data-option={option.id} href={`#${option.id}`}>
+      {#each options as option}<a class="option" data-option={option.id} href={`/education/${option.id}`}>
           <span class="option-art">
             {#if option.image}<img src={option.image} alt="" width="640" height="320" decoding="async" />{/if}
           </span>
@@ -207,8 +207,8 @@
         <div class="actions">
           <a class="pill" href={applyHref("EDUCATION")}
             >{item.cta}<ArrowRight size={17} /></a
-          ><a class="text-link" href={applyHref("EDUCATION", "enquiry", item.heading)}
-            >Ask a question</a
+          ><a class="text-link" href={`/education/${item.key}`}
+            >Universities and subjects</a
           >
         </div>
       </div>
@@ -218,12 +218,12 @@
           </div>{/if}
         <div class="field-body">
           <i class="field-mark"><Icon /></i>
-          <small>POPULAR SUBJECTS</small>
+          <small>{content.labels.popularSubjects}</small>
           <ul class="subjects">
             {#each item.subjects as subject}<li>{subject}</li>{/each}
           </ul>
           {#if item.programs.length}<div class="listed">
-              <small>IN OUR DIRECTORY</small>
+              <small>{content.labels.inDirectory}</small>
               <ul>
                 {#each item.programs.slice(0, 3) as program}<li>
                     <b>{program.title}</b><span
@@ -232,7 +232,7 @@
                   </li>{/each}
               </ul>
               <a href="#directory" onclick={() => showField(item.key)}
-                >See {item.title.toLowerCase()} institutions <ArrowRight size={15} /></a
+                >{content.labels.seeInstitutions.replace("{field}", item.title.toLowerCase())} <ArrowRight size={15} /></a
               >
             </div>{/if}
         </div>
@@ -263,7 +263,7 @@
           >
         </div>
       </div>
-      {#if reviews.length}<Testimonials {reviews} label="Student reviews" />{:else}<p class="reviews-empty">Reviews from our students will appear here once they have shared their experience.</p>{/if}
+      {#if reviews.length}<Testimonials {reviews} label="Student reviews" />{:else}<p class="reviews-empty">{content.labels.reviewsEmpty}</p>{/if}
     </div>
   </section>
 
@@ -299,7 +299,7 @@
           ><i><Icon size={26} /></i>
           <h3>{item.title}</h3>
           <p>{item.description}</p>
-          <strong>Explore <ArrowRight size={15} /></strong></a
+          <strong>{content.labels.explore} <ArrowRight size={15} /></strong></a
         >{/each}
     </div>
   </section>
@@ -337,7 +337,7 @@
       </header>
       {#if records.length}<div class="field-filter" role="group" aria-label="Filter by field of study">
         <button type="button" class:on={field === "all"} aria-pressed={field === "all"} onclick={() => (field = "all")}
-          >All fields</button
+          >{content.labels.allFields}</button
         >{#each fieldKeys as key}<button
             type="button"
             class:on={field === key}
@@ -349,11 +349,11 @@
         <label
           ><Search size={18} /><input
             bind:value={query}
-            placeholder="Search institutions or programs"
+            placeholder={content.labels.searchPlaceholder}
             aria-label="Search institutions or programs"
           /></label
         ><select bind:value={country} aria-label="Filter by country"
-          >{#each countries as item}<option>{item}</option>{/each}</select
+          >{#each countries as item}<option value={item}>{item === "All" ? content.labels.all : item}</option>{/each}</select
         >
       </div>
       <div class="record-grid">
@@ -366,22 +366,22 @@
               >
             </div>
             <div class="record-copy">
-              <small>INSTITUTION</small>
+              <small>{content.labels.institution}</small>
               <h3>{record.name}</h3>
               <p>{record.description}</p>
               <div class="tags">
                 {#each (record.programs ?? []).slice(0, 3) as item}<span>{item.title}</span>{/each}
               </div>
-              <strong>View programs & enquire <ArrowRight size={15} /></strong>
+              <strong>{content.labels.viewPrograms} <ArrowRight size={15} /></strong>
             </div></a
           >{/each}
       </div>
       {#if !filtered.length}<div class="none">
-          No matching institutions. Try a different field, country or search.
+          {content.labels.noMatches}
         </div>{/if}{:else}<div class="none">
-          <p>Our list of institutions is being updated. Tell us what you want to study and we will suggest suitable options.</p>
+          <p>{content.labels.listUpdating}</p>
           <a class="pill" href={applyHref("EDUCATION", "enquiry", content.directory.title)}
-            >Ask about institutions<ArrowRight size={17} /></a
+            >{content.labels.askAboutInstitutions}<ArrowRight size={17} /></a
           >
         </div>{/if}
     </div>

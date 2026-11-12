@@ -1,8 +1,13 @@
 <script lang="ts">
+  import { cmsContent } from "$lib/cms";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
   import { api, ApiError } from "$lib/api";
+  import { apiUrl } from "$lib/config";
+  import { isStaff, staffRole, type StaffRole } from "$lib/staff";
+  import { officePermissions, pathPermission, ROLE_LABELS, setOfficeMe, type OfficeMe } from "$lib/office";
+  import "../../office.css";
   import {
     Activity,
     BriefcaseBusiness,
@@ -21,6 +26,18 @@
     MessageSquare,
     MoonStar,
     Receipt,
+    ScrollText,
+    Bell,
+    BookOpenCheck,
+    BookOpenText,
+    Building,
+    CheckSquare,
+    FolderLock,
+    Handshake,
+    History,
+    Landmark,
+    SlidersHorizontal,
+    UsersRound,
     Settings,
     Star,
     Store,
@@ -31,67 +48,118 @@
   let { children } = $props();
   let menuOpen = $state(false),
     ready = $state(false),
-    unreachable = $state(false);
-  const nav = [
-    { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquare },
-    { label: "Applications", href: "/admin/applications", icon: ClipboardList },
-    { label: "Opportunities", href: "/admin/opportunities", icon: Activity },
-    { label: "Suppliers", href: "/admin/suppliers", icon: Store },
-    { label: "Factories", href: "/admin/factories", icon: Building2 },
-    { label: "Education", href: "/admin/education", icon: GraduationCap },
-    { label: "Healthcare", href: "/admin/healthcare", icon: HeartPulse },
-    { label: "Users", href: "/admin/users", icon: UserRound },
-    { label: "Payments", href: "/admin/payments", icon: WalletCards },
-    { label: "Receipts", href: "/admin/receipts", icon: Receipt },
-    { label: "Reviews", href: "/admin/reviews", icon: Star },
-    { label: "Hisab Kitab", href: "/admin/accounts", icon: FileCheck2 },
-    { label: "Website content", href: "/admin/content", icon: FileText },
-    { label: "Media library", href: "/admin/media", icon: Images },
-    {
-      label: "Business page",
-      href: "/admin/business-content",
-      icon: BriefcaseBusiness,
-    },
-    {
-      label: "Education page",
-      href: "/admin/division-content/education",
-      icon: GraduationCap,
-    },
-    {
-      label: "Healthcare page",
-      href: "/admin/division-content/healthcare",
-      icon: HeartPulse,
-    },
-    {
-      label: "Umrah page",
-      href: "/admin/division-content/umrah",
-      icon: MoonStar,
-    },
-    { label: "About page", href: "/admin/page-content/about", icon: Info },
-    {
-      label: "Services page",
-      href: "/admin/page-content/services",
-      icon: LayoutGrid,
-    },
-    { label: "Contact page", href: "/admin/page-content/contact", icon: Phone },
-    { label: "Settings", href: "/admin/settings", icon: Settings },
+    unreachable = $state(false),
+    role = $state<StaffRole | null>(null);
+  // The office (business management) first, then the website. Each link
+  // shows only for staff whose role has its permission.
+  type NavItem = { label: string; href: string; icon: any; need?: string | null; group: "office" | "website" };
+  const nav: NavItem[] = [
+    { group: "office", label: "Dashboard", href: "/admin", icon: LayoutDashboard, need: "dashboard.read" },
+    { group: "office", label: "Customers", href: "/admin/customers", icon: UsersRound, need: "customers.read" },
+    { group: "office", label: "Deals", href: "/admin/deals", icon: Handshake, need: "deals.read" },
+    { group: "office", label: "Invoices", href: "/admin/accounts/invoices", icon: ScrollText, need: "invoices.read" },
+    { group: "office", label: "Collections", href: "/admin/collections", icon: Landmark, need: "payments.read" },
+    { group: "office", label: "Finance", href: "/admin/finance", icon: BookOpenCheck, need: "accounts.read" },
+    { group: "office", label: "Hisab Kitab", href: "/admin/accounts", icon: FileCheck2, need: "hisab.read" },
+    { group: "office", label: "Documents", href: "/admin/documents", icon: FolderLock, need: "documents.read" },
+    { group: "office", label: "Tasks", href: "/admin/tasks", icon: CheckSquare, need: "tasks.read" },
+    { group: "office", label: "Approvals", href: "/admin/approvals", icon: Building, need: null },
+    { group: "office", label: "Notifications", href: "/admin/notifications", icon: Bell, need: null },
+    { group: "office", label: "Audit log", href: "/admin/audit", icon: History, need: "audit.read" },
+    { group: "office", label: "Office settings", href: "/admin/office-settings", icon: SlidersHorizontal, need: "settings.update" },
+    // No role but the Super Admin has "guide.read", so only they see it.
+    { group: "office", label: "Admin guide", href: "/admin/guide", icon: BookOpenText, need: "guide.read" },
+    { group: "website", label: "Enquiries", href: "/admin/enquiries", icon: MessageSquare, need: "enquiries.read" },
+    { group: "website", label: "Applications", href: "/admin/applications", icon: ClipboardList, need: "applications.read" },
+    { group: "website", label: "Opportunities", href: "/admin/opportunities", icon: Activity, need: "directory.read" },
+    { group: "website", label: "Suppliers", href: "/admin/suppliers", icon: Store, need: "directory.read" },
+    { group: "website", label: "Factories", href: "/admin/factories", icon: Building2, need: "directory.read" },
+    { group: "website", label: "Education", href: "/admin/education", icon: GraduationCap, need: "directory.read" },
+    { group: "website", label: "Healthcare", href: "/admin/healthcare", icon: HeartPulse, need: "directory.read" },
+    { group: "website", label: "Users", href: "/admin/users", icon: UserRound, need: "users.read" },
+    { group: "website", label: "Website payments", href: "/admin/payments", icon: WalletCards, need: "payments.read" },
+    { group: "website", label: "Receipts", href: "/admin/receipts", icon: Receipt, need: "payments.read" },
+    { group: "website", label: "Reviews", href: "/admin/reviews", icon: Star, need: "reviews.read" },
+    { group: "website", label: "Website content", href: "/admin/content", icon: FileText, need: "content.read" },
+    { group: "website", label: "Media library", href: "/admin/media", icon: Images, need: "media.read" },
+    { group: "website", label: "Business page", href: "/admin/business-content", icon: BriefcaseBusiness, need: "content.read" },
+    { group: "website", label: "Education page", href: "/admin/division-content/education", icon: GraduationCap, need: "content.read" },
+    { group: "website", label: "Healthcare page", href: "/admin/division-content/healthcare", icon: HeartPulse, need: "content.read" },
+    { group: "website", label: "Umrah page", href: "/admin/division-content/umrah", icon: MoonStar, need: "content.read" },
+    { group: "website", label: "About page", href: "/admin/page-content/about", icon: Info, need: "content.read" },
+    { group: "website", label: "Services page", href: "/admin/page-content/services", icon: LayoutGrid, need: "content.read" },
+    { group: "website", label: "Contact page", href: "/admin/page-content/contact", icon: Phone, need: "content.read" },
+    { group: "website", label: "Opportunities page", href: "/admin/page-content/opportunities", icon: Activity, need: "content.read" },
+    { group: "website", label: "Apply page", href: "/admin/page-content/apply", icon: ClipboardList, need: "content.read" },
+    { group: "website", label: "Pay page", href: "/admin/page-content/pay", icon: WalletCards, need: "content.read" },
+    { group: "website", label: "Sign-in page", href: "/admin/page-content/login", icon: UserRound, need: "content.read" },
+    { group: "website", label: "Privacy Policy", href: "/admin/page-content/privacy", icon: FileText, need: "content.read" },
+    { group: "website", label: "Terms of Use", href: "/admin/page-content/terms", icon: FileText, need: "content.read" },
+    { group: "website", label: "Documents and PDFs", href: "/admin/page-content/documents", icon: FileText, need: "content.update" },
+    { group: "website", label: "Settings", href: "/admin/settings", icon: Settings, need: "settings.update" },
   ];
+  // Hisab Kitab is not lit while its invoices, which have their own link, are open.
   const active = (href: string) =>
     href === "/admin"
       ? page.url.pathname === "/admin"
-      : page.url.pathname.startsWith(href);
+      : page.url.pathname.startsWith(href) &&
+        !(href === "/admin/accounts" && page.url.pathname.startsWith("/admin/accounts/invoices"));
+  // Staff see only the pages their role may open.
+  const may = (need: string | null | undefined) => !need || role === "ADMIN" || $officePermissions.has(need);
+  let shownNav = $derived(nav.filter((item) => may(item.need)));
+  let officeNav = $derived(shownNav.filter((item) => item.group === "office"));
+  let websiteNav = $derived(shownNav.filter((item) => item.group === "website"));
+  let allowed = $derived(may(pathPermission(page.url.pathname)));
+  // Without the dashboard, start at the first page the role can open.
+  $effect(() => {
+    if (ready && /^\/admin\/?$/.test(page.url.pathname) && !may("dashboard.read")) {
+      const first = shownNav.find((item) => item.href !== "/admin");
+      if (first) goto(first.href, { replaceState: true });
+    }
+  });
+  // Unread notifications, for the bell; looked at again every minute.
+  let unread = $state(0);
+  async function checkInbox() {
+    try {
+      const body = await fetch(`${apiUrl()}/office/notifications?unread=1`, { headers: { authorization: `Bearer ${localStorage.getItem("bp_token")}` } }).then((r) => (r.ok ? r.json() : null));
+      if (body) unread = body.meta?.unread ?? 0;
+    } catch {
+      // Offline for a moment: the next check will do.
+    }
+  }
+  $effect(() => {
+    if (!ready) return;
+    checkInbox();
+    // A tab in the background does not ask; it asks again when it is looked at.
+    const timer = setInterval(() => document.visibilityState === "visible" && checkInbox(), 60_000);
+    const back = () => document.visibilityState === "visible" && checkInbox();
+    document.addEventListener("visibilitychange", back);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", back);
+    };
+  });
+  $effect(() => {
+    // Opening the notifications page clears the count soon after.
+    if (page.url.pathname === "/admin/notifications") setTimeout(checkInbox, 1500);
+  });
   onMount(async () => {
     const token = localStorage.getItem("bp_token");
     const user = JSON.parse(localStorage.getItem("bp_user") || "null");
-    if (!token || user?.role !== "ADMIN") {
+    if (!token || !isStaff(user?.role)) {
       goto(`/login?next=${encodeURIComponent(page.url.pathname)}`);
       return;
     }
     try {
-      await api("/admin/dashboard", {
+      // The server says what the account is now; it may have changed since sign-in.
+      const me = await api<{ role: string }>("/auth/me", {
         headers: { authorization: `Bearer ${token}` },
       });
+      if (!isStaff(me.role)) throw new ApiError("Admin access required", "FORBIDDEN", undefined, 403);
+      role = me.role;
+      staffRole.set(me.role);
+      setOfficeMe(await api<OfficeMe>("/office/me/permissions", { headers: { authorization: `Bearer ${token}` } }));
+      localStorage.setItem("bp_user", JSON.stringify({ ...user, role: me.role }));
       ready = true;
     } catch (e) {
       // Being asked to replace a temporary password is not a refused session:
@@ -117,7 +185,7 @@
   {@render children()}
 {:else if !ready}
   <div class="admin-loading">
-    <img src="/images/logo-192.webp" alt="" />
+    <img src={$cmsContent.brand.logo} alt="" />
     {#if unreachable}<span role="alert">The server could not be reached.</span
       ><a href={page.url.pathname} data-sveltekit-reload>Try again</a
       >{:else}<span>Opening admin workspace…</span>{/if}
@@ -126,24 +194,28 @@
   <div class="admin-shell">
     <aside class:open={menuOpen}>
       <div class="brand">
-        <img src="/images/logo-192.webp" alt="Bengal Port" />
+        <img src={$cmsContent.brand.logo} alt={$cmsContent.brand.name} />
         <div><b>BENGAL PORT</b><span>Administration</span></div>
         <button aria-label="Close navigation" onclick={() => (menuOpen = false)}
           ><X size={20} /></button
         >
       </div>
       <nav aria-label="Admin navigation">
-        {#each nav as item}<a
+        {#snippet link(item: NavItem)}<a
             class:active={active(item.href)}
             href={item.href}
             onclick={() => (menuOpen = false)}
             ><svelte:component this={item.icon} size={18} /><span
               >{item.label}</span
-            >{#if active(item.href)}<i></i>{/if}</a
-          >{/each}
+            >{#if item.href === "/admin/notifications" && unread}<em class="count" aria-label={`${unread} unread`}>{unread > 99 ? "99+" : unread}</em>{/if}{#if active(item.href)}<i></i>{/if}</a
+          >{/snippet}
+        {#if officeNav.length}<p class="group">Office</p>{/if}
+        {#each officeNav as item}{@render link(item)}{/each}
+        {#if websiteNav.length}<p class="group">Website</p>{/if}
+        {#each websiteNav as item}{@render link(item)}{/each}
       </nav>
       <div class="account">
-        <span>Signed in as</span><b>Administrator</b><a href="/profile"
+        <span>Signed in as</span><b>{ROLE_LABELS[role ?? "ADMIN"]}</b><a href="/profile"
           >My profile</a
         ><a href="/"
           >View public website</a
@@ -159,14 +231,85 @@
       <div class="mobile-bar">
         <button aria-label="Open navigation" onclick={() => (menuOpen = true)}
           ><Menu /></button
-        ><b>Bengal Port Admin</b><a href="/">Website</a>
+        ><b>Bengal Port Admin</b><a class="bell" href="/admin/notifications" aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}><Bell size={19} />{#if unread}<em class="count">{unread > 99 ? "99+" : unread}</em>{/if}</a><a href="/">Website</a>
       </div>
-      {@render children()}
+      {#if allowed}
+        {@render children()}
+      {:else}
+        <section class="not-yours" role="alert">
+          <h1>Your role cannot open this page</h1>
+          <p>The Super Admin decides what each role may see and do, under Office settings → Roles and permissions. Ask them if you need this page for your work.</p>
+          <a href={shownNav[0]?.href ?? "/profile"}>Go to {shownNav[0]?.label ?? "my profile"}</a>
+        </section>
+      {/if}
     </div>
   </div>
 {/if}
 
 <style>
+  .group {
+    margin: 1rem 0 0.35rem;
+    padding: 0 0.85rem;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8fa0b5;
+  }
+  .group:first-child {
+    margin-top: 0.2rem;
+  }
+  .count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    margin-left: auto;
+    padding: 0 0.35rem;
+    border-radius: 1rem;
+    background: #d19b2d;
+    color: #07182f;
+    font-size: 0.7rem;
+    font-style: normal;
+    font-weight: 850;
+  }
+  .bell {
+    position: relative;
+    display: inline-grid !important;
+    place-items: center;
+  }
+  .bell .count {
+    position: absolute;
+    top: -0.35rem;
+    right: -0.55rem;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    font-size: 0.62rem;
+  }
+  .not-yours {
+    max-width: 38rem;
+    margin: clamp(2rem, 8vw, 5rem) auto;
+    padding: 0 1.25rem;
+  }
+  .not-yours h1 {
+    margin: 0 0 0.6rem;
+    font-size: 1.35rem;
+    color: #07182f;
+  }
+  .not-yours p {
+    margin: 0 0 1.25rem;
+    line-height: 1.6;
+    color: #4b6072;
+  }
+  .not-yours a {
+    display: inline-flex;
+    padding: 0.65rem 1.1rem;
+    border-radius: 0.6rem;
+    background: #07182f;
+    color: #fff;
+    font-weight: 750;
+    text-decoration: none;
+  }
   .admin-loading {
     min-height: 100svh;
     background: #f2f4f6;

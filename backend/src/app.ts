@@ -16,6 +16,9 @@ import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import paymentRoutes from "./routes/payments.js";
 import documentRoutes from "./routes/documents.js";
+import officeRoutes from "./routes/office/index.js";
+import shareRoutes from "./routes/share.js";
+import { sweep } from "./lib/office-notifications.js";
 import { createMailer, type Mailer } from "./lib/email.js";
 import { createBkashGateway } from "./lib/bkash.js";
 import { databaseTokens } from "./lib/bkash-store.js";
@@ -75,5 +78,12 @@ export async function buildApp(options:{mailer?:Mailer;gateway?:Gateway;gateways
   await app.register(applicationRoutes,{prefix:"/api/applications"});
   await app.register(reviewRoutes,{prefix:"/api/reviews"});
   await app.register(backupRoutes,{prefix:"/api/backup"});
+  await app.register(officeRoutes,{prefix:"/api/office"});
+  await app.register(shareRoutes,{prefix:"/api/share"});
+  // Reminders (payments, follow-ups, deadlines, expiring documents) every
+  // quarter of an hour; each is sent once however often this runs.
+  const reminders=setInterval(()=>{sweep(app).catch((error)=>app.log.error({error},"The reminder sweep failed"))},15*60_000);
+  reminders.unref();
+  app.addHook("onClose",async()=>clearInterval(reminders));
   return app;
 }
